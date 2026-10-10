@@ -21,7 +21,7 @@ class ModularityTests {
         assertThat(modules.stream().map(ApplicationModule::getIdentifier).map(Object::toString))
                 .containsExactlyInAnyOrder(
                         "agency", "identity", "worker", "client", "shift", "assignment", "messaging",
-                        "notification", "system");
+                        "notification", "seed", "system");
     }
 
     @Test
