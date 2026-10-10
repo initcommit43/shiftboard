@@ -1,41 +1,341 @@
 {
   "@@locale": "de",
-  "startTagline": "Offene Schichten finden und direkt übernehmen.",
-  "@startTagline": {
-    "description": "Short product claim below the app name on the start screen."
-  },
-  "systemStatusTitle": "Verbindung zum Server",
-  "@systemStatusTitle": {
-    "description": "Heading of the card that shows whether the backend is reachable."
-  },
-  "systemStatusLoading": "Verbindung wird geprüft …",
-  "@systemStatusLoading": {
-    "description": "Shown while the backend is being pinged."
-  },
-  "systemStatusConnected": "Verbunden",
-  "@systemStatusConnected": {
-    "description": "Shown when the backend answered the ping."
-  },
-  "systemStatusApiVersion": "API-Version {version}",
-  "@systemStatusApiVersion": {
-    "description": "Version of the API contract reported by the backend.",
-    "placeholders": {
-      "version": {
-        "type": "String",
-        "example": "0.1.0"
-      }
-    }
-  },
-  "systemStatusUnreachable": "Keine Verbindung",
-  "@systemStatusUnreachable": {
-    "description": "Shown when the backend could not be reached."
-  },
-  "systemStatusUnreachableHint": "Der Server ist gerade nicht erreichbar. Prüfe deine Internetverbindung und versuche es noch einmal.",
-  "@systemStatusUnreachableHint": {
-    "description": "Explains the failed ping and what the worker can do."
-  },
   "actionRetry": "Erneut versuchen",
   "@actionRetry": {
     "description": "Button that repeats a failed action."
+  },
+  "actionLogout": "Abmelden",
+  "@actionLogout": {
+    "description": "Button that ends the session on this device."
+  },
+  "loadingLabel": "Wird geladen …",
+  "@loadingLabel": {
+    "description": "Screen reader label of a progress indicator."
+  },
+  "fieldRequired": "Bitte fülle dieses Feld aus.",
+  "@fieldRequired": {
+    "description": "Error below a required form field that was left empty."
+  },
+  "fieldInvalid": "Bitte prüfe diese Angabe.",
+  "@fieldInvalid": {
+    "description": "Error below a form field the server rejected for a reason without a message of its own."
+  },
+  "fieldEmailLabel": "E-Mail",
+  "@fieldEmailLabel": {
+    "description": "Label of the email field."
+  },
+  "fieldEmailHint": "name@example.com",
+  "@fieldEmailHint": {
+    "description": "Placeholder of the email field."
+  },
+  "fieldEmailInvalid": "Bitte gib eine gültige E-Mail-Adresse ein.",
+  "@fieldEmailInvalid": {
+    "description": "Error below the email field."
+  },
+  "fieldPasswordLabel": "Passwort",
+  "@fieldPasswordLabel": {
+    "description": "Label of the password field."
+  },
+  "passwordShow": "Passwort anzeigen",
+  "@passwordShow": {
+    "description": "Tooltip of the button that reveals the password."
+  },
+  "passwordHide": "Passwort verbergen",
+  "@passwordHide": {
+    "description": "Tooltip of the button that hides the password again."
+  },
+  "errorInvalidCredentials": "E-Mail oder Passwort ist falsch.",
+  "@errorInvalidCredentials": {
+    "description": "The one generic login error; never says which of the two was wrong."
+  },
+  "errorTooManyAttempts": "Zu viele Anmeldeversuche. Warte ein paar Minuten und versuche es dann noch einmal.",
+  "@errorTooManyAttempts": {
+    "description": "Login error after the rate limit was hit."
+  },
+  "errorOffline": "Keine Verbindung zum Server. Prüfe deine Internetverbindung und versuche es noch einmal.",
+  "@errorOffline": {
+    "description": "Error when a request got no answer."
+  },
+  "errorGeneric": "Das hat leider nicht geklappt. Bitte versuche es später noch einmal.",
+  "@errorGeneric": {
+    "description": "Fallback for errors without a message of their own."
+  },
+  "errorValidationFailed": "Bitte prüfe deine Angaben.",
+  "@errorValidationFailed": {
+    "description": "Error when the server rejected a form without naming a known field."
+  },
+  "errorEmailAlreadyRegistered": "Diese E-Mail ist bereits registriert.",
+  "@errorEmailAlreadyRegistered": {
+    "description": "Error below the email field of the signup form."
+  },
+  "errorCheckConnection": "Prüfe deine Internetverbindung und versuche es noch einmal.",
+  "@errorCheckConnection": {
+    "description": "Hint below the title of a full-screen loading error."
+  },
+  "startErrorTitle": "Keine Verbindung zum Server",
+  "@startErrorTitle": {
+    "description": "Title on app start when the stored session could not be checked."
+  },
+  "loginTitle": "Willkommen zurück",
+  "@loginTitle": {
+    "description": "Title of the login screen."
+  },
+  "loginSubtitle": "Melde dich an, um deine Schichten zu sehen.",
+  "@loginSubtitle": {
+    "description": "Text below the title of the login screen."
+  },
+  "loginPasswordHint": "Dein Passwort",
+  "@loginPasswordHint": {
+    "description": "Placeholder of the password field on the login screen."
+  },
+  "loginSubmit": "Anmelden",
+  "@loginSubmit": {
+    "description": "Button that submits the login form."
+  },
+  "loginSubmitting": "Wird angemeldet …",
+  "@loginSubmitting": {
+    "description": "Label of the login button while the request is running."
+  },
+  "loginSignupPrompt": "Einladungslink erhalten?",
+  "@loginSignupPrompt": {
+    "description": "Question in front of the link to the signup."
+  },
+  "loginSignupAction": "Registrieren",
+  "@loginSignupAction": {
+    "description": "Link from the login screen to the signup."
+  },
+  "joinTitle": "Einladung einlösen",
+  "@joinTitle": {
+    "description": "Title of the step where the worker enters the invitation."
+  },
+  "joinSubtitle": "Füge den Einladungslink oder den Code ein, den du von deiner Agentur bekommen hast.",
+  "@joinSubtitle": {
+    "description": "Text below the title of the invitation step."
+  },
+  "joinFieldLabel": "Einladungslink oder Code",
+  "@joinFieldLabel": {
+    "description": "Label of the field for the invitation link or code."
+  },
+  "joinFieldHint": "Link oder Code einfügen",
+  "@joinFieldHint": {
+    "description": "Placeholder of the field for the invitation link or code."
+  },
+  "joinInvalid": "Das ist kein gültiger Einladungslink oder Code.",
+  "@joinInvalid": {
+    "description": "Error below the invitation field when no code could be read from the input."
+  },
+  "joinSubmit": "Weiter",
+  "@joinSubmit": {
+    "description": "Button that opens the signup form for the entered invitation."
+  },
+  "signupTitle": "Bei {agency} registrieren",
+  "@signupTitle": {
+    "description": "Title of the signup form.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "signupSubtitle": "Erstelle dein Konto. {agency} gibt dich danach frei.",
+  "@signupSubtitle": {
+    "description": "Text below the title of the signup form.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "signupFirstNameLabel": "Vorname",
+  "@signupFirstNameLabel": {
+    "description": "Label of the first name field."
+  },
+  "signupLastNameLabel": "Nachname",
+  "@signupLastNameLabel": {
+    "description": "Label of the last name field."
+  },
+  "signupPhoneLabel": "Telefon",
+  "@signupPhoneLabel": {
+    "description": "Label of the phone field."
+  },
+  "signupPhoneInvalid": "Bitte gib eine gültige Telefonnummer ein.",
+  "@signupPhoneInvalid": {
+    "description": "Error below the phone field."
+  },
+  "signupPasswordTooShort": "Das Passwort muss mindestens 8 Zeichen lang sein.",
+  "@signupPasswordTooShort": {
+    "description": "Error below the password field of the signup form."
+  },
+  "signupQualificationsLabel": "Qualifikationen",
+  "@signupQualificationsLabel": {
+    "description": "Label of the qualification chips."
+  },
+  "signupQualificationsHint": "Wähle alles aus, was auf dich zutrifft.",
+  "@signupQualificationsHint": {
+    "description": "Hint below the label of the qualification chips."
+  },
+  "signupSubmit": "Registrieren",
+  "@signupSubmit": {
+    "description": "Button that submits the signup form."
+  },
+  "signupSubmitting": "Wird registriert …",
+  "@signupSubmitting": {
+    "description": "Label of the signup button while the request is running."
+  },
+  "signupPrivacyNote": "Deine Angaben werden an {agency} übermittelt und nur für die Schichtvergabe verwendet.",
+  "@signupPrivacyNote": {
+    "description": "Privacy note below the signup button.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "signupLoginPrompt": "Schon registriert?",
+  "@signupLoginPrompt": {
+    "description": "Question in front of the link to the login."
+  },
+  "signupLoginAction": "Anmelden",
+  "@signupLoginAction": {
+    "description": "Link from the signup form to the login."
+  },
+  "signupInvalidLinkTitle": "Dieser Einladungslink ist nicht gültig",
+  "@signupInvalidLinkTitle": {
+    "description": "Title when the signup code is unknown."
+  },
+  "signupInvalidLinkMessage": "Der Link ist unbekannt oder abgelaufen. Bitte deine Agentur um einen neuen Einladungslink.",
+  "@signupInvalidLinkMessage": {
+    "description": "Text below the title when the signup code is unknown."
+  },
+  "signupToLogin": "Zur Anmeldung",
+  "@signupToLogin": {
+    "description": "Button from the invalid invitation screen to the login."
+  },
+  "signupLoadErrorTitle": "Einladung konnte nicht geladen werden",
+  "@signupLoadErrorTitle": {
+    "description": "Title when the agency behind an invitation could not be loaded."
+  },
+  "waitingTitle": "Deine Registrierung wird geprüft",
+  "@waitingTitle": {
+    "description": "Title of the screen a worker sees until the agency has approved the signup."
+  },
+  "waitingMessage": "{agency} prüft deine Angaben und gibt dein Konto frei. Danach siehst du hier die offenen Schichten.",
+  "@waitingMessage": {
+    "description": "Text below the title of the waiting screen.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "waitingStatusLabel": "Status",
+  "@waitingStatusLabel": {
+    "description": "Label of the status row on the waiting screen."
+  },
+  "waitingStatusPending": "Wartet auf Freigabe",
+  "@waitingStatusPending": {
+    "description": "Badge for a signup the agency has not approved yet."
+  },
+  "waitingRefresh": "Status aktualisieren",
+  "@waitingRefresh": {
+    "description": "Button that checks whether the agency has approved the signup."
+  },
+  "waitingStillPending": "Dein Konto wartet noch auf die Freigabe.",
+  "@waitingStillPending": {
+    "description": "Message after refreshing the status when nothing has changed."
+  },
+  "accountAgencyLabel": "Agentur",
+  "@accountAgencyLabel": {
+    "description": "Label in front of the agency's name."
+  },
+  "accountSignedInAsLabel": "Angemeldet als",
+  "@accountSignedInAsLabel": {
+    "description": "Label in front of the email address of the signed-in worker."
+  },
+  "accountButtonLabel": "Konto",
+  "@accountButtonLabel": {
+    "description": "Screen reader label and tooltip of the avatar that opens the account menu."
+  },
+  "inactiveTitle": "Dein Konto ist nicht aktiv",
+  "@inactiveTitle": {
+    "description": "Title of the screen for a rejected or deactivated worker."
+  },
+  "inactiveMessage": "{agency} hat dein Konto nicht freigegeben oder deaktiviert. Offene Schichten kannst du deshalb gerade nicht sehen.",
+  "@inactiveMessage": {
+    "description": "Text below the title of the not active screen.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "inactiveContactTitle": "Fragen dazu?",
+  "@inactiveContactTitle": {
+    "description": "Title of the contact card on the not active screen."
+  },
+  "inactiveContactMessage": "Wende dich bitte direkt an {agency}.",
+  "@inactiveContactMessage": {
+    "description": "Text of the contact card on the not active screen.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "navShifts": "Schichten",
+  "@navShifts": {
+    "description": "Tab with the open shifts; also the title of that tab."
+  },
+  "navMyShifts": "Meine Schichten",
+  "@navMyShifts": {
+    "description": "Tab with the worker's own shifts."
+  },
+  "navMessages": "Nachrichten",
+  "@navMessages": {
+    "description": "Tab with the conversations."
+  },
+  "navProfile": "Profil",
+  "@navProfile": {
+    "description": "Tab with the worker's profile."
+  },
+  "shiftsEmptyTitle": "Aktuell keine offenen Schichten",
+  "@shiftsEmptyTitle": {
+    "description": "Title of the empty shift list."
+  },
+  "shiftsEmptyMessage": "Sobald {agency} neue Schichten veröffentlicht, erscheinen sie hier.",
+  "@shiftsEmptyMessage": {
+    "description": "Text below the title of the empty shift list.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "shiftsRefresh": "Aktualisieren",
+  "@shiftsRefresh": {
+    "description": "Button that reloads the shift list."
+  },
+  "shiftsLoading": "Schichten werden geladen …",
+  "@shiftsLoading": {
+    "description": "Screen reader label of the placeholders shown while the shift list loads."
+  },
+  "shiftsErrorTitle": "Schichten konnten nicht geladen werden",
+  "@shiftsErrorTitle": {
+    "description": "Title when the shift list could not be loaded."
+  },
+  "comingSoonTitle": "Kommt bald",
+  "@comingSoonTitle": {
+    "description": "Title of a tab that is not built yet."
+  },
+  "comingSoonMessage": "Dieser Bereich ist noch in Arbeit.",
+  "@comingSoonMessage": {
+    "description": "Text below the title of a tab that is not built yet."
   }
 }

@@ -2,6 +2,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shiftboard_api/shiftboard_api.dart';
 
+import '../../features/auth/data/auth_interceptor.dart';
+import '../../features/auth/data/session.dart';
+import '../../features/auth/data/token_storage.dart';
+
 const _configuredBaseUrl = String.fromEnvironment('API_BASE_URL');
 
 /// Base URL of the backend, set with `--dart-define=API_BASE_URL=...`.
@@ -15,8 +19,21 @@ String get apiBaseUrl {
       : ShiftboardApi.basePath;
 }
 
-final apiProvider = Provider<ShiftboardApi>((ref) {
-  final api = ShiftboardApi(basePathOverride: apiBaseUrl);
+final apiProvider = Provider<ShiftboardApi>(createApi);
+
+/// Builds the client with the token handling of [AuthInterceptor].
+///
+/// Public so that tests can swap the HTTP adapter and keep the interceptor.
+ShiftboardApi createApi(Ref ref) {
+  final api = ShiftboardApi(basePathOverride: apiBaseUrl, interceptors: []);
+  api.dio.interceptors.add(
+    AuthInterceptor(
+      dio: api.dio,
+      authApi: api.getAuthApi(),
+      storage: ref.watch(tokenStorageProvider),
+      onSessionExpired: () => ref.read(sessionProvider.notifier).expire(),
+    ),
+  );
   ref.onDispose(api.dio.close);
   return api;
-});
+}
