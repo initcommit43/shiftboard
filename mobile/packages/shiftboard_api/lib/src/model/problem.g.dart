@@ -19,6 +19,8 @@ class _$Problem extends Problem {
   final String? instance;
   @override
   final String? code;
+  @override
+  final BuiltList<FieldError>? errors;
 
   factory _$Problem([void Function(ProblemBuilder)? updates]) =>
       (ProblemBuilder()..update(updates))._build();
@@ -29,7 +31,8 @@ class _$Problem extends Problem {
       required this.status,
       this.detail,
       this.instance,
-      this.code})
+      this.code,
+      this.errors})
       : super._();
   @override
   Problem rebuild(void Function(ProblemBuilder) updates) =>
@@ -47,7 +50,8 @@ class _$Problem extends Problem {
         status == other.status &&
         detail == other.detail &&
         instance == other.instance &&
-        code == other.code;
+        code == other.code &&
+        errors == other.errors;
   }
 
   @override
@@ -59,6 +63,7 @@ class _$Problem extends Problem {
     _$hash = $jc(_$hash, detail.hashCode);
     _$hash = $jc(_$hash, instance.hashCode);
     _$hash = $jc(_$hash, code.hashCode);
+    _$hash = $jc(_$hash, errors.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -71,7 +76,8 @@ class _$Problem extends Problem {
           ..add('status', status)
           ..add('detail', detail)
           ..add('instance', instance)
-          ..add('code', code))
+          ..add('code', code)
+          ..add('errors', errors))
         .toString();
   }
 }
@@ -103,6 +109,11 @@ class ProblemBuilder implements Builder<Problem, ProblemBuilder> {
   String? get code => _$this._code;
   set code(String? code) => _$this._code = code;
 
+  ListBuilder<FieldError>? _errors;
+  ListBuilder<FieldError> get errors =>
+      _$this._errors ??= ListBuilder<FieldError>();
+  set errors(ListBuilder<FieldError>? errors) => _$this._errors = errors;
+
   ProblemBuilder() {
     Problem._defaults(this);
   }
@@ -116,6 +127,7 @@ class ProblemBuilder implements Builder<Problem, ProblemBuilder> {
       _detail = $v.detail;
       _instance = $v.instance;
       _code = $v.code;
+      _errors = $v.errors?.toBuilder();
       _$v = null;
     }
     return this;
@@ -135,17 +147,32 @@ class ProblemBuilder implements Builder<Problem, ProblemBuilder> {
   Problem build() => _build();
 
   _$Problem _build() {
-    final _$result = _$v ??
-        _$Problem._(
-          type: BuiltValueNullFieldError.checkNotNull(type, r'Problem', 'type'),
-          title:
-              BuiltValueNullFieldError.checkNotNull(title, r'Problem', 'title'),
-          status: BuiltValueNullFieldError.checkNotNull(
-              status, r'Problem', 'status'),
-          detail: detail,
-          instance: instance,
-          code: code,
-        );
+    _$Problem _$result;
+    try {
+      _$result = _$v ??
+          _$Problem._(
+            type:
+                BuiltValueNullFieldError.checkNotNull(type, r'Problem', 'type'),
+            title: BuiltValueNullFieldError.checkNotNull(
+                title, r'Problem', 'title'),
+            status: BuiltValueNullFieldError.checkNotNull(
+                status, r'Problem', 'status'),
+            detail: detail,
+            instance: instance,
+            code: code,
+            errors: _errors?.build(),
+          );
+    } catch (_) {
+      late String _$failedField;
+      try {
+        _$failedField = 'errors';
+        _errors?.build();
+      } catch (e) {
+        throw BuiltValueNestedFieldError(
+            r'Problem', _$failedField, e.toString());
+      }
+      rethrow;
+    }
     replace(_$result);
     return _$result;
   }

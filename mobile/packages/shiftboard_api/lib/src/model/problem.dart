@@ -3,6 +3,8 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:built_collection/built_collection.dart';
+import 'package:shiftboard_api/src/model/field_error.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -17,6 +19,7 @@ part 'problem.g.dart';
 /// * [detail] - Human-readable explanation of this occurrence.
 /// * [instance] - URI reference that identifies this occurrence.
 /// * [code] - Machine-readable error code. Clients translate it into a localized message.
+/// * [errors] - Field errors, present when `code` is `validation_failed`.
 @BuiltValue()
 abstract class Problem implements Built<Problem, ProblemBuilder> {
   /// URI reference that identifies the problem type.
@@ -42,6 +45,10 @@ abstract class Problem implements Built<Problem, ProblemBuilder> {
   /// Machine-readable error code. Clients translate it into a localized message.
   @BuiltValueField(wireName: r'code')
   String? get code;
+
+  /// Field errors, present when `code` is `validation_failed`.
+  @BuiltValueField(wireName: r'errors')
+  BuiltList<FieldError>? get errors;
 
   Problem._();
 
@@ -100,6 +107,13 @@ class _$ProblemSerializer implements PrimitiveSerializer<Problem> {
       yield serializers.serialize(
         object.code,
         specifiedType: const FullType(String),
+      );
+    }
+    if (object.errors != null) {
+      yield r'errors';
+      yield serializers.serialize(
+        object.errors,
+        specifiedType: const FullType(BuiltList, [FullType(FieldError)]),
       );
     }
   }
@@ -171,6 +185,15 @@ class _$ProblemSerializer implements PrimitiveSerializer<Problem> {
           ) as String?;
           if (valueDes == null) continue;
           result.code = valueDes;
+          break;
+        case r'errors':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType:
+                const FullType.nullable(BuiltList, [FullType(FieldError)]),
+          ) as BuiltList<FieldError>?;
+          if (valueDes == null) continue;
+          result.errors.replace(valueDes);
           break;
         default:
           unhandled.add(key);

@@ -10,7 +10,25 @@ export 'package:shiftboard_api/src/auth/oauth.dart';
 export 'package:shiftboard_api/src/serializers.dart';
 export 'package:shiftboard_api/src/model/date.dart';
 
+export 'package:shiftboard_api/src/api/auth_api.dart';
+export 'package:shiftboard_api/src/api/signup_api.dart';
 export 'package:shiftboard_api/src/api/system_api.dart';
+export 'package:shiftboard_api/src/api/workers_api.dart';
 
+export 'package:shiftboard_api/src/model/agency_summary.dart';
+export 'package:shiftboard_api/src/model/client_type.dart';
+export 'package:shiftboard_api/src/model/current_user.dart';
+export 'package:shiftboard_api/src/model/field_error.dart';
+export 'package:shiftboard_api/src/model/login_request.dart';
 export 'package:shiftboard_api/src/model/ping.dart';
 export 'package:shiftboard_api/src/model/problem.dart';
+export 'package:shiftboard_api/src/model/qualification.dart';
+export 'package:shiftboard_api/src/model/refresh_token_request.dart';
+export 'package:shiftboard_api/src/model/role.dart';
+export 'package:shiftboard_api/src/model/signup_info.dart';
+export 'package:shiftboard_api/src/model/token_response.dart';
+export 'package:shiftboard_api/src/model/worker.dart';
+export 'package:shiftboard_api/src/model/worker_page.dart';
+export 'package:shiftboard_api/src/model/worker_profile.dart';
+export 'package:shiftboard_api/src/model/worker_signup_request.dart';
+export 'package:shiftboard_api/src/model/worker_status.dart';
