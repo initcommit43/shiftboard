@@ -101,7 +101,7 @@ class SignupApi {
   }
 
   /// Sign up as a worker of the agency
-  /// Creates a user account and a worker profile with status &#x60;PENDING&#x60; and logs the worker in. The agency approves or rejects the signup later. Needs no authentication.  Error codes: &#x60;validation_failed&#x60; (400, with &#x60;errors&#x60;), &#x60;signup_code_unknown&#x60; (404), &#x60;email_already_registered&#x60; (409).
+  /// Creates a user account and a worker profile with status &#x60;PENDING&#x60; and logs the worker in. The agency approves or rejects the signup later. Needs no authentication.  &#x60;dateOfBirth&#x60; must be a real calendar date in the past. Its field error codes are &#x60;required&#x60;, &#x60;invalid_format&#x60; (not a date) and &#x60;out_of_range&#x60; (today or later, or more than 120 years ago).  Error codes: &#x60;validation_failed&#x60; (400, with &#x60;errors&#x60;), &#x60;signup_code_unknown&#x60; (404), &#x60;email_already_registered&#x60; (409).
   ///
   /// Parameters:
   /// * [signupCode] - The code from the agency's signup link.

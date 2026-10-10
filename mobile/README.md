@@ -50,7 +50,7 @@ The session decides which screen is shown; the router's `redirect` is the only p
 | signed in, worker `INACTIVE` | not active |
 | signed in, worker `ACTIVE` | home with the tabs; "Schichten" first |
 
-- **Signup:** an invitation link opens the form for its code. Without the link, "Registrieren" on the login leads to a step where the worker pastes the link or the bare code. The form asks for name, email, phone and password and loads the agency with `GET /signup/{code}`; an unknown code shows "invitation not valid". Signing up logs the worker in, who then waits for approval.
+- **Signup:** an invitation link opens the form for its code. Without the link, "Registrieren" on the login leads to a step where the worker pastes the link or the bare code. The form asks for name, date of birth, email, phone and password and loads the agency with `GET /signup/{code}`; an unknown code shows "invitation not valid". Signing up logs the worker in, who then waits for approval.
 - **Login and logout:** email and password with client type `WORKER_APP`. Wrong credentials and a login on the wrong client show the same generic error. Logging out revokes the refresh token on the server (best effort) and always clears this device.
 - **Shifts:** the API has no shift list yet, so the tab shows its empty state. "Aktualisieren" reloads the account, which moves a deactivated worker off the tab. The other tabs are placeholders.
 

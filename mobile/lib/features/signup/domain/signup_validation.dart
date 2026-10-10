@@ -2,6 +2,12 @@
 abstract final class SignupValidation {
   static const passwordMinLength = 8;
 
+  /// The oldest date of birth the API accepts, in years before today.
+  static const maxAgeYears = 120;
+
+  /// Where the date of birth picker opens, in years before today.
+  static const typicalAgeYears = 25;
+
   static final _email = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
   static final _phone = RegExp(r'^\+?[0-9 ()/.-]+$');
   static const _phoneMinDigits = 8;

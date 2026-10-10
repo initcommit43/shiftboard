@@ -74,6 +74,7 @@ class WorkerService {
                         worker.getId(),
                         worker.getFirstName(),
                         worker.getLastName(),
+                        worker.getDateOfBirth(),
                         emails.get(worker.getUserAccountId()),
                         worker.getPhone(),
                         worker.getStatus(),

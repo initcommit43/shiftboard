@@ -49,6 +49,10 @@ export interface Worker {
     /**
      * 
      */
+    dateOfBirth: Date;
+    /**
+     * 
+     */
     email: string;
     /**
      * 
@@ -77,6 +81,7 @@ export function instanceOfWorker(value: object): value is Worker {
     if (!('id' in value) || value['id'] === undefined) return false;
     if (!('firstName' in value) || value['firstName'] === undefined) return false;
     if (!('lastName' in value) || value['lastName'] === undefined) return false;
+    if (!('dateOfBirth' in value) || value['dateOfBirth'] === undefined) return false;
     if (!('email' in value) || value['email'] === undefined) return false;
     if (!('phone' in value) || value['phone'] === undefined) return false;
     if (!('status' in value) || value['status'] === undefined) return false;
@@ -98,6 +103,7 @@ export function WorkerFromJSONTyped(json: any, ignoreDiscriminator: boolean): Wo
         'id': json['id'],
         'firstName': json['firstName'],
         'lastName': json['lastName'],
+        'dateOfBirth': (json['dateOfBirth'] == null ? json['dateOfBirth'] : parseDate(json['dateOfBirth'])),
         'email': json['email'],
         'phone': json['phone'],
         'status': WorkerStatusFromJSON(json['status']),
@@ -120,6 +126,7 @@ export function WorkerToJSONTyped(value?: Worker | null, ignoreDiscriminator: bo
         'id': value['id'],
         'firstName': value['firstName'],
         'lastName': value['lastName'],
+        'dateOfBirth': value['dateOfBirth'] == null ? value['dateOfBirth'] : serializeDate(value['dateOfBirth']),
         'email': value['email'],
         'phone': value['phone'],
         'status': WorkerStatusToJSON(value['status']),

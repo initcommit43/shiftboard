@@ -28,6 +28,7 @@ export function worker(
     id: `0199c3a0-0000-7000-8000-0000000001${String(number).padStart(2, '0')}`,
     firstName,
     lastName,
+    dateOfBirth: new Date(1990 + number, 2, 14),
     email: `${firstName}.${lastName}@example.com`.toLowerCase(),
     phone: `+43 660 55501${String(number).padStart(2, '0')}`,
     status: WorkerStatus.PENDING,

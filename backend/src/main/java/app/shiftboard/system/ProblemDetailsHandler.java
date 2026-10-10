@@ -22,6 +22,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import tools.jackson.databind.exc.MismatchedInputException;
 
 /**
  * Renders errors as RFC 9457 problem details with the machine-readable {@code code} of the API contract.
@@ -88,7 +89,11 @@ class ProblemDetailsHandler extends ResponseEntityExceptionHandler {
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
-        return validationFailed(ex, List.of(), request);
+        // A value that cannot be read as the type of its field, such as a date that does not exist.
+        var errors = ex.getCause() instanceof MismatchedInputException mismatch && !mismatch.getPath().isEmpty()
+                ? List.of(new FieldError(mismatch.getPath().getLast().getPropertyName(), INVALID_FORMAT))
+                : List.<FieldError>of();
+        return validationFailed(ex, errors, request);
     }
 
     // Spring leaves the default type out of the body, the API contract requires it.
@@ -124,7 +129,7 @@ class ProblemDetailsHandler extends ResponseEntityExceptionHandler {
         return switch (constraint) {
             case "NotNull", "NotBlank", "NotEmpty" -> "required";
             case "Size" -> "invalid_length";
-            case "Min", "Max" -> "out_of_range";
+            case "Min", "Max", "DateOfBirth" -> "out_of_range";
             case "Email" -> INVALID_FORMAT;
             default -> "invalid";
         };

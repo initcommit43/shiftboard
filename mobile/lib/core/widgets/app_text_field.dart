@@ -17,6 +17,8 @@ class AppTextField extends StatefulWidget {
     this.errorText,
     this.onChanged,
     this.onSubmitted,
+    this.onTap,
+    this.readOnly = false,
     this.keyboardType,
     this.textInputAction,
     this.textCapitalization = TextCapitalization.none,
@@ -35,6 +37,10 @@ class AppTextField extends StatefulWidget {
   final String? errorText;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
+  final VoidCallback? onTap;
+
+  /// For a value that is picked instead of typed; [onTap] opens the picker.
+  final bool readOnly;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final TextCapitalization textCapitalization;
@@ -77,6 +83,8 @@ class _AppTextFieldState extends State<AppTextField> {
             forceErrorText: widget.errorText,
             onChanged: widget.onChanged,
             onFieldSubmitted: widget.onSubmitted,
+            onTap: widget.onTap,
+            readOnly: widget.readOnly,
             keyboardType: widget.keyboardType,
             textInputAction: widget.textInputAction,
             textCapitalization: widget.textCapitalization,

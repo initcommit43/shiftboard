@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -18,6 +19,23 @@ void main() {
     );
   });
 
+  /// Types [date] into the date picker, as it is faster than the calendar.
+  Future<void> pickDateOfBirth(WidgetTester tester, String date) async {
+    await scrollToAndTap(tester, field('Geburtsdatum'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byIcon(Icons.edit_outlined));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.descendant(
+        of: find.byType(DatePickerDialog),
+        matching: find.byType(TextField),
+      ),
+      date,
+    );
+    await tester.tap(find.text('OK'));
+    await tester.pumpAndSettle();
+  }
+
   Future<void> fillIn(
     WidgetTester tester, {
     String email = 'lena.hofer@example.com',
@@ -26,6 +44,7 @@ void main() {
   }) async {
     await tester.enterText(field('Vorname'), 'Lena');
     await tester.enterText(field('Nachname'), ' Hofer ');
+    await pickDateOfBirth(tester, '14.03.1996');
     await tester.enterText(field('E-Mail'), email);
     await tester.enterText(field('Telefon'), phone);
     await tester.enterText(field('Passwort'), password);
@@ -150,8 +169,56 @@ void main() {
 
       await submit(tester);
 
-      expect(find.text('Bitte fülle dieses Feld aus.'), findsNWidgets(5));
+      expect(find.text('Bitte fülle dieses Feld aus.'), findsNWidgets(6));
       expect(backend.sent('POST /signup/DONAU24'), isEmpty);
+    });
+
+    testWidgets('picks the date of birth in the date picker', (tester) async {
+      await pumpApp(tester, backend, link: _link);
+      expect(
+        find.descendant(
+          of: field('Geburtsdatum'),
+          matching: find.text('TT.MM.JJJJ'),
+        ),
+        findsOneWidget,
+      );
+
+      await scrollToAndTap(tester, field('Geburtsdatum'));
+      await tester.pumpAndSettle();
+
+      // Opens on the years, with no day after yesterday to choose.
+      final picker = tester.widget<DatePickerDialog>(
+        find.byType(DatePickerDialog),
+      );
+      expect(picker.initialCalendarMode, DatePickerMode.year);
+      expect(
+        picker.lastDate.isBefore(DateUtils.dateOnly(DateTime.now())),
+        isTrue,
+      );
+      await tester.tap(find.text('Abbrechen'));
+      await tester.pumpAndSettle();
+      expect(
+        tester
+            .widget<TextField>(
+              find.descendant(
+                of: field('Geburtsdatum'),
+                matching: find.byType(TextField),
+              ),
+            )
+            .controller!
+            .text,
+        isEmpty,
+      );
+
+      await pickDateOfBirth(tester, '14.03.1996');
+
+      expect(
+        find.descendant(
+          of: field('Geburtsdatum'),
+          matching: find.text('14.03.1996'),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('checks email, phone and password length', (tester) async {
@@ -216,7 +283,11 @@ void main() {
         (_) => problem(
           400,
           'validation_failed',
-          fieldErrors: {'phone': 'invalid_format', 'email': 'invalid_format'},
+          fieldErrors: {
+            'phone': 'invalid_format',
+            'email': 'invalid_format',
+            'dateOfBirth': 'out_of_range',
+          },
         ),
       );
       await pumpApp(tester, backend, link: _link);
@@ -237,6 +308,20 @@ void main() {
           matching: find.text('Bitte gib eine gültige E-Mail-Adresse ein.'),
         ),
         findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: field('Geburtsdatum'),
+          matching: find.text('Bitte gib ein gültiges Geburtsdatum ein.'),
+        ),
+        findsOneWidget,
+      );
+
+      // Picking a different date clears the error.
+      await pickDateOfBirth(tester, '15.03.1996');
+      expect(
+        find.text('Bitte gib ein gültiges Geburtsdatum ein.'),
+        findsNothing,
       );
     });
 
@@ -336,6 +421,7 @@ void main() {
       expect(backend.sent('POST /signup/DONAU24').single.data, {
         'firstName': 'Lena',
         'lastName': 'Hofer',
+        'dateOfBirth': '1996-03-14',
         'email': 'lena.hofer@example.com',
         'phone': '+43 660 5550101',
         'password': 'sonnenblume24',
@@ -356,7 +442,7 @@ void main() {
       await pumpApp(tester, backend, link: _link);
       await submit(tester);
 
-      expect(find.text('Bitte fülle dieses Feld aus.'), findsNWidgets(5));
+      expect(find.text('Bitte fülle dieses Feld aus.'), findsNWidgets(6));
       expect(tester.takeException(), isNull);
     });
 

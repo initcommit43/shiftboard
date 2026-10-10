@@ -1,6 +1,7 @@
 package app.shiftboard.worker.internal;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -40,6 +41,8 @@ class Worker {
 
     private String lastName;
 
+    private LocalDate dateOfBirth;
+
     private String phone;
 
     @Enumerated(EnumType.STRING)
@@ -61,10 +64,11 @@ class Worker {
     protected Worker() {
     }
 
-    Worker(UUID userAccountId, String firstName, String lastName, String phone) {
+    Worker(UUID userAccountId, String firstName, String lastName, LocalDate dateOfBirth, String phone) {
         this.userAccountId = userAccountId;
         this.firstName = firstName;
         this.lastName = lastName;
+        this.dateOfBirth = dateOfBirth;
         this.phone = phone;
         this.status = WorkerStatus.PENDING;
     }
@@ -98,6 +102,10 @@ class Worker {
 
     String getLastName() {
         return lastName;
+    }
+
+    LocalDate getDateOfBirth() {
+        return dateOfBirth;
     }
 
     String getPhone() {

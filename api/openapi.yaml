@@ -87,6 +87,10 @@ paths:
         logs the worker in. The agency approves or rejects the signup later.
         Needs no authentication.
 
+        `dateOfBirth` must be a real calendar date in the past. Its field
+        error codes are `required`, `invalid_format` (not a date) and
+        `out_of_range` (today or later, or more than 120 years ago).
+
         Error codes: `validation_failed` (400, with `errors`),
         `signup_code_unknown` (404), `email_already_registered` (409).
       security: []
@@ -398,7 +402,7 @@ components:
 
     WorkerSignupRequest:
       type: object
-      required: [firstName, lastName, email, phone, password]
+      required: [firstName, lastName, dateOfBirth, email, phone, password]
       properties:
         firstName:
           type: string
@@ -408,6 +412,10 @@ components:
           type: string
           minLength: 1
           maxLength: 100
+        dateOfBirth:
+          type: string
+          format: date
+          examples: ["1998-04-17"]
         email:
           type: string
           format: email
@@ -522,7 +530,7 @@ components:
 
     Worker:
       type: object
-      required: [id, firstName, lastName, email, phone, status, qualifications, createdAt]
+      required: [id, firstName, lastName, dateOfBirth, email, phone, status, qualifications, createdAt]
       properties:
         id:
           type: string
@@ -531,6 +539,9 @@ components:
           type: string
         lastName:
           type: string
+        dateOfBirth:
+          type: string
+          format: date
         email:
           type: string
           format: email

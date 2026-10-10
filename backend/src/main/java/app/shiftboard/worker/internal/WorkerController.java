@@ -1,6 +1,7 @@
 package app.shiftboard.worker.internal;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,6 +50,7 @@ class WorkerController {
             UUID id,
             String firstName,
             String lastName,
+            LocalDate dateOfBirth,
             String email,
             String phone,
             WorkerStatus status,

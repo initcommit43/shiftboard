@@ -12,6 +12,8 @@ class _$WorkerSignupRequest extends WorkerSignupRequest {
   @override
   final String lastName;
   @override
+  final Date dateOfBirth;
+  @override
   final String email;
   @override
   final String phone;
@@ -25,6 +27,7 @@ class _$WorkerSignupRequest extends WorkerSignupRequest {
   _$WorkerSignupRequest._(
       {required this.firstName,
       required this.lastName,
+      required this.dateOfBirth,
       required this.email,
       required this.phone,
       required this.password})
@@ -44,6 +47,7 @@ class _$WorkerSignupRequest extends WorkerSignupRequest {
     return other is WorkerSignupRequest &&
         firstName == other.firstName &&
         lastName == other.lastName &&
+        dateOfBirth == other.dateOfBirth &&
         email == other.email &&
         phone == other.phone &&
         password == other.password;
@@ -54,6 +58,7 @@ class _$WorkerSignupRequest extends WorkerSignupRequest {
     var _$hash = 0;
     _$hash = $jc(_$hash, firstName.hashCode);
     _$hash = $jc(_$hash, lastName.hashCode);
+    _$hash = $jc(_$hash, dateOfBirth.hashCode);
     _$hash = $jc(_$hash, email.hashCode);
     _$hash = $jc(_$hash, phone.hashCode);
     _$hash = $jc(_$hash, password.hashCode);
@@ -66,6 +71,7 @@ class _$WorkerSignupRequest extends WorkerSignupRequest {
     return (newBuiltValueToStringHelper(r'WorkerSignupRequest')
           ..add('firstName', firstName)
           ..add('lastName', lastName)
+          ..add('dateOfBirth', dateOfBirth)
           ..add('email', email)
           ..add('phone', phone)
           ..add('password', password))
@@ -84,6 +90,10 @@ class WorkerSignupRequestBuilder
   String? _lastName;
   String? get lastName => _$this._lastName;
   set lastName(String? lastName) => _$this._lastName = lastName;
+
+  Date? _dateOfBirth;
+  Date? get dateOfBirth => _$this._dateOfBirth;
+  set dateOfBirth(Date? dateOfBirth) => _$this._dateOfBirth = dateOfBirth;
 
   String? _email;
   String? get email => _$this._email;
@@ -106,6 +116,7 @@ class WorkerSignupRequestBuilder
     if ($v != null) {
       _firstName = $v.firstName;
       _lastName = $v.lastName;
+      _dateOfBirth = $v.dateOfBirth;
       _email = $v.email;
       _phone = $v.phone;
       _password = $v.password;
@@ -134,6 +145,8 @@ class WorkerSignupRequestBuilder
               firstName, r'WorkerSignupRequest', 'firstName'),
           lastName: BuiltValueNullFieldError.checkNotNull(
               lastName, r'WorkerSignupRequest', 'lastName'),
+          dateOfBirth: BuiltValueNullFieldError.checkNotNull(
+              dateOfBirth, r'WorkerSignupRequest', 'dateOfBirth'),
           email: BuiltValueNullFieldError.checkNotNull(
               email, r'WorkerSignupRequest', 'email'),
           phone: BuiltValueNullFieldError.checkNotNull(

@@ -12,7 +12,7 @@
  * Do not edit the class manually.
  */
 
-import { mapValues } from '../runtime';
+import { mapValues, parseDate, parseDateTime, serializeDate, serializeDateTime } from '../runtime';
 /**
  * 
  * @export
@@ -27,6 +27,10 @@ export interface WorkerSignupRequest {
      * 
      */
     lastName: string;
+    /**
+     * 
+     */
+    dateOfBirth: Date;
     /**
      * 
      */
@@ -47,6 +51,7 @@ export interface WorkerSignupRequest {
 export function instanceOfWorkerSignupRequest(value: object): value is WorkerSignupRequest {
     if (!('firstName' in value) || value['firstName'] === undefined) return false;
     if (!('lastName' in value) || value['lastName'] === undefined) return false;
+    if (!('dateOfBirth' in value) || value['dateOfBirth'] === undefined) return false;
     if (!('email' in value) || value['email'] === undefined) return false;
     if (!('phone' in value) || value['phone'] === undefined) return false;
     if (!('password' in value) || value['password'] === undefined) return false;
@@ -65,6 +70,7 @@ export function WorkerSignupRequestFromJSONTyped(json: any, ignoreDiscriminator:
         
         'firstName': json['firstName'],
         'lastName': json['lastName'],
+        'dateOfBirth': (json['dateOfBirth'] == null ? json['dateOfBirth'] : parseDate(json['dateOfBirth'])),
         'email': json['email'],
         'phone': json['phone'],
         'password': json['password'],
@@ -84,6 +90,7 @@ export function WorkerSignupRequestToJSONTyped(value?: WorkerSignupRequest | nul
         
         'firstName': value['firstName'],
         'lastName': value['lastName'],
+        'dateOfBirth': value['dateOfBirth'] == null ? value['dateOfBirth'] : serializeDate(value['dateOfBirth']),
         'email': value['email'],
         'phone': value['phone'],
         'password': value['password'],
