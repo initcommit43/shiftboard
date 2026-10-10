@@ -22,3 +22,4 @@ One short record per real decision. Format: `NNNN-title.md` with the sections Co
 | [0016](0016-push-notifications.md) | Push notifications via Firebase Cloud Messaging |
 | [0017](0017-data-protection.md) | Minimal personal data and anonymization on deletion |
 | [0018](0018-date-of-birth.md) | Date of birth in the worker profile |
+| [0019](0019-source-available-all-rights-reserved.md) | Public repository, all rights reserved |
