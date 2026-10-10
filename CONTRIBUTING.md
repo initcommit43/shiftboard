@@ -62,6 +62,67 @@ feat(shift): reject claims on shifts that have started
 - [ ] Spec and generated clients updated if the API changed
 - [ ] Docs or ADR updated if a decision changed
 
+## Development
+
+Needs Docker, JDK 25, Node.js 24 and Flutter 3.47. Starting the stack, the demo accounts and the signup code are described under "Getting started" in the [README](README.md#getting-started).
+
+**Local stack** (repo root)
+
+```
+docker compose up --build     PostgreSQL and backend on :8080, demo data loaded on startup
+docker compose down -v        stop and reset the database
+docker compose up -d db       database only, to run the backend from Gradle
+```
+
+Seed data loads automatically in the `local` profile, which docker compose and `bootRun` use, and is skipped when it already exists.
+
+**Backend** (`backend/`)
+
+```
+./gradlew bootRun     run against the compose database
+./gradlew build       unit tests, module boundary test, integration tests (needs Docker)
+```
+
+**API contract and generated clients** (`api/`)
+
+```
+npm ci
+npm run lint          lint openapi.yaml
+npm run generate      regenerate the Dart and TypeScript clients (needs Java and Dart)
+npm run check         fail if the committed clients differ from the spec
+```
+
+**Design tokens** (`design-tokens/`)
+
+```
+npm ci
+npm run build         regenerate the CSS variables and the Dart constants
+npm run check         fail if the committed outputs differ from the tokens
+```
+
+**Dashboard** (`dashboard/`)
+
+```
+npm ci
+npm run dev           http://localhost:5173, proxies /api to the backend
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+**Worker app** (`mobile/`)
+
+```
+flutter pub get       also generates the localizations
+flutter run           add --dart-define=API_BASE_URL=http://<host>:8080/api/v1 for another host
+dart format --output=none --set-exit-if-changed lib test
+flutter analyze
+flutter test
+```
+
+CI runs the same checks per folder; see `.github/workflows/`. Each folder's README has more detail.
+
 ## Privacy and secrets
 
 - No personal information in the repository. Seed data, demo data, tests and screenshots use fictional agencies, clients and people only.

@@ -1,0 +1,14 @@
+# Owners are requested for review automatically. The last matching pattern wins.
+# Update this file together with the Team section in README.md when a part changes hands.
+
+*                   @initcommit43
+
+/api/               @initcommit43
+/docs/adr/          @initcommit43
+/design-tokens/     @initcommit43
+/.github/           @initcommit43
+/docker-compose.yml @initcommit43
+
+/backend/           @initcommit43
+/mobile/            @initcommit43
+/dashboard/         @initcommit43
