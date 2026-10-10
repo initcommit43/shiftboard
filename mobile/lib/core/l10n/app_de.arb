@@ -1,0 +1,41 @@
+{
+  "@@locale": "de",
+  "startTagline": "Offene Schichten finden und direkt übernehmen.",
+  "@startTagline": {
+    "description": "Short product claim below the app name on the start screen."
+  },
+  "systemStatusTitle": "Verbindung zum Server",
+  "@systemStatusTitle": {
+    "description": "Heading of the card that shows whether the backend is reachable."
+  },
+  "systemStatusLoading": "Verbindung wird geprüft …",
+  "@systemStatusLoading": {
+    "description": "Shown while the backend is being pinged."
+  },
+  "systemStatusConnected": "Verbunden",
+  "@systemStatusConnected": {
+    "description": "Shown when the backend answered the ping."
+  },
+  "systemStatusApiVersion": "API-Version {version}",
+  "@systemStatusApiVersion": {
+    "description": "Version of the API contract reported by the backend.",
+    "placeholders": {
+      "version": {
+        "type": "String",
+        "example": "0.1.0"
+      }
+    }
+  },
+  "systemStatusUnreachable": "Keine Verbindung",
+  "@systemStatusUnreachable": {
+    "description": "Shown when the backend could not be reached."
+  },
+  "systemStatusUnreachableHint": "Der Server ist gerade nicht erreichbar. Prüfe deine Internetverbindung und versuche es noch einmal.",
+  "@systemStatusUnreachableHint": {
+    "description": "Explains the failed ping and what the worker can do."
+  },
+  "actionRetry": "Erneut versuchen",
+  "@actionRetry": {
+    "description": "Button that repeats a failed action."
+  }
+}

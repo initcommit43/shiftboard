@@ -1,0 +1,11 @@
+{
+  "@@locale": "en",
+  "startTagline": "Find open shifts and claim them right away.",
+  "systemStatusTitle": "Server connection",
+  "systemStatusLoading": "Checking connection …",
+  "systemStatusConnected": "Connected",
+  "systemStatusApiVersion": "API version {version}",
+  "systemStatusUnreachable": "No connection",
+  "systemStatusUnreachableHint": "The server can't be reached right now. Check your internet connection and try again.",
+  "actionRetry": "Try again"
+}
