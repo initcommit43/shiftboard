@@ -32,7 +32,51 @@ Both API clients are generated from the OpenAPI spec.
 
 ## How to run
 
-The scaffold is being built. This section is filled in once the stack starts locally with one command.
+Needs Docker, JDK 25, Node.js 24 and Flutter 3.47.
+
+**Backend and database**
+
+```
+docker compose up --build
+```
+
+Starts PostgreSQL and the backend on http://localhost:8080 and loads fictional demo data. No setup is needed; to change ports or credentials, copy `.env.example` to `.env`.
+
+**Dashboard**
+
+```
+cd dashboard
+npm ci
+npm run dev
+```
+
+Opens on http://localhost:5173 and proxies `/api` to the backend.
+
+**Worker app**
+
+```
+cd mobile
+flutter pub get
+flutter run
+```
+
+On the Android emulator the app reaches the backend through `10.0.2.2`. For another host, pass `--dart-define=API_BASE_URL=http://<host>:8080/api/v1`.
+
+**Demo accounts**
+
+All demo accounts use the password `shiftboard-demo`.
+
+| Where | Account | What you see |
+| --- | --- | --- |
+| Dashboard | `dispatcher1.donau@example.com` | Dispatcher of "Donau Personal" with pending signups |
+| Dashboard | `dispatcher.alpen@example.com` | Dispatcher of a second agency, to see tenant isolation |
+| App | `lena.hofer@example.com` | Active worker |
+| App | `emma.koller@example.com` | Worker waiting for approval |
+| App | `simon.egger@example.com` | Inactive worker |
+
+To sign up a new worker, open `shiftboard://join/donau-demo` on the device or paste the code `donau-demo` after tapping "Registrieren".
+
+Each folder has its own README with tests and further commands.
 
 ## Screenshots
 
