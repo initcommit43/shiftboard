@@ -23,6 +23,8 @@ docker compose up -d db     # repository root
 
 `bootRun` and docker compose start the application with the `local` profile, which brings a development JWT secret and the [demo data](#demo-data). Flyway migrates the schema on startup.
 
+A local database created before the date of birth was added (migration `V3`) cannot be migrated, because its workers have none. Reset it with `docker compose down -v` and start again.
+
 | URL | What |
 | --- | --- |
 | `http://localhost:8080/api/v1/ping` | Service status and contract version |
@@ -83,7 +85,7 @@ Every account has the password `shiftboard-demo` (`SEED_PASSWORD`). It is a loca
 | Alpen Events | `alpen-demo` | Dispatcher | `dispatcher.alpen@example.com` |
 | | | Worker, active | `tobias.gruber@example.com` |
 
-Donau Personal has the qualifications Service, Bar, Lager and Staplerschein. The second agency exists to show tenant isolation: its dispatcher sees one worker, the dispatchers of Donau Personal see eleven.
+Every worker has a fictional date of birth. Donau Personal has the qualifications Service, Bar, Lager and Staplerschein. The second agency exists to show tenant isolation: its dispatcher sees one worker, the dispatchers of Donau Personal see eleven.
 
 A signup link carries the signup code; the API behind it is `GET` and `POST /api/v1/signup/donau-demo`:
 
@@ -134,6 +136,8 @@ src/test/java/app/shiftboard/            modularity and integration tests
 - Controllers are `@RestController`s with paths relative to `/api/v1`; the prefix is added centrally.
 - Errors are RFC 9457 problem details (`application/problem+json`) with the `code` of the contract. Modules throw `ApiException`; `ProblemDetailsHandler` renders it, as well as validation errors and the 401 and 403 of Spring Security.
 - Rules live in the entities (`worker.approve()`); services load, call and publish the domain event.
+- Requests are validated with Bean Validation on the request records; a rule without a standard constraint gets its own, like `@DateOfBirth`. A value that cannot be read as the type of its field is reported as `invalid_format` for that field.
+- Personal data such as the date of birth is never logged and never part of an event payload.
 - `shiftboard.api.version` in `application.yaml` is the contract version the backend implements; a test compares it with the spec.
 - Hibernate only validates the schema (`ddl-auto=validate`). Schema changes are new Flyway migrations.
 - Times are `timestamptz` in UTC, money is `decimal`, IDs are UUID v7, every tenant-owned table carries `agency_id`.

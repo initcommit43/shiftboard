@@ -39,6 +39,7 @@ class SignupService {
                 accountId,
                 request.firstName().strip(),
                 request.lastName().strip(),
+                request.dateOfBirth(),
                 request.phone().strip()));
         events.publishEvent(new WorkerSignedUp(TenantContext.require(), worker.getId()));
         return sessions.open(accountId);

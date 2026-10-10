@@ -1,5 +1,7 @@
 package app.shiftboard.worker.internal;
 
+import java.time.LocalDate;
+
 import app.shiftboard.agency.Agencies;
 import app.shiftboard.agency.AgencySummary;
 import app.shiftboard.agency.TenantContext;
@@ -61,6 +63,7 @@ class SignupController {
     record WorkerSignupRequest(
             @NotBlank @Size(max = 100) String firstName,
             @NotBlank @Size(max = 100) String lastName,
+            @NotNull @DateOfBirth LocalDate dateOfBirth,
             @NotBlank @Email @Size(max = 254) String email,
             @NotNull @Size(min = 5, max = 30) String phone,
             @NotNull @Size(min = 8, max = 128) String password) {

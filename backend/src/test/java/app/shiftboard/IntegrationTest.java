@@ -45,6 +45,7 @@ public abstract class IntegrationTest {
         var request = new HashMap<String, Object>();
         request.put("firstName", "Lena");
         request.put("lastName", "Hofer");
+        request.put("dateOfBirth", "1996-03-14");
         request.put("email", email);
         request.put("phone", "+43 660 5550101");
         request.put("password", TestData.PASSWORD);

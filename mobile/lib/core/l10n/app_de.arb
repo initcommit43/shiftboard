@@ -156,6 +156,22 @@
   "@signupLastNameLabel": {
     "description": "Label of the last name field."
   },
+  "signupDateOfBirthLabel": "Geburtsdatum",
+  "@signupDateOfBirthLabel": {
+    "description": "Label of the date of birth field; also the title of its date picker."
+  },
+  "signupDateOfBirthHint": "TT.MM.JJJJ",
+  "@signupDateOfBirthHint": {
+    "description": "Placeholder of the date of birth field: signupDateOfBirthFormat in words."
+  },
+  "signupDateOfBirthFormat": "dd.MM.yyyy",
+  "@signupDateOfBirthFormat": {
+    "description": "How the date of birth field shows the picked date, as a pattern of intl's DateFormat. Not shown itself."
+  },
+  "signupDateOfBirthInvalid": "Bitte gib ein gültiges Geburtsdatum ein.",
+  "@signupDateOfBirthInvalid": {
+    "description": "Error below the date of birth field."
+  },
   "signupPhoneLabel": "Telefon",
   "@signupPhoneLabel": {
     "description": "Label of the phone field."

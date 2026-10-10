@@ -65,6 +65,8 @@ class ApiError {
     return switch ((field, fieldCode)) {
       (_, 'required') => l10n.fieldRequired,
       ('email', 'invalid_format' || 'invalid_length') => l10n.fieldEmailInvalid,
+      ('dateOfBirth', 'invalid_format' || 'out_of_range') =>
+        l10n.signupDateOfBirthInvalid,
       ('phone', 'invalid_format' || 'invalid_length') =>
         l10n.signupPhoneInvalid,
       ('password', 'invalid_length') => l10n.signupPasswordTooShort,

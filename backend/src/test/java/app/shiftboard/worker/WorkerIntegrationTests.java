@@ -50,6 +50,7 @@ class WorkerIntegrationTests extends IntegrationTest {
                 .jsonPath("$.content[0].id").isEqualTo(firstId.toString())
                 .jsonPath("$.content[0].firstName").isEqualTo("Lena")
                 .jsonPath("$.content[0].lastName").isEqualTo("Hofer")
+                .jsonPath("$.content[0].dateOfBirth").isEqualTo("1996-03-14")
                 .jsonPath("$.content[0].phone").isEqualTo("+43 660 5550101")
                 .jsonPath("$.content[0].status").isEqualTo("PENDING")
                 .jsonPath("$.content[0].createdAt").isNotEmpty()

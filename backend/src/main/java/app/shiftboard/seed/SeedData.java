@@ -1,5 +1,6 @@
 package app.shiftboard.seed;
 
+import java.time.LocalDate;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -60,17 +61,17 @@ class SeedData implements ApplicationRunner {
         account(agency, "dispatcher1.donau@example.com", "DISPATCHER");
         account(agency, "dispatcher2.donau@example.com", "DISPATCHER");
 
-        worker(agency, 1, "Lena", "Hofer", "ACTIVE", 60, service, bar);
-        worker(agency, 2, "Jakob", "Steiner", "ACTIVE", 52, lager, staplerschein);
-        worker(agency, 3, "Mira", "Aigner", "ACTIVE", 45, service);
-        worker(agency, 4, "Felix", "Brandner", "ACTIVE", 31, bar);
-        worker(agency, 5, "Sophie", "Lechner", "ACTIVE", 24, service, bar);
-        worker(agency, 6, "Paul", "Winkler", "ACTIVE", 17, lager);
-        worker(agency, 7, "Simon", "Egger", "INACTIVE", 12, service);
-        worker(agency, 8, "Emma", "Koller", "PENDING", 3, service);
-        worker(agency, 9, "Lukas", "Reiter", "PENDING", 2, lager, staplerschein);
-        worker(agency, 10, "Nina", "Hauser", "PENDING", 1);
-        worker(agency, 11, "David", "Pichler", "PENDING", 0, bar);
+        worker(agency, 1, "Lena", "Hofer", "1996-03-14", "ACTIVE", 60, service, bar);
+        worker(agency, 2, "Jakob", "Steiner", "1988-11-02", "ACTIVE", 52, lager, staplerschein);
+        worker(agency, 3, "Mira", "Aigner", "2001-07-23", "ACTIVE", 45, service);
+        worker(agency, 4, "Felix", "Brandner", "1993-01-30", "ACTIVE", 31, bar);
+        worker(agency, 5, "Sophie", "Lechner", "1999-09-08", "ACTIVE", 24, service, bar);
+        worker(agency, 6, "Paul", "Winkler", "1985-05-19", "ACTIVE", 17, lager);
+        worker(agency, 7, "Simon", "Egger", "1979-12-11", "INACTIVE", 12, service);
+        worker(agency, 8, "Emma", "Koller", "2003-04-27", "PENDING", 3, service);
+        worker(agency, 9, "Lukas", "Reiter", "1991-08-05", "PENDING", 2, lager, staplerschein);
+        worker(agency, 10, "Nina", "Hauser", "2005-02-16", "PENDING", 1);
+        worker(agency, 11, "David", "Pichler", "1997-10-21", "PENDING", 0, bar);
     }
 
     private void seedAlpenEvents() {
@@ -80,7 +81,7 @@ class SeedData implements ApplicationRunner {
 
         account(agency, "dispatcher.alpen@example.com", "DISPATCHER");
 
-        worker(agency, 12, "Tobias", "Gruber", "ACTIVE", 20, service);
+        worker(agency, 12, "Tobias", "Gruber", "1990-06-09", "ACTIVE", 20, service);
     }
 
     private UUID agency(String name, String signupCode) {
@@ -101,16 +102,19 @@ class SeedData implements ApplicationRunner {
     }
 
     private void worker(
-            UUID agencyId, int number, String firstName, String lastName, String status, int signedUpDaysAgo,
-            UUID... qualificationIds) {
+            UUID agencyId, int number, String firstName, String lastName, String dateOfBirth, String status,
+            int signedUpDaysAgo, UUID... qualificationIds) {
         var email = (firstName + "." + lastName + "@example.com").toLowerCase(Locale.ROOT);
         var phone = "+43 660 55501%02d".formatted(number);
         var accountId = account(agencyId, email, "WORKER");
         var workerId = jdbc.sql("""
-                insert into worker (id, agency_id, user_account_id, first_name, last_name, phone, status, created_at)
-                values (uuidv7(), ?, ?, ?, ?, ?, ?, now() - make_interval(days => ?)) returning id
+                insert into worker (
+                    id, agency_id, user_account_id, first_name, last_name, date_of_birth, phone, status, created_at)
+                values (uuidv7(), ?, ?, ?, ?, ?, ?, ?, now() - make_interval(days => ?)) returning id
                 """)
-                .params(agencyId, accountId, firstName, lastName, phone, status, signedUpDaysAgo)
+                .params(
+                        agencyId, accountId, firstName, lastName, LocalDate.parse(dateOfBirth), phone, status,
+                        signedUpDaysAgo)
                 .query(UUID.class).single();
         for (var qualificationId : qualificationIds) {
             jdbc.sql("insert into worker_qualification (worker_id, qualification_id) values (?, ?)")

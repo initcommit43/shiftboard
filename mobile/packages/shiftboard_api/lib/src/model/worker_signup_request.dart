@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:shiftboard_api/src/model/date.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -13,6 +14,7 @@ part 'worker_signup_request.g.dart';
 /// Properties:
 /// * [firstName]
 /// * [lastName]
+/// * [dateOfBirth]
 /// * [email]
 /// * [phone]
 /// * [password]
@@ -24,6 +26,9 @@ abstract class WorkerSignupRequest
 
   @BuiltValueField(wireName: r'lastName')
   String get lastName;
+
+  @BuiltValueField(wireName: r'dateOfBirth')
+  Date get dateOfBirth;
 
   @BuiltValueField(wireName: r'email')
   String get email;
@@ -72,6 +77,11 @@ class _$WorkerSignupRequestSerializer
     yield serializers.serialize(
       object.lastName,
       specifiedType: const FullType(String),
+    );
+    yield r'dateOfBirth';
+    yield serializers.serialize(
+      object.dateOfBirth,
+      specifiedType: const FullType(Date),
     );
     yield r'email';
     yield serializers.serialize(
@@ -126,6 +136,13 @@ class _$WorkerSignupRequestSerializer
             specifiedType: const FullType(String),
           ) as String;
           result.lastName = valueDes;
+          break;
+        case r'dateOfBirth':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(Date),
+          ) as Date;
+          result.dateOfBirth = valueDes;
           break;
         case r'email':
           final valueDes = serializers.deserialize(

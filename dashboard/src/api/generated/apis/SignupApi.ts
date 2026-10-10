@@ -142,7 +142,7 @@ export class SignupApi extends runtime.BaseAPI {
     }
 
     /**
-     * Creates a user account and a worker profile with status `PENDING` and logs the worker in. The agency approves or rejects the signup later. Needs no authentication.  Error codes: `validation_failed` (400, with `errors`), `signup_code_unknown` (404), `email_already_registered` (409). 
+     * Creates a user account and a worker profile with status `PENDING` and logs the worker in. The agency approves or rejects the signup later. Needs no authentication.  `dateOfBirth` must be a real calendar date in the past. Its field error codes are `required`, `invalid_format` (not a date) and `out_of_range` (today or later, or more than 120 years ago).  Error codes: `validation_failed` (400, with `errors`), `signup_code_unknown` (404), `email_already_registered` (409). 
      * Sign up as a worker of the agency
      */
     async signUpRaw(requestParameters: SignUpRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponse>> {
@@ -153,7 +153,7 @@ export class SignupApi extends runtime.BaseAPI {
     }
 
     /**
-     * Creates a user account and a worker profile with status `PENDING` and logs the worker in. The agency approves or rejects the signup later. Needs no authentication.  Error codes: `validation_failed` (400, with `errors`), `signup_code_unknown` (404), `email_already_registered` (409). 
+     * Creates a user account and a worker profile with status `PENDING` and logs the worker in. The agency approves or rejects the signup later. Needs no authentication.  `dateOfBirth` must be a real calendar date in the past. Its field error codes are `required`, `invalid_format` (not a date) and `out_of_range` (today or later, or more than 120 years ago).  Error codes: `validation_failed` (400, with `errors`), `signup_code_unknown` (404), `email_already_registered` (409). 
      * Sign up as a worker of the agency
      */
     async signUp(requestParameters: SignUpRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponse> {

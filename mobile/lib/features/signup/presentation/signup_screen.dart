@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:shiftboard_api/shiftboard_api.dart';
 
 import '../../../core/api/api_error.dart';
@@ -79,7 +80,7 @@ class SignupScreen extends ConsumerWidget {
 }
 
 /// Request fields the API can reject, by their names in the contract.
-enum _Field { firstName, lastName, email, phone, password }
+enum _Field { firstName, lastName, dateOfBirth, email, phone, password }
 
 class _SignupForm extends ConsumerStatefulWidget {
   const _SignupForm({required this.signupCode, required this.info});
@@ -95,10 +96,14 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
   final _formKey = GlobalKey<FormState>();
   final _firstName = TextEditingController();
   final _lastName = TextEditingController();
+
+  /// Shows [_dateOfBirth] in the format of the language.
+  final _dateOfBirthText = TextEditingController();
   final _email = TextEditingController();
   final _phone = TextEditingController();
   final _password = TextEditingController();
 
+  DateTime? _dateOfBirth;
   bool _submitting = false;
 
   /// What the API rejected: messages for single fields, or one for the form.
@@ -109,10 +114,32 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
   void dispose() {
     _firstName.dispose();
     _lastName.dispose();
+    _dateOfBirthText.dispose();
     _email.dispose();
     _phone.dispose();
     _password.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickDateOfBirth() async {
+    final today = DateUtils.dateOnly(DateTime.now());
+    DateTime yearsAgo(int years) =>
+        DateTime(today.year - years, today.month, today.day);
+
+    final picked = await showDatePicker(
+      context: context,
+      helpText: context.l10n.signupDateOfBirthLabel,
+      initialDate: _dateOfBirth ?? yearsAgo(SignupValidation.typicalAgeYears),
+      firstDate: yearsAgo(SignupValidation.maxAgeYears),
+      lastDate: DateUtils.addDaysToDate(today, -1),
+      initialDatePickerMode: DatePickerMode.year,
+    );
+    if (picked == null || !mounted) return;
+
+    _dateOfBirthText.text = DateFormat(context.l10n.signupDateOfBirthFormat)
+        .format(picked);
+    setState(() => _dateOfBirth = picked);
+    _clearError(_Field.dateOfBirth);
   }
 
   Future<void> _submit() async {
@@ -144,6 +171,7 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
               (b) => b
                 ..firstName = _firstName.text.trim()
                 ..lastName = _lastName.text.trim()
+                ..dateOfBirth = _dateOfBirth!.toDate()
                 ..email = _email.text.trim()
                 ..phone = _phone.text.trim()
                 ..password = _password.text,
@@ -264,6 +292,17 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: AppSpacing.s4),
+                AppTextField(
+                  label: l10n.signupDateOfBirthLabel,
+                  hint: l10n.signupDateOfBirthHint,
+                  controller: _dateOfBirthText,
+                  enabled: !_submitting,
+                  validator: required,
+                  errorText: _fieldErrors[_Field.dateOfBirth],
+                  readOnly: true,
+                  onTap: _pickDateOfBirth,
                 ),
                 const SizedBox(height: AppSpacing.s4),
                 AppTextField(

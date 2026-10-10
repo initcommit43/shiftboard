@@ -14,6 +14,8 @@ class _$Worker extends Worker {
   @override
   final String lastName;
   @override
+  final Date dateOfBirth;
+  @override
   final String email;
   @override
   final String phone;
@@ -31,6 +33,7 @@ class _$Worker extends Worker {
       {required this.id,
       required this.firstName,
       required this.lastName,
+      required this.dateOfBirth,
       required this.email,
       required this.phone,
       required this.status,
@@ -51,6 +54,7 @@ class _$Worker extends Worker {
         id == other.id &&
         firstName == other.firstName &&
         lastName == other.lastName &&
+        dateOfBirth == other.dateOfBirth &&
         email == other.email &&
         phone == other.phone &&
         status == other.status &&
@@ -64,6 +68,7 @@ class _$Worker extends Worker {
     _$hash = $jc(_$hash, id.hashCode);
     _$hash = $jc(_$hash, firstName.hashCode);
     _$hash = $jc(_$hash, lastName.hashCode);
+    _$hash = $jc(_$hash, dateOfBirth.hashCode);
     _$hash = $jc(_$hash, email.hashCode);
     _$hash = $jc(_$hash, phone.hashCode);
     _$hash = $jc(_$hash, status.hashCode);
@@ -79,6 +84,7 @@ class _$Worker extends Worker {
           ..add('id', id)
           ..add('firstName', firstName)
           ..add('lastName', lastName)
+          ..add('dateOfBirth', dateOfBirth)
           ..add('email', email)
           ..add('phone', phone)
           ..add('status', status)
@@ -102,6 +108,10 @@ class WorkerBuilder implements Builder<Worker, WorkerBuilder> {
   String? _lastName;
   String? get lastName => _$this._lastName;
   set lastName(String? lastName) => _$this._lastName = lastName;
+
+  Date? _dateOfBirth;
+  Date? get dateOfBirth => _$this._dateOfBirth;
+  set dateOfBirth(Date? dateOfBirth) => _$this._dateOfBirth = dateOfBirth;
 
   String? _email;
   String? get email => _$this._email;
@@ -135,6 +145,7 @@ class WorkerBuilder implements Builder<Worker, WorkerBuilder> {
       _id = $v.id;
       _firstName = $v.firstName;
       _lastName = $v.lastName;
+      _dateOfBirth = $v.dateOfBirth;
       _email = $v.email;
       _phone = $v.phone;
       _status = $v.status;
@@ -168,6 +179,8 @@ class WorkerBuilder implements Builder<Worker, WorkerBuilder> {
                 firstName, r'Worker', 'firstName'),
             lastName: BuiltValueNullFieldError.checkNotNull(
                 lastName, r'Worker', 'lastName'),
+            dateOfBirth: BuiltValueNullFieldError.checkNotNull(
+                dateOfBirth, r'Worker', 'dateOfBirth'),
             email: BuiltValueNullFieldError.checkNotNull(
                 email, r'Worker', 'email'),
             phone: BuiltValueNullFieldError.checkNotNull(
