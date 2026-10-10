@@ -3,7 +3,6 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:built_collection/built_collection.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -17,7 +16,6 @@ part 'worker_signup_request.g.dart';
 /// * [email]
 /// * [phone]
 /// * [password]
-/// * [qualificationIds] - Qualifications of the agency the worker has. May be empty.
 @BuiltValue()
 abstract class WorkerSignupRequest
     implements Built<WorkerSignupRequest, WorkerSignupRequestBuilder> {
@@ -35,10 +33,6 @@ abstract class WorkerSignupRequest
 
   @BuiltValueField(wireName: r'password')
   String get password;
-
-  /// Qualifications of the agency the worker has. May be empty.
-  @BuiltValueField(wireName: r'qualificationIds')
-  BuiltList<String> get qualificationIds;
 
   WorkerSignupRequest._();
 
@@ -93,11 +87,6 @@ class _$WorkerSignupRequestSerializer
     yield serializers.serialize(
       object.password,
       specifiedType: const FullType(String),
-    );
-    yield r'qualificationIds';
-    yield serializers.serialize(
-      object.qualificationIds,
-      specifiedType: const FullType(BuiltList, [FullType(String)]),
     );
   }
 
@@ -158,13 +147,6 @@ class _$WorkerSignupRequestSerializer
             specifiedType: const FullType(String),
           ) as String;
           result.password = valueDes;
-          break;
-        case r'qualificationIds':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(String)]),
-          ) as BuiltList<String>;
-          result.qualificationIds.replace(valueDes);
           break;
         default:
           unhandled.add(key);

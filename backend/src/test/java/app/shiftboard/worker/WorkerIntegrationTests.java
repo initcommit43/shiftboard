@@ -35,7 +35,8 @@ class WorkerIntegrationTests extends IntegrationTest {
         var service = data.qualification(agency, "Service");
         var first = TestData.email();
         var second = TestData.email();
-        var firstId = workerId(signUp(agency.signupCode(), first, service, bar));
+        var firstId = workerId(signUp(agency.signupCode(), first));
+        data.qualify(firstId, service, bar);
         signUp(agency.signupCode(), second);
 
         get("/api/v1/workers", dispatcher)
@@ -115,13 +116,13 @@ class WorkerIntegrationTests extends IntegrationTest {
         var service = data.qualification(agency, "Service");
         var statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
 
-        signUp(agency.signupCode(), TestData.email(), service);
+        data.qualify(workerId(signUp(agency.signupCode(), TestData.email())), service);
         statistics.clear();
         get("/api/v1/workers", dispatcher).expectBody().jsonPath("$.content.length()").isEqualTo(1);
         var statementsForOneWorker = statistics.getPrepareStatementCount();
 
         for (int i = 0; i < 5; i++) {
-            signUp(agency.signupCode(), TestData.email(), service);
+            data.qualify(workerId(signUp(agency.signupCode(), TestData.email())), service);
         }
         statistics.clear();
         get("/api/v1/workers", dispatcher).expectBody().jsonPath("$.content.length()").isEqualTo(6);

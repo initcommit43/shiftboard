@@ -13,7 +13,6 @@ import '../../../core/routing/app_router.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_alert.dart';
 import '../../../core/widgets/app_button.dart';
-import '../../../core/widgets/app_chip.dart';
 import '../../../core/widgets/app_text_field.dart';
 import '../../../core/widgets/form_page.dart';
 import '../../../core/widgets/initials_avatar.dart';
@@ -99,7 +98,6 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
   final _email = TextEditingController();
   final _phone = TextEditingController();
   final _password = TextEditingController();
-  final _qualificationIds = <String>{};
 
   bool _submitting = false;
 
@@ -148,8 +146,7 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
                 ..lastName = _lastName.text.trim()
                 ..email = _email.text.trim()
                 ..phone = _phone.text.trim()
-                ..password = _password.text
-                ..qualificationIds.addAll(_qualificationIds),
+                ..password = _password.text,
             ),
           );
       // The router moves on to the waiting screen with the new session.
@@ -175,15 +172,9 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
       if (error.code == ApiErrorCode.emailAlreadyRegistered)
         _Field.email: l10n.errorEmailAlreadyRegistered,
     };
-    // Anything that is not shown at a field goes above the form.
-    final shownAtFields = error.fieldCodes.keys.every(
-      (name) => _Field.values.any((field) => field.name == name),
-    );
     setState(() {
       _fieldErrors = fieldErrors;
-      _formError = fieldErrors.isEmpty || !shownAtFields
-          ? error.message(l10n)
-          : null;
+      _formError = fieldErrors.isEmpty ? error.message(l10n) : null;
     });
   }
 
@@ -332,37 +323,6 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
             ),
           ),
         ),
-        if (info.qualifications.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.s6),
-          Text(
-            l10n.signupQualificationsLabel,
-            style: theme.textTheme.labelLarge,
-          ),
-          const SizedBox(height: AppSpacing.s1),
-          Text(
-            l10n.signupQualificationsHint,
-            style: theme.textTheme.bodySmall?.copyWith(color: muted),
-          ),
-          const SizedBox(height: AppSpacing.s3),
-          Wrap(
-            spacing: AppSpacing.s2,
-            runSpacing: AppSpacing.s2,
-            children: [
-              for (final qualification in info.qualifications)
-                AppChip(
-                  label: qualification.name,
-                  selected: _qualificationIds.contains(qualification.id),
-                  onSelected: _submitting
-                      ? null
-                      : (selected) => setState(
-                          () => selected
-                              ? _qualificationIds.add(qualification.id)
-                              : _qualificationIds.remove(qualification.id),
-                        ),
-                ),
-            ],
-          ),
-        ],
         const SizedBox(height: AppSpacing.s6),
         AppButton(
           label: _submitting ? l10n.signupSubmitting : l10n.signupSubmit,

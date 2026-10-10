@@ -3,8 +3,6 @@
 //
 
 // ignore_for_file: unused_element
-import 'package:built_collection/built_collection.dart';
-import 'package:shiftboard_api/src/model/qualification.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -14,15 +12,10 @@ part 'signup_info.g.dart';
 ///
 /// Properties:
 /// * [agencyName]
-/// * [qualifications] - The qualifications a worker of this agency can have.
 @BuiltValue()
 abstract class SignupInfo implements Built<SignupInfo, SignupInfoBuilder> {
   @BuiltValueField(wireName: r'agencyName')
   String get agencyName;
-
-  /// The qualifications a worker of this agency can have.
-  @BuiltValueField(wireName: r'qualifications')
-  BuiltList<Qualification> get qualifications;
 
   SignupInfo._();
 
@@ -51,11 +44,6 @@ class _$SignupInfoSerializer implements PrimitiveSerializer<SignupInfo> {
     yield serializers.serialize(
       object.agencyName,
       specifiedType: const FullType(String),
-    );
-    yield r'qualifications';
-    yield serializers.serialize(
-      object.qualifications,
-      specifiedType: const FullType(BuiltList, [FullType(Qualification)]),
     );
   }
 
@@ -88,13 +76,6 @@ class _$SignupInfoSerializer implements PrimitiveSerializer<SignupInfo> {
             specifiedType: const FullType(String),
           ) as String;
           result.agencyName = valueDes;
-          break;
-        case r'qualifications':
-          final valueDes = serializers.deserialize(
-            value,
-            specifiedType: const FullType(BuiltList, [FullType(Qualification)]),
-          ) as BuiltList<Qualification>;
-          result.qualifications.replace(valueDes);
           break;
         default:
           unhandled.add(key);

@@ -17,8 +17,6 @@ class _$WorkerSignupRequest extends WorkerSignupRequest {
   final String phone;
   @override
   final String password;
-  @override
-  final BuiltList<String> qualificationIds;
 
   factory _$WorkerSignupRequest(
           [void Function(WorkerSignupRequestBuilder)? updates]) =>
@@ -29,8 +27,7 @@ class _$WorkerSignupRequest extends WorkerSignupRequest {
       required this.lastName,
       required this.email,
       required this.phone,
-      required this.password,
-      required this.qualificationIds})
+      required this.password})
       : super._();
   @override
   WorkerSignupRequest rebuild(
@@ -49,8 +46,7 @@ class _$WorkerSignupRequest extends WorkerSignupRequest {
         lastName == other.lastName &&
         email == other.email &&
         phone == other.phone &&
-        password == other.password &&
-        qualificationIds == other.qualificationIds;
+        password == other.password;
   }
 
   @override
@@ -61,7 +57,6 @@ class _$WorkerSignupRequest extends WorkerSignupRequest {
     _$hash = $jc(_$hash, email.hashCode);
     _$hash = $jc(_$hash, phone.hashCode);
     _$hash = $jc(_$hash, password.hashCode);
-    _$hash = $jc(_$hash, qualificationIds.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -73,8 +68,7 @@ class _$WorkerSignupRequest extends WorkerSignupRequest {
           ..add('lastName', lastName)
           ..add('email', email)
           ..add('phone', phone)
-          ..add('password', password)
-          ..add('qualificationIds', qualificationIds))
+          ..add('password', password))
         .toString();
   }
 }
@@ -103,12 +97,6 @@ class WorkerSignupRequestBuilder
   String? get password => _$this._password;
   set password(String? password) => _$this._password = password;
 
-  ListBuilder<String>? _qualificationIds;
-  ListBuilder<String> get qualificationIds =>
-      _$this._qualificationIds ??= ListBuilder<String>();
-  set qualificationIds(ListBuilder<String>? qualificationIds) =>
-      _$this._qualificationIds = qualificationIds;
-
   WorkerSignupRequestBuilder() {
     WorkerSignupRequest._defaults(this);
   }
@@ -121,7 +109,6 @@ class WorkerSignupRequestBuilder
       _email = $v.email;
       _phone = $v.phone;
       _password = $v.password;
-      _qualificationIds = $v.qualificationIds.toBuilder();
       _$v = null;
     }
     return this;
@@ -141,33 +128,19 @@ class WorkerSignupRequestBuilder
   WorkerSignupRequest build() => _build();
 
   _$WorkerSignupRequest _build() {
-    _$WorkerSignupRequest _$result;
-    try {
-      _$result = _$v ??
-          _$WorkerSignupRequest._(
-            firstName: BuiltValueNullFieldError.checkNotNull(
-                firstName, r'WorkerSignupRequest', 'firstName'),
-            lastName: BuiltValueNullFieldError.checkNotNull(
-                lastName, r'WorkerSignupRequest', 'lastName'),
-            email: BuiltValueNullFieldError.checkNotNull(
-                email, r'WorkerSignupRequest', 'email'),
-            phone: BuiltValueNullFieldError.checkNotNull(
-                phone, r'WorkerSignupRequest', 'phone'),
-            password: BuiltValueNullFieldError.checkNotNull(
-                password, r'WorkerSignupRequest', 'password'),
-            qualificationIds: qualificationIds.build(),
-          );
-    } catch (_) {
-      late String _$failedField;
-      try {
-        _$failedField = 'qualificationIds';
-        qualificationIds.build();
-      } catch (e) {
-        throw BuiltValueNestedFieldError(
-            r'WorkerSignupRequest', _$failedField, e.toString());
-      }
-      rethrow;
-    }
+    final _$result = _$v ??
+        _$WorkerSignupRequest._(
+          firstName: BuiltValueNullFieldError.checkNotNull(
+              firstName, r'WorkerSignupRequest', 'firstName'),
+          lastName: BuiltValueNullFieldError.checkNotNull(
+              lastName, r'WorkerSignupRequest', 'lastName'),
+          email: BuiltValueNullFieldError.checkNotNull(
+              email, r'WorkerSignupRequest', 'email'),
+          phone: BuiltValueNullFieldError.checkNotNull(
+              phone, r'WorkerSignupRequest', 'phone'),
+          password: BuiltValueNullFieldError.checkNotNull(
+              password, r'WorkerSignupRequest', 'password'),
+        );
     replace(_$result);
     return _$result;
   }

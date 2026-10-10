@@ -22,7 +22,7 @@ class SignupApi {
   const SignupApi(this._dio, this._serializers);
 
   /// Look up the agency behind a signup link
-  /// Returns what the signup form needs: the agency&#39;s name and the qualifications a worker can pick. Needs no authentication.  Error codes: &#x60;signup_code_unknown&#x60; (404).
+  /// Returns what the signup form needs: the agency&#39;s name. Needs no authentication.  Error codes: &#x60;signup_code_unknown&#x60; (404).
   ///
   /// Parameters:
   /// * [signupCode] - The code from the agency's signup link.

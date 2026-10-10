@@ -3,7 +3,7 @@ import 'package:shiftboard_api/shiftboard_api.dart';
 
 import '../../../core/api/api_provider.dart';
 
-/// The agency behind a signup code and the qualifications it offers.
+/// The agency behind a signup code.
 final signupInfoProvider = FutureProvider.autoDispose
     .family<SignupInfo, String>(
       (ref, signupCode) async {

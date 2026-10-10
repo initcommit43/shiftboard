@@ -39,8 +39,6 @@
   "signupPhoneLabel": "Phone",
   "signupPhoneInvalid": "Please enter a valid phone number.",
   "signupPasswordTooShort": "The password must be at least 8 characters long.",
-  "signupQualificationsLabel": "Qualifications",
-  "signupQualificationsHint": "Select everything that applies to you.",
   "signupSubmit": "Sign up",
   "signupSubmitting": "Signing up …",
   "signupPrivacyNote": "Your details are sent to {agency} and used only for assigning shifts.",

@@ -29,20 +29,15 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice
 class ProblemDetailsHandler extends ResponseEntityExceptionHandler {
 
-    static final String VALIDATION_FAILED = "validation_failed";
-    static final String INVALID_REQUEST = "The request is not valid.";
-
     private static final Logger log = LoggerFactory.getLogger(ProblemDetailsHandler.class);
     private static final URI BLANK_TYPE = URI.create("about:blank");
+    private static final String VALIDATION_FAILED = "validation_failed";
+    private static final String INVALID_REQUEST = "The request is not valid.";
     private static final String INVALID_FORMAT = "invalid_format";
 
     @ExceptionHandler(ApiException.class)
     ResponseEntity<Object> handleApiException(ApiException ex, WebRequest request) {
-        var problem = problem(ex.getStatus(), ex.getCode(), ex.getMessage());
-        if (ex instanceof InvalidFieldException invalid) {
-            problem.setProperty("errors", List.of(new FieldError(invalid.getField(), invalid.getFieldCode())));
-        }
-        return respond(ex, problem, request);
+        return respond(ex, problem(ex.getStatus(), ex.getCode(), ex.getMessage()), request);
     }
 
     @ExceptionHandler(AuthenticationException.class)

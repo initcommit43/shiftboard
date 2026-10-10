@@ -61,12 +61,11 @@ class Worker {
     protected Worker() {
     }
 
-    Worker(UUID userAccountId, String firstName, String lastName, String phone, Set<UUID> qualificationIds) {
+    Worker(UUID userAccountId, String firstName, String lastName, String phone) {
         this.userAccountId = userAccountId;
         this.firstName = firstName;
         this.lastName = lastName;
         this.phone = phone;
-        this.qualificationIds.addAll(qualificationIds);
         this.status = WorkerStatus.PENDING;
     }
 
