@@ -1,0 +1,44 @@
+{
+  "$schema": "./node_modules/@openapitools/openapi-generator-cli/config.schema.json",
+  "spaces": 2,
+  "generator-cli": {
+    "version": "7.26.0",
+    "generators": {
+      "dart": {
+        "generatorName": "dart-dio",
+        "inputSpec": "openapi.yaml",
+        "output": "../mobile/packages/shiftboard_api",
+        "additionalProperties": {
+          "pubName": "shiftboard_api",
+          "pubDescription": "Generated API client for the shiftboard worker app. Do not edit.",
+          "pubVersion": "0.1.0",
+          "serializationLibrary": "built_value",
+          "dateLibrary": "core"
+        },
+        "globalProperty": {
+          "apiTests": false,
+          "modelTests": false,
+          "apiDocs": false,
+          "modelDocs": false
+        }
+      },
+      "typescript": {
+        "generatorName": "typescript-fetch",
+        "inputSpec": "openapi.yaml",
+        "output": "../dashboard/src/api/generated",
+        "additionalProperties": {
+          "supportsES6": true,
+          "useSingleRequestParameter": true,
+          "stringEnums": false,
+          "enumPropertyNaming": "original"
+        },
+        "globalProperty": {
+          "apiTests": false,
+          "modelTests": false,
+          "apiDocs": false,
+          "modelDocs": false
+        }
+      }
+    }
+  }
+}

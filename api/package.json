@@ -1,0 +1,16 @@
+{
+  "name": "shiftboard-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OpenAPI spec and client generation for shiftboard",
+  "type": "module",
+  "scripts": {
+    "lint": "redocly lint openapi.yaml",
+    "generate": "node scripts/generate.mjs",
+    "check": "node scripts/generate.mjs --check"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "2.41.0",
+    "@redocly/cli": "2.62.1"
+  }
+}
