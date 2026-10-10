@@ -1,0 +1,41 @@
+name: design-tokens
+
+on:
+  pull_request:
+    paths:
+      - design-tokens/**
+      - dashboard/src/styles/tokens.css
+      - mobile/lib/core/theme/tokens.dart
+      - .github/workflows/design-tokens.yml
+  push:
+    branches: [main]
+    paths:
+      - design-tokens/**
+      - dashboard/src/styles/tokens.css
+      - mobile/lib/core/theme/tokens.dart
+      - .github/workflows/design-tokens.yml
+
+concurrency:
+  group: design-tokens-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Check generated token outputs
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: design-tokens
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: design-tokens/package-lock.json
+      - run: npm ci
+      - run: npm run check
