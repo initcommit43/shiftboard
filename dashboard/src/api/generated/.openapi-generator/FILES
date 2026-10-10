@@ -1,0 +1,8 @@
+.openapi-generator-ignore
+apis/SystemApi.ts
+apis/index.ts
+index.ts
+models/Ping.ts
+models/Problem.ts
+models/index.ts
+runtime.ts

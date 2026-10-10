@@ -1,0 +1,93 @@
+openapi: 3.1.0
+info:
+  title: shiftboard API
+  version: 0.1.0
+  summary: Shift distribution platform for staffing agencies.
+  description: |
+    Single source of truth for the shiftboard API. The Dart client of the worker
+    app and the TypeScript client of the agency dashboard are generated from
+    this file.
+
+    Conventions:
+    - REST under `/api/v1`
+    - errors as RFC 9457 problem details (`application/problem+json`)
+    - page/size pagination for lists
+    - UUID v7 identifiers
+    - changes stay backward compatible
+  license:
+    name: Proprietary
+    identifier: LicenseRef-Proprietary
+servers:
+  - url: http://localhost:8080/api/v1
+    description: Local development
+tags:
+  - name: system
+    description: Service status
+security: []
+paths:
+  /ping:
+    get:
+      operationId: ping
+      tags: [system]
+      summary: Check that the API is reachable
+      description: Returns the service status and API version. Needs no authentication.
+      responses:
+        "200":
+          description: The API is up.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Ping"
+        default:
+          $ref: "#/components/responses/Problem"
+components:
+  responses:
+    Problem:
+      description: An error, described as RFC 9457 problem details.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+  schemas:
+    Ping:
+      type: object
+      required: [status, version]
+      properties:
+        status:
+          type: string
+          description: Always `ok` when the API answers.
+          examples: [ok]
+        version:
+          type: string
+          description: Version of the API contract the backend implements.
+          examples: ["0.1.0"]
+    Problem:
+      type: object
+      description: RFC 9457 problem details.
+      required: [type, title, status]
+      properties:
+        type:
+          type: string
+          format: uri-reference
+          description: URI reference that identifies the problem type.
+          default: about:blank
+        title:
+          type: string
+          description: Short, human-readable summary of the problem type.
+        status:
+          type: integer
+          format: int32
+          description: HTTP status code.
+          minimum: 100
+          maximum: 599
+        detail:
+          type: string
+          description: Human-readable explanation of this occurrence.
+        instance:
+          type: string
+          format: uri-reference
+          description: URI reference that identifies this occurrence.
+        code:
+          type: string
+          description: Machine-readable error code. Clients translate it into a localized message.
+          examples: [email_already_registered]
