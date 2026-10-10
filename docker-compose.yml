@@ -1,0 +1,35 @@
+name: shiftboard
+
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: ${DB_NAME:-shiftboard}
+      POSTGRES_USER: ${DB_USER:-shiftboard}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-shiftboard}
+    ports:
+      - "${DB_HOST_PORT:-5432}:5432"
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  backend:
+    build: ./backend
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-shiftboard}
+      DB_USER: ${DB_USER:-shiftboard}
+      DB_PASSWORD: ${DB_PASSWORD:-shiftboard}
+    ports:
+      - "${BACKEND_HOST_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:

@@ -1,0 +1,83 @@
+package app.shiftboard;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.regex.Pattern;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.test.web.servlet.client.RestTestClient;
+
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@AutoConfigureRestTestClient
+@Import(TestcontainersConfiguration.class)
+class ApplicationIntegrationTests {
+
+    private static final Pattern SPEC_VERSION = Pattern.compile("(?m)^  version: (\\S+)$");
+
+    @Autowired
+    RestTestClient client;
+
+    @Autowired
+    JdbcClient jdbc;
+
+    @Test
+    void pingReportsTheContractVersion() throws IOException {
+        client.get().uri("/api/v1/ping")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.status").isEqualTo("ok")
+                .jsonPath("$.version").isEqualTo(specVersion())
+                .jsonPath("$.length()").isEqualTo(2);
+    }
+
+    @Test
+    void unknownPathIsReportedAsProblemDetail() {
+        client.get().uri("/api/v1/does-not-exist")
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
+                .expectBody()
+                .jsonPath("$.type").isEqualTo("about:blank")
+                .jsonPath("$.title").isEqualTo("Not Found")
+                .jsonPath("$.status").isEqualTo(404);
+    }
+
+    @Test
+    void flywayMigratesTheSchemaOnStartup() {
+        var applied = jdbc.sql("select count(*) from flyway_schema_history where success").query(Integer.class).single();
+        var publications = jdbc.sql("select count(*) from event_publication").query(Integer.class).single();
+
+        assertThat(applied).isPositive();
+        assertThat(publications).isZero();
+    }
+
+    @Test
+    void healthIsTheOnlyExposedActuatorEndpoint() {
+        client.get().uri("/actuator/health")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody().jsonPath("$.status").isEqualTo("UP");
+
+        client.get().uri("/actuator/info")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    private static String specVersion() throws IOException {
+        var matcher = SPEC_VERSION.matcher(Files.readString(Path.of("../api/openapi.yaml")));
+        assertThat(matcher.find()).as("info.version in api/openapi.yaml").isTrue();
+        return matcher.group(1);
+    }
+}
