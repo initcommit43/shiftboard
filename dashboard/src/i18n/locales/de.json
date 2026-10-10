@@ -1,0 +1,45 @@
+{
+  "app": {
+    "name": "shiftboard",
+    "tagline": "Disposition"
+  },
+  "shell": {
+    "navigation": "Hauptnavigation",
+    "nav": {
+      "overview": "Übersicht"
+    },
+    "theme": {
+      "toLight": "Zum hellen Design wechseln",
+      "toDark": "Zum dunklen Design wechseln"
+    },
+    "language": {
+      "switchTo": "Sprache wechseln: {{language}}",
+      "de": "Deutsch",
+      "en": "English"
+    }
+  },
+  "systemStatus": {
+    "title": "Übersicht",
+    "description": "Hier entsteht die Schichtplanung. Bis dahin zeigt diese Seite, ob das Dashboard mit dem Backend verbunden ist.",
+    "card": {
+      "title": "Backend-API",
+      "description": "Verbindung zwischen Dashboard und Server"
+    },
+    "loading": "Verbindung wird geprüft …",
+    "success": {
+      "badge": "Verbunden",
+      "status": "Status",
+      "version": "API-Version"
+    },
+    "error": {
+      "title": "Die API ist nicht erreichbar",
+      "description": "Läuft das Backend? Prüfe die Verbindung und versuche es erneut.",
+      "retry": "Erneut versuchen"
+    }
+  },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "description": "Diese Adresse gibt es nicht oder nicht mehr.",
+    "back": "Zur Übersicht"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "app": {
+    "name": "shiftboard",
+    "tagline": "Dispatch"
+  },
+  "shell": {
+    "navigation": "Main navigation",
+    "nav": {
+      "overview": "Overview"
+    },
+    "theme": {
+      "toLight": "Switch to light theme",
+      "toDark": "Switch to dark theme"
+    },
+    "language": {
+      "switchTo": "Change language: {{language}}",
+      "de": "Deutsch",
+      "en": "English"
+    }
+  },
+  "systemStatus": {
+    "title": "Overview",
+    "description": "Shift planning will live here. Until then, this page shows whether the dashboard is connected to the backend.",
+    "card": {
+      "title": "Backend API",
+      "description": "Connection between dashboard and server"
+    },
+    "loading": "Checking connection …",
+    "success": {
+      "badge": "Connected",
+      "status": "Status",
+      "version": "API version"
+    },
+    "error": {
+      "title": "The API cannot be reached",
+      "description": "Is the backend running? Check the connection and try again.",
+      "retry": "Try again"
+    }
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "This address does not exist or no longer exists.",
+    "back": "Back to overview"
+  }
+}
