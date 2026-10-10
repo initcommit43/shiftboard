@@ -21,7 +21,7 @@ docker compose up -d db     # repository root
 ./gradlew bootRun           # backend/
 ```
 
-`bootRun` and docker compose start the application with the `local` profile, which brings a development JWT secret. Flyway migrates the schema on startup.
+`bootRun` and docker compose start the application with the `local` profile, which brings a development JWT secret and the [demo data](#demo-data). Flyway migrates the schema on startup.
 
 | URL | What |
 | --- | --- |
@@ -40,7 +40,8 @@ Everything comes from environment variables; `.env.example` in the repository ro
 | `SHIFTBOARD_SECURITY_REFRESH_TOKEN_TTL` | `30d` | Lifetime of a refresh token |
 | `SHIFTBOARD_SECURITY_LOGIN_RATE_LIMIT_MAX_ATTEMPTS` | `5` | Login attempts per email and client address within the window |
 | `SHIFTBOARD_SECURITY_LOGIN_RATE_LIMIT_WINDOW` | `15m` | Length of that window |
-| `SPRING_PROFILES_ACTIVE` | none (`local` for `bootRun` and docker compose) | `local` is for development machines only |
+| `SEED_PASSWORD` | `shiftboard-demo`, `local` profile only | Password of the seeded demo accounts |
+| `SPRING_PROFILES_ACTIVE` | none (`local` for `bootRun` and docker compose) | `local` is for development machines only: development JWT secret and demo data |
 
 Without the `local` profile there is no default for `JWT_SECRET` and the application refuses to start until one is set, for example from `openssl rand -base64 48`.
 
@@ -66,6 +67,34 @@ Every tenant-owned table carries `agency_id`, and the entities map it with Hiber
 
 A request for a row of another agency answers `404`, exactly like a row that does not exist.
 
+## Demo data
+
+With the `local` profile the application seeds two fictional agencies on startup. The seed runs once: a database that already has the demo agency is left alone, and `docker compose down -v` starts over. It is never active in tests or without the `local` profile.
+
+Every account has the password `shiftboard-demo` (`SEED_PASSWORD`). It is a local demo credential, not a secret.
+
+| Agency | Signup code | Role | Login |
+| --- | --- | --- | --- |
+| Donau Personal | `donau-demo` | Admin | `admin.donau@example.com` |
+| | | Dispatcher | `dispatcher1.donau@example.com`, `dispatcher2.donau@example.com` |
+| | | Worker, active | `lena.hofer@example.com`, `jakob.steiner@example.com`, `mira.aigner@example.com`, `felix.brandner@example.com`, `sophie.lechner@example.com`, `paul.winkler@example.com` |
+| | | Worker, pending | `emma.koller@example.com`, `lukas.reiter@example.com`, `nina.hauser@example.com`, `david.pichler@example.com` |
+| | | Worker, inactive | `simon.egger@example.com` |
+| Alpen Events | `alpen-demo` | Dispatcher | `dispatcher.alpen@example.com` |
+| | | Worker, active | `tobias.gruber@example.com` |
+
+Donau Personal has the qualifications Service, Bar, Lager and Staplerschein. The second agency exists to show tenant isolation: its dispatcher sees one worker, the dispatchers of Donau Personal see eleven.
+
+A signup link carries the signup code; the API behind it is `GET` and `POST /api/v1/signup/donau-demo`:
+
+```sh
+curl http://localhost:8080/api/v1/signup/donau-demo
+curl -X POST http://localhost:8080/api/v1/auth/login -H 'Content-Type: application/json' \
+    -d '{"email": "dispatcher1.donau@example.com", "password": "shiftboard-demo", "client": "DASHBOARD"}'
+```
+
+Clients, locations and shifts join the demo data together with their tables in slice 1.
+
 ## Test
 
 ```sh
@@ -88,6 +117,7 @@ Base package `app.shiftboard`. Each direct subpackage is a Spring Modulith appli
 | `assignment` | Claims of workers on shifts, their confirmation and cancellation |
 | `messaging` | Conversations between an agency and its workers |
 | `notification` | Push notifications sent in reaction to events of other modules |
+| `seed` | Fictional demo data for development machines (`local` profile) |
 | `system` | Service status, `/api/v1` path prefix, problem details |
 
 Inside a module the top-level package holds what other modules may use (service interfaces, value records, domain events); entities, repositories, services and controllers are package-private in `internal`.

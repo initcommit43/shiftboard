@@ -1,0 +1,134 @@
+package app.shiftboard.seed;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import app.shiftboard.TestcontainersConfiguration;
+import app.shiftboard.identity.TokenPair;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.client.RestTestClient;
+
+/**
+ * Starts the application the way a developer machine does: local profile, empty database.
+ */
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@AutoConfigureRestTestClient
+@Import(TestcontainersConfiguration.class)
+@ActiveProfiles("local")
+class SeedDataIntegrationTests {
+
+    @Autowired
+    SeedData seedData;
+
+    @Autowired
+    JdbcClient jdbc;
+
+    @Autowired
+    RestTestClient client;
+
+    @Value("${shiftboard.seed.password}")
+    String password;
+
+    @Test
+    void seedsTheDemoAgenciesOnStartup() {
+        assertThat(rowCounts()).containsExactlyInAnyOrderEntriesOf(Map.of(
+                "agency", 2,
+                "qualification", 6,
+                "user_account", 16,
+                "worker", 12,
+                "worker_qualification", 15));
+        assertThat(workersOfDonauPersonalWith("ACTIVE")).isEqualTo(6);
+        assertThat(workersOfDonauPersonalWith("PENDING")).isEqualTo(4);
+        assertThat(workersOfDonauPersonalWith("INACTIVE")).isEqualTo(1);
+    }
+
+    @Test
+    void seedingAgainChangesNothing() {
+        var before = rowCounts();
+
+        seedData.run(null);
+
+        assertThat(rowCounts()).isEqualTo(before);
+    }
+
+    @Test
+    void usesOnlyFictionalContactData() {
+        var emails = jdbc.sql("select email from user_account").query(String.class).list();
+        var phones = jdbc.sql("select phone from worker").query(String.class).list();
+
+        assertThat(emails).allMatch(email -> email.endsWith("@example.com"));
+        assertThat(phones).doesNotHaveDuplicates().allMatch(phone -> phone.matches("\\+43 660 55501\\d\\d"));
+    }
+
+    @Test
+    void theDemoSignupCodeLeadsToDonauPersonal() {
+        client.get().uri("/api/v1/signup/{code}", SeedData.DONAU_SIGNUP_CODE)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.agencyName").isEqualTo("Donau Personal")
+                .jsonPath("$.qualifications[*].name")
+                .isEqualTo(List.of("Bar", "Lager", "Service", "Staplerschein"));
+    }
+
+    @Test
+    void theSeededDispatchersSeeTheSignupsOfTheirOwnAgency() {
+        client.get().uri("/api/v1/workers?status=PENDING")
+                .headers(headers -> headers.setBearerAuth(login("dispatcher1.donau@example.com", "DASHBOARD")))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[*].lastName").isEqualTo(List.of("Koller", "Reiter", "Hauser", "Pichler"))
+                .jsonPath("$.content[1].qualifications[*].name").isEqualTo(List.of("Lager", "Staplerschein"));
+
+        client.get().uri("/api/v1/workers")
+                .headers(headers -> headers.setBearerAuth(login("dispatcher.alpen@example.com", "DASHBOARD")))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[*].email").isEqualTo(List.of("tobias.gruber@example.com"));
+    }
+
+    @Test
+    void theSeededAdminAndWorkersCanLogIn() {
+        assertThat(login("admin.donau@example.com", "DASHBOARD")).isNotBlank();
+        assertThat(login("lena.hofer@example.com", "WORKER_APP")).isNotBlank();
+    }
+
+    private String login(String email, String clientType) {
+        return client.post().uri("/api/v1/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("email", email, "password", password, "client", clientType))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(TokenPair.class).returnResult().getResponseBody()
+                .accessToken();
+    }
+
+    private Map<String, Integer> rowCounts() {
+        var counts = new LinkedHashMap<String, Integer>();
+        for (var table : List.of("agency", "qualification", "user_account", "worker", "worker_qualification")) {
+            counts.put(table, jdbc.sql("select count(*) from " + table).query(Integer.class).single());
+        }
+        return counts;
+    }
+
+    private int workersOfDonauPersonalWith(String status) {
+        return jdbc.sql("""
+                select count(*) from worker w join agency a on a.id = w.agency_id
+                where a.signup_code = ? and w.status = ?
+                """).params(SeedData.DONAU_SIGNUP_CODE, status).query(Integer.class).single();
+    }
+}
