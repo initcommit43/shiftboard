@@ -1,12 +1,9 @@
 name: api
 
 on:
+  # No path filter here: the job below is a required check, and a check that
+  # never starts would block the pull request. The changes job decides instead.
   pull_request:
-    paths:
-      - api/**
-      - mobile/packages/shiftboard_api/**
-      - dashboard/src/api/generated/**
-      - .github/workflows/api.yml
   push:
     branches: [main]
     paths:
@@ -21,10 +18,31 @@ concurrency:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
+  changes:
+    name: Detect changes (api)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'api/**'
+              - 'mobile/packages/shiftboard_api/**'
+              - 'dashboard/src/api/generated/**'
+              - '.github/workflows/api.yml'
+
   check:
     name: Lint spec and check generated clients
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:

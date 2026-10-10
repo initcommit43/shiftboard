@@ -1,10 +1,9 @@
 name: dashboard
 
 on:
+  # No path filter here: the job below is a required check, and a check that
+  # never starts would block the pull request. The changes job decides instead.
   pull_request:
-    paths:
-      - dashboard/**
-      - .github/workflows/dashboard.yml
   push:
     branches: [main]
     paths:
@@ -17,10 +16,29 @@ concurrency:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
+  changes:
+    name: Detect changes (dashboard)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      relevant: ${{ steps.filter.outputs.relevant }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            relevant:
+              - 'dashboard/**'
+              - '.github/workflows/dashboard.yml'
+
   check:
     name: Lint, type check, tests and build
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
