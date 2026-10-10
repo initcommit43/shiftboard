@@ -93,3 +93,7 @@ Review requests follow [CODEOWNERS](.github/CODEOWNERS).
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+All rights reserved. The code is published for viewing only; see [LICENSE](LICENSE).
