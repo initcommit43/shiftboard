@@ -7,28 +7,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.regex.Pattern;
 
+import app.shiftboard.identity.Role;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.test.web.servlet.client.RestTestClient;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@AutoConfigureRestTestClient
-@Import(TestcontainersConfiguration.class)
-class ApplicationIntegrationTests {
+class ApplicationIntegrationTests extends IntegrationTest {
 
     private static final Pattern SPEC_VERSION = Pattern.compile("(?m)^  version: (\\S+)$");
-
-    @Autowired
-    RestTestClient client;
-
-    @Autowired
-    JdbcClient jdbc;
 
     @Test
     void pingReportsTheContractVersion() throws IOException {
@@ -44,14 +29,21 @@ class ApplicationIntegrationTests {
 
     @Test
     void unknownPathIsReportedAsProblemDetail() {
-        client.get().uri("/api/v1/does-not-exist")
-                .exchange()
+        var agency = data.agency("Donau Personal");
+        var tokens = login(data.account(agency, Role.DISPATCHER), DASHBOARD);
+
+        get("/api/v1/does-not-exist", tokens)
                 .expectStatus().isNotFound()
                 .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON)
                 .expectBody()
                 .jsonPath("$.type").isEqualTo("about:blank")
                 .jsonPath("$.title").isEqualTo("Not Found")
                 .jsonPath("$.status").isEqualTo(404);
+    }
+
+    @Test
+    void pathsNeedAuthenticationUnlessDeclaredPublic() {
+        expectProblem(client.get().uri("/api/v1/does-not-exist").exchange(), 401, "unauthenticated");
     }
 
     @Test
@@ -65,13 +57,15 @@ class ApplicationIntegrationTests {
 
     @Test
     void healthIsTheOnlyExposedActuatorEndpoint() {
+        var agency = data.agency("Donau Personal");
+        var tokens = login(data.account(agency, Role.ADMIN), DASHBOARD);
+
         client.get().uri("/actuator/health")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody().jsonPath("$.status").isEqualTo("UP");
 
-        client.get().uri("/actuator/info")
-                .exchange()
+        get("/actuator/info", tokens)
                 .expectStatus().isNotFound();
     }
 

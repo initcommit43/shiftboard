@@ -25,6 +25,8 @@ services:
       DB_NAME: ${DB_NAME:-shiftboard}
       DB_USER: ${DB_USER:-shiftboard}
       DB_PASSWORD: ${DB_PASSWORD:-shiftboard}
+      SPRING_PROFILES_ACTIVE: local
+      JWT_SECRET: ${JWT_SECRET:-local-development-only-jwt-secret-0000}
     ports:
       - "${BACKEND_HOST_PORT:-8080}:8080"
     depends_on:

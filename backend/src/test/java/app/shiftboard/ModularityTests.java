@@ -20,7 +20,8 @@ class ModularityTests {
     void allModulesAreDetected() {
         assertThat(modules.stream().map(ApplicationModule::getIdentifier).map(Object::toString))
                 .containsExactlyInAnyOrder(
-                        "agency", "worker", "client", "shift", "assignment", "messaging", "notification", "system");
+                        "agency", "identity", "worker", "client", "shift", "assignment", "messaging",
+                        "notification", "system");
     }
 
     @Test
