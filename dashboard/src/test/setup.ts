@@ -4,4 +4,11 @@ import '@/i18n'
 import { cleanup } from '@testing-library/react'
 import { afterEach } from 'vitest'
 
-afterEach(cleanup)
+import { logout } from '@/features/auth/session'
+
+afterEach(() => {
+  cleanup()
+  // Session and tokens are module state: every test starts signed out.
+  logout()
+  localStorage.clear()
+})

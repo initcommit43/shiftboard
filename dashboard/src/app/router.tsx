@@ -1,18 +1,35 @@
-import { createBrowserRouter } from 'react-router'
+import { Navigate, type RouteObject } from 'react-router'
 
-import { SystemStatusPage } from '@/features/system-status/system-status-page'
+import { redirectSignedIn, requireSession } from '@/features/auth/guards'
+import { LoginPage } from '@/features/auth/login-page'
+import { SessionLoading } from '@/features/auth/session-loading'
+import { APP_ROUTE_ID } from '@/features/auth/use-session'
+import { SignupsPage } from '@/features/signups/signups-page'
 
 import { AppShell } from './app-shell'
+import { ComingSoonPage } from './coming-soon-page'
 import { NotFoundPage } from './not-found-page'
 
-// All routes live here. Pages that need a signed-in user go under the AppShell
-// layout route, which is where the auth guard will be attached.
-export const router = createBrowserRouter([
+// All routes live here. Everything below the AppShell route needs a signed-in
+// user: its loader restores the session or redirects to the login.
+export const routes: RouteObject[] = [
   {
-    element: <AppShell />,
+    hydrateFallbackElement: <SessionLoading />,
     children: [
-      { index: true, element: <SystemStatusPage /> },
-      { path: '*', element: <NotFoundPage /> },
+      { path: 'login', loader: redirectSignedIn, element: <LoginPage /> },
+      {
+        id: APP_ROUTE_ID,
+        loader: requireSession,
+        element: <AppShell />,
+        children: [
+          { index: true, element: <Navigate to="/signups" replace /> },
+          { path: 'shifts', element: <ComingSoonPage area="shifts" /> },
+          { path: 'signups', element: <SignupsPage /> },
+          { path: 'messages', element: <ComingSoonPage area="messages" /> },
+          { path: 'settings', element: <ComingSoonPage area="settings" /> },
+          { path: '*', element: <NotFoundPage /> },
+        ],
+      },
     ],
   },
-])
+]

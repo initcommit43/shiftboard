@@ -1,12 +1,16 @@
 {
   "app": {
-    "name": "shiftboard",
-    "tagline": "Disposition"
+    "name": "shiftboard"
   },
   "shell": {
     "navigation": "Hauptnavigation",
     "nav": {
-      "overview": "Übersicht"
+      "shifts": "Schichten",
+      "signups": "Anmeldungen",
+      "messages": "Nachrichten",
+      "settings": "Einstellungen",
+      "pendingSignups_one": "{{count}} offene Anmeldung",
+      "pendingSignups_other": "{{count}} offene Anmeldungen"
     },
     "theme": {
       "toLight": "Zum hellen Design wechseln",
@@ -16,30 +20,95 @@
       "switchTo": "Sprache wechseln: {{language}}",
       "de": "Deutsch",
       "en": "English"
-    }
-  },
-  "systemStatus": {
-    "title": "Übersicht",
-    "description": "Hier entsteht die Schichtplanung. Bis dahin zeigt diese Seite, ob das Dashboard mit dem Backend verbunden ist.",
-    "card": {
-      "title": "Backend-API",
-      "description": "Verbindung zwischen Dashboard und Server"
     },
-    "loading": "Verbindung wird geprüft …",
-    "success": {
-      "badge": "Verbunden",
-      "status": "Status",
-      "version": "API-Version"
+    "userMenu": {
+      "open": "Benutzermenü",
+      "logout": "Abmelden"
+    },
+    "notifications": "Benachrichtigungen",
+    "sessionLoading": "Sitzung wird geladen …"
+  },
+  "roles": {
+    "ADMIN": "Admin",
+    "DISPATCHER": "Disponent:in",
+    "WORKER": "Mitarbeiter:in"
+  },
+  "login": {
+    "title": "Anmelden",
+    "description": "Melde dich mit deinem Agentur-Konto im Dashboard an.",
+    "email": "E-Mail",
+    "emailPlaceholder": "name@example.com",
+    "password": "Passwort",
+    "passwordPlaceholder": "Dein Passwort",
+    "submit": "Anmelden",
+    "workerHint": "Du bist Mitarbeiter:in? Deine Schichten findest du in der shiftboard App."
+  },
+  "signups": {
+    "title": "Anmeldungen",
+    "description": "Prüfe neue Registrierungen und gib Mitarbeiter:innen für offene Schichten frei.",
+    "columns": {
+      "name": "Name",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "qualifications": "Qualifikationen",
+      "registeredAt": "Registriert am",
+      "actions": "Aktionen"
+    },
+    "approve": "Freigeben",
+    "approveNamed": "{{name}} freigeben",
+    "reject": "Ablehnen",
+    "rejectNamed": "{{name}} ablehnen",
+    "count_one": "{{count}} Anmeldung wartet auf Freigabe",
+    "count_other": "{{count}} Anmeldungen warten auf Freigabe",
+    "loading": "Anmeldungen werden geladen …",
+    "empty": {
+      "title": "Keine offenen Anmeldungen",
+      "description": "Neue Registrierungen erscheinen hier, sobald sich jemand über euren Einladungslink anmeldet."
     },
     "error": {
-      "title": "Die API ist nicht erreichbar",
-      "description": "Läuft das Backend? Prüfe die Verbindung und versuche es erneut.",
+      "title": "Anmeldungen konnten nicht geladen werden",
+      "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu.",
       "retry": "Erneut versuchen"
+    },
+    "approved": {
+      "title": "{{name}} wurde freigegeben",
+      "description": "Der Zugang gilt ab dem nächsten App-Start."
+    },
+    "rejected": {
+      "title": "{{name}} wurde abgelehnt",
+      "description": "Das Konto ist als inaktiv markiert."
+    },
+    "rejectDialog": {
+      "title": "Anmeldung ablehnen?",
+      "description": "{{name}} erhält keinen Zugang zu den Schichten von {{agency}}. Das Konto wird als inaktiv markiert.",
+      "cancel": "Abbrechen",
+      "confirm": "Ablehnen"
+    },
+    "pagination": {
+      "label": "Seiten",
+      "page": "Seite {{page}} von {{total}}",
+      "previous": "Zurück",
+      "next": "Weiter"
     }
+  },
+  "comingSoon": {
+    "title": "Kommt bald",
+    "description": "An diesem Bereich arbeiten wir noch."
   },
   "notFound": {
     "title": "Seite nicht gefunden",
     "description": "Diese Adresse gibt es nicht oder nicht mehr.",
-    "back": "Zur Übersicht"
+    "back": "Zur Startseite"
+  },
+  "errors": {
+    "invalid_credentials": "E-Mail oder Passwort ist falsch.",
+    "wrong_client": "E-Mail oder Passwort ist falsch.",
+    "too_many_attempts": "Zu viele Anmeldeversuche. Versuche es in einigen Minuten noch einmal.",
+    "unauthenticated": "Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.",
+    "forbidden": "Dafür fehlt dir die Berechtigung.",
+    "worker_not_found": "Diese Anmeldung gibt es nicht mehr. Die Liste wurde aktualisiert.",
+    "worker_not_pending": "Diese Anmeldung wurde bereits bearbeitet. Die Liste wurde aktualisiert.",
+    "network": "Der Server ist nicht erreichbar. Prüfe deine Verbindung und versuche es noch einmal.",
+    "unknown": "Etwas ist schiefgelaufen. Bitte versuche es noch einmal."
   }
 }
