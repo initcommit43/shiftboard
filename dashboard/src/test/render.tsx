@@ -1,14 +1,19 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClient } from '@tanstack/react-query'
 import { render } from '@testing-library/react'
-import type { ReactElement } from 'react'
+import { createMemoryRouter } from 'react-router'
 
-/** Renders with a fresh query cache per test and retries off, so errors surface immediately. */
-export function renderWithQueryClient(ui: ReactElement) {
+import { App } from '@/app/app'
+import { routes } from '@/app/router'
+
+/** Renders the whole app at the given path, with a fresh query cache and retries off. */
+export function renderApp(path: string) {
+  const router = createMemoryRouter(routes, { initialEntries: [path] })
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
     },
   })
 
-  return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>)
+  render(<App router={router} queryClient={queryClient} />)
+  return { router }
 }

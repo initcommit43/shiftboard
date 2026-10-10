@@ -1,12 +1,16 @@
 {
   "app": {
-    "name": "shiftboard",
-    "tagline": "Dispatch"
+    "name": "shiftboard"
   },
   "shell": {
     "navigation": "Main navigation",
     "nav": {
-      "overview": "Overview"
+      "shifts": "Shifts",
+      "signups": "Signups",
+      "messages": "Messages",
+      "settings": "Settings",
+      "pendingSignups_one": "{{count}} pending signup",
+      "pendingSignups_other": "{{count}} pending signups"
     },
     "theme": {
       "toLight": "Switch to light theme",
@@ -16,30 +20,95 @@
       "switchTo": "Change language: {{language}}",
       "de": "Deutsch",
       "en": "English"
-    }
-  },
-  "systemStatus": {
-    "title": "Overview",
-    "description": "Shift planning will live here. Until then, this page shows whether the dashboard is connected to the backend.",
-    "card": {
-      "title": "Backend API",
-      "description": "Connection between dashboard and server"
     },
-    "loading": "Checking connection …",
-    "success": {
-      "badge": "Connected",
-      "status": "Status",
-      "version": "API version"
+    "userMenu": {
+      "open": "User menu",
+      "logout": "Log out"
+    },
+    "notifications": "Notifications",
+    "sessionLoading": "Loading session …"
+  },
+  "roles": {
+    "ADMIN": "Admin",
+    "DISPATCHER": "Dispatcher",
+    "WORKER": "Worker"
+  },
+  "login": {
+    "title": "Log in",
+    "description": "Log in to the dashboard with your agency account.",
+    "email": "Email",
+    "emailPlaceholder": "name@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "Your password",
+    "submit": "Log in",
+    "workerHint": "Are you a worker? You'll find your shifts in the shiftboard app."
+  },
+  "signups": {
+    "title": "Signups",
+    "description": "Review new registrations and approve workers for open shifts.",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "qualifications": "Qualifications",
+      "registeredAt": "Registered",
+      "actions": "Actions"
+    },
+    "approve": "Approve",
+    "approveNamed": "Approve {{name}}",
+    "reject": "Reject",
+    "rejectNamed": "Reject {{name}}",
+    "count_one": "{{count}} signup is waiting for approval",
+    "count_other": "{{count}} signups are waiting for approval",
+    "loading": "Loading signups …",
+    "empty": {
+      "title": "No pending signups",
+      "description": "New registrations appear here as soon as someone signs up through your invitation link."
     },
     "error": {
-      "title": "The API cannot be reached",
-      "description": "Is the backend running? Check the connection and try again.",
+      "title": "Signups could not be loaded",
+      "description": "Please try again. If the problem persists, reload the page.",
       "retry": "Try again"
+    },
+    "approved": {
+      "title": "{{name}} has been approved",
+      "description": "Access starts the next time the app is opened."
+    },
+    "rejected": {
+      "title": "{{name}} has been rejected",
+      "description": "The account is marked as inactive."
+    },
+    "rejectDialog": {
+      "title": "Reject signup?",
+      "description": "{{name}} will not get access to the shifts of {{agency}}. The account will be marked as inactive.",
+      "cancel": "Cancel",
+      "confirm": "Reject"
+    },
+    "pagination": {
+      "label": "Pages",
+      "page": "Page {{page}} of {{total}}",
+      "previous": "Previous",
+      "next": "Next"
     }
+  },
+  "comingSoon": {
+    "title": "Coming soon",
+    "description": "We are still working on this area."
   },
   "notFound": {
     "title": "Page not found",
     "description": "This address does not exist or no longer exists.",
-    "back": "Back to overview"
+    "back": "Back to start"
+  },
+  "errors": {
+    "invalid_credentials": "Email or password is incorrect.",
+    "wrong_client": "Email or password is incorrect.",
+    "too_many_attempts": "Too many login attempts. Try again in a few minutes.",
+    "unauthenticated": "Your session has expired. Please log in again.",
+    "forbidden": "You don't have permission to do that.",
+    "worker_not_found": "This signup no longer exists. The list has been updated.",
+    "worker_not_pending": "This signup has already been handled. The list has been updated.",
+    "network": "The server cannot be reached. Check your connection and try again.",
+    "unknown": "Something went wrong. Please try again."
   }
 }
