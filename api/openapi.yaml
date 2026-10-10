@@ -10,10 +10,15 @@ info:
 
     Conventions:
     - REST under `/api/v1`
-    - errors as RFC 9457 problem details (`application/problem+json`)
-    - page/size pagination for lists
+    - errors as RFC 9457 problem details (`application/problem+json`) with a
+      machine-readable `code` that clients translate
+    - page/size pagination for lists, pages start at 0
     - UUID v7 identifiers
     - changes stay backward compatible
+
+    Authentication: `POST /auth/login` returns a short-lived access token and a
+    refresh token. The access token is sent as `Authorization: Bearer <token>`.
+    Refresh tokens are single use: `POST /auth/refresh` returns a new pair.
   license:
     name: Proprietary
     identifier: LicenseRef-Proprietary
@@ -23,7 +28,14 @@ servers:
 tags:
   - name: system
     description: Service status
-security: []
+  - name: signup
+    description: Worker self-signup through an agency's signup link
+  - name: auth
+    description: Login, token refresh, logout and the current user
+  - name: workers
+    description: The agency's worker pool
+security:
+  - bearerAuth: []
 paths:
   /ping:
     get:
@@ -31,6 +43,7 @@ paths:
       tags: [system]
       summary: Check that the API is reachable
       description: Returns the service status and API version. Needs no authentication.
+      security: []
       responses:
         "200":
           description: The API is up.
@@ -40,7 +53,309 @@ paths:
                 $ref: "#/components/schemas/Ping"
         default:
           $ref: "#/components/responses/Problem"
+
+  /signup/{signupCode}:
+    parameters:
+      - $ref: "#/components/parameters/SignupCode"
+    get:
+      operationId: getSignupInfo
+      tags: [signup]
+      summary: Look up the agency behind a signup link
+      description: |
+        Returns what the signup form needs: the agency's name and the
+        qualifications a worker can pick. Needs no authentication.
+
+        Error codes: `signup_code_unknown` (404).
+      security: []
+      responses:
+        "200":
+          description: The agency the code belongs to.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignupInfo"
+        "404":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+    post:
+      operationId: signUp
+      tags: [signup]
+      summary: Sign up as a worker of the agency
+      description: |
+        Creates a user account and a worker profile with status `PENDING` and
+        logs the worker in. The agency approves or rejects the signup later.
+        Needs no authentication.
+
+        Error codes: `validation_failed` (400, with `errors`),
+        `signup_code_unknown` (404), `email_already_registered` (409).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkerSignupRequest"
+      responses:
+        "201":
+          description: The account was created; the worker is logged in.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Log in with email and password
+      description: |
+        Workers log in to the worker app, dispatchers and admins to the
+        dashboard. The request names the client it comes from; a role on the
+        wrong client is rejected.
+
+        Error codes: `validation_failed` (400), `invalid_credentials` (401,
+        the same for an unknown email and a wrong password), `wrong_client`
+        (403), `too_many_attempts` (429).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Logged in.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /auth/refresh:
+    post:
+      operationId: refreshToken
+      tags: [auth]
+      summary: Exchange a refresh token for a new token pair
+      description: |
+        The refresh token is single use; the response contains its
+        replacement.
+
+        Error codes: `invalid_refresh_token` (401, unknown, expired, revoked or
+        already used).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: A new token pair.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "401":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: End the session on this device
+      description: |
+        Revokes the given refresh token. Succeeds even if the token is unknown
+        or already revoked. Needs no access token, so logging out works after
+        the access token has expired.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "204":
+          description: The session has ended.
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: The logged-in user
+      description: |
+        Returns the account, its agency and, for workers, the worker profile
+        with its current status. The worker app calls this on start to decide
+        between the shift list, the waiting screen and the inactive screen.
+      responses:
+        "200":
+          description: The current user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CurrentUser"
+        "401":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /workers:
+    get:
+      operationId: listWorkers
+      tags: [workers]
+      summary: List the agency's workers
+      description: |
+        Dispatchers and admins only. Sorted by signup time, oldest first.
+
+        Error codes: `forbidden` (403).
+      parameters:
+        - name: status
+          in: query
+          description: Only workers with this status.
+          schema:
+            $ref: "#/components/schemas/WorkerStatus"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of workers.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerPage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /workers/{workerId}/approve:
+    parameters:
+      - $ref: "#/components/parameters/WorkerId"
+    post:
+      operationId: approveWorker
+      tags: [workers]
+      summary: Approve a pending signup
+      description: |
+        Sets the worker to `ACTIVE`. Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `worker_not_found` (404),
+        `worker_not_pending` (409).
+      responses:
+        "200":
+          description: The approved worker.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Worker"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /workers/{workerId}/reject:
+    parameters:
+      - $ref: "#/components/parameters/WorkerId"
+    post:
+      operationId: rejectWorker
+      tags: [workers]
+      summary: Reject a pending signup
+      description: |
+        Sets the worker to `INACTIVE`. Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `worker_not_found` (404),
+        `worker_not_pending` (409).
+      responses:
+        "200":
+          description: The rejected worker.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Worker"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    SignupCode:
+      name: signupCode
+      in: path
+      required: true
+      description: The code from the agency's signup link.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 64
+    WorkerId:
+      name: workerId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      description: Page number, starting at 0.
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        default: 0
+    Size:
+      name: size
+      in: query
+      description: Page size.
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 20
   responses:
     Problem:
       description: An error, described as RFC 9457 problem details.
@@ -61,6 +376,222 @@ components:
           type: string
           description: Version of the API contract the backend implements.
           examples: ["0.1.0"]
+
+    SignupInfo:
+      type: object
+      required: [agencyName, qualifications]
+      properties:
+        agencyName:
+          type: string
+          examples: [Donau Personal]
+        qualifications:
+          type: array
+          description: The qualifications a worker of this agency can have.
+          items:
+            $ref: "#/components/schemas/Qualification"
+
+    Qualification:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          examples: [Service]
+
+    WorkerSignupRequest:
+      type: object
+      required: [firstName, lastName, email, phone, password, qualificationIds]
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone:
+          type: string
+          minLength: 5
+          maxLength: 30
+          examples: ["+43 660 5550101"]
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 128
+        qualificationIds:
+          type: array
+          description: Qualifications of the agency the worker has. May be empty.
+          items:
+            type: string
+            format: uuid
+
+    ClientType:
+      type: string
+      description: The client a login comes from.
+      enum: [WORKER_APP, DASHBOARD]
+
+    LoginRequest:
+      type: object
+      required: [email, password, client]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          format: password
+          minLength: 1
+          maxLength: 128
+        client:
+          $ref: "#/components/schemas/ClientType"
+
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+          minLength: 1
+
+    TokenResponse:
+      type: object
+      required: [accessToken, refreshToken, expiresIn]
+      properties:
+        accessToken:
+          type: string
+          description: JWT, sent as bearer token.
+        refreshToken:
+          type: string
+          description: Opaque, single-use token for `POST /auth/refresh`.
+        expiresIn:
+          type: integer
+          format: int32
+          description: Lifetime of the access token in seconds.
+
+    Role:
+      type: string
+      enum: [ADMIN, DISPATCHER, WORKER]
+
+    WorkerStatus:
+      type: string
+      description: |
+        `PENDING` after signup, `ACTIVE` once the agency approved, `INACTIVE`
+        after a rejection or deactivation.
+      enum: [PENDING, ACTIVE, INACTIVE]
+
+    AgencySummary:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+
+    WorkerProfile:
+      type: object
+      required: [id, firstName, lastName, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        status:
+          $ref: "#/components/schemas/WorkerStatus"
+
+    CurrentUser:
+      type: object
+      required: [id, email, role, agency]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        role:
+          $ref: "#/components/schemas/Role"
+        agency:
+          $ref: "#/components/schemas/AgencySummary"
+        worker:
+          description: Present when the role is `WORKER`.
+          $ref: "#/components/schemas/WorkerProfile"
+
+    Worker:
+      type: object
+      required: [id, firstName, lastName, email, phone, status, qualifications, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        status:
+          $ref: "#/components/schemas/WorkerStatus"
+        qualifications:
+          type: array
+          items:
+            $ref: "#/components/schemas/Qualification"
+        createdAt:
+          type: string
+          format: date-time
+          description: When the worker signed up.
+
+    WorkerPage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/Worker"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+
+    FieldError:
+      type: object
+      required: [field, code]
+      properties:
+        field:
+          type: string
+          description: Name of the request field.
+          examples: [email]
+        code:
+          type: string
+          description: Machine-readable reason.
+          examples: [invalid_format]
+
     Problem:
       type: object
       description: RFC 9457 problem details.
@@ -91,3 +622,8 @@ components:
           type: string
           description: Machine-readable error code. Clients translate it into a localized message.
           examples: [email_already_registered]
+        errors:
+          type: array
+          description: Field errors, present when `code` is `validation_failed`.
+          items:
+            $ref: "#/components/schemas/FieldError"

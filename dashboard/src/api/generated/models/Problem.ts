@@ -2,7 +2,7 @@
 /* eslint-disable */
 /**
  * shiftboard API
- * Single source of truth for the shiftboard API. The Dart client of the worker app and the TypeScript client of the agency dashboard are generated from this file.  Conventions: - REST under `/api/v1` - errors as RFC 9457 problem details (`application/problem+json`) - page/size pagination for lists - UUID v7 identifiers - changes stay backward compatible 
+ * Single source of truth for the shiftboard API. The Dart client of the worker app and the TypeScript client of the agency dashboard are generated from this file.  Conventions: - REST under `/api/v1` - errors as RFC 9457 problem details (`application/problem+json`) with a   machine-readable `code` that clients translate - page/size pagination for lists, pages start at 0 - UUID v7 identifiers - changes stay backward compatible  Authentication: `POST /auth/login` returns a short-lived access token and a refresh token. The access token is sent as `Authorization: Bearer <token>`. Refresh tokens are single use: `POST /auth/refresh` returns a new pair. 
  *
  * The version of the OpenAPI document: 0.1.0
  * 
@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { FieldError } from './FieldError';
+import {
+    FieldErrorFromJSON,
+    FieldErrorFromJSONTyped,
+    FieldErrorToJSON,
+    FieldErrorToJSONTyped,
+} from './FieldError';
+
 /**
  * RFC 9457 problem details.
  * @export
@@ -43,6 +51,10 @@ export interface Problem {
      * Machine-readable error code. Clients translate it into a localized message.
      */
     code?: string;
+    /**
+     * Field errors, present when `code` is `validation_failed`.
+     */
+    errors?: Array<FieldError>;
 }
 
 /**
@@ -71,6 +83,7 @@ export function ProblemFromJSONTyped(json: any, ignoreDiscriminator: boolean): P
         'detail': json['detail'] == null ? undefined : json['detail'],
         'instance': json['instance'] == null ? undefined : json['instance'],
         'code': json['code'] == null ? undefined : json['code'],
+        'errors': json['errors'] == null ? undefined : ((json['errors'] as Array<any>).map(FieldErrorFromJSON)),
     };
 }
 
@@ -91,6 +104,7 @@ export function ProblemToJSONTyped(value?: Problem | null, ignoreDiscriminator: 
         'detail': value['detail'],
         'instance': value['instance'],
         'code': value['code'],
+        'errors': value['errors'] == null ? undefined : ((value['errors'] as Array<any>).map(FieldErrorToJSON)),
     };
 }
 

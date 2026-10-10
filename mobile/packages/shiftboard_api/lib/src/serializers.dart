@@ -14,16 +14,62 @@ import 'package:built_value/iso_8601_date_time_serializer.dart';
 import 'package:shiftboard_api/src/date_serializer.dart';
 import 'package:shiftboard_api/src/model/date.dart';
 
+import 'package:shiftboard_api/src/model/agency_summary.dart';
+import 'package:shiftboard_api/src/model/client_type.dart';
+import 'package:shiftboard_api/src/model/current_user.dart';
+import 'package:shiftboard_api/src/model/field_error.dart';
+import 'package:shiftboard_api/src/model/login_request.dart';
 import 'package:shiftboard_api/src/model/ping.dart';
 import 'package:shiftboard_api/src/model/problem.dart';
+import 'package:shiftboard_api/src/model/qualification.dart';
+import 'package:shiftboard_api/src/model/refresh_token_request.dart';
+import 'package:shiftboard_api/src/model/role.dart';
+import 'package:shiftboard_api/src/model/signup_info.dart';
+import 'package:shiftboard_api/src/model/token_response.dart';
+import 'package:shiftboard_api/src/model/worker.dart';
+import 'package:shiftboard_api/src/model/worker_page.dart';
+import 'package:shiftboard_api/src/model/worker_profile.dart';
+import 'package:shiftboard_api/src/model/worker_signup_request.dart';
+import 'package:shiftboard_api/src/model/worker_status.dart';
 
 part 'serializers.g.dart';
 
 @SerializersFor([
+  AgencySummary,
+  ClientType,
+  CurrentUser,
+  FieldError,
+  LoginRequest,
   Ping,
   Problem,
+  Qualification,
+  RefreshTokenRequest,
+  Role,
+  SignupInfo,
+  TokenResponse,
+  Worker,
+  WorkerPage,
+  WorkerProfile,
+  WorkerSignupRequest,
+  WorkerStatus,
 ])
 Serializers serializers = (_$serializers.toBuilder()
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Qualification)]),
+        () => ListBuilder<Qualification>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Worker)]),
+        () => ListBuilder<Worker>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(FieldError)]),
+        () => ListBuilder<FieldError>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(String)]),
+        () => ListBuilder<String>(),
+      )
       ..add(const OneOfSerializer())
       ..add(const AnyOfSerializer())
       ..add(const DateSerializer())

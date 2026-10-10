@@ -9,7 +9,10 @@ import 'package:shiftboard_api/src/auth/api_key_auth.dart';
 import 'package:shiftboard_api/src/auth/basic_auth.dart';
 import 'package:shiftboard_api/src/auth/bearer_auth.dart';
 import 'package:shiftboard_api/src/auth/oauth.dart';
+import 'package:shiftboard_api/src/api/auth_api.dart';
+import 'package:shiftboard_api/src/api/signup_api.dart';
 import 'package:shiftboard_api/src/api/system_api.dart';
+import 'package:shiftboard_api/src/api/workers_api.dart';
 
 class ShiftboardApi {
   static const String basePath = r'http://localhost:8080/api/v1';
@@ -131,9 +134,27 @@ class ShiftboardApi {
     }
   }
 
+  /// Get AuthApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  AuthApi getAuthApi() {
+    return AuthApi(dio, serializers);
+  }
+
+  /// Get SignupApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  SignupApi getSignupApi() {
+    return SignupApi(dio, serializers);
+  }
+
   /// Get SystemApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
   SystemApi getSystemApi() {
     return SystemApi(dio, serializers);
+  }
+
+  /// Get WorkersApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  WorkersApi getWorkersApi() {
+    return WorkersApi(dio, serializers);
   }
 }
