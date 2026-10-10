@@ -62,8 +62,8 @@ paths:
       tags: [signup]
       summary: Look up the agency behind a signup link
       description: |
-        Returns what the signup form needs: the agency's name and the
-        qualifications a worker can pick. Needs no authentication.
+        Returns what the signup form needs: the agency's name. Needs no
+        authentication.
 
         Error codes: `signup_code_unknown` (404).
       security: []
@@ -379,16 +379,11 @@ components:
 
     SignupInfo:
       type: object
-      required: [agencyName, qualifications]
+      required: [agencyName]
       properties:
         agencyName:
           type: string
           examples: [Donau Personal]
-        qualifications:
-          type: array
-          description: The qualifications a worker of this agency can have.
-          items:
-            $ref: "#/components/schemas/Qualification"
 
     Qualification:
       type: object
@@ -403,7 +398,7 @@ components:
 
     WorkerSignupRequest:
       type: object
-      required: [firstName, lastName, email, phone, password, qualificationIds]
+      required: [firstName, lastName, email, phone, password]
       properties:
         firstName:
           type: string
@@ -427,12 +422,6 @@ components:
           format: password
           minLength: 8
           maxLength: 128
-        qualificationIds:
-          type: array
-          description: Qualifications of the agency the worker has. May be empty.
-          items:
-            type: string
-            format: uuid
 
     ClientType:
       type: string

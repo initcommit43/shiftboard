@@ -1,7 +1,6 @@
 package app.shiftboard;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -42,14 +41,13 @@ public abstract class IntegrationTest {
     @Autowired
     protected RecordedEvents events;
 
-    protected static Map<String, Object> signupRequest(String email, UUID... qualificationIds) {
+    protected static Map<String, Object> signupRequest(String email) {
         var request = new HashMap<String, Object>();
         request.put("firstName", "Lena");
         request.put("lastName", "Hofer");
         request.put("email", email);
         request.put("phone", "+43 660 5550101");
         request.put("password", TestData.PASSWORD);
-        request.put("qualificationIds", List.of(qualificationIds));
         return request;
     }
 
@@ -61,8 +59,8 @@ public abstract class IntegrationTest {
     }
 
     /** Signs a new worker up and returns the tokens the signup logs in with. */
-    protected TokenPair signUp(String signupCode, String email, UUID... qualificationIds) {
-        return postSignup(signupCode, signupRequest(email, qualificationIds))
+    protected TokenPair signUp(String signupCode, String email) {
+        return postSignup(signupCode, signupRequest(email))
                 .expectStatus().isCreated()
                 .expectBody(TokenPair.class).returnResult().getResponseBody();
     }

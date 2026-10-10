@@ -78,9 +78,7 @@ class SeedDataIntegrationTests {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.agencyName").isEqualTo("Donau Personal")
-                .jsonPath("$.qualifications[*].name")
-                .isEqualTo(List.of("Bar", "Lager", "Service", "Staplerschein"));
+                .jsonPath("$.agencyName").isEqualTo("Donau Personal");
     }
 
     @Test

@@ -7,7 +7,8 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
- * Creates what no endpoint can create yet: agencies, their qualifications, dispatchers and admins.
+ * Creates what no endpoint can create yet: agencies, their qualifications and who has them,
+ * dispatchers and admins.
  * Everything is fictional and unique per call, so tests do not see each other's data.
  */
 public class TestData {
@@ -39,6 +40,14 @@ public class TestData {
                 .params(id, agency.id(), name)
                 .update();
         return id;
+    }
+
+    public void qualify(UUID workerId, UUID... qualificationIds) {
+        for (var qualificationId : qualificationIds) {
+            jdbc.sql("insert into worker_qualification (worker_id, qualification_id) values (?, ?)")
+                    .params(workerId, qualificationId)
+                    .update();
+        }
     }
 
     /** Creates an account with {@link #PASSWORD} and returns its email. */

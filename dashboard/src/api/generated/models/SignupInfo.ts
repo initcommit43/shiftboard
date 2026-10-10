@@ -13,14 +13,6 @@
  */
 
 import { mapValues } from '../runtime';
-import type { Qualification } from './Qualification';
-import {
-    QualificationFromJSON,
-    QualificationFromJSONTyped,
-    QualificationToJSON,
-    QualificationToJSONTyped,
-} from './Qualification';
-
 /**
  * 
  * @export
@@ -31,10 +23,6 @@ export interface SignupInfo {
      * 
      */
     agencyName: string;
-    /**
-     * The qualifications a worker of this agency can have.
-     */
-    qualifications: Array<Qualification>;
 }
 
 /**
@@ -42,7 +30,6 @@ export interface SignupInfo {
  */
 export function instanceOfSignupInfo(value: object): value is SignupInfo {
     if (!('agencyName' in value) || value['agencyName'] === undefined) return false;
-    if (!('qualifications' in value) || value['qualifications'] === undefined) return false;
     return true;
 }
 
@@ -57,7 +44,6 @@ export function SignupInfoFromJSONTyped(json: any, ignoreDiscriminator: boolean)
     return {
         
         'agencyName': json['agencyName'],
-        'qualifications': ((json['qualifications'] as Array<any>).map(QualificationFromJSON)),
     };
 }
 
@@ -73,7 +59,6 @@ export function SignupInfoToJSONTyped(value?: SignupInfo | null, ignoreDiscrimin
     return {
         
         'agencyName': value['agencyName'],
-        'qualifications': ((value['qualifications'] as Array<any>).map(QualificationToJSON)),
     };
 }
 

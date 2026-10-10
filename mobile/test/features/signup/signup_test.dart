@@ -1,12 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shiftboard/core/widgets/app_chip.dart';
 
 import '../../support/fake_backend.dart';
 
 const _link = 'shiftboard://join/DONAU24';
-const _serviceId = '0199c0de-0000-7000-8000-0000000000c1';
-const _barId = '0199c0de-0000-7000-8000-0000000000c2';
 
 void main() {
   late FakeBackend backend;
@@ -17,14 +14,7 @@ void main() {
     stored = fakeTokenStorage();
     backend.on(
       'GET /signup/DONAU24',
-      (_) => json({
-        'agencyName': 'Donau Personal',
-        'qualifications': [
-          {'id': _serviceId, 'name': 'Service'},
-          {'id': _barId, 'name': 'Bar'},
-          {'id': '0199c0de-0000-7000-8000-0000000000c3', 'name': 'Lager'},
-        ],
-      }),
+      (_) => json({'agencyName': 'Donau Personal'}),
     );
   });
 
@@ -54,7 +44,6 @@ void main() {
 
       expect(find.text('Bei Donau Personal registrieren'), findsOneWidget);
       expect(find.text('DP'), findsOneWidget);
-      expect(find.byType(AppChip), findsNWidgets(3));
     });
 
     testWidgets('opens it from an invitation link while the app is running', (
@@ -146,17 +135,12 @@ void main() {
 
       backend.on(
         'GET /signup/NEU',
-        (_) => json({
-          'agencyName': 'Donau Personal',
-          'qualifications': <Object>[],
-        }),
+        (_) => json({'agencyName': 'Donau Personal'}),
       );
       await tester.tap(find.text('Erneut versuchen'));
       await tester.pumpAndSettle();
 
       expect(find.text('Bei Donau Personal registrieren'), findsOneWidget);
-      // An agency without qualifications gets no empty section.
-      expect(find.text('Qualifikationen'), findsNothing);
     });
   });
 
@@ -287,16 +271,12 @@ void main() {
       expect(find.text('Bitte prüfe deine Angaben.'), findsNothing);
     });
 
-    testWidgets('shows rejections without a field above the form', (
+    testWidgets('shows a rejection without fields above the form', (
       tester,
     ) async {
       backend.on(
         'POST /signup/DONAU24',
-        (_) => problem(
-          400,
-          'validation_failed',
-          fieldErrors: {'qualificationIds': 'unknown'},
-        ),
+        (_) => problem(400, 'validation_failed'),
       );
       await pumpApp(tester, backend, link: _link);
       await fillIn(tester);
@@ -347,10 +327,6 @@ void main() {
       backend.on('GET /me', (_) => json(currentUser('PENDING')));
       await pumpApp(tester, backend, link: _link);
       await fillIn(tester);
-      for (final qualification in ['Service', 'Bar', 'Lager', 'Lager']) {
-        await scrollToAndTap(tester, find.text(qualification));
-        await tester.pump();
-      }
 
       await submit(tester);
 
@@ -363,7 +339,6 @@ void main() {
         'email': 'lena.hofer@example.com',
         'phone': '+43 660 5550101',
         'password': 'sonnenblume24',
-        'qualificationIds': [_serviceId, _barId],
       });
       expect(stored, {
         'access_token': 'access-1',

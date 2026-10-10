@@ -2,7 +2,6 @@ package app.shiftboard.worker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -15,19 +14,14 @@ import org.springframework.http.MediaType;
 class SignupIntegrationTests extends IntegrationTest {
 
     @Test
-    void signupInfoShowsTheAgencyAndItsQualifications() {
+    void signupInfoShowsTheAgency() {
         var agency = data.agency("Donau Personal");
-        var service = data.qualification(agency, "Service");
-        var bar = data.qualification(agency, "Bar");
-        data.qualification(data.agency("Alpen Events"), "Security");
 
         client.get().uri("/api/v1/signup/{code}", agency.signupCode())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.agencyName").isEqualTo("Donau Personal")
-                .jsonPath("$.qualifications[*].name").isEqualTo(List.of("Bar", "Service"))
-                .jsonPath("$.qualifications[*].id").isEqualTo(List.of(bar.toString(), service.toString()));
+                .jsonPath("$.agencyName").isEqualTo("Donau Personal");
     }
 
     @Test
@@ -38,10 +32,9 @@ class SignupIntegrationTests extends IntegrationTest {
     @Test
     void signingUpCreatesAPendingWorkerAndLogsIn() {
         var agency = data.agency("Donau Personal");
-        var service = data.qualification(agency, "Service");
         var email = TestData.email();
 
-        var tokens = postSignup(agency.signupCode(), signupRequest(email, service))
+        var tokens = postSignup(agency.signupCode(), signupRequest(email))
                 .expectStatus().isCreated()
                 .expectBody(TokenPair.class).returnResult().getResponseBody();
 
@@ -112,39 +105,20 @@ class SignupIntegrationTests extends IntegrationTest {
         request.put("lastName", "x".repeat(101));
         request.put("phone", "123");
         request.put("password", "short");
-        request.remove("qualificationIds");
 
         expectProblem(postSignup(agency.signupCode(), request), 400, "validation_failed")
-                .jsonPath("$.errors.length()").isEqualTo(6)
+                .jsonPath("$.errors.length()").isEqualTo(5)
                 .jsonPath("$.errors[?(@.field == 'firstName')].code").isEqualTo("required")
                 .jsonPath("$.errors[?(@.field == 'lastName')].code").isEqualTo("invalid_length")
                 .jsonPath("$.errors[?(@.field == 'email')].code").isEqualTo("invalid_format")
                 .jsonPath("$.errors[?(@.field == 'phone')].code").isEqualTo("invalid_length")
-                .jsonPath("$.errors[?(@.field == 'password')].code").isEqualTo("invalid_length")
-                .jsonPath("$.errors[?(@.field == 'qualificationIds')].code").isEqualTo("required");
-    }
-
-    @Test
-    void aQualificationOfAnotherAgencyIsRejected() {
-        var agency = data.agency("Donau Personal");
-        var foreign = data.qualification(data.agency("Alpen Events"), "Security");
-        var email = TestData.email();
-
-        expectProblem(postSignup(agency.signupCode(), signupRequest(email, foreign)), 400, "validation_failed")
-                .jsonPath("$.errors.length()").isEqualTo(1)
-                .jsonPath("$.errors[0].field").isEqualTo("qualificationIds")
-                .jsonPath("$.errors[0].code").isEqualTo("unknown");
-
-        assertThat(accountsWith(email)).isZero();
+                .jsonPath("$.errors[?(@.field == 'password')].code").isEqualTo("invalid_length");
     }
 
     @Test
     void aBodyThatCannotBeReadIsAValidationError() {
         var agency = data.agency("Donau Personal");
-        var request = signupRequest(TestData.email());
-        request.put("qualificationIds", List.of("not-a-uuid"));
 
-        expectProblem(postSignup(agency.signupCode(), request), 400, "validation_failed");
         expectProblem(
                 client.post().uri("/api/v1/signup/{code}", agency.signupCode())
                         .contentType(MediaType.APPLICATION_JSON)

@@ -39,10 +39,6 @@ export interface WorkerSignupRequest {
      * 
      */
     password: string;
-    /**
-     * Qualifications of the agency the worker has. May be empty.
-     */
-    qualificationIds: Array<string>;
 }
 
 /**
@@ -54,7 +50,6 @@ export function instanceOfWorkerSignupRequest(value: object): value is WorkerSig
     if (!('email' in value) || value['email'] === undefined) return false;
     if (!('phone' in value) || value['phone'] === undefined) return false;
     if (!('password' in value) || value['password'] === undefined) return false;
-    if (!('qualificationIds' in value) || value['qualificationIds'] === undefined) return false;
     return true;
 }
 
@@ -73,7 +68,6 @@ export function WorkerSignupRequestFromJSONTyped(json: any, ignoreDiscriminator:
         'email': json['email'],
         'phone': json['phone'],
         'password': json['password'],
-        'qualificationIds': json['qualificationIds'],
     };
 }
 
@@ -93,7 +87,6 @@ export function WorkerSignupRequestToJSONTyped(value?: WorkerSignupRequest | nul
         'email': value['email'],
         'phone': value['phone'],
         'password': value['password'],
-        'qualificationIds': value['qualificationIds'],
     };
 }
 

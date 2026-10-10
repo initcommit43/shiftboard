@@ -85,7 +85,7 @@ export class SignupApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns what the signup form needs: the agency\'s name and the qualifications a worker can pick. Needs no authentication.  Error codes: `signup_code_unknown` (404). 
+     * Returns what the signup form needs: the agency\'s name. Needs no authentication.  Error codes: `signup_code_unknown` (404). 
      * Look up the agency behind a signup link
      */
     async getSignupInfoRaw(requestParameters: GetSignupInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SignupInfo>> {
@@ -96,7 +96,7 @@ export class SignupApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns what the signup form needs: the agency\'s name and the qualifications a worker can pick. Needs no authentication.  Error codes: `signup_code_unknown` (404). 
+     * Returns what the signup form needs: the agency\'s name. Needs no authentication.  Error codes: `signup_code_unknown` (404). 
      * Look up the agency behind a signup link
      */
     async getSignupInfo(requestParameters: GetSignupInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SignupInfo> {

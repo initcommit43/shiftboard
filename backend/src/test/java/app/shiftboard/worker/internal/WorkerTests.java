@@ -3,7 +3,6 @@ package app.shiftboard.worker.internal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-import java.util.Set;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -11,13 +10,11 @@ import org.junit.jupiter.api.Test;
 class WorkerTests {
 
     @Test
-    void signsUpAsPendingWithItsQualifications() {
-        var qualificationId = UUID.randomUUID();
-
-        var worker = new Worker(UUID.randomUUID(), "Lena", "Hofer", "+43 660 5550101", Set.of(qualificationId));
+    void signsUpAsPendingWithoutQualifications() {
+        var worker = new Worker(UUID.randomUUID(), "Lena", "Hofer", "+43 660 5550101");
 
         assertThat(worker.getStatus()).isEqualTo(WorkerStatus.PENDING);
-        assertThat(worker.getQualificationIds()).containsExactly(qualificationId);
+        assertThat(worker.getQualificationIds()).isEmpty();
     }
 
     @Test
@@ -59,6 +56,6 @@ class WorkerTests {
     }
 
     private static Worker pendingWorker() {
-        return new Worker(UUID.randomUUID(), "Jakob", "Steiner", "+43 660 5550102", Set.of());
+        return new Worker(UUID.randomUUID(), "Jakob", "Steiner", "+43 660 5550102");
     }
 }

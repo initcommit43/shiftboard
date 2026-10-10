@@ -168,14 +168,6 @@
   "@signupPasswordTooShort": {
     "description": "Error below the password field of the signup form."
   },
-  "signupQualificationsLabel": "Qualifikationen",
-  "@signupQualificationsLabel": {
-    "description": "Label of the qualification chips."
-  },
-  "signupQualificationsHint": "Wähle alles aus, was auf dich zutrifft.",
-  "@signupQualificationsHint": {
-    "description": "Hint below the label of the qualification chips."
-  },
   "signupSubmit": "Registrieren",
   "@signupSubmit": {
     "description": "Button that submits the signup form."

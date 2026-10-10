@@ -1,12 +1,7 @@
 package app.shiftboard.worker.internal;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
 import app.shiftboard.agency.Agencies;
 import app.shiftboard.agency.AgencySummary;
-import app.shiftboard.agency.QualificationSummary;
 import app.shiftboard.agency.TenantContext;
 import app.shiftboard.identity.TokenPair;
 import app.shiftboard.system.ApiException;
@@ -42,10 +37,7 @@ class SignupController {
 
     @GetMapping
     SignupInfo signupInfo(@PathVariable String signupCode) {
-        var agency = agencyOf(signupCode);
-        try (var _ = TenantContext.bind(agency.id())) {
-            return new SignupInfo(agency.name(), agencies.qualifications());
-        }
+        return new SignupInfo(agencyOf(signupCode).name());
     }
 
     @PostMapping
@@ -63,7 +55,7 @@ class SignupController {
                         HttpStatus.NOT_FOUND, "signup_code_unknown", "No agency has this signup code."));
     }
 
-    record SignupInfo(String agencyName, List<QualificationSummary> qualifications) {
+    record SignupInfo(String agencyName) {
     }
 
     record WorkerSignupRequest(
@@ -71,7 +63,6 @@ class SignupController {
             @NotBlank @Size(max = 100) String lastName,
             @NotBlank @Email @Size(max = 254) String email,
             @NotNull @Size(min = 5, max = 30) String phone,
-            @NotNull @Size(min = 8, max = 128) String password,
-            @NotNull Set<UUID> qualificationIds) {
+            @NotNull @Size(min = 8, max = 128) String password) {
     }
 }
