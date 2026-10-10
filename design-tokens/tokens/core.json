@@ -1,0 +1,81 @@
+{
+  "palette": {
+    "$type": "color",
+    "neutral": {
+      "0": { "$value": "#FFFFFF" },
+      "50": { "$value": "#F7F8FA" },
+      "100": { "$value": "#EEF0F4" },
+      "200": { "$value": "#DFE3EA" },
+      "300": { "$value": "#C5CBD6" },
+      "400": { "$value": "#98A1B2" },
+      "500": { "$value": "#6B7588" },
+      "600": { "$value": "#4D5668" },
+      "700": { "$value": "#363D4C" },
+      "800": { "$value": "#222733" },
+      "900": { "$value": "#151922" },
+      "950": { "$value": "#0D1017" }
+    },
+    "brand": {
+      "50": { "$value": "#EEF4FF" },
+      "100": { "$value": "#D9E6FF" },
+      "200": { "$value": "#B8CFFF" },
+      "300": { "$value": "#8AAEFF" },
+      "400": { "$value": "#5A87F7" },
+      "500": { "$value": "#3566E8" },
+      "600": { "$value": "#2450CC" },
+      "700": { "$value": "#1D3FA3" },
+      "800": { "$value": "#1B367F" },
+      "900": { "$value": "#1A2F63" }
+    },
+    "green": {
+      "400": { "$value": "#4CC585" },
+      "600": { "$value": "#17804A" }
+    },
+    "amber": {
+      "400": { "$value": "#F2AE30" },
+      "500": { "$value": "#D98A00" }
+    },
+    "red": {
+      "400": { "$value": "#F0655B" },
+      "600": { "$value": "#B82C22" }
+    }
+  },
+  "spacing": {
+    "$type": "dimension",
+    "1": { "$value": "4px" },
+    "2": { "$value": "8px" },
+    "3": { "$value": "12px" },
+    "4": { "$value": "16px" },
+    "5": { "$value": "20px" },
+    "6": { "$value": "24px" },
+    "8": { "$value": "32px" },
+    "10": { "$value": "40px" },
+    "12": { "$value": "48px" }
+  },
+  "radius": {
+    "$type": "dimension",
+    "sm": { "$value": "6px" },
+    "md": { "$value": "10px" },
+    "lg": { "$value": "14px" },
+    "xl": { "$value": "20px" }
+  },
+  "font": {
+    "family": {
+      "$type": "fontFamily",
+      "sans": { "$value": "Inter" }
+    },
+    "size": {
+      "$type": "dimension",
+      "xs": { "$value": "12px" },
+      "sm": { "$value": "14px" },
+      "md": { "$value": "16px" },
+      "lg": { "$value": "18px" },
+      "xl": { "$value": "20px" },
+      "xxl": { "$value": "24px" },
+      "xxxl": { "$value": "30px" }
+    }
+  },
+  "brand": {
+    "name": { "$type": "string", "$value": "shiftboard" }
+  }
+}
