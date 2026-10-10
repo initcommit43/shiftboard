@@ -1,0 +1,6 @@
+# Local development only: active for `./gradlew bootRun` and in docker-compose.yml.
+shiftboard:
+  security:
+    # Not a secret. It exists so that the application starts on a developer machine without
+    # any setup; every other environment has to provide JWT_SECRET.
+    jwt-secret: ${JWT_SECRET:local-development-only-jwt-secret-0000}

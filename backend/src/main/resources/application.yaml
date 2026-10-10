@@ -32,3 +32,13 @@ shiftboard:
   api:
     # Version of the contract in api/openapi.yaml that this backend implements.
     version: 0.1.0
+  security:
+    # Signs the access tokens, at least 32 characters. No default: without it the application
+    # only starts with the local profile.
+    jwt-secret: ${JWT_SECRET:}
+    access-token-ttl: 15m
+    refresh-token-ttl: 30d
+    login-rate-limit:
+      # Login attempts per email and client address within the window.
+      max-attempts: 5
+      window: 15m
