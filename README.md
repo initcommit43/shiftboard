@@ -30,7 +30,7 @@ The core flow is fixed. Branding, wording, workflow rules, qualifications and op
 
 Both API clients are generated from the OpenAPI spec.
 
-## How to run
+## Getting started
 
 Needs Docker, JDK 25, Node.js 24 and Flutter 3.47.
 
@@ -76,11 +76,19 @@ All demo accounts use the password `shiftboard-demo`.
 
 To sign up a new worker, open `shiftboard://join/donau-demo` on the device or paste the code `donau-demo` after tapping "Registrieren".
 
-Each folder has its own README with tests and further commands.
+Tests, client generation and the other development commands are in [CONTRIBUTING.md](CONTRIBUTING.md#development).
 
 ## Screenshots
 
 Added with the first slice.
+
+## Team
+
+| Who | Parts |
+| --- | --- |
+| [@initcommit43](https://github.com/initcommit43) | Architecture and API, design, DevOps, backend, worker app, dashboard |
+
+Review requests follow [CODEOWNERS](.github/CODEOWNERS).
 
 ## Contributing
 
