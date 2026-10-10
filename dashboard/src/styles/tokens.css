@@ -1,0 +1,54 @@
+/* Generated from design-tokens/tokens. Do not edit; run `npm run build` in design-tokens/. */
+:root {
+  --background: #f7f8fa;
+  --foreground: #151922;
+  --card: #ffffff;
+  --card-foreground: #151922;
+  --popover: #ffffff;
+  --popover-foreground: #151922;
+  --primary: #2450cc;
+  --primary-foreground: #ffffff;
+  --secondary: #eef0f4;
+  --secondary-foreground: #222733;
+  --muted: #eef0f4;
+  --muted-foreground: #4d5668;
+  --accent: #eef4ff;
+  --accent-foreground: #1b367f;
+  --destructive: #b82c22;
+  --destructive-foreground: #ffffff;
+  --success: #17804a;
+  --success-foreground: #ffffff;
+  --warning: #d98a00;
+  --warning-foreground: #0d1017;
+  --border: #dfe3ea;
+  --input: #c5cbd6;
+  --ring: #3566e8;
+  --radius: 0.625rem;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+.dark {
+  --background: #0d1017;
+  --foreground: #f7f8fa;
+  --card: #151922;
+  --card-foreground: #f7f8fa;
+  --popover: #151922;
+  --popover-foreground: #f7f8fa;
+  --primary: #5a87f7;
+  --primary-foreground: #0d1017;
+  --secondary: #222733;
+  --secondary-foreground: #eef0f4;
+  --muted: #222733;
+  --muted-foreground: #98a1b2;
+  --accent: #1a2f63;
+  --accent-foreground: #d9e6ff;
+  --destructive: #f0655b;
+  --destructive-foreground: #0d1017;
+  --success: #4cc585;
+  --success-foreground: #0d1017;
+  --warning: #f2ae30;
+  --warning-foreground: #0d1017;
+  --border: #222733;
+  --input: #363d4c;
+  --ring: #5a87f7;
+}

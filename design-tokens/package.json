@@ -1,0 +1,14 @@
+{
+  "name": "shiftboard-design-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "One token source for the worker app and the agency dashboard",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node build.mjs --check"
+  },
+  "devDependencies": {
+    "style-dictionary": "5.6.1"
+  }
+}
