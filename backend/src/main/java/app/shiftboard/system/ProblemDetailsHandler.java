@@ -41,6 +41,11 @@ class ProblemDetailsHandler extends ResponseEntityExceptionHandler {
         return respond(ex, problem(ex.getStatus(), ex.getCode(), ex.getMessage()), request);
     }
 
+    @ExceptionHandler(InvalidFieldException.class)
+    ResponseEntity<Object> handleInvalidField(InvalidFieldException ex, WebRequest request) {
+        return validationFailed(ex, List.of(new FieldError(ex.getField(), ex.getCode())), request);
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     ResponseEntity<Object> handleAuthentication(AuthenticationException ex, WebRequest request) {
         return respond(ex, problem(HttpStatus.UNAUTHORIZED, "unauthenticated", "Authentication is required."), request);

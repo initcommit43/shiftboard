@@ -48,7 +48,11 @@ class SeedDataIntegrationTests {
                 "qualification", 6,
                 "user_account", 16,
                 "worker", 12,
-                "worker_qualification", 15));
+                "worker_qualification", 15,
+                "client", 4,
+                "location", 5,
+                "shift", 7,
+                "shift_qualification", 7));
         assertThat(workersOfDonauPersonalWith("ACTIVE")).isEqualTo(6);
         assertThat(workersOfDonauPersonalWith("PENDING")).isEqualTo(4);
         assertThat(workersOfDonauPersonalWith("INACTIVE")).isEqualTo(1);
@@ -100,6 +104,31 @@ class SeedDataIntegrationTests {
     }
 
     @Test
+    void theSeededDispatchersSeeTheUpcomingShiftsOfTheirOwnAgency() {
+        client.get().uri("/api/v1/shifts")
+                .headers(headers -> headers.setBearerAuth(login("dispatcher1.donau@example.com", "DASHBOARD")))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[*].title").isEqualTo(List.of(
+                        "Lagerunterstützung", "Service Hochzeit", "Barkeeper:in Hochzeit", "Staplerfahrer:in",
+                        "Auf- und Abbau Messe", "Service Firmenfeier"))
+                .jsonPath("$.content[0].client.name").isEqualTo("Nordlicht Logistik")
+                .jsonPath("$.content[0].location.name").isEqualTo("Zentrallager Linz")
+                .jsonPath("$.content[0].hourlyRateCents").isEqualTo(1650)
+                .jsonPath("$.content[3].qualifications[*].name").isEqualTo(List.of("Lager", "Staplerschein"))
+                .jsonPath("$.content[5].status").isEqualTo("DRAFT");
+
+        client.get().uri("/api/v1/clients")
+                .headers(headers -> headers.setBearerAuth(login("dispatcher.alpen@example.com", "DASHBOARD")))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[*].name").isEqualTo(List.of("Gipfelarena"))
+                .jsonPath("$.content[0].locations[*].name").isEqualTo(List.of("Haupteingang"));
+    }
+
+    @Test
     void theSeededAdminAndWorkersCanLogIn() {
         assertThat(login("admin.donau@example.com", "DASHBOARD")).isNotBlank();
         assertThat(login("lena.hofer@example.com", "WORKER_APP")).isNotBlank();
@@ -117,7 +146,9 @@ class SeedDataIntegrationTests {
 
     private Map<String, Integer> rowCounts() {
         var counts = new LinkedHashMap<String, Integer>();
-        for (var table : List.of("agency", "qualification", "user_account", "worker", "worker_qualification")) {
+        for (var table : List.of(
+                "agency", "qualification", "user_account", "worker", "worker_qualification", "client", "location",
+                "shift", "shift_qualification")) {
             counts.put(table, jdbc.sql("select count(*) from " + table).query(Integer.class).single());
         }
         return counts;

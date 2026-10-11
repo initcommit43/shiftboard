@@ -1,5 +1,6 @@
 package app.shiftboard.seed;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Locale;
 import java.util.UUID;
@@ -16,9 +17,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Two fictional agencies with their qualifications, dashboard users and workers. The rows are
- * written with plain SQL, like a migration would, because nothing in the application creates
- * agencies or dashboard users yet. Runs once: a database that has the demo agency is left alone.
+ * Two fictional agencies with their qualifications, dashboard users, workers, clients, locations
+ * and shifts. The rows are written with plain SQL, like a migration would, because nothing in the
+ * application creates agencies, dashboard users or clients yet. Runs once: a database that has
+ * the demo agency is left alone.
  */
 @Component
 @Profile("local")
@@ -58,8 +60,31 @@ class SeedData implements ApplicationRunner {
         var staplerschein = qualification(agency, "Staplerschein");
 
         account(agency, "admin.donau@example.com", "ADMIN");
-        account(agency, "dispatcher1.donau@example.com", "DISPATCHER");
+        var dispatcher = account(agency, "dispatcher1.donau@example.com", "DISPATCHER");
         account(agency, "dispatcher2.donau@example.com", "DISPATCHER");
+
+        var logistics = client(agency, "Nordlicht Logistik");
+        var warehouse = location(agency, logistics, "Zentrallager Linz", "Hafenstraße 12, 4020 Linz");
+        var depot = location(agency, logistics, "Umschlagplatz Wels", "Terminalstraße 5, 4600 Wels");
+        var hotel = client(agency, "Hotel Lindenhof");
+        var ballroom = location(agency, hotel, "Bankettsaal", "Lindenallee 3, 4040 Linz");
+        var catering = client(agency, "Genusswerk Catering");
+        var hall = location(agency, catering, "Messehalle Wels", "Messeplatz 1, 4600 Wels");
+
+        shift(agency, logistics, warehouse, dispatcher, "Lagerunterstützung",
+                "Sicherheitsschuhe mitbringen. Treffpunkt beim Tor 3.", 1, 6, 8, false, "16.50", 5, "PUBLISHED",
+                lager);
+        shift(agency, hotel, ballroom, dispatcher, "Service Hochzeit",
+                "Schwarze Hose, weißes Hemd. Treffpunkt an der Rezeption.", 2, 16, 8, true, "15.00", 6, "PUBLISHED",
+                service);
+        shift(agency, hotel, ballroom, dispatcher, "Barkeeper:in Hochzeit", null, 2, 17, 7, true, "17.50", 2,
+                "PUBLISHED", bar);
+        shift(agency, logistics, depot, dispatcher, "Staplerfahrer:in", "Staplerschein nicht vergessen.", 3, 7, 8,
+                false, "19.00", 2, "PUBLISHED", lager, staplerschein);
+        shift(agency, catering, hall, dispatcher, "Auf- und Abbau Messe", null, 5, 8, 6, true, "14.50", 8,
+                "PUBLISHED");
+        shift(agency, catering, hall, dispatcher, "Service Firmenfeier", null, 9, 17, 6, true, "15.50", 10, "DRAFT",
+                service);
 
         worker(agency, 1, "Lena", "Hofer", "1996-03-14", "ACTIVE", 60, service, bar);
         worker(agency, 2, "Jakob", "Steiner", "1988-11-02", "ACTIVE", 52, lager, staplerschein);
@@ -79,7 +104,12 @@ class SeedData implements ApplicationRunner {
         var service = qualification(agency, "Service");
         qualification(agency, "Security");
 
-        account(agency, "dispatcher.alpen@example.com", "DISPATCHER");
+        var dispatcher = account(agency, "dispatcher.alpen@example.com", "DISPATCHER");
+
+        var arena = client(agency, "Gipfelarena");
+        var stadium = location(agency, arena, "Haupteingang", "Arenaweg 2, 6020 Innsbruck");
+        shift(agency, arena, stadium, dispatcher, "Einlass Konzert", null, 4, 17, 6, true, "15.00", 12, "PUBLISHED",
+                service);
 
         worker(agency, 12, "Tobias", "Gruber", "1990-06-09", "ACTIVE", 20, service);
     }
@@ -99,6 +129,45 @@ class SeedData implements ApplicationRunner {
                 insert into user_account (id, agency_id, email, password_hash, role)
                 values (uuidv7(), ?, ?, ?, ?) returning id
                 """).params(agencyId, email, passwordHash, role).query(UUID.class).single();
+    }
+
+    private UUID client(UUID agencyId, String name) {
+        return jdbc.sql("insert into client (id, agency_id, name) values (uuidv7(), ?, ?) returning id")
+                .params(agencyId, name).query(UUID.class).single();
+    }
+
+    private UUID location(UUID agencyId, UUID clientId, String name, String address) {
+        return jdbc.sql("""
+                insert into location (id, agency_id, client_id, name, address)
+                values (uuidv7(), ?, ?, ?, ?) returning id
+                """).params(agencyId, clientId, name, address).query(UUID.class).single();
+    }
+
+    /** A shift that starts {@code inDays} days from today at {@code startHour} o'clock in Vienna. */
+    private void shift(
+            UUID agencyId, UUID clientId, UUID locationId, UUID contactUserId, String title, String description,
+            int inDays, int startHour, int hours, boolean endIsEstimate, String hourlyRate, int slots, String status,
+            UUID... qualificationIds) {
+        var shiftId = jdbc.sql("""
+                with start as (
+                    select (date_trunc('day', now() at time zone 'Europe/Vienna')
+                            + make_interval(days => ?, hours => ?)) at time zone 'Europe/Vienna' as at
+                )
+                insert into shift (
+                    id, agency_id, client_id, location_id, contact_user_id, title, description, starts_at, ends_at,
+                    end_is_estimate, hourly_rate, slots, status)
+                select uuidv7(), ?, ?, ?, ?, ?, ?, start.at, start.at + make_interval(hours => ?), ?, ?, ?, ?
+                from start
+                returning id
+                """)
+                .params(
+                        inDays, startHour, agencyId, clientId, locationId, contactUserId, title, description, hours,
+                        endIsEstimate, new BigDecimal(hourlyRate), slots, status)
+                .query(UUID.class).single();
+        for (var qualificationId : qualificationIds) {
+            jdbc.sql("insert into shift_qualification (shift_id, qualification_id) values (?, ?)")
+                    .params(shiftId, qualificationId).update();
+        }
     }
 
     private void worker(
