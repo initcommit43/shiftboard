@@ -23,3 +23,4 @@ One short record per real decision. Format: `NNNN-title.md` with the sections Co
 | [0017](0017-data-protection.md) | Minimal personal data and anonymization on deletion |
 | [0018](0018-date-of-birth.md) | Date of birth in the worker profile |
 | [0019](0019-source-available-all-rights-reserved.md) | Public repository, all rights reserved |
+| [0020](0020-worker-app-tabs.md) | Tabs of the worker app |

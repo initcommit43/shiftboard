@@ -33,6 +33,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final tabs = [
       (
+        title: l10n.navShifts,
         tab: AppTab(
           label: l10n.navShifts,
           icon: CupertinoIcons.square_list,
@@ -41,14 +42,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         view: ShiftsView(agencyName: user.agency.name),
       ),
       (
+        title: l10n.navMyShifts,
         tab: AppTab(
-          label: l10n.navMyShifts,
+          label: l10n.navMyShiftsShort,
+          semanticLabel: l10n.navMyShifts,
           icon: CupertinoIcons.checkmark_circle,
           selectedIcon: CupertinoIcons.checkmark_circle_fill,
         ),
         view: const _ComingSoon(),
       ),
       (
+        title: l10n.navMessages,
         tab: AppTab(
           label: l10n.navMessages,
           icon: CupertinoIcons.chat_bubble,
@@ -57,6 +61,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         view: const _ComingSoon(),
       ),
       (
+        title: l10n.navProfile,
         tab: AppTab(
           label: l10n.navProfile,
           icon: CupertinoIcons.person,
@@ -92,7 +97,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: Semantics(
                       header: true,
                       child: Text(
-                        tabs[_tab].tab.label,
+                        tabs[_tab].title,
                         style: AppTypography.largeTitle.copyWith(
                           color: context.colors.ink,
                         ),

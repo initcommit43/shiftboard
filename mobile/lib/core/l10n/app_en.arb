@@ -67,6 +67,7 @@
   "inactiveContactMessage": "Please contact {agency} directly.",
   "navShifts": "Shifts",
   "navMyShifts": "My shifts",
+  "navMyShiftsShort": "Mine",
   "navMessages": "Messages",
   "navProfile": "Profile",
   "shiftsEmptyTitle": "No open shifts right now",
