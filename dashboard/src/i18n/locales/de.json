@@ -34,6 +34,7 @@
     "WORKER": "Mitarbeiter:in"
   },
   "login": {
+    "tagline": "Jede Schicht besetzt.",
     "title": "Anmelden",
     "description": "Melde dich mit deinem Agentur-Konto im Dashboard an.",
     "email": "E-Mail",

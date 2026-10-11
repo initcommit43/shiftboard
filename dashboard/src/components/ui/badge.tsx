@@ -3,24 +3,23 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const badgeVariants = cva(
-  "inline-flex w-fit shrink-0 items-center justify-center px-2 py-1 text-xs leading-4 font-medium whitespace-nowrap",
+  "type-caption inline-flex w-fit shrink-0 items-center justify-center rounded-full px-3 py-1 whitespace-nowrap",
   {
     variants: {
       variant: {
-        secondary: "rounded-sm bg-secondary text-secondary-foreground",
-        count:
-          "min-w-6 rounded-full bg-primary text-primary-foreground tabular-nums",
+        tag: "border bg-surface-soft text-ink",
+        feature: "min-w-7 bg-primary text-on-primary tabular-nums",
       },
     },
     defaultVariants: {
-      variant: "secondary",
+      variant: "tag",
     },
   }
 )
 
 function Badge({
   className,
-  variant = "secondary",
+  variant = "tag",
   ...props
 }: React.ComponentProps<"span"> & VariantProps<typeof badgeVariants>) {
   return (

@@ -13,7 +13,7 @@ export function SignupsPage() {
   const { t } = useTranslation()
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <PageHeader title={t('signups.title')} description={t('signups.description')} />
       <PendingSignups />
     </div>
@@ -32,7 +32,7 @@ function PendingSignups() {
   if (signups.isError) {
     return (
       <StateCard
-        icon={<TriangleAlert className="text-destructive" />}
+        icon={<TriangleAlert className="text-danger-text" />}
         title={t('signups.error.title')}
         description={t('signups.error.description')}
         action={
@@ -72,16 +72,17 @@ function PendingSignups() {
       <SignupTable workers={content} />
 
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <p className="text-sm text-muted-foreground">
+        <p className="type-body-sm text-ink-secondary">
           {t('signups.count', { count: totalElements })}
         </p>
         {totalPages > 1 && (
           <nav aria-label={t('signups.pagination.label')} className="flex items-center gap-2">
-            <span className="mr-2 text-sm text-muted-foreground">
+            <span className="type-body-sm mr-2 text-ink-secondary tabular-nums">
               {t('signups.pagination.page', { page: page + 1, total: totalPages })}
             </span>
             <Button
               variant="outline"
+              size="sm"
               disabled={page === 0 || signups.isPlaceholderData}
               onClick={() => {
                 setPage(page - 1)
@@ -91,6 +92,7 @@ function PendingSignups() {
             </Button>
             <Button
               variant="outline"
+              size="sm"
               disabled={page >= totalPages - 1 || signups.isPlaceholderData}
               onClick={() => {
                 setPage(page + 1)

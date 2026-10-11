@@ -62,11 +62,11 @@ function SignupRow({ worker }: { worker: Worker }) {
         <div className="flex items-center gap-3">
           <span
             aria-hidden
-            className="grid size-8 shrink-0 place-items-center rounded-full bg-muted text-xs font-medium text-muted-foreground"
+            className="type-caption grid size-9 shrink-0 place-items-center rounded-full border bg-surface-soft font-semibold"
           >
             {initials(name)}
           </span>
-          <span className="font-medium">{name}</span>
+          <span className="font-semibold">{name}</span>
         </div>
       </TableCell>
       <TableCell>{worker.email}</TableCell>
@@ -78,7 +78,7 @@ function SignupRow({ worker }: { worker: Worker }) {
           ))}
         </div>
       </TableCell>
-      <TableCell className="text-muted-foreground">
+      <TableCell className="text-ink-secondary tabular-nums">
         {new Intl.DateTimeFormat(i18n.language, {
           dateStyle: 'medium',
           timeStyle: 'short',
@@ -88,6 +88,7 @@ function SignupRow({ worker }: { worker: Worker }) {
         <div className="flex items-center justify-end gap-2">
           <RejectSignup worker={worker} disabled={approve.isPending} />
           <Button
+            size="sm"
             aria-label={t('signups.approveNamed', { name })}
             disabled={approve.isPending}
             onClick={() => {
@@ -115,7 +116,7 @@ export function SignupTableSkeleton() {
           <TableRow key={row}>
             <TableCell>
               <div className="flex items-center gap-3">
-                <Skeleton className="size-8 rounded-full" />
+                <Skeleton className="size-9 rounded-full" />
                 <Skeleton className="h-3.5 w-22" />
               </div>
             </TableCell>
@@ -126,15 +127,15 @@ export function SignupTableSkeleton() {
               <Skeleton className="h-3.5 w-26" />
             </TableCell>
             <TableCell>
-              <Skeleton className="h-5.5 w-24" />
+              <Skeleton className="h-6.5 w-24 rounded-full" />
             </TableCell>
             <TableCell>
               <Skeleton className="h-3.5 w-28" />
             </TableCell>
             <TableCell>
               <div className="flex justify-end gap-2">
-                <Skeleton className="h-9 w-22" />
-                <Skeleton className="h-9 w-24" />
+                <Skeleton className="h-9 w-22 rounded-full" />
+                <Skeleton className="h-9 w-24 rounded-full" />
               </div>
             </TableCell>
           </TableRow>

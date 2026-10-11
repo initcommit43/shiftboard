@@ -35,8 +35,8 @@ function NavItem({
       to={to}
       className={({ isActive }) =>
         cn(
-          'flex h-9 items-center gap-3 rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50',
-          isActive && 'bg-accent text-accent-foreground',
+          'type-button-sm flex h-11 items-center gap-3 rounded-full px-4 text-ink-secondary transition-colors hover:bg-surface-soft hover:text-ink',
+          isActive && 'bg-surface-soft text-ink',
         )
       }
     >
@@ -55,7 +55,7 @@ function PendingSignupsBadge() {
     return null
   }
   return (
-    <Badge variant="count">
+    <Badge variant="feature">
       <span aria-hidden>{count}</span>
       <span className="sr-only">{t('shell.nav.pendingSignups', { count })}</span>
     </Badge>
@@ -69,8 +69,9 @@ export function AppShell() {
 
   return (
     <div className="flex min-h-svh">
-      <aside className="hidden w-60 shrink-0 flex-col gap-6 border-r bg-card px-3 py-4 md:flex">
-        <div className="flex h-8 items-center px-2">
+      {/* The navigation is a dark band in both themes. */}
+      <aside className="dark hidden w-64 shrink-0 flex-col gap-8 border-r bg-canvas px-4 pb-6 text-ink md:flex">
+        <div className="flex h-16 items-center px-4">
           <Brand />
         </div>
         <nav aria-label={t('shell.navigation')} className="flex flex-col gap-1">
@@ -84,15 +85,15 @@ export function AppShell() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b bg-card px-6">
+        <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b px-8">
           <div className="flex min-w-0 items-center gap-3">
             <span
               aria-hidden
-              className="grid size-8 shrink-0 place-items-center rounded-lg bg-accent text-xs font-medium text-accent-foreground"
+              className="type-caption grid size-9 shrink-0 place-items-center rounded-full bg-surface-soft font-semibold"
             >
               {initials(agency.name)}
             </span>
-            <span className="truncate text-sm font-semibold">{agency.name}</span>
+            <span className="type-body-md-bold truncate">{agency.name}</span>
           </div>
           <div className="flex items-center gap-1">
             <LanguageSwitch />
@@ -100,8 +101,10 @@ export function AppShell() {
             <UserMenu />
           </div>
         </header>
-        <main className="flex-1 px-6 py-8">
-          <Outlet />
+        <main className="flex-1 px-8 py-12">
+          <div className="mx-auto max-w-[75rem]">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

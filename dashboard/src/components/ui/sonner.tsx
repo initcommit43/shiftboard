@@ -1,24 +1,25 @@
 import { CircleAlert, CircleCheck } from "lucide-react"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
-// Unstyled, so that the toast takes every color from the design tokens.
+// Unstyled, so that the toast takes every color from the design tokens. It is
+// the inverse of the page, which sets it apart without a shadow.
 function Toaster(props: ToasterProps) {
   return (
     <Sonner
       position="bottom-right"
       offset={24}
       icons={{
-        success: <CircleCheck aria-hidden className="size-5 text-success" />,
-        error: <CircleAlert aria-hidden className="size-5 text-destructive" />,
+        success: <CircleCheck aria-hidden className="size-5" />,
+        error: <CircleAlert aria-hidden className="size-5" />,
       }}
       toastOptions={{
         unstyled: true,
         classNames: {
           toast:
-            "flex w-[380px] max-w-[calc(100vw-3rem)] items-start gap-3 rounded-lg border bg-popover p-4 text-sm text-popover-foreground shadow-lg",
+            "type-body-sm flex w-[380px] max-w-[calc(100vw-3rem)] items-start gap-3 rounded-md bg-action p-4 text-on-action",
           content: "flex flex-col gap-1",
-          title: "font-medium",
-          description: "text-muted-foreground",
+          title: "font-semibold",
+          description: "opacity-72",
         },
       }}
       {...props}

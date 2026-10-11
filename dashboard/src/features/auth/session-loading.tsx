@@ -11,7 +11,7 @@ export function SessionLoading() {
       aria-label={t('shell.sessionLoading')}
       className="grid min-h-svh place-items-center"
     >
-      <LoaderCircle aria-hidden className="size-6 animate-spin text-muted-foreground" />
+      <LoaderCircle aria-hidden className="size-6 animate-spin text-ink-tertiary" />
     </div>
   )
 }
