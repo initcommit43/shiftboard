@@ -1,6 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shiftboard/core/widgets/app_tab_bar.dart';
 
@@ -28,13 +32,18 @@ void main() {
   testWidgets('the other tabs announce what is coming', (tester) async {
     await pumpApp(tester, backend);
 
-    for (final tab in ['Meine Schichten', 'Nachrichten', 'Profil']) {
+    final titles = {
+      'Meine': 'Meine Schichten',
+      'Nachrichten': 'Nachrichten',
+      'Profil': 'Profil',
+    };
+    for (final MapEntry(key: tab, value: title) in titles.entries) {
       await tester.tap(find.text(tab));
       await tester.pumpAndSettle();
 
       expect(find.text('Kommt bald').hitTestable(), findsOneWidget);
-      // The tab's label and the title of the screen.
-      expect(find.text(tab), findsNWidgets(2));
+      // The title of the screen, and the tab's label where it is the same word.
+      expect(find.text(title), findsNWidgets(title == tab ? 2 : 1));
     }
 
     await tester.tap(find.text('Schichten'));
@@ -43,6 +52,44 @@ void main() {
       find.text('Aktuell keine offenen Schichten').hitTestable(),
       findsOneWidget,
     );
+  });
+
+  testWidgets('the tab labels fit the smallest screen with large text', (
+    tester,
+  ) async {
+    // Widths are only real with the real font; the test font is much wider.
+    final inter = FontLoader('Inter');
+    for (final weight in ['Regular', 'Medium']) {
+      final bytes = File('assets/fonts/inter/Inter-$weight.ttf')
+          .readAsBytesSync();
+      inter.addFont(Future.value(ByteData.sublistView(bytes)));
+    }
+    await inter.load();
+    // 375 wide is the narrowest screen the design supports.
+    tester.view.physicalSize = const Size(375, 667);
+    tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+    await pumpApp(tester, backend);
+
+    // The paragraphs of the labels; the icons are paragraphs too.
+    final labels = find.descendant(
+      of: find.descendant(
+        of: find.byType(AppTabItem),
+        matching: find.byType(Text),
+      ),
+      matching: find.byType(RichText),
+    );
+    expect(labels, findsNWidgets(4));
+    for (final label in tester.renderObjectList<RenderParagraph>(labels)) {
+      expect(
+        label.didExceedMaxLines,
+        isFalse,
+        reason: '"${label.text.toPlainText()}" is cut off',
+      );
+    }
   });
 
   testWidgets('shows placeholders while refreshing', (tester) async {

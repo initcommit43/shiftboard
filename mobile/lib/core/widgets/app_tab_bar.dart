@@ -12,9 +12,14 @@ class AppTab {
     required this.label,
     required this.icon,
     required this.selectedIcon,
+    this.semanticLabel,
   });
 
+  /// One short word; four tabs share the width of the screen.
   final String label;
+
+  /// What screen readers say instead of a [label] that is abbreviated.
+  final String? semanticLabel;
   final IconData icon;
 
   /// The filled variant, shown while the tab is selected.
@@ -92,6 +97,8 @@ class AppTabItem extends StatelessWidget {
     required this.onTap,
   });
 
+  static const double _maxLabelScale = 1.2;
+
   final AppTab tab;
   final bool selected;
   final VoidCallback onTap;
@@ -104,6 +111,8 @@ class AppTabItem extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
+      label: tab.semanticLabel,
+      excludeSemantics: tab.semanticLabel != null,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
@@ -123,6 +132,11 @@ class AppTabItem extends StatelessWidget {
                 tab.label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
+                // As in a native tab bar, the labels grow only a little with
+                // the system text size: a quarter of the width has no room
+                // for more, and the screen title above carries the full name.
+                textScaler: MediaQuery.textScalerOf(context)
+                    .clamp(maxScaleFactor: _maxLabelScale),
                 style: AppTypography.caption2.copyWith(color: color),
               ),
             ],

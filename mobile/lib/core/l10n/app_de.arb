@@ -302,7 +302,11 @@
   },
   "navMyShifts": "Meine Schichten",
   "@navMyShifts": {
-    "description": "Tab with the worker's own shifts."
+    "description": "Title of the tab with the worker's own shifts, and its name for screen readers."
+  },
+  "navMyShiftsShort": "Meine",
+  "@navMyShiftsShort": {
+    "description": "Label of the tab with the worker's own shifts in the tab bar. One short word: it has a quarter of a small phone's width."
   },
   "navMessages": "Nachrichten",
   "@navMessages": {
