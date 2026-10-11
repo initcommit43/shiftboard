@@ -34,6 +34,10 @@ tags:
     description: Login, token refresh, logout and the current user
   - name: workers
     description: The agency's worker pool
+  - name: clients
+    description: The agency's customers, their locations and the qualifications a shift can ask for
+  - name: shifts
+    description: Shifts the agency creates and publishes
 security:
   - bearerAuth: []
 paths:
@@ -318,6 +322,156 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /clients:
+    get:
+      operationId: listClients
+      tags: [clients]
+      summary: List the agency's clients with their locations
+      description: |
+        What the shift form offers to choose from. Dispatchers and admins
+        only. Sorted by name; the locations of a client are sorted by name too.
+
+        Error codes: `forbidden` (403).
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of clients.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientPage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /qualifications:
+    get:
+      operationId: listQualifications
+      tags: [clients]
+      summary: List the agency's qualifications
+      description: |
+        The qualifications a shift can require. Dispatchers and admins only.
+        Sorted by name.
+
+        Error codes: `forbidden` (403).
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of qualifications.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QualificationPage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /shifts:
+    get:
+      operationId: listShifts
+      tags: [shifts]
+      summary: List the agency's upcoming shifts
+      description: |
+        Draft and published shifts that have not ended yet, sorted by start
+        time, earliest first. Dispatchers and admins only.
+
+        Error codes: `forbidden` (403).
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of shifts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShiftPage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+    post:
+      operationId: createShift
+      tags: [shifts]
+      summary: Create a shift
+      description: |
+        Creates the shift as `DRAFT`, or as `PUBLISHED` when `publish` is
+        true. Dispatchers and admins only.
+
+        Field error codes: `required`, `invalid_format`, `too_long`,
+        `out_of_range` (`hourlyRateCents` below 1, `slots` below 1 or above
+        500), `before_start` (`endsAt` is not after `startsAt`) and
+        `not_found` (`clientId` is not a client of the agency, `locationId` is
+        not a location of that client, or `qualificationIds` contains an
+        unknown qualification).
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShiftRequest"
+      responses:
+        "201":
+          description: The created shift.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shift"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /shifts/{shiftId}/publish:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+    post:
+      operationId: publishShift
+      tags: [shifts]
+      summary: Publish a draft
+      description: |
+        Sets the shift to `PUBLISHED`, so that workers can see and claim it.
+        Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `shift_not_found` (404),
+        `shift_not_draft` (409).
+      responses:
+        "200":
+          description: The published shift.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shift"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -336,6 +490,13 @@ components:
         maxLength: 64
     WorkerId:
       name: workerId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ShiftId:
+      name: shiftId
       in: path
       required: true
       schema:
@@ -566,6 +727,235 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Worker"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+
+    QualificationPage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/Qualification"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+
+    Location:
+      type: object
+      description: A site of a client where shifts take place.
+      required: [id, name, address]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          examples: [Zentrallager Linz]
+        address:
+          type: string
+          description: Postal address in one line.
+          examples: ["Industriezeile 40, 4020 Linz"]
+
+    ClientSummary:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          examples: [Nordlicht Logistik]
+
+    Client:
+      type: object
+      description: A customer of the agency, with the locations shifts can take place at.
+      required: [id, name, locations]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          examples: [Nordlicht Logistik]
+        locations:
+          type: array
+          items:
+            $ref: "#/components/schemas/Location"
+
+    ClientPage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/Client"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+
+    ShiftStatus:
+      type: string
+      description: |
+        `DRAFT` until the agency publishes it, `PUBLISHED` while workers can
+        see it, `COMPLETED` after it took place, `CANCELLED` when the agency
+        called it off. Whether a published shift is full follows from
+        `takenSlots` and `slots`.
+      enum: [DRAFT, PUBLISHED, COMPLETED, CANCELLED]
+
+    ShiftRequest:
+      type: object
+      required: [clientId, locationId, title, startsAt, endsAt, hourlyRateCents, slots]
+      properties:
+        clientId:
+          type: string
+          format: uuid
+        locationId:
+          type: string
+          format: uuid
+          description: A location of the client.
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+          examples: [Lagerunterstützung]
+        description:
+          type: string
+          maxLength: 2000
+          description: What to bring, the meeting point and anything else workers need to know.
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+          description: Must be after `startsAt`.
+        endIsEstimate:
+          type: boolean
+          default: false
+          description: The end is approximate; clients show it with "ca.".
+        hourlyRateCents:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Gross pay per hour in euro cents.
+          examples: [1650]
+        slots:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 500
+          description: How many workers the shift needs.
+        qualificationIds:
+          type: array
+          description: Qualifications a worker needs to claim the shift. Empty or absent means none.
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+        publish:
+          type: boolean
+          default: false
+          description: Publish the shift right away instead of saving it as a draft.
+
+    Shift:
+      type: object
+      required:
+        - id
+        - title
+        - status
+        - client
+        - location
+        - startsAt
+        - endsAt
+        - endIsEstimate
+        - hourlyRateCents
+        - slots
+        - takenSlots
+        - qualifications
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: "#/components/schemas/ShiftStatus"
+        client:
+          $ref: "#/components/schemas/ClientSummary"
+        location:
+          $ref: "#/components/schemas/Location"
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        endIsEstimate:
+          type: boolean
+        hourlyRateCents:
+          type: integer
+          format: int32
+          description: Gross pay per hour in euro cents.
+        slots:
+          type: integer
+          format: int32
+          description: How many workers the shift needs.
+        takenSlots:
+          type: integer
+          format: int32
+          description: How many of the slots are claimed.
+        qualifications:
+          type: array
+          description: Qualifications a worker needs to claim the shift.
+          items:
+            $ref: "#/components/schemas/Qualification"
+        createdAt:
+          type: string
+          format: date-time
+
+    ShiftPage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/Shift"
         page:
           type: integer
           format: int32

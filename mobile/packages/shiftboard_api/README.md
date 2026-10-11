@@ -83,6 +83,11 @@ Class | Method | HTTP request | Description
 [*AuthApi*](doc/AuthApi.md) | [**login**](doc/AuthApi.md#login) | **POST** /auth/login | Log in with email and password
 [*AuthApi*](doc/AuthApi.md) | [**logout**](doc/AuthApi.md#logout) | **POST** /auth/logout | End the session on this device
 [*AuthApi*](doc/AuthApi.md) | [**refreshToken**](doc/AuthApi.md#refreshtoken) | **POST** /auth/refresh | Exchange a refresh token for a new token pair
+[*ClientsApi*](doc/ClientsApi.md) | [**listClients**](doc/ClientsApi.md#listclients) | **GET** /clients | List the agency&#39;s clients with their locations
+[*ClientsApi*](doc/ClientsApi.md) | [**listQualifications**](doc/ClientsApi.md#listqualifications) | **GET** /qualifications | List the agency&#39;s qualifications
+[*ShiftsApi*](doc/ShiftsApi.md) | [**createShift**](doc/ShiftsApi.md#createshift) | **POST** /shifts | Create a shift
+[*ShiftsApi*](doc/ShiftsApi.md) | [**listShifts**](doc/ShiftsApi.md#listshifts) | **GET** /shifts | List the agency&#39;s upcoming shifts
+[*ShiftsApi*](doc/ShiftsApi.md) | [**publishShift**](doc/ShiftsApi.md#publishshift) | **POST** /shifts/{shiftId}/publish | Publish a draft
 [*SignupApi*](doc/SignupApi.md) | [**getSignupInfo**](doc/SignupApi.md#getsignupinfo) | **GET** /signup/{signupCode} | Look up the agency behind a signup link
 [*SignupApi*](doc/SignupApi.md) | [**signUp**](doc/SignupApi.md#signup) | **POST** /signup/{signupCode} | Sign up as a worker of the agency
 [*SystemApi*](doc/SystemApi.md) | [**ping**](doc/SystemApi.md#ping) | **GET** /ping | Check that the API is reachable
@@ -94,15 +99,24 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [AgencySummary](doc/AgencySummary.md)
+ - [Client](doc/Client.md)
+ - [ClientPage](doc/ClientPage.md)
+ - [ClientSummary](doc/ClientSummary.md)
  - [ClientType](doc/ClientType.md)
  - [CurrentUser](doc/CurrentUser.md)
  - [FieldError](doc/FieldError.md)
+ - [Location](doc/Location.md)
  - [LoginRequest](doc/LoginRequest.md)
  - [Ping](doc/Ping.md)
  - [Problem](doc/Problem.md)
  - [Qualification](doc/Qualification.md)
+ - [QualificationPage](doc/QualificationPage.md)
  - [RefreshTokenRequest](doc/RefreshTokenRequest.md)
  - [Role](doc/Role.md)
+ - [Shift](doc/Shift.md)
+ - [ShiftPage](doc/ShiftPage.md)
+ - [ShiftRequest](doc/ShiftRequest.md)
+ - [ShiftStatus](doc/ShiftStatus.md)
  - [SignupInfo](doc/SignupInfo.md)
  - [TokenResponse](doc/TokenResponse.md)
  - [Worker](doc/Worker.md)
