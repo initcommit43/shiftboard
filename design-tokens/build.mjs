@@ -34,37 +34,65 @@ const px = (value) => Number.parseFloat(value);
 const rem = (value) => `${px(value) / 16}rem`;
 const camel = (name) => name.replace(/-(\w)/g, (_, char) => char.toUpperCase());
 const dartName = (name) => (/^\d/.test(name) ? `s${name}` : camel(name));
-const dartColor = (hex) => `Color(0xFF${hex.slice(1).toUpperCase()})`;
+// Colors are #RRGGBB or, with transparency, #RRGGBBAA. Dart wants the alpha first.
+const dartColor = (hex) => `Color(0x${(hex.slice(7) || "FF").toUpperCase()}${hex.slice(1, 7).toUpperCase()})`;
+const fontStack = (...families) => [...families.map((family) => `"${family}"`), "ui-sans-serif", "system-ui", "sans-serif"].join(", ");
 
 const light = await resolveTheme("light");
 const dark = await resolveTheme("dark");
 
 const header = "Generated from design-tokens/tokens. Do not edit; run `npm run build` in design-tokens/.";
 
-// CSS: the variable names shadcn/ui expects, light on :root and dark on .dark.
+// CSS: colors, radius and fonts as variables, light on :root and dark on .dark,
+// and one Tailwind utility per text style of the web scale (type-heading-lg, ...).
 const cssColors = (tokens) => group(tokens, "color").map(([name, value]) => `  --${name}: ${value.toLowerCase()};`);
+const cssTextStyle = ([name, style]) => [
+  `@utility type-${name} {`,
+  `  font-family: var(--font-family-${style.fontFamily === light["font.family.text"] ? "text" : "display"});`,
+  `  font-size: ${rem(style.fontSize)};`,
+  `  font-weight: ${style.fontWeight};`,
+  `  line-height: ${style.lineHeight};`,
+  `  letter-spacing: ${style.letterSpacing};`,
+  "}",
+  "",
+];
 const css = [
   `/* ${header} */`,
   ":root {",
   ...cssColors(light),
-  `  --radius: ${rem(light["radius.md"])};`,
-  `  --font-sans: "${light["font.family.sans"]}", ui-sans-serif, system-ui, sans-serif;`,
+  ...group(light, "radius")
+    .filter(([name]) => name !== "full")
+    .map(([name, value]) => `  --radius-${name}: ${rem(value)};`),
+  `  --font-family-text: ${fontStack(light["font.family.text"])};`,
+  `  --font-family-display: ${fontStack(light["font.family.display-web"], light["font.family.text"])};`,
   "}",
   "",
   ".dark {",
   ...cssColors(dark),
   "}",
   "",
+  ...group(light, "web.typography").flatMap(cssTextStyle),
 ].join("\n");
 
-// Dart: the constants the Flutter theme is built from.
+// Dart: the constants the Flutter theme is built from, with the mobile scale.
 const colorNames = group(light, "color").map(([name]) => dartName(name));
 const dartColors = (tokens) => group(tokens, "color").map(([name, value]) => `    ${dartName(name)}: ${dartColor(value)},`);
-const dartNumbers = (prefix) =>
-  group(light, prefix).map(([name, value]) => `  static const double ${dartName(name)} = ${px(value)};`);
+const dartNumbers = (...prefixes) =>
+  prefixes.flatMap((prefix) =>
+    group(light, prefix).map(([name, value]) => `  static const double ${dartName(name)} = ${px(value)};`),
+  );
+const dartTextStyle = ([name, style]) => [
+  `  static const TextStyle ${dartName(name)} = TextStyle(`,
+  `    fontFamily: '${style.fontFamily}',`,
+  `    fontSize: ${px(style.fontSize)},`,
+  `    fontWeight: FontWeight.w${style.fontWeight},`,
+  `    height: ${px(style.lineHeight)} / ${px(style.fontSize)},`,
+  `    letterSpacing: ${px(style.letterSpacing)},`,
+  "  );",
+];
 const dart = [
   `// ${header}`,
-  "import 'dart:ui';",
+  "import 'package:flutter/painting.dart';",
   "",
   "/// Semantic colors of one theme.",
   "class AppColors {",
@@ -84,20 +112,25 @@ const dart = [
   "}",
   "",
   "abstract final class AppSpacing {",
-  ...dartNumbers("spacing"),
+  ...dartNumbers("spacing", "mobile.layout"),
   "}",
   "",
   "abstract final class AppRadius {",
   ...dartNumbers("radius"),
   "}",
   "",
-  "abstract final class AppFontSize {",
-  ...dartNumbers("font.size"),
+  "abstract final class AppSize {",
+  ...dartNumbers("mobile.size"),
+  "}",
+  "",
+  "abstract final class AppTypography {",
+  ...group(light, "mobile.typography").flatMap(dartTextStyle),
   "}",
   "",
   "abstract final class AppBrand {",
   `  static const String name = '${light["brand.name"]}';`,
-  `  static const String fontFamily = '${light["font.family.sans"]}';`,
+  `  static const String fontFamily = '${light["font.family.text"]}';`,
+  `  static const String displayFontFamily = '${light["font.family.display-mobile"]}';`,
   "}",
   "",
 ].join("\n");

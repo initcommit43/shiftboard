@@ -1,81 +1,163 @@
 {
   "palette": {
     "$type": "color",
+    "white": { "$value": "#FFFFFF" },
+    "black": { "$value": "#000000" },
+    "white-alpha": {
+      "12": { "$value": "#FFFFFF1F" },
+      "30": { "$value": "#FFFFFF4D" },
+      "72": { "$value": "#FFFFFFB8" },
+      "80": { "$value": "#FFFFFFCC" }
+    },
+    "black-alpha": {
+      "40": { "$value": "#00000066" },
+      "60": { "$value": "#00000099" }
+    },
+    "cobalt": {
+      "base": { "$value": "#494FDF" },
+      "deep": { "$value": "#3A40C4" },
+      "lifted": { "$value": "#8A8FFF" }
+    },
     "neutral": {
-      "0": { "$value": "#FFFFFF" },
-      "50": { "$value": "#F7F8FA" },
-      "100": { "$value": "#EEF0F4" },
-      "200": { "$value": "#DFE3EA" },
-      "300": { "$value": "#C5CBD6" },
-      "400": { "$value": "#98A1B2" },
-      "500": { "$value": "#6B7588" },
-      "600": { "$value": "#4D5668" },
-      "700": { "$value": "#363D4C" },
-      "800": { "$value": "#222733" },
-      "900": { "$value": "#151922" },
-      "950": { "$value": "#0D1017" }
+      "soft": { "$value": "#F4F4F4" },
+      "hairline": { "$value": "#E2E2E7" },
+      "faint": { "$value": "#C9C9CD" },
+      "stone": { "$value": "#8D969E" },
+      "placeholder": { "$value": "#6E7378" },
+      "ash": { "$value": "#5C5E60" },
+      "mute": { "$value": "#505A63" },
+      "charcoal": { "$value": "#3A3D40" },
+      "ink": { "$value": "#191C1F" },
+      "elevated": { "$value": "#16181A" },
+      "elevated-alpha-80": { "$value": "#16181ACC" }
     },
-    "brand": {
-      "50": { "$value": "#EEF4FF" },
-      "100": { "$value": "#D9E6FF" },
-      "200": { "$value": "#B8CFFF" },
-      "300": { "$value": "#8AAEFF" },
-      "400": { "$value": "#5A87F7" },
-      "500": { "$value": "#3566E8" },
-      "600": { "$value": "#2450CC" },
-      "700": { "$value": "#1D3FA3" },
-      "800": { "$value": "#1B367F" },
-      "900": { "$value": "#1A2F63" }
-    },
-    "green": {
-      "400": { "$value": "#4CC585" },
-      "600": { "$value": "#17804A" }
-    },
-    "amber": {
-      "400": { "$value": "#F2AE30" },
-      "500": { "$value": "#D98A00" }
+    "blue": {
+      "link": { "$value": "#376CD5" },
+      "link-lifted": { "$value": "#7B9CFF" }
     },
     "red": {
-      "400": { "$value": "#F0655B" },
-      "600": { "$value": "#B82C22" }
+      "danger": { "$value": "#E23B4A" },
+      "deep": { "$value": "#8B0000" },
+      "lifted": { "$value": "#FF8A80" }
+    },
+    "status": {
+      "confirmed": {
+        "fg": { "$value": "#006400" },
+        "bg": { "$value": "#E7F3E1" },
+        "fg-dark": { "$value": "#5CC98A" },
+        "bg-dark": { "$value": "#0F2619" }
+      },
+      "pending": {
+        "fg": { "$value": "#9A5300" },
+        "bg": { "$value": "#FDF0DF" },
+        "fg-dark": { "$value": "#FFB340" },
+        "bg-dark": { "$value": "#2B1D08" }
+      },
+      "open": {
+        "fg": { "$value": "#3A40C4" },
+        "bg": { "$value": "#ECEEFC" },
+        "fg-dark": { "$value": "#A6AAFF" },
+        "bg-dark": { "$value": "#1B1D40" }
+      },
+      "cancelled": {
+        "fg": { "$value": "#8B0000" },
+        "bg": { "$value": "#FDEAEC" },
+        "fg-dark": { "$value": "#FF8A80" },
+        "bg-dark": { "$value": "#2E1214" }
+      }
     }
   },
   "spacing": {
     "$type": "dimension",
-    "1": { "$value": "4px" },
-    "2": { "$value": "8px" },
-    "3": { "$value": "12px" },
-    "4": { "$value": "16px" },
-    "5": { "$value": "20px" },
-    "6": { "$value": "24px" },
-    "8": { "$value": "32px" },
-    "10": { "$value": "40px" },
-    "12": { "$value": "48px" }
+    "xxs": { "$value": "4px" },
+    "xs": { "$value": "6px" },
+    "sm": { "$value": "8px" },
+    "md": { "$value": "14px" },
+    "lg": { "$value": "16px" },
+    "xl": { "$value": "24px" },
+    "xxl": { "$value": "32px" },
+    "xxxl": { "$value": "48px" }
   },
   "radius": {
     "$type": "dimension",
-    "sm": { "$value": "6px" },
-    "md": { "$value": "10px" },
-    "lg": { "$value": "14px" },
-    "xl": { "$value": "20px" }
+    "sm": { "$value": "8px" },
+    "md": { "$value": "12px" },
+    "lg": { "$value": "20px" },
+    "xl": { "$value": "28px" },
+    "full": { "$value": "9999px" }
   },
   "font": {
     "family": {
       "$type": "fontFamily",
-      "sans": { "$value": "Inter" }
-    },
-    "size": {
-      "$type": "dimension",
-      "xs": { "$value": "12px" },
-      "sm": { "$value": "14px" },
-      "md": { "$value": "16px" },
-      "lg": { "$value": "18px" },
-      "xl": { "$value": "20px" },
-      "xxl": { "$value": "24px" },
-      "xxxl": { "$value": "30px" }
+      "text": { "$value": "Inter" },
+      "display-web": { "$value": "Geist" },
+      "display-mobile": { "$value": "Inter Tight" }
     }
   },
   "brand": {
     "name": { "$type": "string", "$value": "shiftboard" }
+  },
+  "web": {
+    "typography": {
+      "$type": "typography",
+      "display-xxl": { "$value": { "fontFamily": "{font.family.display-web}", "fontSize": "136px", "fontWeight": 500, "lineHeight": 1, "letterSpacing": "-2.72px" } },
+      "display-xl": { "$value": { "fontFamily": "{font.family.display-web}", "fontSize": "80px", "fontWeight": 500, "lineHeight": 1, "letterSpacing": "-0.8px" } },
+      "display-lg": { "$value": { "fontFamily": "{font.family.display-web}", "fontSize": "48px", "fontWeight": 500, "lineHeight": 1.21, "letterSpacing": "-0.48px" } },
+      "display-md": { "$value": { "fontFamily": "{font.family.display-web}", "fontSize": "40px", "fontWeight": 500, "lineHeight": 1.2, "letterSpacing": "-0.4px" } },
+      "heading-lg": { "$value": { "fontFamily": "{font.family.display-web}", "fontSize": "32px", "fontWeight": 500, "lineHeight": 1.19, "letterSpacing": "-0.32px" } },
+      "heading-md": { "$value": { "fontFamily": "{font.family.display-web}", "fontSize": "24px", "fontWeight": 500, "lineHeight": 1.33, "letterSpacing": "0px" } },
+      "heading-sm": { "$value": { "fontFamily": "{font.family.display-web}", "fontSize": "20px", "fontWeight": 500, "lineHeight": 1.4, "letterSpacing": "0px" } },
+      "body-lg": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "18px", "fontWeight": 400, "lineHeight": 1.56, "letterSpacing": "-0.09px" } },
+      "body-md": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "16px", "fontWeight": 400, "lineHeight": 1.5, "letterSpacing": "0.24px" } },
+      "body-md-bold": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "16px", "fontWeight": 600, "lineHeight": 1.5, "letterSpacing": "0.16px" } },
+      "body-sm": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "14px", "fontWeight": 400, "lineHeight": 1.43, "letterSpacing": "0px" } },
+      "button-lg": { "$value": { "fontFamily": "{font.family.display-web}", "fontSize": "20px", "fontWeight": 500, "lineHeight": 1.4, "letterSpacing": "0px" } },
+      "button-md": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "16px", "fontWeight": 600, "lineHeight": 1.5, "letterSpacing": "0.24px" } },
+      "button-sm": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "14px", "fontWeight": 600, "lineHeight": 1.43, "letterSpacing": "0px" } },
+      "caption": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "13px", "fontWeight": 400, "lineHeight": 1.4, "letterSpacing": "0px" } },
+      "link-emph": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "16px", "fontWeight": 700, "lineHeight": 1.5, "letterSpacing": "0.24px" } }
+    }
+  },
+  "mobile": {
+    "layout": {
+      "$type": "dimension",
+      "margin-screen": { "$value": "16px" },
+      "margin-screen-wide": { "$value": "20px" },
+      "padding-card": { "$value": "20px" }
+    },
+    "size": {
+      "$type": "dimension",
+      "touch-target": { "$value": "44px" },
+      "touch-target-min": { "$value": "28px" },
+      "button-lg": { "$value": "52px" },
+      "button-md": { "$value": "44px" },
+      "button-sm": { "$value": "32px" },
+      "input": { "$value": "52px" },
+      "row": { "$value": "52px" },
+      "nav-bar": { "$value": "44px" },
+      "tab-bar": { "$value": "64px" },
+      "badge": { "$value": "26px" },
+      "icon-md": { "$value": "24px" },
+      "icon-sm": { "$value": "16px" },
+      "screen-wide": { "$value": "428px" }
+    },
+    "typography": {
+      "$type": "typography",
+      "display": { "$value": { "fontFamily": "{font.family.display-mobile}", "fontSize": "40px", "fontWeight": 500, "lineHeight": "44px", "letterSpacing": "-0.8px" } },
+      "large-title": { "$value": { "fontFamily": "{font.family.display-mobile}", "fontSize": "34px", "fontWeight": 500, "lineHeight": "41px", "letterSpacing": "-0.34px" } },
+      "title-1": { "$value": { "fontFamily": "{font.family.display-mobile}", "fontSize": "28px", "fontWeight": 500, "lineHeight": "34px", "letterSpacing": "-0.28px" } },
+      "title-2": { "$value": { "fontFamily": "{font.family.display-mobile}", "fontSize": "22px", "fontWeight": 500, "lineHeight": "28px", "letterSpacing": "0px" } },
+      "title-3": { "$value": { "fontFamily": "{font.family.display-mobile}", "fontSize": "20px", "fontWeight": 500, "lineHeight": "25px", "letterSpacing": "0px" } },
+      "headline": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "17px", "fontWeight": 600, "lineHeight": "22px", "letterSpacing": "0.16px" } },
+      "body": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "17px", "fontWeight": 400, "lineHeight": "22px", "letterSpacing": "0px" } },
+      "callout": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "16px", "fontWeight": 400, "lineHeight": "21px", "letterSpacing": "0px" } },
+      "subhead": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "15px", "fontWeight": 400, "lineHeight": "20px", "letterSpacing": "0px" } },
+      "footnote": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "13px", "fontWeight": 400, "lineHeight": "18px", "letterSpacing": "0px" } },
+      "caption-1": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "12px", "fontWeight": 400, "lineHeight": "16px", "letterSpacing": "0px" } },
+      "caption-2": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "11px", "fontWeight": 500, "lineHeight": "13px", "letterSpacing": "0.06px" } },
+      "button-lg": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "17px", "fontWeight": 600, "lineHeight": "22px", "letterSpacing": "0.24px" } },
+      "button-sm": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "15px", "fontWeight": 600, "lineHeight": "20px", "letterSpacing": "0.16px" } },
+      "badge": { "$value": { "fontFamily": "{font.family.text}", "fontSize": "13px", "fontWeight": 600, "lineHeight": "18px", "letterSpacing": "0.16px" } }
+    }
   }
 }
