@@ -8,15 +8,24 @@ part of 'serializers.dart';
 
 Serializers _$serializers = (Serializers().toBuilder()
       ..add(AgencySummary.serializer)
+      ..add(Client.serializer)
+      ..add(ClientPage.serializer)
+      ..add(ClientSummary.serializer)
       ..add(ClientType.serializer)
       ..add(CurrentUser.serializer)
       ..add(FieldError.serializer)
+      ..add(Location.serializer)
       ..add(LoginRequest.serializer)
       ..add(Ping.serializer)
       ..add(Problem.serializer)
       ..add(Qualification.serializer)
+      ..add(QualificationPage.serializer)
       ..add(RefreshTokenRequest.serializer)
       ..add(Role.serializer)
+      ..add(Shift.serializer)
+      ..add(ShiftPage.serializer)
+      ..add(ShiftRequest.serializer)
+      ..add(ShiftStatus.serializer)
       ..add(SignupInfo.serializer)
       ..add(TokenResponse.serializer)
       ..add(Worker.serializer)
@@ -25,14 +34,32 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..add(WorkerSignupRequest.serializer)
       ..add(WorkerStatus.serializer)
       ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(Client)]),
+          () => ListBuilder<Client>())
+      ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(FieldError)]),
           () => ListBuilder<FieldError>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(Location)]),
+          () => ListBuilder<Location>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(Qualification)]),
           () => ListBuilder<Qualification>())
       ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(Qualification)]),
+          () => ListBuilder<Qualification>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(Qualification)]),
+          () => ListBuilder<Qualification>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(Shift)]),
+          () => ListBuilder<Shift>())
+      ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(Worker)]),
-          () => ListBuilder<Worker>()))
+          () => ListBuilder<Worker>())
+      ..addBuilderFactory(
+          const FullType(BuiltSet, const [const FullType(String)]),
+          () => SetBuilder<String>()))
     .build();
 
 // ignore_for_file: deprecated_member_use_from_same_package,type=lint
