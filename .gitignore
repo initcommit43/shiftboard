@@ -5,6 +5,8 @@ CLAUDE.local.md
 HANDOFF.md
 *.plan.md
 plans/
+/design.md
+/mobile/design.md
 
 # Secrets and local config
 .env
