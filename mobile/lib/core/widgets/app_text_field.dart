@@ -1,7 +1,9 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../l10n/l10n.dart';
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
 /// A text input with its label above; the look comes from the input theme.
@@ -58,7 +60,7 @@ class _AppTextFieldState extends State<AppTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = context.colors;
     final l10n = context.l10n;
 
     return Column(
@@ -68,12 +70,10 @@ class _AppTextFieldState extends State<AppTextField> {
         ExcludeSemantics(
           child: Text(
             widget.label,
-            style: theme.textTheme.labelLarge?.copyWith(
-              color: theme.colorScheme.onSurface,
-            ),
+            style: AppTypography.subhead.copyWith(color: colors.inkSecondary),
           ),
         ),
-        const SizedBox(height: AppSpacing.s2),
+        const SizedBox(height: AppSpacing.sm),
         Semantics(
           label: widget.label,
           child: TextFormField(
@@ -96,7 +96,9 @@ class _AppTextFieldState extends State<AppTextField> {
               if (widget.maxLength case final maxLength?)
                 LengthLimitingTextInputFormatter(maxLength),
             ],
-            style: theme.textTheme.bodyLarge,
+            style: AppTypography.body.copyWith(
+              color: widget.enabled ? colors.ink : colors.inkDisabled,
+            ),
             decoration: InputDecoration(
               hintText: widget.hint,
               suffixIcon: widget.obscure
@@ -104,9 +106,7 @@ class _AppTextFieldState extends State<AppTextField> {
                       onPressed: () => setState(() => _hidden = !_hidden),
                       tooltip: _hidden ? l10n.passwordShow : l10n.passwordHide,
                       icon: Icon(
-                        _hidden
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
+                        _hidden ? CupertinoIcons.eye : CupertinoIcons.eye_slash,
                       ),
                     )
                   : null,

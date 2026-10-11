@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/l10n.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/initials_avatar.dart';
@@ -23,34 +24,46 @@ class _AccountSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final colors = context.colors;
     final l10n = context.l10n;
     final user = ref.watch(currentUserProvider);
-    final muted = theme.textTheme.bodyMedium?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-    );
+    final muted = AppTypography.subhead.copyWith(color: colors.inkSecondary);
 
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(
-          AppSpacing.s6,
-          0,
-          AppSpacing.s6,
-          AppSpacing.s4,
+          AppSpacing.paddingCard,
+          AppSpacing.sm,
+          AppSpacing.paddingCard,
+          AppSpacing.xl,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 5,
+                decoration: ShapeDecoration(
+                  color: colors.hairline,
+                  shape: const StadiumBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xl),
             Row(
               children: [
-                InitialsAvatar(name: name, size: AppSpacing.s12),
-                const SizedBox(width: AppSpacing.s4),
+                InitialsAvatar(name: name, size: AppSpacing.xxxl),
+                const SizedBox(width: AppSpacing.lg),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(name, style: theme.textTheme.titleSmall),
+                      Text(
+                        name,
+                        style: AppTypography.title2.copyWith(color: colors.ink),
+                      ),
                       if (user != null) Text(user.agency.name, style: muted),
                     ],
                   ),
@@ -58,12 +71,15 @@ class _AccountSheet extends ConsumerWidget {
               ],
             ),
             if (user != null) ...[
-              const SizedBox(height: AppSpacing.s5),
+              const SizedBox(height: AppSpacing.xl),
               Text(l10n.accountSignedInAsLabel, style: muted),
-              const SizedBox(height: AppSpacing.s1),
-              Text(user.email, style: theme.textTheme.labelLarge),
+              const SizedBox(height: AppSpacing.xxs),
+              Text(
+                user.email,
+                style: AppTypography.body.copyWith(color: colors.ink),
+              ),
             ],
-            const SizedBox(height: AppSpacing.s6),
+            const SizedBox(height: AppSpacing.xl),
             AppButton(
               label: l10n.actionLogout,
               variant: AppButtonVariant.outline,

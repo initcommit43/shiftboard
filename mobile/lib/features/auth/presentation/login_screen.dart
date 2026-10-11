@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/api/api_error.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_alert.dart';
 import '../../../core/widgets/app_button.dart';
@@ -59,13 +60,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = context.colors;
     final l10n = context.l10n;
     String? required(String? value) =>
         value == null || value.trim().isEmpty ? l10n.fieldRequired : null;
 
     return FormPage(
-      topPadding: AppSpacing.s10,
+      action: AppButton(
+        label: _submitting ? l10n.loginSubmitting : l10n.loginSubmit,
+        loading: _submitting,
+        onPressed: _submit,
+      ),
       footer: PromptLink(
         prompt: l10n.loginSignupPrompt,
         action: l10n.loginSignupAction,
@@ -73,16 +78,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
       children: [
         const Align(alignment: Alignment.centerLeft, child: BrandMark()),
-        const SizedBox(height: AppSpacing.s8),
-        Text(l10n.loginTitle, style: theme.textTheme.headlineSmall),
-        const SizedBox(height: AppSpacing.s2),
+        const SizedBox(height: AppSpacing.xxxl),
+        Text(
+          l10n.loginTitle,
+          style: AppTypography.largeTitle.copyWith(color: colors.ink),
+        ),
+        const SizedBox(height: AppSpacing.sm),
         Text(
           l10n.loginSubtitle,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+          style: AppTypography.callout.copyWith(color: colors.inkSecondary),
         ),
-        const SizedBox(height: AppSpacing.s8),
+        const SizedBox(height: AppSpacing.xxl),
         Form(
           key: _formKey,
           child: AutofillGroup(
@@ -91,7 +97,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               children: [
                 if (_error case final error?) ...[
                   AppAlert(text: error.message(l10n)),
-                  const SizedBox(height: AppSpacing.s4),
+                  const SizedBox(height: AppSpacing.lg),
                 ],
                 AppTextField(
                   label: l10n.fieldEmailLabel,
@@ -104,7 +110,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   autofillHints: const [AutofillHints.email],
                   maxLength: 254,
                 ),
-                const SizedBox(height: AppSpacing.s4),
+                const SizedBox(height: AppSpacing.lg),
                 AppTextField(
                   label: l10n.fieldPasswordLabel,
                   hint: l10n.loginPasswordHint,
@@ -122,12 +128,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ],
             ),
           ),
-        ),
-        const SizedBox(height: AppSpacing.s8),
-        AppButton(
-          label: _submitting ? l10n.loginSubmitting : l10n.loginSubmit,
-          loading: _submitting,
-          onPressed: _submit,
         ),
       ],
     );

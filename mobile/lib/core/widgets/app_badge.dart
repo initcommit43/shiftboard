@@ -1,34 +1,64 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
-/// A small status label.
-class AppBadge extends StatelessWidget {
-  /// Something that still needs attention, such as a pending approval.
-  const AppBadge.warning({super.key, required this.label});
+/// The states a status badge can show. Each has its own word, icon and color
+/// pair, so a status never rests on color alone.
+enum AppStatus { confirmed, pending, open, cancelled }
 
+/// A status as a pill with an icon and a word. Not tappable.
+class AppBadge extends StatelessWidget {
+  const AppBadge({super.key, required this.status, required this.label});
+
+  final AppStatus status;
   final String label;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.semanticColors;
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.warning,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
+    final colors = context.colors;
+    final (icon, foreground, background) = switch (status) {
+      AppStatus.confirmed => (
+        CupertinoIcons.checkmark,
+        colors.statusConfirmedFg,
+        colors.statusConfirmedBg,
       ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.s2,
-          vertical: AppSpacing.s1,
-        ),
-        child: Text(
-          label,
-          style: Theme.of(context).textTheme.labelMedium
-              ?.copyWith(color: colors.onWarning),
-        ),
+      AppStatus.pending => (
+        CupertinoIcons.clock,
+        colors.statusPendingFg,
+        colors.statusPendingBg,
+      ),
+      AppStatus.open => (
+        CupertinoIcons.plus,
+        colors.statusOpenFg,
+        colors.statusOpenBg,
+      ),
+      AppStatus.cancelled => (
+        CupertinoIcons.xmark,
+        colors.statusCancelledFg,
+        colors.statusCancelledBg,
+      ),
+    };
+
+    return Container(
+      constraints: const BoxConstraints(minHeight: AppSize.badge),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: ShapeDecoration(
+        color: background,
+        shape: const StadiumBorder(),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: AppSize.iconSm, color: foreground),
+          const SizedBox(width: AppSpacing.xxs),
+          Flexible(
+            child: Text(
+              label,
+              style: AppTypography.badge.copyWith(color: foreground),
+            ),
+          ),
+        ],
       ),
     );
   }

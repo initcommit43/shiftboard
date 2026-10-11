@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shiftboard/core/widgets/app_tab_bar.dart';
 
 import '../../support/fake_backend.dart';
 
@@ -22,7 +22,7 @@ void main() {
     expect(find.text('Aktuell keine offenen Schichten'), findsOneWidget);
     expect(find.textContaining('Sobald Donau Personal'), findsOneWidget);
     expect(find.text('LH'), findsOneWidget);
-    expect(find.byType(NavigationDestination), findsNWidgets(4));
+    expect(find.byType(AppTabItem), findsNWidgets(4));
   });
 
   testWidgets('the other tabs announce what is coming', (tester) async {
@@ -33,7 +33,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Kommt bald').hitTestable(), findsOneWidget);
-      expect(find.widgetWithText(AppBar, tab), findsOneWidget);
+      // The tab's label and the title of the screen.
+      expect(find.text(tab), findsNWidgets(2));
     }
 
     await tester.tap(find.text('Schichten'));
