@@ -91,6 +91,14 @@ public abstract class IntegrationTest {
                 .exchange();
     }
 
+    protected RestTestClient.ResponseSpec post(String uri, TokenPair tokens, Map<String, Object> body) {
+        return client.post().uri(uri)
+                .headers(headers -> headers.setBearerAuth(tokens.accessToken()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .exchange();
+    }
+
     protected RestTestClient.ResponseSpec postRefreshToken(String uri, String refreshToken) {
         return client.post().uri(uri)
                 .contentType(MediaType.APPLICATION_JSON)

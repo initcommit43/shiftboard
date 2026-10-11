@@ -56,7 +56,7 @@ The `local` profile in turn only starts against a database on the same machine: 
 - The refresh token is a random opaque value. Only its SHA-256 hash is stored. `POST /auth/refresh` revokes it and returns a new pair, so a token works once; `POST /auth/logout` revokes it and ends the session on that device.
 - Passwords are hashed with Argon2id. A wrong password and an unknown email give the same answer and take comparable time.
 - Login attempts are limited per email and client address. The counters are kept in memory: the limit holds per application instance and is forgotten on restart, so running several instances needs a shared store. The client address is the remote address of the connection; behind a reverse proxy set `server.forward-headers-strategy`.
-- `/ping`, `/signup/**`, `/auth/**` and `/actuator/health` are public. Everything else needs an access token, `/workers/**` the role `DISPATCHER` or `ADMIN`.
+- `/ping`, `/signup/**`, `/auth/**` and `/actuator/health` are public. Everything else needs an access token; `/workers/**`, `/clients/**`, `/qualifications/**` and `/shifts/**` need the role `DISPATCHER` or `ADMIN`.
 
 Pending and inactive workers can log in; the app reads their status from `GET /me` and shows the matching screen.
 
@@ -97,7 +97,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login -H 'Content-Type: applicati
     -d '{"email": "dispatcher1.donau@example.com", "password": "shiftboard-demo", "client": "DASHBOARD"}'
 ```
 
-Clients, locations and shifts join the demo data together with their tables in slice 1.
+Donau Personal also has three clients (Nordlicht Logistik, Hotel Lindenhof, Genusswerk Catering) with four locations, and six shifts in the next nine days: five published and one draft. Alpen Events has one client with one published shift. The shifts are dated relative to the day the database was seeded, so an old demo database shows them in the past; `docker compose down -v` gives fresh ones.
 
 ## Test
 
@@ -139,6 +139,8 @@ src/test/java/app/shiftboard/            modularity and integration tests
 - Errors are RFC 9457 problem details (`application/problem+json`) with the `code` of the contract. Modules throw `ApiException`; `ProblemDetailsHandler` renders it, as well as validation errors and the 401 and 403 of Spring Security.
 - Rules live in the entities (`worker.approve()`); services load, call and publish the domain event.
 - Requests are validated with Bean Validation on the request records; a rule without a standard constraint gets its own, like `@DateOfBirth`. A value that cannot be read as the type of its field is reported as `invalid_format` for that field.
+- A rule that needs more than one field or a lookup, such as an end before the start or the id of a client the agency does not have, throws `InvalidFieldException` with the field and a code. It is reported like any other validation error.
+- Money crosses the API as an integer number of euro cents (`hourlyRateCents`) and is a `decimal` in euros in the database.
 - Personal data such as the date of birth is never logged and never part of an event payload.
 - `shiftboard.api.version` in `application.yaml` is the contract version the backend implements; a test compares it with the spec.
 - Hibernate only validates the schema (`ddl-auto=validate`). Schema changes are new Flyway migrations.

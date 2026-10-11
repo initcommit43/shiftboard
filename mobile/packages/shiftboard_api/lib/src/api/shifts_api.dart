@@ -22,7 +22,7 @@ class ShiftsApi {
   const ShiftsApi(this._dio, this._serializers);
 
   /// Create a shift
-  /// Creates the shift as &#x60;DRAFT&#x60;, or as &#x60;PUBLISHED&#x60; when &#x60;publish&#x60; is true. Dispatchers and admins only.  Field error codes: &#x60;required&#x60;, &#x60;invalid_format&#x60;, &#x60;too_long&#x60;, &#x60;out_of_range&#x60; (&#x60;hourlyRateCents&#x60; below 1, &#x60;slots&#x60; below 1 or above 500), &#x60;before_start&#x60; (&#x60;endsAt&#x60; is not after &#x60;startsAt&#x60;) and &#x60;not_found&#x60; (&#x60;clientId&#x60; is not a client of the agency, &#x60;locationId&#x60; is not a location of that client, or &#x60;qualificationIds&#x60; contains an unknown qualification).  Error codes: &#x60;validation_failed&#x60; (400, with &#x60;errors&#x60;), &#x60;forbidden&#x60; (403).
+  /// Creates the shift as &#x60;DRAFT&#x60;, or as &#x60;PUBLISHED&#x60; when &#x60;publish&#x60; is true. Dispatchers and admins only.  Field error codes: &#x60;required&#x60;, &#x60;invalid_format&#x60;, &#x60;invalid_length&#x60;, &#x60;out_of_range&#x60; (&#x60;hourlyRateCents&#x60; below 1, &#x60;slots&#x60; below 1 or above 500), &#x60;before_start&#x60; (&#x60;endsAt&#x60; is not after &#x60;startsAt&#x60;) and &#x60;not_found&#x60; (&#x60;clientId&#x60; is not a client of the agency, &#x60;locationId&#x60; is not a location of that client, or &#x60;qualificationIds&#x60; contains an unknown qualification).  Error codes: &#x60;validation_failed&#x60; (400, with &#x60;errors&#x60;), &#x60;forbidden&#x60; (403).
   ///
   /// Parameters:
   /// * [shiftRequest]

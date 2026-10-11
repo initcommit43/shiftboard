@@ -102,7 +102,7 @@ export class ShiftsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Creates the shift as `DRAFT`, or as `PUBLISHED` when `publish` is true. Dispatchers and admins only.  Field error codes: `required`, `invalid_format`, `too_long`, `out_of_range` (`hourlyRateCents` below 1, `slots` below 1 or above 500), `before_start` (`endsAt` is not after `startsAt`) and `not_found` (`clientId` is not a client of the agency, `locationId` is not a location of that client, or `qualificationIds` contains an unknown qualification).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403). 
+     * Creates the shift as `DRAFT`, or as `PUBLISHED` when `publish` is true. Dispatchers and admins only.  Field error codes: `required`, `invalid_format`, `invalid_length`, `out_of_range` (`hourlyRateCents` below 1, `slots` below 1 or above 500), `before_start` (`endsAt` is not after `startsAt`) and `not_found` (`clientId` is not a client of the agency, `locationId` is not a location of that client, or `qualificationIds` contains an unknown qualification).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403). 
      * Create a shift
      */
     async createShiftRaw(requestParameters: CreateShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Shift>> {
@@ -113,7 +113,7 @@ export class ShiftsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Creates the shift as `DRAFT`, or as `PUBLISHED` when `publish` is true. Dispatchers and admins only.  Field error codes: `required`, `invalid_format`, `too_long`, `out_of_range` (`hourlyRateCents` below 1, `slots` below 1 or above 500), `before_start` (`endsAt` is not after `startsAt`) and `not_found` (`clientId` is not a client of the agency, `locationId` is not a location of that client, or `qualificationIds` contains an unknown qualification).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403). 
+     * Creates the shift as `DRAFT`, or as `PUBLISHED` when `publish` is true. Dispatchers and admins only.  Field error codes: `required`, `invalid_format`, `invalid_length`, `out_of_range` (`hourlyRateCents` below 1, `slots` below 1 or above 500), `before_start` (`endsAt` is not after `startsAt`) and `not_found` (`clientId` is not a client of the agency, `locationId` is not a location of that client, or `qualificationIds` contains an unknown qualification).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403). 
      * Create a shift
      */
     async createShift(requestParameters: CreateShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Shift> {

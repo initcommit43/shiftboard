@@ -8,7 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
  * Creates what no endpoint can create yet: agencies, their qualifications and who has them,
- * dispatchers and admins.
+ * dispatchers and admins, clients and their locations.
  * Everything is fictional and unique per call, so tests do not see each other's data.
  */
 public class TestData {
@@ -48,6 +48,22 @@ public class TestData {
                     .params(workerId, qualificationId)
                     .update();
         }
+    }
+
+    public UUID client(Agency agency, String name) {
+        var id = UUID.randomUUID();
+        jdbc.sql("insert into client (id, agency_id, name) values (?, ?, ?)")
+                .params(id, agency.id(), name)
+                .update();
+        return id;
+    }
+
+    public UUID location(Agency agency, UUID clientId, String name, String address) {
+        var id = UUID.randomUUID();
+        jdbc.sql("insert into location (id, agency_id, client_id, name, address) values (?, ?, ?, ?, ?)")
+                .params(id, agency.id(), clientId, name, address)
+                .update();
+        return id;
     }
 
     /** Creates an account with {@link #PASSWORD} and returns its email. */
