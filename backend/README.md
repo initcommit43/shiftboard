@@ -47,6 +47,8 @@ Everything comes from environment variables; `.env.example` in the repository ro
 
 Without the `local` profile there is no default for `JWT_SECRET` and the application refuses to start until one is set, for example from `openssl rand -base64 48`.
 
+The `local` profile in turn only starts against a database on the same machine: `localhost`, a loopback address, or a host name without a dot such as the `db` service of docker compose. Against any other database the application stops during startup, before it connects to it, so a deployment that sets the profile by mistake fails instead of running with the development JWT secret and the demo accounts.
+
 ## Authentication
 
 - `POST /auth/login` checks email and password and returns an access token and a refresh token. Workers log in with client `WORKER_APP`, dispatchers and admins with `DASHBOARD`; the other combination is rejected, but only after the password was right.
@@ -71,7 +73,7 @@ A request for a row of another agency answers `404`, exactly like a row that doe
 
 ## Demo data
 
-With the `local` profile the application seeds two fictional agencies on startup. The seed runs once: a database that already has the demo agency is left alone, and `docker compose down -v` starts over. It is never active in tests or without the `local` profile.
+With the `local` profile the application seeds two fictional agencies on startup. The seed runs once: a database that already has the demo agency is left alone, and `docker compose down -v` starts over. It is never active without the `local` profile, and that profile does not start against a database on another machine (see Configuration).
 
 Every account has the password `shiftboard-demo` (`SEED_PASSWORD`). It is a local demo credential, not a secret.
 
