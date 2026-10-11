@@ -34,6 +34,7 @@
     "WORKER": "Worker"
   },
   "login": {
+    "tagline": "Every shift, covered.",
     "title": "Log in",
     "description": "Log in to the dashboard with your agency account.",
     "email": "Email",

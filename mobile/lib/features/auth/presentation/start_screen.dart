@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,9 +25,9 @@ class StartScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const BrandMark(),
-            const SizedBox(height: AppSpacing.s8),
+            const SizedBox(height: AppSpacing.xxl),
             CircularProgressIndicator(
-              strokeWidth: 3,
+              strokeWidth: 2,
               semanticsLabel: l10n.loadingLabel,
             ),
           ],
@@ -36,7 +37,7 @@ class StartScreen extends ConsumerWidget {
 
     return StatusPage(
       body: StatusMessage(
-        icon: Icons.warning_amber_rounded,
+        icon: CupertinoIcons.exclamationmark_triangle,
         tone: StatusTone.error,
         title: l10n.startErrorTitle,
         message: l10n.errorCheckConnection,
@@ -48,7 +49,7 @@ class StartScreen extends ConsumerWidget {
         ),
         AppButton(
           label: l10n.actionLogout,
-          variant: AppButtonVariant.ghost,
+          variant: AppButtonVariant.text,
           onPressed: () => ref.read(sessionProvider.notifier).logout(),
         ),
       ],

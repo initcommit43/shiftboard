@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
 /// An inline error message, announced to screen readers when it appears.
@@ -10,37 +11,38 @@ class AppAlert extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final colors = context.colors;
 
     return Semantics(
       container: true,
       liveRegion: true,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: scheme.surfaceContainerLow,
-          border: Border.all(color: scheme.error),
+          color: colors.statusCancelledBg,
           borderRadius: BorderRadius.circular(AppRadius.md),
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.s4,
-            vertical: AppSpacing.s3,
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.md,
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.error_outline_rounded,
-                size: AppSpacing.s5,
-                color: scheme.error,
+              Padding(
+                padding: const EdgeInsets.only(top: 2),
+                child: Icon(
+                  CupertinoIcons.exclamationmark_circle,
+                  size: AppSize.iconSm,
+                  color: colors.statusCancelledFg,
+                ),
               ),
-              const SizedBox(width: AppSpacing.s3),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   text,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: scheme.error,
+                  style: AppTypography.subhead.copyWith(
+                    color: colors.statusCancelledFg,
                   ),
                 ),
               ),

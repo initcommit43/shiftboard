@@ -90,9 +90,12 @@ The login sends the client type `DASHBOARD`, so the backend only lets dispatcher
 - **Server state** goes through TanStack Query. Each feature keeps its query keys, queries and mutations in one file (`queries.ts`); mutations invalidate what they change.
 - **Errors**: the API client turns every error response into an `ApiError` with the problem `code`. `errorMessage()` in `src/api/errors.ts` maps it to the translation `errors.<code>`; unknown codes get a generic message. A new code only needs a translation.
 - **Strings** never live in components. German (`src/i18n/locales/de.json`) is the source language, `en.json` must have the same keys, and translation keys are type-checked. Dates are formatted with `Intl` in the active language.
-- **Colors, radius and font** come from the design tokens through Tailwind utilities (`bg-primary`, `text-muted-foreground`, `bg-success`). No hardcoded color values, also not in shadcn/ui components.
-- **Radius**: the theme follows the shadcn/ui scale, in which the token `--radius` is `rounded-lg`. The radii of the design therefore map to `rounded-sm` (sm: badges), `rounded-lg` (md: buttons, inputs, cards, tables, nav items) and `rounded-xl` (lg: dialogs, login card).
-- **shadcn/ui** components are added with `npx shadcn@latest add <component>` and live in `src/components/ui/`. After adding one: change the `cn` import to `@/lib/utils`, replace literal colors such as `text-white` with token utilities, and remove the parts that are not used.
+- **Colors, radius and type** come from the design tokens through Tailwind utilities named after the design system (`bg-canvas`, `text-ink-secondary`, `border-hairline`, `bg-action`). No hardcoded color values, also not in shadcn/ui components. `action` is the primary call to action (black in light, white in dark); `primary` is the cobalt brand color and appears at most once per view.
+- **Text styles** are the `type-*` utilities generated from the tokens (`type-heading-lg`, `type-body-md`, `type-button-sm`, `type-caption`). Use them instead of combining `text-*`, `font-*` and `leading-*`. Headings are set in Geist, everything else in Inter.
+- **Dark bands**: an element with the class `dark` shows its content in the dark theme, whatever the page's theme is. The navigation and the left half of the login use it.
+- **No shadows**: depth comes from the step between canvas and card and from hairline borders.
+- **Radius**: `rounded-sm` to `rounded-xl` are the radius tokens. Buttons, badges and navigation items are pills (`rounded-full`), inputs and menus use `rounded-md` (12px), cards, tables and dialogs `rounded-lg` (20px).
+- **shadcn/ui** components are added with `npx shadcn@latest add <component>` and live in `src/components/ui/`. After adding one: change the `cn` import to `@/lib/utils`, replace its color utilities (`bg-background`, `text-muted-foreground`, `text-white`, ...) with the token utilities above, drop its shadows and focus rings (the focus ring is set once in `index.css`), and remove the parts that are not used.
 
 ## Tests
 

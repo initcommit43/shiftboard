@@ -5,11 +5,11 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto rounded-lg border bg-card"
+      className="relative w-full overflow-x-auto rounded-lg border bg-surface-card"
     >
       <table
         data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
+        className={cn("type-body-sm w-full caption-bottom", className)}
         {...props}
       />
     </div>
@@ -51,7 +51,7 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "h-11 px-2 text-left align-middle font-medium whitespace-nowrap text-muted-foreground first:pl-4 last:pr-4",
+        "type-caption h-12 px-3 text-left align-middle whitespace-nowrap text-ink-tertiary first:pl-8 last:pr-8",
         className
       )}
       {...props}
@@ -64,7 +64,7 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     <td
       data-slot="table-cell"
       className={cn(
-        "px-2 py-3 align-middle whitespace-nowrap first:pl-4 last:pr-4",
+        "px-3 py-4 align-middle whitespace-nowrap first:pl-8 last:pr-8",
         className
       )}
       {...props}

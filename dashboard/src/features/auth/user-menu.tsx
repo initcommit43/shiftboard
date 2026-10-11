@@ -23,24 +23,24 @@ export function UserMenu() {
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label={t('shell.userMenu.open')}
-        className="flex h-11 items-center gap-3 rounded-lg px-2 text-left transition-colors outline-none hover:bg-accent focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[state=open]:bg-accent"
+        className="flex h-12 items-center gap-3 rounded-full pr-4 pl-1.5 text-left transition-colors hover:bg-surface-soft data-[state=open]:bg-surface-soft"
       >
         <span
           aria-hidden
-          className="grid size-8 place-items-center rounded-full bg-secondary text-xs font-medium text-secondary-foreground"
+          className="type-caption grid size-9 place-items-center rounded-full bg-action font-semibold text-on-action"
         >
           {initials(user.email.split('@')[0] ?? '')}
         </span>
         <span className="hidden min-w-0 sm:block">
-          <span className="block truncate text-sm leading-5 font-medium">{user.email}</span>
-          <span className="block text-xs leading-4 text-muted-foreground">{role}</span>
+          <span className="type-button-sm block truncate">{user.email}</span>
+          <span className="type-caption block text-ink-secondary">{role}</span>
         </span>
         <ChevronDown aria-hidden className="size-4" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-60">
+      <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel>
-          <span className="block truncate leading-5">{user.email}</span>
-          <span className="block text-xs leading-4 font-normal text-muted-foreground">{role}</span>
+          <span className="block truncate">{user.email}</span>
+          <span className="type-caption block text-ink-secondary">{role}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem

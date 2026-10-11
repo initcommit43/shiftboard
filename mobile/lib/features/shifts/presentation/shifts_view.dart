@@ -1,10 +1,13 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/l10n.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_button.dart';
+import '../../../core/widgets/form_page.dart';
 import '../../../core/widgets/status_message.dart';
 import '../../auth/data/session.dart';
 
@@ -46,12 +49,12 @@ class _ShiftsViewState extends ConsumerState<ShiftsView> {
       _Load.running => const _Skeleton(),
       _Load.idle => _Centered(
         child: StatusMessage(
-          icon: Icons.calendar_today_outlined,
+          icon: CupertinoIcons.calendar,
           title: l10n.shiftsEmptyTitle,
           message: l10n.shiftsEmptyMessage(widget.agencyName),
           action: AppButton(
             label: l10n.shiftsRefresh,
-            variant: AppButtonVariant.outline,
+            variant: AppButtonVariant.soft,
             expand: false,
             onPressed: _refresh,
           ),
@@ -59,12 +62,13 @@ class _ShiftsViewState extends ConsumerState<ShiftsView> {
       ),
       _Load.failed => _Centered(
         child: StatusMessage(
-          icon: Icons.warning_amber_rounded,
+          icon: CupertinoIcons.exclamationmark_triangle,
           tone: StatusTone.error,
           title: l10n.shiftsErrorTitle,
           message: l10n.errorCheckConnection,
           action: AppButton(
             label: l10n.actionRetry,
+            variant: AppButtonVariant.soft,
             expand: false,
             onPressed: _refresh,
           ),
@@ -83,9 +87,9 @@ class _Centered extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.s6,
-          vertical: AppSpacing.s4,
+        padding: EdgeInsets.symmetric(
+          horizontal: screenMargin(context),
+          vertical: AppSpacing.lg,
         ),
         child: child,
       ),
@@ -112,29 +116,29 @@ class _Skeleton extends StatelessWidget {
       liveRegion: true,
       child: ListView.separated(
         physics: const NeverScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.s6,
-          vertical: AppSpacing.s4,
+        padding: EdgeInsets.symmetric(
+          horizontal: screenMargin(context),
+          vertical: AppSpacing.sm,
         ),
         itemCount: _cards.length,
-        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.s3),
+        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.lg),
         itemBuilder: (context, index) {
           final (title, subtitle) = _cards[index];
           return Card(
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.s4),
+              padding: const EdgeInsets.all(AppSpacing.paddingCard),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _Bar(width: title, height: AppSpacing.s5),
-                  const SizedBox(height: AppSpacing.s3),
-                  _Bar(width: subtitle, height: 14),
-                  const SizedBox(height: AppSpacing.s3),
+                  _Bar(width: title, height: 22),
+                  const SizedBox(height: AppSpacing.sm),
+                  _Bar(width: subtitle, height: AppSpacing.lg),
+                  const SizedBox(height: AppSpacing.lg),
                   const Row(
                     children: [
-                      _Bar(width: 72, height: AppSpacing.s6),
-                      SizedBox(width: AppSpacing.s2),
-                      _Bar(width: 56, height: AppSpacing.s6),
+                      _Bar(width: 72, height: AppSize.badge),
+                      SizedBox(width: AppSpacing.sm),
+                      _Bar(width: 56, height: AppSize.badge),
                     ],
                   ),
                 ],
@@ -159,7 +163,7 @@ class _Bar extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        color: context.colors.hairline,
         borderRadius: BorderRadius.circular(AppRadius.sm),
       ),
     );

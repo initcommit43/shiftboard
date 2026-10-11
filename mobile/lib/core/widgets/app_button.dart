@@ -1,10 +1,24 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
-enum AppButtonVariant { primary, outline, ghost }
+enum AppButtonVariant {
+  /// The one loud call to action of a screen: 52 high, black in light and
+  /// white in dark.
+  action,
 
-/// The app's action button; sizes and colors come from the button themes.
+  /// The alternative next to an action.
+  outline,
+
+  /// A tertiary action.
+  soft,
+
+  /// A quiet action without a surface, such as "Abmelden" below a button.
+  text,
+}
+
+/// The app's pill button.
 ///
 /// While [loading] it shows a spinner, keeps its colors and ignores taps.
 class AppButton extends StatelessWidget {
@@ -12,7 +26,7 @@ class AppButton extends StatelessWidget {
     super.key,
     required this.label,
     required this.onPressed,
-    this.variant = AppButtonVariant.primary,
+    this.variant = AppButtonVariant.action,
     this.loading = false,
     this.expand = true,
   });
@@ -27,53 +41,85 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final foreground = switch (variant) {
-      AppButtonVariant.primary => scheme.onPrimary,
-      AppButtonVariant.outline => scheme.onSurface,
-      AppButtonVariant.ghost => scheme.primary,
+    final colors = context.colors;
+    final (background, pressed, foreground) = switch (variant) {
+      AppButtonVariant.action => (
+        colors.action,
+        colors.actionPressed,
+        colors.onAction,
+      ),
+      AppButtonVariant.outline => (
+        Colors.transparent,
+        colors.surfaceSoft,
+        colors.ink,
+      ),
+      AppButtonVariant.soft => (
+        colors.surfaceSoft,
+        colors.hairline,
+        colors.ink,
+      ),
+      AppButtonVariant.text => (
+        Colors.transparent,
+        colors.surfaceSoft,
+        colors.ink,
+      ),
     };
-    final onPressed = loading ? null : this.onPressed;
-    final child = Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (loading) ...[
-          SizedBox.square(
-            dimension: AppSpacing.s5,
-            child: CircularProgressIndicator(strokeWidth: 2, color: foreground),
-          ),
-          const SizedBox(width: AppSpacing.s2),
-        ],
-        Flexible(child: Text(label, textAlign: TextAlign.center)),
-      ],
+    final filled =
+        variant == AppButtonVariant.action || variant == AppButtonVariant.soft;
+    final enabled = onPressed != null || loading;
+
+    final style = ButtonStyle(
+      minimumSize: WidgetStatePropertyAll(
+        Size(
+          AppSize.touchTarget,
+          variant == AppButtonVariant.action
+              ? AppSize.buttonLg
+              : AppSize.buttonMd,
+        ),
+      ),
+      padding: const WidgetStatePropertyAll(
+        EdgeInsets.symmetric(horizontal: AppSpacing.xl),
+      ),
+      shape: const WidgetStatePropertyAll(StadiumBorder()),
+      textStyle: const WidgetStatePropertyAll(AppTypography.buttonLg),
+      elevation: const WidgetStatePropertyAll(0),
+      overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+      foregroundColor: WidgetStatePropertyAll(
+        enabled ? foreground : colors.inkDisabled,
+      ),
+      backgroundColor: WidgetStateProperty.resolveWith((states) {
+        if (!enabled) return filled ? colors.surfaceSoft : Colors.transparent;
+        return states.contains(WidgetState.pressed) ? pressed : background;
+      }),
+      side: variant == AppButtonVariant.outline
+          ? WidgetStatePropertyAll(
+              BorderSide(
+                color: enabled ? colors.hairlineStrong : colors.hairline,
+              ),
+            )
+          : null,
     );
 
-    final button = switch (variant) {
-      AppButtonVariant.primary => FilledButton(
-        onPressed: onPressed,
-        style: loading
-            ? FilledButton.styleFrom(
-                disabledBackgroundColor: scheme.primary,
-                disabledForegroundColor: foreground,
-              )
-            : null,
-        child: child,
+    final button = FilledButton(
+      onPressed: loading ? null : onPressed,
+      style: style,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (loading) ...[
+            SizedBox.square(
+              dimension: AppSize.iconSm,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: foreground,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+          ],
+          Flexible(child: Text(label, textAlign: TextAlign.center)),
+        ],
       ),
-      AppButtonVariant.outline => OutlinedButton(
-        onPressed: onPressed,
-        style: loading
-            ? OutlinedButton.styleFrom(disabledForegroundColor: foreground)
-            : null,
-        child: child,
-      ),
-      AppButtonVariant.ghost => TextButton(
-        onPressed: onPressed,
-        style: loading
-            ? TextButton.styleFrom(disabledForegroundColor: foreground)
-            : null,
-        child: child,
-      ),
-    };
+    );
 
     return expand ? SizedBox(width: double.infinity, child: button) : button;
   }

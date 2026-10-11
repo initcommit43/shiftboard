@@ -1,7 +1,9 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/l10n/l10n.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/status_message.dart';
@@ -13,7 +15,7 @@ class NotActiveScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
+    final colors = context.colors;
     final l10n = context.l10n;
     final agency = ref.watch(currentUserProvider)?.agency.name;
     // Logged out; the router is about to leave this screen.
@@ -24,28 +26,26 @@ class NotActiveScreen extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           StatusMessage(
-            icon: Icons.pause_circle_outline_rounded,
+            icon: CupertinoIcons.pause_circle,
             title: l10n.inactiveTitle,
             message: l10n.inactiveMessage(agency),
           ),
-          const SizedBox(height: AppSpacing.s8),
+          const SizedBox(height: AppSpacing.xxl),
           Card(
             child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.s4),
+              padding: const EdgeInsets.all(AppSpacing.paddingCard),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
                     l10n.inactiveContactTitle,
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTypography.headline.copyWith(color: colors.ink),
                   ),
-                  const SizedBox(height: AppSpacing.s1),
+                  const SizedBox(height: AppSpacing.xxs),
                   Text(
                     l10n.inactiveContactMessage(agency),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onSurfaceVariant,
+                    style: AppTypography.subhead.copyWith(
+                      color: colors.inkSecondary,
                     ),
                   ),
                 ],

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +12,7 @@ import '../../../core/api/api_error.dart';
 import '../../../core/api/api_provider.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_alert.dart';
 import '../../../core/widgets/app_button.dart';
@@ -46,22 +48,22 @@ class SignupScreen extends ConsumerWidget {
       data: (info) => _SignupForm(signupCode: signupCode, info: info),
       loading: () => StatusPage(
         body: CircularProgressIndicator(
-          strokeWidth: 3,
+          strokeWidth: 2,
           semanticsLabel: l10n.loadingLabel,
         ),
       ),
       error: (error, _) => ApiError.from(error).status == HttpStatus.notFound
           ? StatusPage(
               body: StatusMessage(
-                icon: Icons.link_rounded,
+                icon: CupertinoIcons.link,
                 title: l10n.signupInvalidLinkTitle,
                 message: l10n.signupInvalidLinkMessage,
               ),
-              actions: [toLogin(AppButtonVariant.primary)],
+              actions: [toLogin(AppButtonVariant.action)],
             )
           : StatusPage(
               body: StatusMessage(
-                icon: Icons.warning_amber_rounded,
+                icon: CupertinoIcons.exclamationmark_triangle,
                 tone: StatusTone.error,
                 title: l10n.signupLoadErrorTitle,
                 message: l10n.errorCheckConnection,
@@ -72,7 +74,7 @@ class SignupScreen extends ConsumerWidget {
                   onPressed: () =>
                       ref.invalidate(signupInfoProvider(signupCode)),
                 ),
-                toLogin(AppButtonVariant.ghost),
+                toLogin(AppButtonVariant.text),
               ],
             ),
     );
@@ -213,15 +215,19 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = context.colors;
     final l10n = context.l10n;
     final info = widget.info;
-    final muted = theme.colorScheme.onSurfaceVariant;
 
     String? required(String? value) =>
         value == null || value.trim().isEmpty ? l10n.fieldRequired : null;
 
     return FormPage(
+      action: AppButton(
+        label: _submitting ? l10n.signupSubmitting : l10n.signupSubmit,
+        loading: _submitting,
+        onPressed: _submit,
+      ),
       footer: PromptLink(
         prompt: l10n.signupLoginPrompt,
         action: l10n.signupLoginAction,
@@ -230,23 +236,19 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
       children: [
         Align(
           alignment: Alignment.centerLeft,
-          child: InitialsAvatar(
-            name: info.agencyName,
-            size: AppSpacing.s12,
-            borderRadius: AppRadius.lg,
-          ),
+          child: InitialsAvatar(name: info.agencyName, size: AppSpacing.xxxl),
         ),
-        const SizedBox(height: AppSpacing.s4),
+        const SizedBox(height: AppSpacing.lg),
         Text(
           l10n.signupTitle(info.agencyName),
-          style: theme.textTheme.headlineSmall,
+          style: AppTypography.title1.copyWith(color: colors.ink),
         ),
-        const SizedBox(height: AppSpacing.s2),
+        const SizedBox(height: AppSpacing.sm),
         Text(
           l10n.signupSubtitle(info.agencyName),
-          style: theme.textTheme.bodyLarge?.copyWith(color: muted),
+          style: AppTypography.callout.copyWith(color: colors.inkSecondary),
         ),
-        const SizedBox(height: AppSpacing.s6),
+        const SizedBox(height: AppSpacing.xxl),
         Form(
           key: _formKey,
           child: AutofillGroup(
@@ -255,7 +257,7 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
               children: [
                 if (_formError case final formError?) ...[
                   AppAlert(text: formError),
-                  const SizedBox(height: AppSpacing.s4),
+                  const SizedBox(height: AppSpacing.lg),
                 ],
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -275,7 +277,7 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
                         maxLength: 100,
                       ),
                     ),
-                    const SizedBox(width: AppSpacing.s3),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: AppTextField(
                         label: l10n.signupLastNameLabel,
@@ -293,7 +295,7 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.s4),
+                const SizedBox(height: AppSpacing.lg),
                 AppTextField(
                   label: l10n.signupDateOfBirthLabel,
                   hint: l10n.signupDateOfBirthHint,
@@ -304,7 +306,7 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
                   readOnly: true,
                   onTap: _pickDateOfBirth,
                 ),
-                const SizedBox(height: AppSpacing.s4),
+                const SizedBox(height: AppSpacing.lg),
                 AppTextField(
                   label: l10n.fieldEmailLabel,
                   controller: _email,
@@ -321,7 +323,7 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
                   autofillHints: const [AutofillHints.email],
                   maxLength: 254,
                 ),
-                const SizedBox(height: AppSpacing.s4),
+                const SizedBox(height: AppSpacing.lg),
                 AppTextField(
                   label: l10n.signupPhoneLabel,
                   controller: _phone,
@@ -338,7 +340,7 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
                   autofillHints: const [AutofillHints.telephoneNumber],
                   maxLength: 30,
                 ),
-                const SizedBox(height: AppSpacing.s4),
+                const SizedBox(height: AppSpacing.lg),
                 AppTextField(
                   label: l10n.fieldPasswordLabel,
                   controller: _password,
@@ -362,17 +364,10 @@ class _SignupFormState extends ConsumerState<_SignupForm> {
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.s6),
-        AppButton(
-          label: _submitting ? l10n.signupSubmitting : l10n.signupSubmit,
-          loading: _submitting,
-          onPressed: _submit,
-        ),
-        const SizedBox(height: AppSpacing.s3),
+        const SizedBox(height: AppSpacing.xl),
         Text(
           l10n.signupPrivacyNote(info.agencyName),
-          textAlign: TextAlign.center,
-          style: theme.textTheme.bodySmall?.copyWith(color: muted),
+          style: AppTypography.caption1.copyWith(color: colors.inkTertiary),
         ),
       ],
     );

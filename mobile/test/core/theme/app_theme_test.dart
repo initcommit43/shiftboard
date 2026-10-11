@@ -17,43 +17,45 @@ void main() {
 
         expect(theme.useMaterial3, isTrue);
         expect(scheme.brightness, brightness);
-        expect(scheme.primary, colors.primary);
-        expect(scheme.onPrimary, colors.primaryForeground);
-        expect(scheme.surface, colors.background);
-        expect(scheme.onSurface, colors.foreground);
-        expect(scheme.onSurfaceVariant, colors.mutedForeground);
-        expect(scheme.error, colors.destructive);
-        expect(scheme.onError, colors.destructiveForeground);
-        expect(scheme.outlineVariant, colors.border);
-        expect(theme.scaffoldBackgroundColor, colors.background);
+        expect(scheme.surface, colors.canvas);
+        expect(scheme.onSurface, colors.ink);
+        expect(scheme.onSurfaceVariant, colors.inkSecondary);
+        expect(scheme.error, colors.danger);
+        expect(scheme.onError, colors.onDanger);
+        expect(scheme.outlineVariant, colors.hairline);
+        expect(theme.scaffoldBackgroundColor, colors.canvas);
       });
 
-      test('exposes success and warning as a theme extension', () {
-        final semantic = theme.extension<AppSemanticColors>()!;
+      test('makes the action color the primary and cobalt the secondary', () {
+        final scheme = theme.colorScheme;
 
-        expect(semantic.success, colors.success);
-        expect(semantic.onSuccess, colors.successForeground);
-        expect(semantic.warning, colors.warning);
-        expect(semantic.onWarning, colors.warningForeground);
+        expect(scheme.primary, colors.action);
+        expect(scheme.onPrimary, colors.onAction);
+        expect(scheme.secondary, colors.primary);
+        expect(scheme.onSecondary, colors.onPrimary);
       });
 
-      test('uses the brand font and token font sizes', () {
+      test('exposes every token color as a theme extension', () {
+        expect(theme.extension<AppPalette>()!.colors, same(colors));
+      });
+
+      test('uses the brand fonts and the text styles of the tokens', () {
         final text = theme.textTheme;
 
-        expect(text.bodyLarge!.fontFamily, AppBrand.fontFamily);
-        expect(text.bodyLarge!.fontSize, AppFontSize.md);
-        expect(text.bodyMedium!.fontSize, AppFontSize.sm);
-        expect(text.displaySmall!.fontSize, AppFontSize.xxxl);
-        expect(text.bodyLarge!.color, colors.foreground);
+        expect(text.bodyMedium!.fontFamily, AppBrand.fontFamily);
+        expect(text.bodyMedium!.fontSize, AppTypography.body.fontSize);
+        expect(text.headlineLarge!.fontFamily, AppBrand.displayFontFamily);
+        expect(text.headlineLarge!.fontSize, AppTypography.largeTitle.fontSize);
+        expect(text.bodyMedium!.color, colors.ink);
       });
     });
   }
 
-  test('semantic colors interpolate between themes', () {
-    final light = AppTheme.light.extension<AppSemanticColors>()!;
-    final dark = AppTheme.dark.extension<AppSemanticColors>()!;
+  test('the palette switches with the theme instead of blending', () {
+    final light = AppTheme.light.extension<AppPalette>()!;
+    final dark = AppTheme.dark.extension<AppPalette>()!;
 
-    expect(light.lerp(dark, 0).success, AppColors.light.success);
-    expect(light.lerp(dark, 1).success, AppColors.dark.success);
+    expect(light.lerp(dark, 0).colors, same(AppColors.light));
+    expect(light.lerp(dark, 1).colors, same(AppColors.dark));
   });
 }

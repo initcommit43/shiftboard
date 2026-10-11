@@ -38,7 +38,8 @@ export function RejectSignup({ worker, disabled }: { worker: Worker; disabled: b
       <AlertDialogTrigger asChild>
         <Button
           variant="ghost"
-          className="text-destructive hover:bg-destructive/10 hover:text-destructive dark:hover:bg-destructive/20"
+          size="sm"
+          className="text-danger-text hover:bg-status-cancelled-bg"
           aria-label={t('signups.rejectNamed', { name })}
           disabled={disabled}
         >

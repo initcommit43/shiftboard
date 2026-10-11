@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/l10n/l10n.dart';
 import '../../../core/routing/app_router.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/app_text_field.dart';
@@ -37,26 +38,27 @@ class _JoinScreenState extends State<JoinScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colors = context.colors;
     final l10n = context.l10n;
 
     return FormPage(
-      topPadding: AppSpacing.s10,
+      action: AppButton(label: l10n.joinSubmit, onPressed: _submit),
       footer: PromptLink(
         prompt: l10n.signupLoginPrompt,
         action: l10n.signupLoginAction,
         onPressed: () => context.go(AppRoutes.login),
       ),
       children: [
-        Text(l10n.joinTitle, style: theme.textTheme.headlineSmall),
-        const SizedBox(height: AppSpacing.s2),
+        Text(
+          l10n.joinTitle,
+          style: AppTypography.title1.copyWith(color: colors.ink),
+        ),
+        const SizedBox(height: AppSpacing.sm),
         Text(
           l10n.joinSubtitle,
-          style: theme.textTheme.bodyLarge?.copyWith(
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+          style: AppTypography.callout.copyWith(color: colors.inkSecondary),
         ),
-        const SizedBox(height: AppSpacing.s8),
+        const SizedBox(height: AppSpacing.xxl),
         Form(
           key: _formKey,
           child: AppTextField(
@@ -76,8 +78,6 @@ class _JoinScreenState extends State<JoinScreen> {
             onSubmitted: (_) => _submit(),
           ),
         ),
-        const SizedBox(height: AppSpacing.s8),
-        AppButton(label: l10n.joinSubmit, onPressed: _submit),
       ],
     );
   }

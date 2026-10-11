@@ -1,8 +1,8 @@
 export function PageHeader({ title, description }: { title: string; description?: string }) {
   return (
-    <div className="space-y-1">
-      <h1 className="text-2xl leading-8 font-semibold tracking-[-0.01875rem]">{title}</h1>
-      {description && <p className="text-sm text-muted-foreground">{description}</p>}
+    <div className="space-y-2">
+      <h1 className="type-heading-lg">{title}</h1>
+      {description && <p className="text-ink-secondary">{description}</p>}
     </div>
   )
 }

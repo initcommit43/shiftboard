@@ -1,61 +1,76 @@
 @import "tailwindcss";
+@import "@fontsource/geist/latin-500.css";
 @import "@fontsource/inter/latin-400.css";
-@import "@fontsource/inter/latin-500.css";
 @import "@fontsource/inter/latin-600.css";
 @import "./tokens.css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark, .dark *));
 
 /*
- * Tailwind reads every color and radius from the generated design tokens.
- * The font needs no mapping: the token is called --font-sans, like Tailwind's
- * own theme variable, and the unlayered token wins over the theme layer.
+ * Tailwind reads every color, radius and font from the generated design
+ * tokens, under the names of the design system (bg-canvas, text-ink-secondary,
+ * border-hairline). The radius needs no mapping: the tokens are called
+ * --radius-sm to --radius-xl, like Tailwind's own theme variables, and the
+ * unlayered tokens win over the theme layer. Text styles come from the
+ * type-* utilities in tokens.css.
  */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
+  --color-canvas: var(--canvas);
+  --color-surface-soft: var(--surface-soft);
+  --color-surface-card: var(--surface-card);
+  --color-scrim: var(--scrim);
+  --color-hairline: var(--hairline);
+  --color-hairline-strong: var(--hairline-strong);
+  --color-ink: var(--ink);
+  --color-ink-secondary: var(--ink-secondary);
+  --color-ink-tertiary: var(--ink-tertiary);
+  --color-ink-placeholder: var(--ink-placeholder);
+  --color-ink-disabled: var(--ink-disabled);
+  --color-action: var(--action);
+  --color-action-pressed: var(--action-pressed);
+  --color-on-action: var(--on-action);
   --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-success: var(--success);
-  --color-success-foreground: var(--success-foreground);
-  --color-warning: var(--warning);
-  --color-warning-foreground: var(--warning-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
+  --color-primary-pressed: var(--primary-pressed);
+  --color-on-primary: var(--on-primary);
+  --color-primary-text: var(--primary-text);
+  --color-link: var(--link);
+  --color-focus-ring: var(--focus-ring);
+  --color-danger: var(--danger);
+  --color-on-danger: var(--on-danger);
+  --color-danger-text: var(--danger-text);
+  --color-status-confirmed-fg: var(--status-confirmed-fg);
+  --color-status-confirmed-bg: var(--status-confirmed-bg);
+  --color-status-pending-fg: var(--status-pending-fg);
+  --color-status-pending-bg: var(--status-pending-bg);
+  --color-status-open-fg: var(--status-open-fg);
+  --color-status-open-bg: var(--status-open-bg);
+  --color-status-cancelled-fg: var(--status-cancelled-fg);
+  --color-status-cancelled-bg: var(--status-cancelled-bg);
 
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --font-sans: var(--font-family-text);
+  --font-display: var(--font-family-display);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-hairline;
+  }
+
+  /* One focus ring for everything that can take the keyboard focus. */
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-focus-ring;
   }
 
   html {
     color-scheme: light;
   }
 
-  html.dark {
+  /* Also a dark band inside a light page, such as the navigation. */
+  .dark {
     color-scheme: dark;
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply type-body-md bg-canvas text-ink antialiased;
   }
 }

@@ -98,7 +98,7 @@ lib/
 │   ├── l10n/                  ARB files, context.l10n
 │   ├── routing/               all routes and the redirect that follows the session
 │   ├── theme/                 tokens.dart (generated), AppTheme
-│   └── widgets/               button, text field, badge, alert, status message
+│   └── widgets/               button, text field, badge, alert, status message, tab bar
 └── features/
     ├── auth/                  session, token storage, auth interceptor, login, start screen
     ├── signup/                invitation code, signup form
@@ -106,7 +106,7 @@ lib/
     └── shifts/                home with the tabs, shift list (empty for now), account sheet
 packages/
 └── shiftboard_api/            generated API client
-assets/fonts/inter/            Inter, bundled with its license
+assets/fonts/                  Inter and Inter Tight, bundled with their licenses
 test/                          mirrors lib/; support/ holds the fake backend
 ```
 
@@ -118,7 +118,8 @@ A feature has `data/` (providers and repositories on the generated client) and `
 - **Routing:** paths live in `AppRoutes`, routes and the `redirect` in `core/routing/app_router.dart`. Screens do not navigate after login, logout or approval; they change the session and the redirect follows.
 - **Errors:** `ApiError` turns a failed call into the API's error `code` and, in one place, into a localized message. Unknown codes get a generic one.
 - **API:** models and calls come from `shiftboard_api`. Never write API models by hand.
-- **Theme:** colors, spacing, radii and font sizes come from `core/theme/tokens.dart`. Use `Theme.of(context)`, `context.semanticColors` (success, warning) and `AppSpacing`; never hardcode a color or brand value.
+- **Theme:** colors, spacing, radii, control sizes and text styles come from `core/theme/tokens.dart`. Use `context.colors` (every token color of the current theme), `AppTypography`, `AppSpacing`, `AppRadius` and `AppSize`; never hardcode a color or brand value. The themes follow the system appearance.
+- **Design rules:** one `AppButtonVariant.action` button per screen, full width at the bottom. The cobalt `primary` appears at most once per screen. A status is always an `AppBadge` with a word and an icon, never color alone. No shadows. Icons are `CupertinoIcons`. Every tappable element is at least 44 high, and text scales with the system text size.
 - **Strings:** every user-facing string goes through `context.l10n`. German is the template language, English a translation.
 
 ## Generated code
@@ -135,4 +136,7 @@ To add a string, add it with a description to `app_de.arb`, add the translation 
 
 ## Font
 
-Inter 4.1 from the [Inter project](https://github.com/rsms/inter/releases/tag/v4.1) is bundled in `assets/fonts/inter/` in the weights 400, 500, 600 and 700, together with its SIL Open Font License. Nothing is fetched at runtime.
+Two families are bundled, each with its SIL Open Font License; nothing is fetched at runtime.
+
+- Inter 4.1 from the [Inter project](https://github.com/rsms/inter/releases/tag/v4.1) in `assets/fonts/inter/`, in the weights 400, 500, 600 and 700, for text and controls.
+- Inter Tight from [Google Fonts](https://fonts.google.com/specimen/Inter+Tight) in `assets/fonts/inter_tight/`, in the weight 500, for titles.

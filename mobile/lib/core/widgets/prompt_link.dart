@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_theme.dart';
 import '../theme/tokens.dart';
 
 /// A question followed by the link that answers it, such as
@@ -18,30 +19,27 @@ class PromptLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
+    final colors = context.colors;
 
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        minimumSize: const Size(AppSpacing.s12, AppSpacing.s12),
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.s2,
-          vertical: AppSpacing.s2,
-        ),
+        minimumSize: const Size(AppSize.touchTarget, AppSize.touchTarget),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+        shape: const StadiumBorder(),
+        overlayColor: Colors.transparent,
       ),
       child: Text.rich(
         TextSpan(
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: scheme.onSurfaceVariant,
-          ),
+          style: AppTypography.subhead.copyWith(color: colors.inkSecondary),
           children: [
             TextSpan(text: '$prompt '),
             TextSpan(
               text: action,
               style: TextStyle(
-                color: scheme.primary,
+                color: colors.ink,
                 fontWeight: FontWeight.w600,
+                decoration: TextDecoration.underline,
               ),
             ),
           ],
