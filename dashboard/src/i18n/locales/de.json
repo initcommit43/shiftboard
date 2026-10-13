@@ -120,7 +120,7 @@
       "endIsEstimate": "Das Ende ist geschätzt (wird mit „ca.“ angezeigt)",
       "hourlyRatePlaceholder": "z. B. 16,50",
       "hourlyRateHint": "Brutto pro Stunde.",
-      "qualificationsHint": "Ohne Auswahl kann jede:r die Schicht übernehmen.",
+      "qualificationsHint": "Mitarbeiter:innen sehen sie als Voraussetzung bei der Schicht. Die App prüft sie nicht.",
       "publish": "Veröffentlichen",
       "saveDraft": "Als Entwurf speichern",
       "cancel": "Abbrechen",

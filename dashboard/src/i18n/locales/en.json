@@ -120,7 +120,7 @@
       "endIsEstimate": "The end is an estimate (shown with \"approx.\")",
       "hourlyRatePlaceholder": "e.g. 16.50",
       "hourlyRateHint": "Gross per hour.",
-      "qualificationsHint": "With none selected, anyone can take the shift.",
+      "qualificationsHint": "Workers see them as a requirement on the shift. The app does not check them.",
       "publish": "Publish",
       "saveDraft": "Save as draft",
       "cancel": "Cancel",

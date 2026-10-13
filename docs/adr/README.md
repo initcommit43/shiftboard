@@ -24,3 +24,4 @@ One short record per real decision. Format: `NNNN-title.md` with the sections Co
 | [0018](0018-date-of-birth.md) | Date of birth in the worker profile |
 | [0019](0019-source-available-all-rights-reserved.md) | Public repository, all rights reserved |
 | [0020](0020-worker-app-tabs.md) | Tabs of the worker app |
+| [0021](0021-qualifications-information-only.md) | Qualifications are information only in the MVP |
