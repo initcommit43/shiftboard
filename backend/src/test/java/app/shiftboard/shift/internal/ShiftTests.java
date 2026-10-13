@@ -63,6 +63,43 @@ class ShiftTests {
                 "slots", "out_of_range", () -> shift(START.plus(Duration.ofHours(8)), "16.50", slots, Set.of()));
     }
 
+    @Test
+    void aClaimTakesOneSlotUntilTheShiftIsFull() {
+        var shift = shift(START.plus(Duration.ofHours(8)), "16.50", 2, Set.of());
+        shift.publish();
+
+        shift.claim(START.minus(Duration.ofDays(1)));
+        shift.claim(START.minus(Duration.ofSeconds(1)));
+
+        assertThat(shift.getTakenSlots()).isEqualTo(2);
+        assertNotClaimable("shift_full", shift, START.minus(Duration.ofSeconds(1)));
+        assertThat(shift.getTakenSlots()).isEqualTo(2);
+    }
+
+    @Test
+    void aShiftCannotBeClaimedOnceItHasStarted() {
+        var shift = shift(START.plus(Duration.ofHours(8)), "16.50", 2, Set.of());
+        shift.publish();
+
+        assertNotClaimable("shift_started", shift, START);
+        assertNotClaimable("shift_started", shift, START.plus(Duration.ofHours(1)));
+        assertThat(shift.getTakenSlots()).isZero();
+    }
+
+    @Test
+    void onlyAPublishedShiftCanBeClaimed() {
+        var draft = shift(START.plus(Duration.ofHours(8)), "16.50", 2, Set.of());
+
+        assertNotClaimable("shift_not_open", draft, START.minus(Duration.ofDays(1)));
+        assertThat(draft.getTakenSlots()).isZero();
+    }
+
+    private static void assertNotClaimable(String code, Shift shift, Instant now) {
+        assertThatExceptionOfType(ShiftNotClaimableException.class)
+                .isThrownBy(() -> shift.claim(now))
+                .satisfies(rejection -> assertThat(rejection.getCode()).isEqualTo(code));
+    }
+
     private static Shift shift(Instant endsAt, String hourlyRate, int slots, Set<UUID> qualificationIds) {
         return new Shift(
                 UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "Lagerunterstützung", null, START, endsAt,

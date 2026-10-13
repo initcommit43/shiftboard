@@ -33,6 +33,13 @@ class UserAccount {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    // Name and phone of dispatchers and admins. Workers have theirs in the worker profile.
+    private String firstName;
+
+    private String lastName;
+
+    private String phone;
+
     protected UserAccount() {
     }
 
@@ -66,5 +73,17 @@ class UserAccount {
 
     Role getRole() {
         return role;
+    }
+
+    String getFirstName() {
+        return firstName;
+    }
+
+    String getLastName() {
+        return lastName;
+    }
+
+    String getPhone() {
+        return phone;
     }
 }

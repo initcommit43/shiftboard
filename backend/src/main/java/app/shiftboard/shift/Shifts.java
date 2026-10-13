@@ -1,0 +1,34 @@
+package app.shiftboard.shift;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+
+/**
+ * The shifts of the current agency as workers see them. Drafts do not exist here.
+ */
+public interface Shifts {
+
+    /** The published shifts that have not started yet, earliest start first, full ones included. */
+    Page<ShiftDetails> listOpen(int page, int size);
+
+    /** A published, completed or cancelled shift. */
+    Optional<ShiftDetails> find(UUID shiftId);
+
+    /** The shifts with these ids by id; unknown ids are left out. */
+    Map<UUID, ShiftDetails> findAll(Collection<UUID> shiftIds);
+
+    /**
+     * Takes one slot of the shift for a claim and returns the shift with that slot counted. Joins
+     * the transaction of the caller, so the slot is only taken if the claim is stored too.
+     *
+     * @throws app.shiftboard.system.ApiException {@code shift_not_found}, {@code shift_not_open},
+     *         {@code shift_started} or {@code shift_full}
+     * @throws org.springframework.dao.OptimisticLockingFailureException if a concurrent change of
+     *         the shift won; the transaction cannot be continued
+     */
+    ShiftDetails claim(UUID shiftId);
+}

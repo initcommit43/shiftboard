@@ -2,6 +2,7 @@ package app.shiftboard.shift.internal;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,5 +17,9 @@ interface ShiftRepository extends Repository<Shift, UUID> {
 
     Optional<Shift> findById(UUID id);
 
+    List<Shift> findAllById(Iterable<UUID> ids);
+
     Page<Shift> findByStatusInAndEndsAtAfter(Collection<ShiftStatus> statuses, Instant time, Pageable pageable);
+
+    Page<Shift> findByStatusAndStartsAtAfter(ShiftStatus status, Instant time, Pageable pageable);
 }
