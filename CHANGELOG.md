@@ -2,7 +2,14 @@
 
 Notable changes per slice. One version tag per completed slice during the MVP.
 
-## Unreleased: slice 0, skeleton, signup and login
+## Unreleased: slice 1, create, see and claim a shift
+
+### Added
+
+- Dispatchers create a shift for a client and location in the dashboard, published right away or saved as a draft, and publish drafts later.
+- The dashboard lists the upcoming shifts with their status and taken vs. total spots.
+
+## v0.1.0 (2026-10-13): slice 0, skeleton, signup and login
 
 ### Added
 
