@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
 import { PageHeader } from '@/components/page-header'
+import { Pagination } from '@/components/pagination'
 import { StateCard } from '@/components/state-card'
 import { Button } from '@/components/ui/button'
 
@@ -75,33 +76,12 @@ function PendingSignups() {
         <p className="type-body-sm text-ink-secondary">
           {t('signups.count', { count: totalElements })}
         </p>
-        {totalPages > 1 && (
-          <nav aria-label={t('signups.pagination.label')} className="flex items-center gap-2">
-            <span className="type-body-sm mr-2 text-ink-secondary tabular-nums">
-              {t('signups.pagination.page', { page: page + 1, total: totalPages })}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page === 0 || signups.isPlaceholderData}
-              onClick={() => {
-                setPage(page - 1)
-              }}
-            >
-              {t('signups.pagination.previous')}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={page >= totalPages - 1 || signups.isPlaceholderData}
-              onClick={() => {
-                setPage(page + 1)
-              }}
-            >
-              {t('signups.pagination.next')}
-            </Button>
-          </nav>
-        )}
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          disabled={signups.isPlaceholderData}
+          onPageChange={setPage}
+        />
       </div>
     </>
   )
