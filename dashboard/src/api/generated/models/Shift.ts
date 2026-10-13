@@ -97,7 +97,7 @@ export interface Shift {
      */
     takenSlots: number;
     /**
-     * Qualifications a worker needs to claim the shift.
+     * Qualifications the shift asks for. Information only; a claim is not checked against them.
      */
     qualifications: Array<Qualification>;
     /**

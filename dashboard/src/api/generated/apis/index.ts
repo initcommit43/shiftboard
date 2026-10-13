@@ -5,4 +5,5 @@ export * from './ClientsApi';
 export * from './ShiftsApi';
 export * from './SignupApi';
 export * from './SystemApi';
+export * from './WorkerShiftsApi';
 export * from './WorkersApi';

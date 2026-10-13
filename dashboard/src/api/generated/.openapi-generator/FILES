@@ -4,10 +4,13 @@ apis/ClientsApi.ts
 apis/ShiftsApi.ts
 apis/SignupApi.ts
 apis/SystemApi.ts
+apis/WorkerShiftsApi.ts
 apis/WorkersApi.ts
 apis/index.ts
 index.ts
 models/AgencySummary.ts
+models/AssignmentStatus.ts
+models/AssignmentSummary.ts
 models/Client.ts
 models/ClientPage.ts
 models/ClientSummary.ts
@@ -23,6 +26,7 @@ models/QualificationPage.ts
 models/RefreshTokenRequest.ts
 models/Role.ts
 models/Shift.ts
+models/ShiftContact.ts
 models/ShiftPage.ts
 models/ShiftRequest.ts
 models/ShiftStatus.ts
@@ -31,6 +35,8 @@ models/TokenResponse.ts
 models/Worker.ts
 models/WorkerPage.ts
 models/WorkerProfile.ts
+models/WorkerShift.ts
+models/WorkerShiftPage.ts
 models/WorkerSignupRequest.ts
 models/WorkerStatus.ts
 models/index.ts

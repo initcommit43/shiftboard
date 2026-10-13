@@ -7,6 +7,7 @@ lib/src/api/clients_api.dart
 lib/src/api/shifts_api.dart
 lib/src/api/signup_api.dart
 lib/src/api/system_api.dart
+lib/src/api/worker_shifts_api.dart
 lib/src/api/workers_api.dart
 lib/src/api_util.dart
 lib/src/auth/api_key_auth.dart
@@ -16,6 +17,8 @@ lib/src/auth/bearer_auth.dart
 lib/src/auth/oauth.dart
 lib/src/date_serializer.dart
 lib/src/model/agency_summary.dart
+lib/src/model/assignment_status.dart
+lib/src/model/assignment_summary.dart
 lib/src/model/client.dart
 lib/src/model/client_page.dart
 lib/src/model/client_summary.dart
@@ -32,6 +35,7 @@ lib/src/model/qualification_page.dart
 lib/src/model/refresh_token_request.dart
 lib/src/model/role.dart
 lib/src/model/shift.dart
+lib/src/model/shift_contact.dart
 lib/src/model/shift_page.dart
 lib/src/model/shift_request.dart
 lib/src/model/shift_status.dart
@@ -40,6 +44,8 @@ lib/src/model/token_response.dart
 lib/src/model/worker.dart
 lib/src/model/worker_page.dart
 lib/src/model/worker_profile.dart
+lib/src/model/worker_shift.dart
+lib/src/model/worker_shift_page.dart
 lib/src/model/worker_signup_request.dart
 lib/src/model/worker_status.dart
 lib/src/serializers.dart

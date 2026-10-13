@@ -28,7 +28,7 @@ part 'shift.g.dart';
 /// * [hourlyRateCents] - Gross pay per hour in euro cents.
 /// * [slots] - How many workers the shift needs.
 /// * [takenSlots] - How many of the slots are claimed.
-/// * [qualifications] - Qualifications a worker needs to claim the shift.
+/// * [qualifications] - Qualifications the shift asks for. Information only; a claim is not checked against them.
 /// * [createdAt]
 @BuiltValue()
 abstract class Shift implements Built<Shift, ShiftBuilder> {
@@ -72,7 +72,7 @@ abstract class Shift implements Built<Shift, ShiftBuilder> {
   @BuiltValueField(wireName: r'takenSlots')
   int get takenSlots;
 
-  /// Qualifications a worker needs to claim the shift.
+  /// Qualifications the shift asks for. Information only; a claim is not checked against them.
   @BuiltValueField(wireName: r'qualifications')
   BuiltList<Qualification> get qualifications;
 

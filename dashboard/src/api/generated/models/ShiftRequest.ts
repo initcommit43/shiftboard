@@ -56,7 +56,9 @@ export interface ShiftRequest {
      */
     slots: number;
     /**
-     * Qualifications a worker needs to claim the shift. Empty or absent means none.
+     * Qualifications the shift asks for. Workers see them on the shift;
+     * a claim is not checked against them. Empty or absent means none.
+     * 
      */
     qualificationIds?: Set<string>;
     /**
