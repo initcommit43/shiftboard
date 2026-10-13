@@ -25,3 +25,4 @@ One short record per real decision. Format: `NNNN-title.md` with the sections Co
 | [0019](0019-source-available-all-rights-reserved.md) | Public repository, all rights reserved |
 | [0020](0020-worker-app-tabs.md) | Tabs of the worker app |
 | [0021](0021-qualifications-information-only.md) | Qualifications are information only in the MVP |
+| [0022](0022-staff-names-and-shift-contact.md) | Names on staff accounts and the contact person of a shift |

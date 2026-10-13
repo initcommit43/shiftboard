@@ -38,6 +38,8 @@ tags:
     description: The agency's customers, their locations and the qualifications a shift can ask for
   - name: shifts
     description: Shifts the agency creates and publishes
+  - name: worker-shifts
+    description: What a worker sees of the agency's shifts, claiming a spot, and the shifts they claimed
 security:
   - bearerAuth: []
 paths:
@@ -472,6 +474,135 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /worker/shifts:
+    get:
+      operationId: listWorkerShifts
+      tags: [worker-shifts]
+      summary: List the shifts a worker can claim
+      description: |
+        The agency's published shifts that have not started yet, sorted by
+        start time, earliest first. Full shifts are included, so that the app
+        can show them as full. A shift the worker has claimed carries their
+        `assignment`. Active workers only.
+
+        Qualifications are not matched: every active worker sees every
+        published shift, and `qualifications` is information for the worker.
+
+        Error codes: `forbidden` (403, not a worker), `worker_not_active`
+        (403, the signup is pending or the worker is inactive).
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of shifts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerShiftPage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /worker/shifts/{shiftId}:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+    get:
+      operationId: getWorkerShift
+      tags: [worker-shifts]
+      summary: One shift as a worker sees it
+      description: |
+        A published, completed or cancelled shift of the agency, whether or
+        not it has started, so that the detail of a claimed shift stays
+        reachable. A draft does not exist for workers. Active workers only.
+
+        Error codes: `forbidden` (403), `worker_not_active` (403),
+        `shift_not_found` (404).
+      responses:
+        "200":
+          description: The shift.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerShift"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /worker/shifts/{shiftId}/claim:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+    post:
+      operationId: claimShift
+      tags: [worker-shifts]
+      summary: Claim a spot on a shift
+      description: |
+        Creates the worker's assignment as `PENDING` and counts the spot as
+        taken. When two workers claim the last spot at the same time, one of
+        them gets `shift_full`. The claim is not checked against the shift's
+        qualifications. Active workers only.
+
+        Error codes: `forbidden` (403), `worker_not_active` (403),
+        `shift_not_found` (404), and with 409: `shift_full` (no spot left),
+        `shift_already_claimed` (the worker has claimed this shift before,
+        whatever became of that claim), `shift_started` (the start time has
+        passed), `shift_not_open` (cancelled or completed) and
+        `shift_overlap` (it overlaps one of the worker's pending or confirmed
+        shifts).
+      responses:
+        "201":
+          description: The shift with the worker's new assignment.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerShift"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /worker/my-shifts:
+    get:
+      operationId: listMyShifts
+      tags: [worker-shifts]
+      summary: List the shifts the worker has claimed
+      description: |
+        Every shift the worker has an assignment for, whatever its status,
+        sorted by start time, earliest first. Each shift carries the
+        `assignment`. Active workers only.
+
+        Error codes: `forbidden` (403), `worker_not_active` (403).
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of claimed shifts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerShiftPage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -879,7 +1010,9 @@ components:
           description: How many workers the shift needs.
         qualificationIds:
           type: array
-          description: Qualifications a worker needs to claim the shift. Empty or absent means none.
+          description: |
+            Qualifications the shift asks for. Workers see them on the shift;
+            a claim is not checked against them. Empty or absent means none.
           uniqueItems: true
           items:
             type: string
@@ -941,7 +1074,7 @@ components:
           description: How many of the slots are claimed.
         qualifications:
           type: array
-          description: Qualifications a worker needs to claim the shift.
+          description: Qualifications the shift asks for. Information only; a claim is not checked against them.
           items:
             $ref: "#/components/schemas/Qualification"
         createdAt:
@@ -956,6 +1089,129 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Shift"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+
+    AssignmentStatus:
+      type: string
+      description: |
+        `PENDING` after the claim, `CONFIRMED` once the agency approved,
+        `REJECTED` when it declined, `CANCELLED` when the worker dropped out,
+        the agency removed them or the shift was called off, `COMPLETED` after
+        the shift took place, `NO_SHOW` when the worker did not turn up.
+        Pending and confirmed assignments hold a spot.
+      enum: [PENDING, CONFIRMED, REJECTED, CANCELLED, COMPLETED, NO_SHOW]
+
+    AssignmentSummary:
+      type: object
+      description: A worker's claim on a shift.
+      required: [id, status, claimedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/AssignmentStatus"
+        claimedAt:
+          type: string
+          format: date-time
+
+    ShiftContact:
+      type: object
+      description: The person at the agency to ask about a shift; the dispatcher who created it.
+      required: [name]
+      properties:
+        name:
+          type: string
+          examples: [Anna Berger]
+        phone:
+          type: string
+          description: Absent when the contact has no phone number on record.
+          examples: ["+43 660 5550100"]
+
+    WorkerShift:
+      type: object
+      description: A shift as a worker sees it.
+      required:
+        - id
+        - title
+        - status
+        - client
+        - location
+        - startsAt
+        - endsAt
+        - endIsEstimate
+        - hourlyRateCents
+        - slots
+        - takenSlots
+        - qualifications
+        - contact
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+          description: What to bring, the meeting point and anything else workers need to know.
+        status:
+          description: Never `DRAFT`.
+          $ref: "#/components/schemas/ShiftStatus"
+        client:
+          $ref: "#/components/schemas/ClientSummary"
+        location:
+          $ref: "#/components/schemas/Location"
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        endIsEstimate:
+          type: boolean
+          description: The end is approximate; clients show it with "ca.".
+        hourlyRateCents:
+          type: integer
+          format: int32
+          description: Gross pay per hour in euro cents.
+        slots:
+          type: integer
+          format: int32
+          description: How many workers the shift needs.
+        takenSlots:
+          type: integer
+          format: int32
+          description: How many of the slots are claimed. The shift is full when it equals `slots`.
+        qualifications:
+          type: array
+          description: Qualifications the shift asks for. Information only; a claim is not checked against them.
+          items:
+            $ref: "#/components/schemas/Qualification"
+        contact:
+          $ref: "#/components/schemas/ShiftContact"
+        assignment:
+          description: The worker's own claim on this shift. Absent when they have not claimed it.
+          $ref: "#/components/schemas/AssignmentSummary"
+
+    WorkerShiftPage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkerShift"
         page:
           type: integer
           format: int32

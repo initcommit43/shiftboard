@@ -91,6 +91,10 @@ Class | Method | HTTP request | Description
 [*SignupApi*](doc/SignupApi.md) | [**getSignupInfo**](doc/SignupApi.md#getsignupinfo) | **GET** /signup/{signupCode} | Look up the agency behind a signup link
 [*SignupApi*](doc/SignupApi.md) | [**signUp**](doc/SignupApi.md#signup) | **POST** /signup/{signupCode} | Sign up as a worker of the agency
 [*SystemApi*](doc/SystemApi.md) | [**ping**](doc/SystemApi.md#ping) | **GET** /ping | Check that the API is reachable
+[*WorkerShiftsApi*](doc/WorkerShiftsApi.md) | [**claimShift**](doc/WorkerShiftsApi.md#claimshift) | **POST** /worker/shifts/{shiftId}/claim | Claim a spot on a shift
+[*WorkerShiftsApi*](doc/WorkerShiftsApi.md) | [**getWorkerShift**](doc/WorkerShiftsApi.md#getworkershift) | **GET** /worker/shifts/{shiftId} | One shift as a worker sees it
+[*WorkerShiftsApi*](doc/WorkerShiftsApi.md) | [**listMyShifts**](doc/WorkerShiftsApi.md#listmyshifts) | **GET** /worker/my-shifts | List the shifts the worker has claimed
+[*WorkerShiftsApi*](doc/WorkerShiftsApi.md) | [**listWorkerShifts**](doc/WorkerShiftsApi.md#listworkershifts) | **GET** /worker/shifts | List the shifts a worker can claim
 [*WorkersApi*](doc/WorkersApi.md) | [**approveWorker**](doc/WorkersApi.md#approveworker) | **POST** /workers/{workerId}/approve | Approve a pending signup
 [*WorkersApi*](doc/WorkersApi.md) | [**listWorkers**](doc/WorkersApi.md#listworkers) | **GET** /workers | List the agency&#39;s workers
 [*WorkersApi*](doc/WorkersApi.md) | [**rejectWorker**](doc/WorkersApi.md#rejectworker) | **POST** /workers/{workerId}/reject | Reject a pending signup
@@ -99,6 +103,8 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [AgencySummary](doc/AgencySummary.md)
+ - [AssignmentStatus](doc/AssignmentStatus.md)
+ - [AssignmentSummary](doc/AssignmentSummary.md)
  - [Client](doc/Client.md)
  - [ClientPage](doc/ClientPage.md)
  - [ClientSummary](doc/ClientSummary.md)
@@ -114,6 +120,7 @@ Class | Method | HTTP request | Description
  - [RefreshTokenRequest](doc/RefreshTokenRequest.md)
  - [Role](doc/Role.md)
  - [Shift](doc/Shift.md)
+ - [ShiftContact](doc/ShiftContact.md)
  - [ShiftPage](doc/ShiftPage.md)
  - [ShiftRequest](doc/ShiftRequest.md)
  - [ShiftStatus](doc/ShiftStatus.md)
@@ -122,6 +129,8 @@ Class | Method | HTTP request | Description
  - [Worker](doc/Worker.md)
  - [WorkerPage](doc/WorkerPage.md)
  - [WorkerProfile](doc/WorkerProfile.md)
+ - [WorkerShift](doc/WorkerShift.md)
+ - [WorkerShiftPage](doc/WorkerShiftPage.md)
  - [WorkerSignupRequest](doc/WorkerSignupRequest.md)
  - [WorkerStatus](doc/WorkerStatus.md)
 

@@ -8,6 +8,8 @@ part of 'serializers.dart';
 
 Serializers _$serializers = (Serializers().toBuilder()
       ..add(AgencySummary.serializer)
+      ..add(AssignmentStatus.serializer)
+      ..add(AssignmentSummary.serializer)
       ..add(Client.serializer)
       ..add(ClientPage.serializer)
       ..add(ClientSummary.serializer)
@@ -23,6 +25,7 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..add(RefreshTokenRequest.serializer)
       ..add(Role.serializer)
       ..add(Shift.serializer)
+      ..add(ShiftContact.serializer)
       ..add(ShiftPage.serializer)
       ..add(ShiftRequest.serializer)
       ..add(ShiftStatus.serializer)
@@ -31,6 +34,8 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..add(Worker.serializer)
       ..add(WorkerPage.serializer)
       ..add(WorkerProfile.serializer)
+      ..add(WorkerShift.serializer)
+      ..add(WorkerShiftPage.serializer)
       ..add(WorkerSignupRequest.serializer)
       ..add(WorkerStatus.serializer)
       ..addBuilderFactory(
@@ -52,11 +57,17 @@ Serializers _$serializers = (Serializers().toBuilder()
           const FullType(BuiltList, const [const FullType(Qualification)]),
           () => ListBuilder<Qualification>())
       ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(Qualification)]),
+          () => ListBuilder<Qualification>())
+      ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(Shift)]),
           () => ListBuilder<Shift>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(Worker)]),
           () => ListBuilder<Worker>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(WorkerShift)]),
+          () => ListBuilder<WorkerShift>())
       ..addBuilderFactory(
           const FullType(BuiltSet, const [const FullType(String)]),
           () => SetBuilder<String>()))

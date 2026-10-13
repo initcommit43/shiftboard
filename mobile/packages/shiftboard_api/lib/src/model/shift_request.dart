@@ -21,7 +21,7 @@ part 'shift_request.g.dart';
 /// * [endIsEstimate] - The end is approximate; clients show it with \"ca.\".
 /// * [hourlyRateCents] - Gross pay per hour in euro cents.
 /// * [slots] - How many workers the shift needs.
-/// * [qualificationIds] - Qualifications a worker needs to claim the shift. Empty or absent means none.
+/// * [qualificationIds] - Qualifications the shift asks for. Workers see them on the shift; a claim is not checked against them. Empty or absent means none.
 /// * [publish] - Publish the shift right away instead of saving it as a draft.
 @BuiltValue()
 abstract class ShiftRequest
@@ -59,7 +59,7 @@ abstract class ShiftRequest
   @BuiltValueField(wireName: r'slots')
   int get slots;
 
-  /// Qualifications a worker needs to claim the shift. Empty or absent means none.
+  /// Qualifications the shift asks for. Workers see them on the shift; a claim is not checked against them. Empty or absent means none.
   @BuiltValueField(wireName: r'qualificationIds')
   BuiltSet<String>? get qualificationIds;
 

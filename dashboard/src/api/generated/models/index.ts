@@ -1,6 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 export * from './AgencySummary';
+export * from './AssignmentStatus';
+export * from './AssignmentSummary';
 export * from './Client';
 export * from './ClientPage';
 export * from './ClientSummary';
@@ -16,6 +18,7 @@ export * from './QualificationPage';
 export * from './RefreshTokenRequest';
 export * from './Role';
 export * from './Shift';
+export * from './ShiftContact';
 export * from './ShiftPage';
 export * from './ShiftRequest';
 export * from './ShiftStatus';
@@ -24,5 +27,7 @@ export * from './TokenResponse';
 export * from './Worker';
 export * from './WorkerPage';
 export * from './WorkerProfile';
+export * from './WorkerShift';
+export * from './WorkerShiftPage';
 export * from './WorkerSignupRequest';
 export * from './WorkerStatus';

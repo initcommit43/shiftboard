@@ -15,6 +15,8 @@ import 'package:shiftboard_api/src/date_serializer.dart';
 import 'package:shiftboard_api/src/model/date.dart';
 
 import 'package:shiftboard_api/src/model/agency_summary.dart';
+import 'package:shiftboard_api/src/model/assignment_status.dart';
+import 'package:shiftboard_api/src/model/assignment_summary.dart';
 import 'package:shiftboard_api/src/model/client.dart';
 import 'package:shiftboard_api/src/model/client_page.dart';
 import 'package:shiftboard_api/src/model/client_summary.dart';
@@ -30,6 +32,7 @@ import 'package:shiftboard_api/src/model/qualification_page.dart';
 import 'package:shiftboard_api/src/model/refresh_token_request.dart';
 import 'package:shiftboard_api/src/model/role.dart';
 import 'package:shiftboard_api/src/model/shift.dart';
+import 'package:shiftboard_api/src/model/shift_contact.dart';
 import 'package:shiftboard_api/src/model/shift_page.dart';
 import 'package:shiftboard_api/src/model/shift_request.dart';
 import 'package:shiftboard_api/src/model/shift_status.dart';
@@ -38,6 +41,8 @@ import 'package:shiftboard_api/src/model/token_response.dart';
 import 'package:shiftboard_api/src/model/worker.dart';
 import 'package:shiftboard_api/src/model/worker_page.dart';
 import 'package:shiftboard_api/src/model/worker_profile.dart';
+import 'package:shiftboard_api/src/model/worker_shift.dart';
+import 'package:shiftboard_api/src/model/worker_shift_page.dart';
 import 'package:shiftboard_api/src/model/worker_signup_request.dart';
 import 'package:shiftboard_api/src/model/worker_status.dart';
 
@@ -45,6 +50,8 @@ part 'serializers.g.dart';
 
 @SerializersFor([
   AgencySummary,
+  AssignmentStatus,
+  AssignmentSummary,
   Client,
   ClientPage,
   ClientSummary,
@@ -60,6 +67,7 @@ part 'serializers.g.dart';
   RefreshTokenRequest,
   Role,
   Shift,
+  ShiftContact,
   ShiftPage,
   ShiftRequest,
   ShiftStatus,
@@ -68,6 +76,8 @@ part 'serializers.g.dart';
   Worker,
   WorkerPage,
   WorkerProfile,
+  WorkerShift,
+  WorkerShiftPage,
   WorkerSignupRequest,
   WorkerStatus,
 ])
@@ -99,6 +109,10 @@ Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Location)]),
         () => ListBuilder<Location>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(WorkerShift)]),
+        () => ListBuilder<WorkerShift>(),
       )
       ..add(const OneOfSerializer())
       ..add(const AnyOfSerializer())
