@@ -15,4 +15,7 @@ public interface UserAccounts {
 
     /** The emails of the given accounts, by account id. */
     Map<UUID, String> emails(Collection<UUID> accountIds);
+
+    /** The contact data of the given dispatchers and admins, by account id. Workers are left out. */
+    Map<UUID, StaffContact> staffContacts(Collection<UUID> accountIds);
 }

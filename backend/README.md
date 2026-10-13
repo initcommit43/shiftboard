@@ -56,9 +56,19 @@ The `local` profile in turn only starts against a database on the same machine: 
 - The refresh token is a random opaque value. Only its SHA-256 hash is stored. `POST /auth/refresh` revokes it and returns a new pair, so a token works once; `POST /auth/logout` revokes it and ends the session on that device.
 - Passwords are hashed with Argon2id. A wrong password and an unknown email give the same answer and take comparable time.
 - Login attempts are limited per email and client address. The counters are kept in memory: the limit holds per application instance and is forgotten on restart, so running several instances needs a shared store. The client address is the remote address of the connection; behind a reverse proxy set `server.forward-headers-strategy`.
-- `/ping`, `/signup/**`, `/auth/**` and `/actuator/health` are public. Everything else needs an access token; `/workers/**`, `/clients/**`, `/qualifications/**` and `/shifts/**` need the role `DISPATCHER` or `ADMIN`.
+- `/ping`, `/signup/**`, `/auth/**` and `/actuator/health` are public. Everything else needs an access token; `/workers/**`, `/clients/**`, `/qualifications/**` and `/shifts/**` need the role `DISPATCHER` or `ADMIN`, `/worker/**` needs the role `WORKER`.
 
-Pending and inactive workers can log in; the app reads their status from `GET /me` and shows the matching screen.
+Pending and inactive workers can log in; the app reads their status from `GET /me` and shows the matching screen. The endpoints under `/worker/**` answer them with `worker_not_active`.
+
+## Claiming a shift
+
+`POST /worker/shifts/{shiftId}/claim` takes one slot of the shift and stores the worker's assignment as `PENDING`, in one transaction.
+
+- The rule lives in the entity: `Shift.claim` only takes a slot of a published shift that has not started and is not full.
+- The shift row carries a `@Version`. Of two claims that read the same row, the slower one fails the version check when it writes. It is tried again up to three times, each time reading the shift anew, so a worker hears `shift_full` when the shift filled up, not when a colleague was merely faster on a shift with spots left ([ADR 0008](../docs/adr/0008-overbooking-protection.md)).
+- The database has the last word: a unique constraint keeps a worker from claiming the same shift twice, an exclusion constraint from being booked for two overlapping shifts. Both also hold against two requests of the same worker at once.
+- An assignment copies start and end of its shift. Overlaps are checked and "my shifts" is sorted on the assignment alone; whatever moves a shift later has to move its assignments too.
+- Qualifications are not checked ([ADR 0021](../docs/adr/0021-qualifications-information-only.md)).
 
 ## Multi-tenancy
 
@@ -97,7 +107,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login -H 'Content-Type: applicati
     -d '{"email": "dispatcher1.donau@example.com", "password": "shiftboard-demo", "client": "DASHBOARD"}'
 ```
 
-Donau Personal also has three clients (Nordlicht Logistik, Hotel Lindenhof, Genusswerk Catering) with four locations, and six shifts in the next nine days: five published and one draft. Alpen Events has one client with one published shift. The shifts are dated relative to the day the database was seeded, so an old demo database shows them in the past; `docker compose down -v` gives fresh ones.
+Donau Personal also has three clients (Nordlicht Logistik, Hotel Lindenhof, Genusswerk Catering) with four locations, and six shifts in the next nine days: five published and one draft. Alpen Events has one client with one published shift. Five claims are pending at Donau Personal: Lena Hofer has one on "Service Hochzeit", "Lagerunterstützung" has two of five spots taken and "Barkeeper:in Hochzeit" is full. The dispatchers and admins have fictional names, two of them a phone number; they are the contact persons of the shifts. The shifts are dated relative to the day the database was seeded, so an old demo database shows them in the past; `docker compose down -v` gives fresh ones.
 
 ## Test
 

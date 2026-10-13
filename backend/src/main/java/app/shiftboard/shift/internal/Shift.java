@@ -120,6 +120,23 @@ class Shift {
         status = ShiftStatus.PUBLISHED;
     }
 
+    /**
+     * Takes one slot for a claim. Only a published shift that has not started and has a free slot
+     * can be claimed.
+     */
+    void claim(Instant now) {
+        if (status != ShiftStatus.PUBLISHED) {
+            throw ShiftNotClaimableException.notOpen();
+        }
+        if (!now.isBefore(startsAt)) {
+            throw ShiftNotClaimableException.started();
+        }
+        if (takenSlots >= slots) {
+            throw ShiftNotClaimableException.full();
+        }
+        takenSlots++;
+    }
+
     UUID getId() {
         return id;
     }
@@ -130,6 +147,10 @@ class Shift {
 
     UUID getLocationId() {
         return locationId;
+    }
+
+    UUID getContactUserId() {
+        return contactUserId;
     }
 
     String getTitle() {

@@ -66,11 +66,19 @@ public class TestData {
         return id;
     }
 
-    /** Creates an account with {@link #PASSWORD} and returns its email. */
+    /** Creates an account of Anna Berger with {@link #PASSWORD} and returns its email. */
     public String account(Agency agency, Role role) {
+        return account(agency, role, "Anna", "Berger", "+43 660 5550191");
+    }
+
+    /** Creates an account with {@link #PASSWORD} and returns its email. */
+    public String account(Agency agency, Role role, String firstName, String lastName, String phone) {
         var email = email();
-        jdbc.sql("insert into user_account (id, agency_id, email, password_hash, role) values (?, ?, ?, ?, ?)")
-                .params(UUID.randomUUID(), agency.id(), email, passwordHash, role.name())
+        jdbc.sql("""
+                insert into user_account (id, agency_id, email, password_hash, role, first_name, last_name, phone)
+                values (?, ?, ?, ?, ?, ?, ?, ?)
+                """)
+                .params(UUID.randomUUID(), agency.id(), email, passwordHash, role.name(), firstName, lastName, phone)
                 .update();
         return email;
     }

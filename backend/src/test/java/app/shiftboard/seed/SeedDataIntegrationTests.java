@@ -52,7 +52,8 @@ class SeedDataIntegrationTests {
                 "client", 4,
                 "location", 5,
                 "shift", 7,
-                "shift_qualification", 7));
+                "shift_qualification", 7,
+                "assignment", 5));
         assertThat(workersOfDonauPersonalWith("ACTIVE")).isEqualTo(6);
         assertThat(workersOfDonauPersonalWith("PENDING")).isEqualTo(4);
         assertThat(workersOfDonauPersonalWith("INACTIVE")).isEqualTo(1);
@@ -70,7 +71,9 @@ class SeedDataIntegrationTests {
     @Test
     void usesOnlyFictionalContactData() {
         var emails = jdbc.sql("select email from user_account").query(String.class).list();
-        var phones = jdbc.sql("select phone from worker").query(String.class).list();
+        var phones = jdbc.sql("""
+                select phone from worker union all select phone from user_account where phone is not null
+                """).query(String.class).list();
 
         assertThat(emails).allMatch(email -> email.endsWith("@example.com"));
         assertThat(phones).doesNotHaveDuplicates().allMatch(phone -> phone.matches("\\+43 660 55501\\d\\d"));
@@ -148,7 +151,7 @@ class SeedDataIntegrationTests {
         var counts = new LinkedHashMap<String, Integer>();
         for (var table : List.of(
                 "agency", "qualification", "user_account", "worker", "worker_qualification", "client", "location",
-                "shift", "shift_qualification")) {
+                "shift", "shift_qualification", "assignment")) {
             counts.put(table, jdbc.sql("select count(*) from " + table).query(Integer.class).single());
         }
         return counts;

@@ -63,6 +63,8 @@ class SecurityConfiguration {
                                 "/api/v1/qualifications/**",
                                 "/api/v1/shifts/**")
                         .hasAnyRole(Role.DISPATCHER.name(), Role.ADMIN.name())
+                        .requestMatchers("/api/v1/worker/**")
+                        .hasRole(Role.WORKER.name())
                         .anyRequest()
                         .authenticated())
                 .oauth2ResourceServer(resourceServer -> resourceServer

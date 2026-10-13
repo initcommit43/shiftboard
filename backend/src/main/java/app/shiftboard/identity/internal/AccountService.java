@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import app.shiftboard.agency.TenantContext;
 import app.shiftboard.identity.Role;
+import app.shiftboard.identity.StaffContact;
 import app.shiftboard.identity.UserAccounts;
 import app.shiftboard.system.ApiException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -46,6 +47,17 @@ class AccountService implements UserAccounts {
     public Map<UUID, String> emails(Collection<UUID> accountIds) {
         return accounts.findAllById(accountIds).stream()
                 .collect(Collectors.toMap(UserAccount::getId, UserAccount::getEmail));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<UUID, StaffContact> staffContacts(Collection<UUID> accountIds) {
+        return accounts.findAllById(accountIds).stream()
+                .filter(account -> account.getRole() != Role.WORKER)
+                .collect(Collectors.toMap(
+                        UserAccount::getId,
+                        account -> new StaffContact(
+                                account.getFirstName() + " " + account.getLastName(), account.getPhone())));
     }
 
     private static ApiException emailAlreadyRegistered() {
