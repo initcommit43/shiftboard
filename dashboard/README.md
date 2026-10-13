@@ -2,7 +2,7 @@
 
 The agency dashboard: dispatchers publish shifts and manage the worker pool here. React and TypeScript, built with Vite, styled with Tailwind CSS and shadcn/ui.
 
-So far dispatchers and admins can log in and out, and approve or reject pending worker signups. The other areas of the navigation are placeholders.
+So far dispatchers and admins can log in and out, approve or reject pending worker signups, see the upcoming shifts and create a shift as a draft or published. The other areas of the navigation are placeholders.
 
 ## Run
 
@@ -24,7 +24,7 @@ The backend's local profile seeds demo accounts, all with the password `shiftboa
 | Donau Personal | `admin.donau@example.com`, `dispatcher1.donau@example.com`, `dispatcher2.donau@example.com` |
 | Alpen Events   | `dispatcher.alpen@example.com`                                                      |
 
-Donau Personal starts with four pending signups. The login is limited to 5 attempts per 15 minutes.
+Donau Personal starts with four pending signups, and both agencies with clients, locations and a few upcoming shifts. The login is limited to 5 attempts per 15 minutes.
 
 ## Scripts
 
@@ -46,8 +46,9 @@ src/
 ├── app/               app composition, routes (router.tsx), app shell, placeholder pages
 ├── features/          one folder per feature
 │   ├── auth/          session, route guards, login page, user menu
+│   ├── shifts/        upcoming shifts: list, publish a draft, create
 │   └── signups/       pending signups: list, approve, reject
-├── components/        shared components (brand, page header, state card)
+├── components/        shared components (brand, page header, pagination, state card)
 │   └── ui/            shadcn/ui components
 ├── api/
 │   ├── client.ts      configured API instances, token refresh
@@ -71,7 +72,9 @@ A feature keeps its pages, components, hooks and tests together in `src/features
 | `/login`                             | Login. Public; a signed-in user is sent on       |
 | `/`                                  | Redirects to `/signups`                          |
 | `/signups`                           | Pending signups                                  |
-| `/shifts`, `/messages`, `/settings`  | Placeholders until their slices are built        |
+| `/shifts`                            | Upcoming shifts, drafts and published            |
+| `/shifts/new`                        | Create a shift: publish it or save it as a draft |
+| `/messages`, `/settings`             | Placeholders until their slices are built        |
 
 Everything except `/login` sits below the app shell route. Its loader (`requireSession`) returns the signed-in user or redirects to `/login?redirectTo=<requested path>`; after the login the user lands on the requested page. Components read the user with `useCurrentUser()`.
 

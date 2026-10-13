@@ -9,6 +9,9 @@ const badgeVariants = cva(
       variant: {
         tag: "border bg-surface-soft text-ink",
         feature: "min-w-7 bg-primary text-on-primary tabular-nums",
+        open: "bg-status-open-bg text-status-open-fg",
+        confirmed: "bg-status-confirmed-bg text-status-confirmed-fg",
+        cancelled: "bg-status-cancelled-bg text-status-cancelled-fg",
       },
     },
     defaultVariants: {

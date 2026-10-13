@@ -1,5 +1,13 @@
 import { ApiError } from './errors'
-import { AuthApi, Configuration, type Middleware, ProblemFromJSON, WorkersApi } from './generated'
+import {
+  AuthApi,
+  ClientsApi,
+  Configuration,
+  type Middleware,
+  ProblemFromJSON,
+  ShiftsApi,
+  WorkersApi,
+} from './generated'
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from './tokens'
 
 const sessionExpiredListeners = new Set<() => void>()
@@ -84,11 +92,11 @@ const throwApiError: Middleware = {
     if (response.ok) {
       return undefined
     }
-    const code = await response
+    const problem = await response
       .json()
-      .then((json) => ProblemFromJSON(json).code)
+      .then((json) => ProblemFromJSON(json))
       .catch(() => undefined)
-    throw new ApiError(response.status, code)
+    throw new ApiError(response.status, problem?.code, problem?.errors)
   },
 }
 
@@ -99,4 +107,6 @@ const configuration = new Configuration({
 })
 
 export const authApi = new AuthApi(configuration)
+export const clientsApi = new ClientsApi(configuration)
+export const shiftsApi = new ShiftsApi(configuration)
 export const workersApi = new WorkersApi(configuration)

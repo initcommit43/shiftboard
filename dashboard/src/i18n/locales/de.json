@@ -44,6 +44,106 @@
     "submit": "Anmelden",
     "workerHint": "Du bist Mitarbeiter:in? Deine Schichten findest du in der shiftboard App."
   },
+  "shifts": {
+    "title": "Schichten",
+    "description": "Alle anstehenden Schichten und wie viele Plätze schon besetzt sind.",
+    "new": "Neue Schicht",
+    "columns": {
+      "shift": "Schicht",
+      "client": "Kunde",
+      "location": "Einsatzort",
+      "date": "Datum",
+      "time": "Zeit",
+      "status": "Status",
+      "spots": "Besetzt",
+      "actions": "Aktionen"
+    },
+    "status": {
+      "DRAFT": "Entwurf",
+      "PUBLISHED": "Veröffentlicht",
+      "COMPLETED": "Abgeschlossen",
+      "CANCELLED": "Abgesagt"
+    },
+    "time": {
+      "range": "{{start}} – {{end}}",
+      "estimated": "ca. {{time}}"
+    },
+    "spots": "{{taken}} von {{total}}",
+    "full": "Voll",
+    "publish": "Veröffentlichen",
+    "publishNamed": "{{title}} veröffentlichen",
+    "count_one": "{{count}} anstehende Schicht",
+    "count_other": "{{count}} anstehende Schichten",
+    "loading": "Schichten werden geladen …",
+    "empty": {
+      "title": "Keine anstehenden Schichten",
+      "description": "Lege eine Schicht an. Entwürfe und veröffentlichte Schichten erscheinen hier, bis sie vorbei sind."
+    },
+    "error": {
+      "title": "Schichten konnten nicht geladen werden",
+      "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu.",
+      "retry": "Erneut versuchen"
+    },
+    "published": {
+      "title": "{{title}} wurde veröffentlicht",
+      "description": "Mitarbeiter:innen sehen die Schicht jetzt in der App."
+    },
+    "created": {
+      "published": "{{title}} wurde veröffentlicht",
+      "draft": "{{title}} wurde als Entwurf gespeichert"
+    },
+    "form": {
+      "title": "Neue Schicht",
+      "description": "Veröffentliche die Schicht gleich oder speichere sie als Entwurf.",
+      "loading": "Formular wird geladen …",
+      "sections": {
+        "assignment": "Einsatz",
+        "time": "Zeit",
+        "terms": "Konditionen"
+      },
+      "fields": {
+        "clientId": "Kunde",
+        "locationId": "Einsatzort",
+        "title": "Titel",
+        "description": "Beschreibung",
+        "date": "Datum",
+        "startTime": "Beginn",
+        "endTime": "Ende",
+        "hourlyRate": "Stundenlohn in Euro",
+        "slots": "Plätze",
+        "qualificationIds": "Erforderliche Qualifikationen"
+      },
+      "choose": "Bitte wählen",
+      "titlePlaceholder": "z. B. Lagerunterstützung",
+      "descriptionHint": "Was mitzubringen ist, der Treffpunkt und alles, was Mitarbeiter:innen sonst wissen müssen.",
+      "endsNextDay": "Endet am Folgetag, {{date}}.",
+      "endIsEstimate": "Das Ende ist geschätzt (wird mit „ca.“ angezeigt)",
+      "hourlyRatePlaceholder": "z. B. 16,50",
+      "hourlyRateHint": "Brutto pro Stunde.",
+      "qualificationsHint": "Ohne Auswahl kann jede:r die Schicht übernehmen.",
+      "publish": "Veröffentlichen",
+      "saveDraft": "Als Entwurf speichern",
+      "cancel": "Abbrechen",
+      "error": {
+        "title": "Das Formular konnte nicht geladen werden",
+        "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu."
+      },
+      "noClients": {
+        "title": "Noch keine Kunden",
+        "description": "Eine Schicht braucht einen Kunden mit Einsatzort. Für eure Agentur ist noch keiner hinterlegt."
+      },
+      "errors": {
+        "required": "Bitte ausfüllen.",
+        "invalid_format": "Das Format stimmt nicht.",
+        "invalid_length": "Der Text ist zu lang.",
+        "before_start": "Das Ende muss nach dem Beginn liegen.",
+        "not_found": "Diese Auswahl gibt es nicht mehr. Lade die Seite neu.",
+        "rate_out_of_range": "Der Stundenlohn muss über 0 € liegen.",
+        "slots_out_of_range": "Zwischen 1 und 500 Plätze.",
+        "unknown": "Diese Angabe wurde nicht angenommen."
+      }
+    }
+  },
   "signups": {
     "title": "Anmeldungen",
     "description": "Prüfe neue Registrierungen und gib Mitarbeiter:innen für offene Schichten frei.",
@@ -84,13 +184,13 @@
       "description": "{{name}} erhält keinen Zugang zu den Schichten von {{agency}}. Das Konto wird als inaktiv markiert.",
       "cancel": "Abbrechen",
       "confirm": "Ablehnen"
-    },
-    "pagination": {
-      "label": "Seiten",
-      "page": "Seite {{page}} von {{total}}",
-      "previous": "Zurück",
-      "next": "Weiter"
     }
+  },
+  "pagination": {
+    "label": "Seiten",
+    "page": "Seite {{page}} von {{total}}",
+    "previous": "Zurück",
+    "next": "Weiter"
   },
   "comingSoon": {
     "title": "Kommt bald",
@@ -109,6 +209,9 @@
     "forbidden": "Dafür fehlt dir die Berechtigung.",
     "worker_not_found": "Diese Anmeldung gibt es nicht mehr. Die Liste wurde aktualisiert.",
     "worker_not_pending": "Diese Anmeldung wurde bereits bearbeitet. Die Liste wurde aktualisiert.",
+    "validation_failed": "Bitte prüfe die markierten Felder.",
+    "shift_not_found": "Diese Schicht gibt es nicht mehr. Die Liste wurde aktualisiert.",
+    "shift_not_draft": "Diese Schicht ist kein Entwurf mehr. Die Liste wurde aktualisiert.",
     "network": "Der Server ist nicht erreichbar. Prüfe deine Verbindung und versuche es noch einmal.",
     "unknown": "Etwas ist schiefgelaufen. Bitte versuche es noch einmal."
   }

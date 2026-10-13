@@ -44,6 +44,106 @@
     "submit": "Log in",
     "workerHint": "Are you a worker? You'll find your shifts in the shiftboard app."
   },
+  "shifts": {
+    "title": "Shifts",
+    "description": "All upcoming shifts and how many spots are already taken.",
+    "new": "New shift",
+    "columns": {
+      "shift": "Shift",
+      "client": "Client",
+      "location": "Location",
+      "date": "Date",
+      "time": "Time",
+      "status": "Status",
+      "spots": "Taken",
+      "actions": "Actions"
+    },
+    "status": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "COMPLETED": "Completed",
+      "CANCELLED": "Cancelled"
+    },
+    "time": {
+      "range": "{{start}} – {{end}}",
+      "estimated": "approx. {{time}}"
+    },
+    "spots": "{{taken}} of {{total}}",
+    "full": "Full",
+    "publish": "Publish",
+    "publishNamed": "Publish {{title}}",
+    "count_one": "{{count}} upcoming shift",
+    "count_other": "{{count}} upcoming shifts",
+    "loading": "Loading shifts …",
+    "empty": {
+      "title": "No upcoming shifts",
+      "description": "Create a shift. Drafts and published shifts appear here until they are over."
+    },
+    "error": {
+      "title": "Shifts could not be loaded",
+      "description": "Please try again. If the problem persists, reload the page.",
+      "retry": "Try again"
+    },
+    "published": {
+      "title": "{{title}} has been published",
+      "description": "Workers now see the shift in the app."
+    },
+    "created": {
+      "published": "{{title}} has been published",
+      "draft": "{{title}} has been saved as a draft"
+    },
+    "form": {
+      "title": "New shift",
+      "description": "Publish the shift right away or save it as a draft.",
+      "loading": "Loading form …",
+      "sections": {
+        "assignment": "Assignment",
+        "time": "Time",
+        "terms": "Terms"
+      },
+      "fields": {
+        "clientId": "Client",
+        "locationId": "Location",
+        "title": "Title",
+        "description": "Description",
+        "date": "Date",
+        "startTime": "Start",
+        "endTime": "End",
+        "hourlyRate": "Hourly rate in euros",
+        "slots": "Spots",
+        "qualificationIds": "Required qualifications"
+      },
+      "choose": "Please choose",
+      "titlePlaceholder": "e.g. Warehouse support",
+      "descriptionHint": "What to bring, the meeting point and anything else workers need to know.",
+      "endsNextDay": "Ends the next day, {{date}}.",
+      "endIsEstimate": "The end is an estimate (shown with \"approx.\")",
+      "hourlyRatePlaceholder": "e.g. 16.50",
+      "hourlyRateHint": "Gross per hour.",
+      "qualificationsHint": "With none selected, anyone can take the shift.",
+      "publish": "Publish",
+      "saveDraft": "Save as draft",
+      "cancel": "Cancel",
+      "error": {
+        "title": "The form could not be loaded",
+        "description": "Please try again. If the problem persists, reload the page."
+      },
+      "noClients": {
+        "title": "No clients yet",
+        "description": "A shift needs a client with a location. Your agency has none on record yet."
+      },
+      "errors": {
+        "required": "Please fill this in.",
+        "invalid_format": "The format is not right.",
+        "invalid_length": "The text is too long.",
+        "before_start": "The end has to be after the start.",
+        "not_found": "This choice no longer exists. Reload the page.",
+        "rate_out_of_range": "The hourly rate has to be above €0.",
+        "slots_out_of_range": "Between 1 and 500 spots.",
+        "unknown": "This entry was not accepted."
+      }
+    }
+  },
   "signups": {
     "title": "Signups",
     "description": "Review new registrations and approve workers for open shifts.",
@@ -84,13 +184,13 @@
       "description": "{{name}} will not get access to the shifts of {{agency}}. The account will be marked as inactive.",
       "cancel": "Cancel",
       "confirm": "Reject"
-    },
-    "pagination": {
-      "label": "Pages",
-      "page": "Page {{page}} of {{total}}",
-      "previous": "Previous",
-      "next": "Next"
     }
+  },
+  "pagination": {
+    "label": "Pages",
+    "page": "Page {{page}} of {{total}}",
+    "previous": "Previous",
+    "next": "Next"
   },
   "comingSoon": {
     "title": "Coming soon",
@@ -109,6 +209,9 @@
     "forbidden": "You don't have permission to do that.",
     "worker_not_found": "This signup no longer exists. The list has been updated.",
     "worker_not_pending": "This signup has already been handled. The list has been updated.",
+    "validation_failed": "Please check the marked fields.",
+    "shift_not_found": "This shift no longer exists. The list has been updated.",
+    "shift_not_draft": "This shift is no longer a draft. The list has been updated.",
     "network": "The server cannot be reached. Check your connection and try again.",
     "unknown": "Something went wrong. Please try again."
   }

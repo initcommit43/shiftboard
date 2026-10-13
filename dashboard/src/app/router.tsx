@@ -4,6 +4,8 @@ import { redirectSignedIn, requireSession } from '@/features/auth/guards'
 import { LoginPage } from '@/features/auth/login-page'
 import { SessionLoading } from '@/features/auth/session-loading'
 import { APP_ROUTE_ID } from '@/features/auth/use-session'
+import { NewShiftPage } from '@/features/shifts/new-shift-page'
+import { ShiftsPage } from '@/features/shifts/shifts-page'
 import { SignupsPage } from '@/features/signups/signups-page'
 
 import { AppShell } from './app-shell'
@@ -23,7 +25,8 @@ export const routes: RouteObject[] = [
         element: <AppShell />,
         children: [
           { index: true, element: <Navigate to="/signups" replace /> },
-          { path: 'shifts', element: <ComingSoonPage area="shifts" /> },
+          { path: 'shifts', element: <ShiftsPage /> },
+          { path: 'shifts/new', element: <NewShiftPage /> },
           { path: 'signups', element: <SignupsPage /> },
           { path: 'messages', element: <ComingSoonPage area="messages" /> },
           { path: 'settings', element: <ComingSoonPage area="settings" /> },

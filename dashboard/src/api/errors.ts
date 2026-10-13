@@ -2,18 +2,23 @@ import type { TFunction } from 'i18next'
 
 import de from '@/i18n/locales/de.json'
 
-import { FetchError } from './generated'
+import { type FieldError, FetchError } from './generated'
 
-/** An error response of the API, reduced to its status and the problem `code`. */
+/**
+ * An error response of the API, reduced to its status, the problem `code` and
+ * the field errors of a `validation_failed`.
+ */
 export class ApiError extends Error {
   override name = 'ApiError'
   readonly status: number
   readonly code: string | undefined
+  readonly fieldErrors: FieldError[]
 
-  constructor(status: number, code: string | undefined) {
+  constructor(status: number, code: string | undefined, fieldErrors: FieldError[] = []) {
     super(`API responded with ${String(status)}${code ? ` (${code})` : ''}`)
     this.status = status
     this.code = code
+    this.fieldErrors = fieldErrors
   }
 }
 
