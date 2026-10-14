@@ -91,6 +91,18 @@
   "claimCancelled": "Cancelled",
   "claimCompleted": "Done",
   "claimNoShow": "No-show",
+  "shiftRefreshFailed": "The shift could not be refreshed.",
+  "shiftErrorTitle": "Shift could not be loaded",
+  "shiftNotFoundTitle": "This shift no longer exists",
+  "shiftNotFoundMessage": "The agency has withdrawn it. The list shows the open shifts.",
+  "shiftOpenMap": "Open in maps",
+  "shiftOpenMapFailed": "The maps app could not be opened.",
+  "shiftSectionDescription": "Description",
+  "shiftSectionQualifications": "Requirements",
+  "shiftQualificationsNone": "No special requirements",
+  "shiftSectionContact": "Contact",
+  "shiftCall": "Call",
+  "shiftCallFailed": "The call could not be started.",
   "comingSoonTitle": "Coming soon",
   "comingSoonMessage": "This area is still in the works."
 }

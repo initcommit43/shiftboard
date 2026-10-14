@@ -9,6 +9,7 @@ import '../../features/auth/data/session.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/start_screen.dart';
 import '../../features/shifts/presentation/home_screen.dart';
+import '../../features/shifts/presentation/shift_detail_screen.dart';
 import '../../features/signup/domain/invitation_code.dart';
 import '../../features/signup/presentation/join_screen.dart';
 import '../../features/signup/presentation/signup_screen.dart';
@@ -24,12 +25,17 @@ abstract final class AppRoutes {
   static const notActive = '/not-active';
   static const shifts = '/shifts';
 
+  /// The detail of one shift, on top of the tabs.
+  static String shift(String shiftId) =>
+      '$shifts/${Uri.encodeComponent(shiftId)}';
+
   /// The signup form of an invitation; also the target of the invitation
   /// link `shiftboard://join/<code>`.
   static String signup(String signupCode) =>
       '$join/${Uri.encodeComponent(signupCode)}';
 
   static const _signupCode = 'signupCode';
+  static const _shiftId = 'shiftId';
 }
 
 /// The URL scheme of links into the app, registered in the Android manifest
@@ -77,6 +83,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.shifts,
         builder: (context, state) => const HomeScreen(),
+        routes: [
+          GoRoute(
+            path: ':${AppRoutes._shiftId}',
+            builder: (context, state) => ShiftDetailScreen(
+              shiftId: state.pathParameters[AppRoutes._shiftId]!,
+            ),
+          ),
+        ],
       ),
     ],
   );
@@ -98,7 +112,10 @@ String _guard(AsyncValue<Session> session, String location) {
 
   return switch (session) {
     AsyncData(value: SignedIn(:final user)) => switch (user.worker?.status) {
-      WorkerStatus.ACTIVE => AppRoutes.shifts,
+      WorkerStatus.ACTIVE =>
+        location.startsWith('${AppRoutes.shifts}/')
+            ? location
+            : AppRoutes.shifts,
       WorkerStatus.PENDING => AppRoutes.waiting,
       _ => AppRoutes.notActive,
     },

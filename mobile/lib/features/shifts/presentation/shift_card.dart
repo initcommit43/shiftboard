@@ -14,11 +14,12 @@ const tabularFigures = [FontFeature.tabularFigures()];
 const _stackFromTextScale = 1.5;
 
 /// One shift in the list: what an agency's SMS says, plus spots left and the
-/// estimated pay.
+/// estimated pay. Tapping it opens the detail.
 class ShiftCard extends StatelessWidget {
-  const ShiftCard({super.key, required this.shift});
+  const ShiftCard({super.key, required this.shift, this.onTap});
 
   final WorkerShift shift;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -44,78 +45,83 @@ class ShiftCard extends StatelessWidget {
     );
 
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.paddingCard),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (stacked) ...[
-              if (badge != null) ...[
-                Align(alignment: Alignment.centerLeft, child: badge),
-                const SizedBox(height: AppSpacing.sm),
-              ],
-              heading,
-            ] else
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: heading),
-                  if (badge != null) ...[
-                    const SizedBox(width: AppSpacing.sm),
-                    badge,
-                  ],
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        highlightColor: colors.surfaceSoft,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.paddingCard),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (stacked) ...[
+                if (badge != null) ...[
+                  Align(alignment: Alignment.centerLeft, child: badge),
+                  const SizedBox(height: AppSpacing.sm),
                 ],
-              ),
-            const SizedBox(height: AppSpacing.md),
-            ShiftFactLine(
-              icon: CupertinoIcons.calendar,
-              text: format.dateAndTime(shift),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-            ShiftFactLine(
-              icon: CupertinoIcons.location,
-              text: shift.location.name,
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            const Divider(),
-            const SizedBox(height: AppSpacing.md),
-            Wrap(
-              alignment: WrapAlignment.spaceBetween,
-              crossAxisAlignment: WrapCrossAlignment.end,
-              spacing: AppSpacing.lg,
-              runSpacing: AppSpacing.sm,
-              children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
+                heading,
+              ] else
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      format.earnings(shift),
-                      style: AppTypography.title2.copyWith(
-                        color: colors.ink,
-                        fontFeatures: tabularFigures,
-                      ),
-                    ),
-                    Text(
-                      context.l10n.shiftEarningsCaption(
-                        format.hourlyRate(shift),
-                      ),
-                      style: AppTypography.caption1.copyWith(
-                        color: colors.inkTertiary,
-                        fontFeatures: tabularFigures,
-                      ),
-                    ),
+                    Expanded(child: heading),
+                    if (badge != null) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      badge,
+                    ],
                   ],
                 ),
-                Text(
-                  format.spots(shift),
-                  style: AppTypography.footnote.copyWith(
-                    color: colors.inkSecondary,
+              const SizedBox(height: AppSpacing.md),
+              ShiftFactLine(
+                icon: CupertinoIcons.calendar,
+                text: format.dateAndTime(shift),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              ShiftFactLine(
+                icon: CupertinoIcons.location,
+                text: shift.location.name,
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              const Divider(),
+              const SizedBox(height: AppSpacing.md),
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.end,
+                spacing: AppSpacing.lg,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        format.earnings(shift),
+                        style: AppTypography.title2.copyWith(
+                          color: colors.ink,
+                          fontFeatures: tabularFigures,
+                        ),
+                      ),
+                      Text(
+                        context.l10n.shiftEarningsCaption(
+                          format.hourlyRate(shift),
+                        ),
+                        style: AppTypography.caption1.copyWith(
+                          color: colors.inkTertiary,
+                          fontFeatures: tabularFigures,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          ],
+                  Text(
+                    format.spots(shift),
+                    style: AppTypography.footnote.copyWith(
+                      color: colors.inkSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

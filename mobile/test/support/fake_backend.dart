@@ -196,12 +196,14 @@ Override apiSentTo(FakeBackend backend) => apiProvider.overrideWith(
 
 /// Starts the app. [link] is the link that launched it, if any. With
 /// [settle] false the first frame stays up, for example to see a spinner.
+/// [overrides] replace further providers, such as the URL opener.
 Future<void> pumpApp(
   WidgetTester tester,
   FakeBackend backend, {
   Locale locale = const Locale('de', 'DE'),
   String? link,
   bool settle = true,
+  List<Override> overrides = const [],
 }) async {
   tester.platformDispatcher.localesTestValue = [locale];
   addTearDown(tester.platformDispatcher.clearLocalesTestValue);
@@ -212,7 +214,7 @@ Future<void> pumpApp(
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: [apiSentTo(backend)],
+      overrides: [apiSentTo(backend), ...overrides],
       child: const ShiftboardApp(),
     ),
   );
