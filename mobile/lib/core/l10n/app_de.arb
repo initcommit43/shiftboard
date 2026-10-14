@@ -342,6 +342,128 @@
   "@shiftsErrorTitle": {
     "description": "Title when the shift list could not be loaded."
   },
+  "shiftsRefreshFailed": "Die Schichten konnten nicht aktualisiert werden.",
+  "@shiftsRefreshFailed": {
+    "description": "Snackbar when pulling to refresh a shift list failed; the old list stays."
+  },
+  "shiftDateAndTime": "{date} · {time}",
+  "@shiftDateAndTime": {
+    "description": "Date and time range of a shift in one line.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Sa., 17. Okt."
+      },
+      "time": {
+        "type": "String",
+        "example": "18:00 – 23:30"
+      }
+    }
+  },
+  "shiftTimeRange": "{start} – {end}",
+  "@shiftTimeRange": {
+    "description": "Start and end time of a shift.",
+    "placeholders": {
+      "start": {
+        "type": "String",
+        "example": "18:00"
+      },
+      "end": {
+        "type": "String",
+        "example": "23:30"
+      }
+    }
+  },
+  "shiftTimeRangeEstimate": "{start} – ca. {end}",
+  "@shiftTimeRangeEstimate": {
+    "description": "Start and end time of a shift whose end is an estimate.",
+    "placeholders": {
+      "start": {
+        "type": "String",
+        "example": "18:00"
+      },
+      "end": {
+        "type": "String",
+        "example": "23:30"
+      }
+    }
+  },
+  "shiftEarningsEstimate": "ca. {amount}",
+  "@shiftEarningsEstimate": {
+    "description": "Estimated pay of a shift whose end is an estimate.",
+    "placeholders": {
+      "amount": {
+        "type": "String",
+        "example": "81,25 €"
+      }
+    }
+  },
+  "shiftEarningsCaption": "Brutto für die Schicht · {rate}",
+  "@shiftEarningsCaption": {
+    "description": "Caption below the estimated pay of a shift.",
+    "placeholders": {
+      "rate": {
+        "type": "String",
+        "example": "14,50 € pro Stunde"
+      }
+    }
+  },
+  "shiftHourlyRate": "{rate} pro Stunde",
+  "@shiftHourlyRate": {
+    "description": "Gross hourly rate of a shift.",
+    "placeholders": {
+      "rate": {
+        "type": "String",
+        "example": "14,50 €"
+      }
+    }
+  },
+  "shiftSpotsLeft": "{left} von {slots} Plätzen frei",
+  "@shiftSpotsLeft": {
+    "description": "How many spots of a shift are still free.",
+    "placeholders": {
+      "left": {
+        "type": "int",
+        "example": "2"
+      },
+      "slots": {
+        "type": "int",
+        "example": "5"
+      }
+    }
+  },
+  "shiftNoSpotsLeft": "Keine Plätze frei",
+  "@shiftNoSpotsLeft": {
+    "description": "Spots line of a full shift."
+  },
+  "shiftFull": "Ausgebucht",
+  "@shiftFull": {
+    "description": "Badge of a shift whose spots are all taken."
+  },
+  "claimPending": "Angefragt",
+  "@claimPending": {
+    "description": "Badge of a shift the worker has claimed; the agency has not decided yet."
+  },
+  "claimConfirmed": "Bestätigt",
+  "@claimConfirmed": {
+    "description": "Badge of a shift the agency confirmed for the worker."
+  },
+  "claimRejected": "Abgelehnt",
+  "@claimRejected": {
+    "description": "Badge of a shift the agency did not give the worker."
+  },
+  "claimCancelled": "Storniert",
+  "@claimCancelled": {
+    "description": "Badge of a claim that was cancelled."
+  },
+  "claimCompleted": "Erledigt",
+  "@claimCompleted": {
+    "description": "Badge of a shift the worker has worked."
+  },
+  "claimNoShow": "Nicht erschienen",
+  "@claimNoShow": {
+    "description": "Badge of a shift the worker did not turn up for."
+  },
   "comingSoonTitle": "Kommt bald",
   "@comingSoonTitle": {
     "description": "Title of a tab that is not built yet."
