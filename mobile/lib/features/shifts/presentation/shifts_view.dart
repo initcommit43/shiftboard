@@ -1,8 +1,8 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/api/api_error.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
@@ -10,71 +10,82 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/form_page.dart';
 import '../../../core/widgets/status_message.dart';
 import '../../auth/data/session.dart';
+import '../data/worker_shifts_provider.dart';
+import 'shift_card.dart';
 
-enum _Load { idle, running, failed }
-
-/// The tab with the open shifts.
-///
-/// The API has no shift list yet, so the tab is always empty. Refreshing
-/// checks the account instead, which is the one thing that can change what
-/// this tab shows: a deactivated worker is moved off it by the router.
-class ShiftsView extends ConsumerStatefulWidget {
+/// The tab with the agency's upcoming shifts.
+class ShiftsView extends ConsumerWidget {
   const ShiftsView({super.key, required this.agencyName});
 
   final String agencyName;
 
   @override
-  ConsumerState<ShiftsView> createState() => _ShiftsViewState();
-}
-
-class _ShiftsViewState extends ConsumerState<ShiftsView> {
-  _Load _load = _Load.idle;
-
-  Future<void> _refresh() async {
-    setState(() => _load = _Load.running);
-    var result = _Load.idle;
-    try {
-      await ref.read(sessionProvider.notifier).refresh();
-    } on DioException {
-      result = _Load.failed;
-    }
-    if (mounted) setState(() => _load = result);
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
+    // A deactivated worker is refused the list; loading the account again
+    // lets the router move them off this tab.
+    ref.listen(workerShiftsProvider, (_, next) {
+      if (next case AsyncError(:final error)
+          when ApiError.from(error).code == ApiErrorCode.workerNotActive) {
+        ref.read(sessionProvider.notifier).refresh().ignore();
+      }
+    });
+    final shifts = ref.watch(workerShiftsProvider);
+    Future<void> reload() => ref.refresh(workerShiftsProvider.future);
 
-    return switch (_load) {
-      _Load.running => const _Skeleton(),
-      _Load.idle => _Centered(
-        child: StatusMessage(
-          icon: CupertinoIcons.calendar,
-          title: l10n.shiftsEmptyTitle,
-          message: l10n.shiftsEmptyMessage(widget.agencyName),
-          action: AppButton(
-            label: l10n.shiftsRefresh,
-            variant: AppButtonVariant.soft,
-            expand: false,
-            onPressed: _refresh,
+    if (shifts.value case final list? when list.isNotEmpty) {
+      return RefreshIndicator(
+        onRefresh: () async {
+          try {
+            await reload();
+          } catch (_) {
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(l10n.shiftsRefreshFailed)));
+          }
+        },
+        child: ListView.separated(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(
+            horizontal: screenMargin(context),
+            vertical: AppSpacing.sm,
           ),
+          itemCount: list.length,
+          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.lg),
+          itemBuilder: (context, index) => ShiftCard(shift: list[index]),
         ),
-      ),
-      _Load.failed => _Centered(
+      );
+    }
+    if (shifts.isLoading) return const _Skeleton();
+
+    final retry = AppButton(
+      label: shifts.hasError ? l10n.actionRetry : l10n.shiftsRefresh,
+      variant: AppButtonVariant.soft,
+      expand: false,
+      onPressed: () => reload().ignore(),
+    );
+    if (shifts.error case final error?) {
+      return _Centered(
         child: StatusMessage(
           icon: CupertinoIcons.exclamationmark_triangle,
           tone: StatusTone.error,
           title: l10n.shiftsErrorTitle,
-          message: l10n.errorCheckConnection,
-          action: AppButton(
-            label: l10n.actionRetry,
-            variant: AppButtonVariant.soft,
-            expand: false,
-            onPressed: _refresh,
-          ),
+          message: ApiError.from(error).isOffline
+              ? l10n.errorCheckConnection
+              : l10n.errorGeneric,
+          action: retry,
         ),
+      );
+    }
+    return _Centered(
+      child: StatusMessage(
+        icon: CupertinoIcons.calendar,
+        title: l10n.shiftsEmptyTitle,
+        message: l10n.shiftsEmptyMessage(agencyName),
+        action: retry,
       ),
-    };
+    );
   }
 }
 

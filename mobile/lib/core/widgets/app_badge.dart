@@ -5,7 +5,15 @@ import '../theme/tokens.dart';
 
 /// The states a status badge can show. Each has its own word, icon and color
 /// pair, so a status never rests on color alone.
-enum AppStatus { confirmed, pending, open, cancelled }
+enum AppStatus {
+  confirmed,
+  pending,
+  open,
+  cancelled,
+
+  /// A shift without free spots; neutral, since nothing went wrong.
+  full,
+}
 
 /// A status as a pill with an icon and a word. Not tappable.
 class AppBadge extends StatelessWidget {
@@ -37,6 +45,11 @@ class AppBadge extends StatelessWidget {
         CupertinoIcons.xmark,
         colors.statusCancelledFg,
         colors.statusCancelledBg,
+      ),
+      AppStatus.full => (
+        CupertinoIcons.minus_circle,
+        colors.ink,
+        colors.surfaceSoft,
       ),
     };
 

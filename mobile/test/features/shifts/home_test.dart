@@ -95,7 +95,7 @@ void main() {
   testWidgets('shows placeholders while refreshing', (tester) async {
     await pumpApp(tester, backend);
     final answer = Completer<ResponseBody>();
-    backend.on('GET /me', (_) => answer.future);
+    backend.on('GET /worker/shifts', (_) => answer.future);
 
     await tester.tap(find.text('Aktualisieren'));
     await tester.pump();
@@ -103,7 +103,7 @@ void main() {
     expect(find.bySemanticsLabel('Schichten werden geladen …'), findsOneWidget);
     expect(find.text('Aktuell keine offenen Schichten'), findsNothing);
 
-    answer.complete(json(currentUser('ACTIVE')));
+    answer.complete(json(page([])));
     await tester.pumpAndSettle();
     expect(find.text('Aktuell keine offenen Schichten'), findsOneWidget);
   });
@@ -112,7 +112,7 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester, backend);
-    backend.on('GET /me', offline);
+    backend.on('GET /worker/shifts', offline);
 
     await tester.tap(find.text('Aktualisieren'));
     await tester.pumpAndSettle();
@@ -120,7 +120,7 @@ void main() {
     expect(find.text('Schichten konnten nicht geladen werden'), findsOneWidget);
     expect(stored, isNotEmpty);
 
-    backend.on('GET /me', (_) => json(currentUser('ACTIVE')));
+    backend.on('GET /worker/shifts', (_) => json(page([])));
     await tester.tap(find.text('Erneut versuchen'));
     await tester.pumpAndSettle();
 
@@ -132,6 +132,7 @@ void main() {
   ) async {
     await pumpApp(tester, backend);
     backend.on('GET /me', (_) => json(currentUser('INACTIVE')));
+    backend.on('GET /worker/shifts', (_) => problem(403, 'worker_not_active'));
 
     await tester.tap(find.text('Aktualisieren'));
     await tester.pumpAndSettle();
@@ -184,7 +185,7 @@ void main() {
     tester,
   ) async {
     await pumpApp(tester, backend);
-    backend.on('GET /me', (_) => problem(401, 'unauthenticated'));
+    backend.on('GET /worker/shifts', (_) => problem(401, 'unauthenticated'));
     backend.on(
       'POST /auth/refresh',
       (_) => problem(401, 'invalid_refresh_token'),

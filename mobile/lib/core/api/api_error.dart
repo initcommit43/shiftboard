@@ -13,6 +13,7 @@ abstract final class ApiErrorCode {
   static const validationFailed = 'validation_failed';
   static const signupCodeUnknown = 'signup_code_unknown';
   static const emailAlreadyRegistered = 'email_already_registered';
+  static const workerNotActive = 'worker_not_active';
 }
 
 /// A failed API call, reduced to what the UI decides on.
