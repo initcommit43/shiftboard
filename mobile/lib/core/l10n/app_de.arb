@@ -464,6 +464,54 @@
   "@claimNoShow": {
     "description": "Badge of a shift the worker did not turn up for."
   },
+  "shiftRefreshFailed": "Die Schicht konnte nicht aktualisiert werden.",
+  "@shiftRefreshFailed": {
+    "description": "Snackbar when pulling to refresh a shift's detail failed; the old details stay."
+  },
+  "shiftErrorTitle": "Schicht konnte nicht geladen werden",
+  "@shiftErrorTitle": {
+    "description": "Title when the detail of a shift could not be loaded."
+  },
+  "shiftNotFoundTitle": "Diese Schicht gibt es nicht mehr",
+  "@shiftNotFoundTitle": {
+    "description": "Title when the shift was withdrawn or never existed."
+  },
+  "shiftNotFoundMessage": "Die Agentur hat sie zurückgezogen. In der Liste findest du die offenen Schichten.",
+  "@shiftNotFoundMessage": {
+    "description": "Text below the title when the shift no longer exists."
+  },
+  "shiftOpenMap": "In Karten öffnen",
+  "@shiftOpenMap": {
+    "description": "Button that opens the shift's address in a maps app."
+  },
+  "shiftOpenMapFailed": "Die Karten-App konnte nicht geöffnet werden.",
+  "@shiftOpenMapFailed": {
+    "description": "Snackbar when no app could open the address."
+  },
+  "shiftSectionDescription": "Beschreibung",
+  "@shiftSectionDescription": {
+    "description": "Heading above what to bring, the meeting point and other notes of a shift."
+  },
+  "shiftSectionQualifications": "Anforderungen",
+  "@shiftSectionQualifications": {
+    "description": "Heading above the qualifications a shift asks for."
+  },
+  "shiftQualificationsNone": "Keine besonderen Anforderungen",
+  "@shiftQualificationsNone": {
+    "description": "Shown when a shift asks for no qualifications."
+  },
+  "shiftSectionContact": "Ansprechperson",
+  "@shiftSectionContact": {
+    "description": "Heading above the person at the agency to ask about a shift."
+  },
+  "shiftCall": "Anrufen",
+  "@shiftCall": {
+    "description": "Button that calls the contact person of a shift."
+  },
+  "shiftCallFailed": "Der Anruf konnte nicht gestartet werden.",
+  "@shiftCallFailed": {
+    "description": "Snackbar when the device could not start a phone call."
+  },
   "comingSoonTitle": "Kommt bald",
   "@comingSoonTitle": {
     "description": "Title of a tab that is not built yet."

@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/api/api_error.dart';
 import '../../../core/l10n/l10n.dart';
+import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_button.dart';
@@ -53,7 +55,10 @@ class ShiftsView extends ConsumerWidget {
           ),
           itemCount: list.length,
           separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.lg),
-          itemBuilder: (context, index) => ShiftCard(shift: list[index]),
+          itemBuilder: (context, index) => ShiftCard(
+            shift: list[index],
+            onTap: () => context.push(AppRoutes.shift(list[index].id)),
+          ),
         ),
       );
     }

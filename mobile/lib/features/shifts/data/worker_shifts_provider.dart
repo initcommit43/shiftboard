@@ -19,3 +19,17 @@ final workerShiftsProvider = FutureProvider.autoDispose<List<WorkerShift>>(
   // The list offers a manual retry and pull to refresh.
   retry: (retryCount, error) => null,
 );
+
+/// One shift of the agency with everything the worker sees of it.
+final workerShiftProvider = FutureProvider.autoDispose
+    .family<WorkerShift, String>(
+      (ref, shiftId) async {
+        final response = await ref
+            .watch(apiProvider)
+            .getWorkerShiftsApi()
+            .getWorkerShift(shiftId: shiftId);
+        return response.data!;
+      },
+      // The screen offers a manual retry.
+      retry: (retryCount, error) => null,
+    );
