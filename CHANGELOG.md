@@ -10,6 +10,7 @@ Notable changes per slice. One version tag per completed slice during the MVP.
 - The dashboard lists the upcoming shifts with their status and taken vs. total spots.
 - Workers see the agency's upcoming shifts in the app as cards with date and time, place, estimated pay and spots left; full shifts stay in the list, marked as full.
 - Workers open a shift for its description, requirements and contact person, open the address in a maps app and call the contact.
+- Workers request a spot on a shift from its detail after confirming in a sheet; the spot is held while the agency decides. Full shifts, double requests, started shifts and overlaps are explained.
 
 ## v0.1.0 (2026-10-13): slice 0, skeleton, signup and login
 

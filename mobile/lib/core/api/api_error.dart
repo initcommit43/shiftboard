@@ -14,6 +14,12 @@ abstract final class ApiErrorCode {
   static const signupCodeUnknown = 'signup_code_unknown';
   static const emailAlreadyRegistered = 'email_already_registered';
   static const workerNotActive = 'worker_not_active';
+  static const shiftNotFound = 'shift_not_found';
+  static const shiftFull = 'shift_full';
+  static const shiftAlreadyClaimed = 'shift_already_claimed';
+  static const shiftStarted = 'shift_started';
+  static const shiftNotOpen = 'shift_not_open';
+  static const shiftOverlap = 'shift_overlap';
 }
 
 /// A failed API call, reduced to what the UI decides on.

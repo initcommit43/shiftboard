@@ -519,5 +519,65 @@
   "comingSoonMessage": "Dieser Bereich ist noch in Arbeit.",
   "@comingSoonMessage": {
     "description": "Text below the title of a tab that is not built yet."
+  },
+  "claimAction": "Schicht anfragen",
+  "@claimAction": {
+    "description": "Button on a shift's detail that opens the claim confirmation."
+  },
+  "claimSheetTitle": "Schicht anfragen?",
+  "@claimSheetTitle": {
+    "description": "Title of the sheet that confirms a claim."
+  },
+  "claimSheetMessage": "Dein Platz ist reserviert, sobald du anfragst. {agency} bestätigt die Schicht danach.",
+  "@claimSheetMessage": {
+    "description": "Text of the claim sheet: a claim waits for the agency.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "claimSubmit": "Anfrage senden",
+  "@claimSubmit": {
+    "description": "Button in the claim sheet that sends the claim."
+  },
+  "claimSubmitting": "Wird gesendet …",
+  "@claimSubmitting": {
+    "description": "Claim button while the claim is being sent."
+  },
+  "actionCancel": "Abbrechen",
+  "@actionCancel": {
+    "description": "Closes a sheet without doing anything."
+  },
+  "claimSent": "Anfrage gesendet. Du hörst von {agency}, sobald sie bestätigt ist.",
+  "@claimSent": {
+    "description": "Snackbar after a successful claim.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "claimErrorFull": "Diese Schicht ist gerade voll geworden.",
+  "@claimErrorFull": {
+    "description": "A claim failed because the last spot was taken."
+  },
+  "claimErrorAlreadyClaimed": "Du hast diese Schicht schon angefragt.",
+  "@claimErrorAlreadyClaimed": {
+    "description": "A claim failed because the worker claimed this shift before."
+  },
+  "claimErrorStarted": "Diese Schicht hat schon begonnen.",
+  "@claimErrorStarted": {
+    "description": "A claim failed because the shift has started."
+  },
+  "claimErrorNotOpen": "Diese Schicht ist nicht mehr offen.",
+  "@claimErrorNotOpen": {
+    "description": "A claim failed because the shift was cancelled or completed."
+  },
+  "claimErrorOverlap": "Du hast zu dieser Zeit schon eine Schicht.",
+  "@claimErrorOverlap": {
+    "description": "A claim failed because it overlaps another claimed shift."
   }
 }
