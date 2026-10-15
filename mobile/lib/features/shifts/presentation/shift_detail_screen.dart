@@ -14,12 +14,16 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/form_page.dart';
 import '../../../core/widgets/initials_avatar.dart';
 import '../../../core/widgets/status_message.dart';
+import '../../auth/data/session.dart';
 import '../data/worker_shifts_provider.dart';
+import '../domain/shift_facts.dart';
+import 'claim_sheet.dart';
 import 'shift_card.dart';
 import 'shift_format.dart';
 
 /// Everything about one shift: the card's facts plus the description, the
 /// required qualifications, the address with a map link and the contact.
+/// A shift the worker has not claimed yet offers the claim at the bottom.
 class ShiftDetailScreen extends ConsumerWidget {
   const ShiftDetailScreen({super.key, required this.shiftId});
 
@@ -101,6 +105,8 @@ class ShiftDetailScreen extends ConsumerWidget {
               ),
             ),
             Expanded(child: body),
+            if (shift.value case final shift? when shift.assignment == null)
+              _ClaimBar(shift: shift),
           ],
         ),
       ),
@@ -110,6 +116,49 @@ class ShiftDetailScreen extends ConsumerWidget {
 
 void _tell(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+}
+
+/// The screen's one call to action, pinned below the details. Disabled with
+/// the reason as its label when no spot is left.
+class _ClaimBar extends ConsumerWidget {
+  const _ClaimBar({required this.shift});
+
+  final WorkerShift shift;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final margin = screenMargin(context);
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: context.colors.hairline)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            margin,
+            AppSpacing.md,
+            margin,
+            AppSpacing.sm,
+          ),
+          child: AppButton(
+            label: shift.isFull ? l10n.shiftNoSpotsLeft : l10n.claimAction,
+            onPressed: shift.isFull
+                ? null
+                : () async {
+                    final claimed = await showClaimSheet(context, shift);
+                    if (!claimed || !context.mounted) return;
+                    final agency =
+                        ref.read(currentUserProvider)?.agency.name ?? '';
+                    _tell(context, l10n.claimSent(agency));
+                  },
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _Details extends ConsumerWidget {

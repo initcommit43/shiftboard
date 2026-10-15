@@ -104,5 +104,17 @@
   "shiftCall": "Call",
   "shiftCallFailed": "The call could not be started.",
   "comingSoonTitle": "Coming soon",
-  "comingSoonMessage": "This area is still in the works."
+  "comingSoonMessage": "This area is still in the works.",
+  "claimAction": "Request shift",
+  "claimSheetTitle": "Request this shift?",
+  "claimSheetMessage": "Your spot is held as soon as you request it. {agency} confirms the shift afterwards.",
+  "claimSubmit": "Send request",
+  "claimSubmitting": "Sending …",
+  "actionCancel": "Cancel",
+  "claimSent": "Request sent. {agency} will let you know once it's confirmed.",
+  "claimErrorFull": "This shift just filled up.",
+  "claimErrorAlreadyClaimed": "You've already requested this shift.",
+  "claimErrorStarted": "This shift has already started.",
+  "claimErrorNotOpen": "This shift is no longer open.",
+  "claimErrorOverlap": "You already have a shift at that time."
 }
