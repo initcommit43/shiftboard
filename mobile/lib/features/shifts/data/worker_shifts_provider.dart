@@ -20,6 +20,19 @@ final workerShiftsProvider = FutureProvider.autoDispose<List<WorkerShift>>(
   retry: (retryCount, error) => null,
 );
 
+/// Every shift the worker has claimed, with their assignment, earliest first.
+final myShiftsProvider = FutureProvider.autoDispose<List<WorkerShift>>(
+  (ref) async {
+    final response = await ref
+        .watch(apiProvider)
+        .getWorkerShiftsApi()
+        .listMyShifts(size: _listSize);
+    return response.data!.content.toList();
+  },
+  // The list offers a manual retry and pull to refresh.
+  retry: (retryCount, error) => null,
+);
+
 /// One shift of the agency with everything the worker sees of it.
 final workerShiftProvider = FutureProvider.autoDispose
     .family<WorkerShift, String>(

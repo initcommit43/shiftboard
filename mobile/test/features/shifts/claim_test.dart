@@ -62,7 +62,11 @@ void main() {
     );
     expect(find.text('Angefragt'), findsOneWidget);
     expect(find.text('2 von 5 Plätzen frei'), findsOneWidget);
-    expect(button('Schicht anfragen'), findsNothing);
+    expect(
+      button('Schicht anfragen'),
+      findsNothing,
+    ); // My shifts loads again, so that it lists the new claim.
+    expect(backend.sent('GET /worker/my-shifts'), hasLength(2));
   });
 
   testWidgets('shows progress while the claim is sent', (tester) async {

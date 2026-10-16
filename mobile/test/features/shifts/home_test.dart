@@ -32,11 +32,7 @@ void main() {
   testWidgets('the other tabs announce what is coming', (tester) async {
     await pumpApp(tester, backend);
 
-    final titles = {
-      'Meine': 'Meine Schichten',
-      'Nachrichten': 'Nachrichten',
-      'Profil': 'Profil',
-    };
+    final titles = {'Nachrichten': 'Nachrichten', 'Profil': 'Profil'};
     for (final MapEntry(key: tab, value: title) in titles.entries) {
       await tester.tap(find.text(tab));
       await tester.pumpAndSettle();

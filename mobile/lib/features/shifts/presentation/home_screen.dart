@@ -11,6 +11,7 @@ import '../../../core/widgets/initials_avatar.dart';
 import '../../../core/widgets/status_message.dart';
 import '../../auth/data/session.dart';
 import 'account_sheet.dart';
+import 'my_shifts_view.dart';
 import 'shifts_view.dart';
 
 /// The home of an approved worker: the tabs with the open shifts first.
@@ -49,7 +50,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           icon: CupertinoIcons.checkmark_circle,
           selectedIcon: CupertinoIcons.checkmark_circle_fill,
         ),
-        view: const _ComingSoon(),
+        view: MyShiftsView(onBrowseShifts: () => setState(() => _tab = 0)),
       ),
       (
         title: l10n.navMessages,

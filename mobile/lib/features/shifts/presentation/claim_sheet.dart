@@ -67,6 +67,7 @@ class _ClaimSheetState extends ConsumerState<_ClaimSheet> {
   void _refreshShifts() {
     ref
       ..invalidate(workerShiftsProvider)
+      ..invalidate(myShiftsProvider)
       ..invalidate(workerShiftProvider(widget.shift.id));
   }
 

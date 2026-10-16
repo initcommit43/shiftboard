@@ -1,187 +1,25 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../core/api/api_error.dart';
 import '../../../core/l10n/l10n.dart';
-import '../../../core/routing/app_router.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../../core/theme/tokens.dart';
-import '../../../core/widgets/app_button.dart';
-import '../../../core/widgets/form_page.dart';
-import '../../../core/widgets/status_message.dart';
-import '../../auth/data/session.dart';
 import '../data/worker_shifts_provider.dart';
-import 'shift_card.dart';
+import 'shift_list_view.dart';
 
 /// The tab with the agency's upcoming shifts.
-class ShiftsView extends ConsumerWidget {
+class ShiftsView extends StatelessWidget {
   const ShiftsView({super.key, required this.agencyName});
 
   final String agencyName;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final l10n = context.l10n;
-    // A deactivated worker is refused the list; loading the account again
-    // lets the router move them off this tab.
-    ref.listen(workerShiftsProvider, (_, next) {
-      if (next case AsyncError(:final error)
-          when ApiError.from(error).code == ApiErrorCode.workerNotActive) {
-        ref.read(sessionProvider.notifier).refresh().ignore();
-      }
-    });
-    final shifts = ref.watch(workerShiftsProvider);
-    Future<void> reload() => ref.refresh(workerShiftsProvider.future);
 
-    if (shifts.value case final list? when list.isNotEmpty) {
-      return RefreshIndicator(
-        onRefresh: () async {
-          try {
-            await reload();
-          } catch (_) {
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(
-              context,
-            ).showSnackBar(SnackBar(content: Text(l10n.shiftsRefreshFailed)));
-          }
-        },
-        child: ListView.separated(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(
-            horizontal: screenMargin(context),
-            vertical: AppSpacing.sm,
-          ),
-          itemCount: list.length,
-          separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.lg),
-          itemBuilder: (context, index) => ShiftCard(
-            shift: list[index],
-            onTap: () => context.push(AppRoutes.shift(list[index].id)),
-          ),
-        ),
-      );
-    }
-    if (shifts.isLoading) return const _Skeleton();
-
-    final retry = AppButton(
-      label: shifts.hasError ? l10n.actionRetry : l10n.shiftsRefresh,
-      variant: AppButtonVariant.soft,
-      expand: false,
-      onPressed: () => reload().ignore(),
-    );
-    if (shifts.error case final error?) {
-      return _Centered(
-        child: StatusMessage(
-          icon: CupertinoIcons.exclamationmark_triangle,
-          tone: StatusTone.error,
-          title: l10n.shiftsErrorTitle,
-          message: ApiError.from(error).isOffline
-              ? l10n.errorCheckConnection
-              : l10n.errorGeneric,
-          action: retry,
-        ),
-      );
-    }
-    return _Centered(
-      child: StatusMessage(
-        icon: CupertinoIcons.calendar,
-        title: l10n.shiftsEmptyTitle,
-        message: l10n.shiftsEmptyMessage(agencyName),
-        action: retry,
-      ),
-    );
-  }
-}
-
-class _Centered extends StatelessWidget {
-  const _Centered({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
-          horizontal: screenMargin(context),
-          vertical: AppSpacing.lg,
-        ),
-        child: child,
-      ),
-    );
-  }
-}
-
-/// Placeholder cards in the shape of the shift list while it loads.
-class _Skeleton extends StatelessWidget {
-  const _Skeleton();
-
-  // Widths of the title and subtitle bars, so the cards do not look cloned.
-  static const _cards = [
-    (200.0, 140.0),
-    (168.0, 120.0),
-    (220.0, 150.0),
-    (184.0, 110.0),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      label: context.l10n.shiftsLoading,
-      liveRegion: true,
-      child: ListView.separated(
-        physics: const NeverScrollableScrollPhysics(),
-        padding: EdgeInsets.symmetric(
-          horizontal: screenMargin(context),
-          vertical: AppSpacing.sm,
-        ),
-        itemCount: _cards.length,
-        separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.lg),
-        itemBuilder: (context, index) {
-          final (title, subtitle) = _cards[index];
-          return Card(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.paddingCard),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _Bar(width: title, height: 22),
-                  const SizedBox(height: AppSpacing.sm),
-                  _Bar(width: subtitle, height: AppSpacing.lg),
-                  const SizedBox(height: AppSpacing.lg),
-                  const Row(
-                    children: [
-                      _Bar(width: 72, height: AppSize.badge),
-                      SizedBox(width: AppSpacing.sm),
-                      _Bar(width: 56, height: AppSize.badge),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class _Bar extends StatelessWidget {
-  const _Bar({required this.width, required this.height});
-
-  final double width;
-  final double height;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: context.colors.hairline,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-      ),
+    return ShiftListView(
+      shifts: workerShiftsProvider,
+      emptyIcon: CupertinoIcons.calendar,
+      emptyTitle: l10n.shiftsEmptyTitle,
+      emptyMessage: l10n.shiftsEmptyMessage(agencyName),
     );
   }
 }

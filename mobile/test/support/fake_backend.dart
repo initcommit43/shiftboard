@@ -17,9 +17,11 @@ typedef Handler = FutureOr<ResponseBody> Function(RequestOptions options);
 /// Stands in for the backend at the HTTP adapter, so the generated client and
 /// the auth interceptor run as in the app.
 class FakeBackend implements HttpClientAdapter {
-  /// The agency has no shifts until a test publishes some.
+  /// The agency has no shifts and the worker no claims until a test adds
+  /// some.
   FakeBackend() {
     on('GET /worker/shifts', (_) => json(page([])));
+    on('GET /worker/my-shifts', (_) => json(page([])));
   }
 
   final _handlers = <String, Handler>{};
