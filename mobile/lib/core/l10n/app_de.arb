@@ -512,6 +512,18 @@
   "@shiftCallFailed": {
     "description": "Snackbar when the device could not start a phone call."
   },
+  "myShiftsEmptyTitle": "Noch keine Schichten angefragt",
+  "@myShiftsEmptyTitle": {
+    "description": "Title of the empty list of the worker's own shifts."
+  },
+  "myShiftsEmptyMessage": "Wenn du eine Schicht anfragst, siehst du sie hier mit ihrem Status.",
+  "@myShiftsEmptyMessage": {
+    "description": "Text below the title of the empty list of the worker's own shifts."
+  },
+  "myShiftsBrowse": "Offene Schichten ansehen",
+  "@myShiftsBrowse": {
+    "description": "Button on the empty list of the worker's own shifts that switches to the open shifts."
+  },
   "comingSoonTitle": "Kommt bald",
   "@comingSoonTitle": {
     "description": "Title of a tab that is not built yet."
