@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Two fictional agencies with their qualifications, dashboard users, workers, clients, locations,
- * shifts and a few claims. The rows are written with plain SQL, like a migration would, because nothing in the
+ * Two fictional agencies with their qualifications, settings, dashboard users, workers, clients,
+ * locations, shifts and a few claims. The rows are written with plain SQL, like a migration would, because nothing in the
  * application creates agencies, dashboard users or clients yet. Runs once: a database that has
  * the demo agency is left alone.
  */
@@ -86,6 +86,9 @@ class SeedData implements ApplicationRunner {
                 "PUBLISHED");
         shift(agency, catering, hall, dispatcher, "Service Firmenfeier", null, 9, 17, 6, true, "15.50", 10, "DRAFT",
                 service);
+        // Took place three days ago, so that no-shows can be marked.
+        var inventory = shift(agency, logistics, warehouse, dispatcher, "Inventur", null, -3, 7, 8, false, "16.50", 3,
+                "COMPLETED", lager);
 
         var lena = worker(agency, 1, "Lena", "Hofer", "1996-03-14", "ACTIVE", 60, service, bar);
         var jakob = worker(agency, 2, "Jakob", "Steiner", "1988-11-02", "ACTIVE", 52, lager, staplerschein);
@@ -99,16 +102,22 @@ class SeedData implements ApplicationRunner {
         worker(agency, 10, "Nina", "Hauser", "2005-02-16", "PENDING", 1);
         worker(agency, 11, "David", "Pichler", "1997-10-21", "PENDING", 0, bar);
 
-        // Lena has a claim of her own, the warehouse shift has two spots taken and the bar is full.
-        claim(agency, weddingService, lena);
-        claim(agency, warehouseHelp, jakob);
-        claim(agency, warehouseHelp, paul);
-        claim(agency, weddingBar, felix);
-        claim(agency, weddingBar, sophie);
+        // Lena has a claim of her own, the warehouse shift has two spots taken (one confirmed) and the
+        // bar is full. Jakob and Paul worked the inventory.
+        claim(agency, weddingService, lena, "PENDING");
+        claim(agency, warehouseHelp, jakob, "CONFIRMED");
+        claim(agency, warehouseHelp, paul, "PENDING");
+        claim(agency, weddingBar, felix, "PENDING");
+        claim(agency, weddingBar, sophie, "PENDING");
+        claim(agency, inventory, jakob, "COMPLETED");
+        claim(agency, inventory, paul, "COMPLETED");
     }
 
     private void seedAlpenEvents() {
         var agency = agency("Alpen Events", ALPEN_SIGNUP_CODE);
+        // Confirms claims right away and lets workers drop out until twelve hours before the start.
+        jdbc.sql("update agency set settings = '{\"autoConfirm\": true, \"cancellationDeadlineHours\": 12}' where id = ?")
+                .param(agency).update();
         var service = qualification(agency, "Service");
         qualification(agency, "Security");
 
@@ -186,12 +195,18 @@ class SeedData implements ApplicationRunner {
         return shiftId;
     }
 
-    /** A pending claim of the worker on the shift, with its spot counted. */
-    private void claim(UUID agencyId, UUID shiftId, UUID workerId) {
+    /**
+     * A claim of the worker on the shift, with its spot counted. Claimed a week before the start
+     * at the latest, decided on right away unless pending.
+     */
+    private void claim(UUID agencyId, UUID shiftId, UUID workerId, String status) {
         jdbc.sql("""
-                insert into assignment (id, agency_id, shift_id, worker_id, status, starts_at, ends_at, claimed_at)
-                select uuidv7(), ?, s.id, ?, 'PENDING', s.starts_at, s.ends_at, now() from shift s where s.id = ?
-                """).params(agencyId, workerId, shiftId).update();
+                insert into assignment (
+                    id, agency_id, shift_id, worker_id, status, starts_at, ends_at, claimed_at, decided_at)
+                select uuidv7(), ?, s.id, ?, ?, s.starts_at, s.ends_at, c.at, case when ? = 'PENDING' then null else c.at end
+                from shift s, lateral (select least(now(), s.starts_at - interval '7 days') as at) c
+                where s.id = ?
+                """).params(agencyId, workerId, status, status, shiftId).update();
         jdbc.sql("update shift set taken_slots = taken_slots + 1 where id = ?").param(shiftId).update();
     }
 

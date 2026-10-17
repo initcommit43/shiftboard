@@ -31,6 +31,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security-oauth2-resource-server")
     implementation("org.springframework.modulith:spring-modulith-starter-core")
     implementation("org.springframework.modulith:spring-modulith-starter-jpa")
+    implementation("net.javacrumbs.shedlock:shedlock-spring:7.10.1")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:7.10.1")
 
     // Argon2 for password hashing
     runtimeOnly("org.bouncycastle:bcprov-jdk18on:1.86")

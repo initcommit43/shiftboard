@@ -181,7 +181,7 @@ class ShiftIntegrationTests extends IntegrationTest {
     }
 
     @Test
-    void listsDraftAndPublishedShiftsThatHaveNotEndedEarliestStartFirst() {
+    void listsDraftPublishedAndCancelledShiftsThatHaveNotEndedEarliestStartFirst() {
         var later = shiftRequest();
         later.put("title", "Später");
         later.put("startsAt", TOMORROW.plus(Duration.ofDays(2)).toString());
@@ -203,28 +203,96 @@ class ShiftIntegrationTests extends IntegrationTest {
         over.put("startsAt", Instant.now().minus(Duration.ofHours(9)).toString());
         over.put("endsAt", Instant.now().minus(Duration.ofHours(1)).toString());
         create(over);
-        var cancelled = create(shiftRequest());
-        jdbc.sql("update shift set status = 'CANCELLED' where id = ?").param(UUID.fromString(cancelled)).update();
+        // Cancelled, and still listed until it would have ended.
+        var cancelled = shiftRequest();
+        cancelled.put("title", "Abgesagt");
+        cancelled.put("publish", true);
+        post("/api/v1/shifts/" + create(cancelled) + "/cancel", dispatcher).expectStatus().isOk();
 
-        get("/api/v1/shifts", dispatcher)
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.page").isEqualTo(0)
-                .jsonPath("$.size").isEqualTo(20)
-                .jsonPath("$.totalElements").isEqualTo(3)
-                .jsonPath("$.totalPages").isEqualTo(1)
-                .jsonPath("$.content[*].title").isEqualTo(List.of("Läuft gerade", "Früher", "Später"))
-                .jsonPath("$.content[*].status").isEqualTo(List.of("PUBLISHED", "DRAFT", "PUBLISHED"))
-                .jsonPath("$.content[1].client.name").isEqualTo("Nordlicht Logistik")
-                .jsonPath("$.content[1].location.name").isEqualTo("Zentrallager Linz")
-                .jsonPath("$.content[1].slots").isEqualTo(5)
-                .jsonPath("$.content[1].takenSlots").isEqualTo(0);
+        for (var uri : List.of("/api/v1/shifts", "/api/v1/shifts?period=UPCOMING")) {
+            get(uri, dispatcher)
+                    .expectStatus().isOk()
+                    .expectBody()
+                    .jsonPath("$.page").isEqualTo(0)
+                    .jsonPath("$.size").isEqualTo(20)
+                    .jsonPath("$.totalElements").isEqualTo(4)
+                    .jsonPath("$.totalPages").isEqualTo(1)
+                    .jsonPath("$.content[*].title").isEqualTo(List.of("Läuft gerade", "Früher", "Abgesagt", "Später"))
+                    .jsonPath("$.content[*].status").isEqualTo(List.of("PUBLISHED", "DRAFT", "CANCELLED", "PUBLISHED"))
+                    .jsonPath("$.content[1].client.name").isEqualTo("Nordlicht Logistik")
+                    .jsonPath("$.content[1].location.name").isEqualTo("Zentrallager Linz")
+                    .jsonPath("$.content[1].slots").isEqualTo(5)
+                    .jsonPath("$.content[1].takenSlots").isEqualTo(0);
+        }
 
-        get("/api/v1/shifts?page=1&size=2", dispatcher)
+        get("/api/v1/shifts?page=1&size=3", dispatcher)
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.totalPages").isEqualTo(2)
                 .jsonPath("$.content[*].title").isEqualTo(List.of("Später"));
+    }
+
+    @Test
+    void listsPublishedCompletedAndCancelledShiftsThatHaveEndedLatestStartFirst() {
+        var yesterday = Instant.now().minus(Duration.ofDays(1)).truncatedTo(ChronoUnit.SECONDS);
+        var older = ended("Vorgestern", yesterday.minus(Duration.ofDays(1)), true);
+        var newer = ended("Gestern", yesterday, true);
+        ended("Nie veröffentlicht", yesterday, false);
+        var completed = ended("Erledigt", yesterday.minus(Duration.ofHours(12)), true);
+        jdbc.sql("update shift set status = 'COMPLETED' where id = ?").param(UUID.fromString(completed)).update();
+        var cancelled = ended("Abgesagt", yesterday.minus(Duration.ofHours(6)), true);
+        jdbc.sql("update shift set status = 'CANCELLED' where id = ?").param(UUID.fromString(cancelled)).update();
+        create(shiftRequest());
+
+        get("/api/v1/shifts?period=PAST", dispatcher)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.totalElements").isEqualTo(4)
+                .jsonPath("$.content[*].title").isEqualTo(List.of("Gestern", "Abgesagt", "Erledigt", "Vorgestern"))
+                .jsonPath("$.content[*].status")
+                .isEqualTo(List.of("PUBLISHED", "CANCELLED", "COMPLETED", "PUBLISHED"))
+                .jsonPath("$.content[0].id").isEqualTo(newer)
+                .jsonPath("$.content[3].id").isEqualTo(older);
+
+        expectFieldError(get("/api/v1/shifts?period=SOON", dispatcher), "period", "invalid_format");
+    }
+
+    @Test
+    void showsOneShiftDraftsIncluded() {
+        var draft = create(shiftRequest());
+
+        get("/api/v1/shifts/" + draft, dispatcher)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(draft)
+                .jsonPath("$.status").isEqualTo("DRAFT")
+                .jsonPath("$.title").isEqualTo("Lagerunterstützung")
+                .jsonPath("$.createdAt").isNotEmpty();
+        expectProblem(get("/api/v1/shifts/" + UUID.randomUUID(), dispatcher), 404, "shift_not_found");
+    }
+
+    @Test
+    void cancelsADraftOrPublishedShiftOnce() {
+        var draft = create(shiftRequest());
+        var request = shiftRequest();
+        request.put("publish", true);
+        var published = create(request);
+
+        for (var id : List.of(draft, published)) {
+            post("/api/v1/shifts/" + id + "/cancel", dispatcher)
+                    .expectStatus().isOk()
+                    .expectBody()
+                    .jsonPath("$.id").isEqualTo(id)
+                    .jsonPath("$.status").isEqualTo("CANCELLED");
+            expectProblem(post("/api/v1/shifts/" + id + "/cancel", dispatcher), 409, "shift_not_cancellable");
+        }
+        assertThat(events.all()).contains(
+                new ShiftCancelled(agency.id(), UUID.fromString(draft)),
+                new ShiftCancelled(agency.id(), UUID.fromString(published)));
+
+        var over = ended("Vorbei", Instant.now().minus(Duration.ofDays(1)), true);
+        expectProblem(post("/api/v1/shifts/" + over + "/cancel", dispatcher), 409, "shift_not_cancellable");
+        expectProblem(post("/api/v1/shifts/" + UUID.randomUUID() + "/cancel", dispatcher), 404, "shift_not_found");
     }
 
     @Test
@@ -239,6 +307,8 @@ class ShiftIntegrationTests extends IntegrationTest {
                 .jsonPath("$.totalElements").isEqualTo(0)
                 .jsonPath("$.content").isEmpty();
         expectProblem(post("/api/v1/shifts/" + id + "/publish", otherDispatcher), 404, "shift_not_found");
+        expectProblem(get("/api/v1/shifts/" + id, otherDispatcher), 404, "shift_not_found");
+        expectProblem(post("/api/v1/shifts/" + id + "/cancel", otherDispatcher), 404, "shift_not_found");
     }
 
     @Test
@@ -249,6 +319,8 @@ class ShiftIntegrationTests extends IntegrationTest {
         expectProblem(get("/api/v1/shifts", worker), 403, "forbidden");
         expectProblem(post("/api/v1/shifts", worker, shiftRequest()), 403, "forbidden");
         expectProblem(post("/api/v1/shifts/" + id + "/publish", worker), 403, "forbidden");
+        expectProblem(get("/api/v1/shifts/" + id, worker), 403, "forbidden");
+        expectProblem(post("/api/v1/shifts/" + id + "/cancel", worker), 403, "forbidden");
         expectProblem(client.get().uri("/api/v1/shifts").exchange(), 401, "unauthenticated");
     }
 
@@ -262,6 +334,16 @@ class ShiftIntegrationTests extends IntegrationTest {
         request.put("hourlyRateCents", 1650);
         request.put("slots", 5);
         return request;
+    }
+
+    /** Creates an eight-hour shift that has ended and returns its id. */
+    private String ended(String title, Instant startsAt, boolean publish) {
+        var request = shiftRequest();
+        request.put("title", title);
+        request.put("startsAt", startsAt.toString());
+        request.put("endsAt", startsAt.plus(Duration.ofHours(8)).toString());
+        request.put("publish", publish);
+        return create(request);
     }
 
     /** Creates the shift and returns its id. */

@@ -26,3 +26,4 @@ One short record per real decision. Format: `NNNN-title.md` with the sections Co
 | [0020](0020-worker-app-tabs.md) | Tabs of the worker app |
 | [0021](0021-qualifications-information-only.md) | Qualifications are information only in the MVP |
 | [0022](0022-staff-names-and-shift-contact.md) | Names on staff accounts and the contact person of a shift |
+| [0023](0023-background-jobs.md) | Background jobs with @Scheduled and ShedLock |

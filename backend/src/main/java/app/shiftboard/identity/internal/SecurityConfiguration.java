@@ -12,6 +12,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -57,6 +58,10 @@ class SecurityConfiguration {
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/api/v1/ping", "/api/v1/signup/**", "/api/v1/auth/**", "/actuator/health")
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/agency/settings")
+                        .hasAnyRole(Role.DISPATCHER.name(), Role.ADMIN.name())
+                        .requestMatchers("/api/v1/agency/**")
+                        .hasRole(Role.ADMIN.name())
                         .requestMatchers(
                                 "/api/v1/workers/**",
                                 "/api/v1/clients/**",

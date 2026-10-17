@@ -9,5 +9,8 @@ logging:
     org.hibernate.engine.internal.StatisticalLoggingSessionEventListener: warn
 
 shiftboard:
+  # Tests start the jobs themselves, at the time they choose.
+  jobs:
+    enabled: false
   security:
     jwt-secret: test-only-jwt-secret-0123456789abcdef

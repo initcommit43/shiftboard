@@ -322,6 +322,77 @@ class WorkerShiftIntegrationTests extends IntegrationTest {
     }
 
     @Test
+    void aClaimShowsUntilWhenTheWorkerCanDropOut() {
+        var shiftId = publish("Lagerunterstützung", TOMORROW.plus(Duration.ofDays(2)), 8, 5);
+
+        claim(shiftId, worker)
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.assignment.cancellableUntil")
+                .isEqualTo(TOMORROW.plus(Duration.ofDays(1)).toString())
+                .jsonPath("$.assignment.cancelledBy").doesNotExist();
+    }
+
+    @Test
+    void aWorkerDropsOutBeforeTheDeadlineAndTheSpotIsFree() {
+        var shiftId = publish("Lagerunterstützung", TOMORROW.plus(Duration.ofDays(2)), 8, 1);
+        claim(shiftId, worker).expectStatus().isCreated();
+
+        var cancelled = cancel(shiftId, worker)
+                .expectStatus().isOk()
+                .expectBody(Map.class).returnResult().getResponseBody();
+
+        var assignment = (Map<?, ?>) cancelled.get("assignment");
+        assertThat(cancelled.get("takenSlots")).isEqualTo(0);
+        assertThat(assignment.get("status")).isEqualTo("CANCELLED");
+        assertThat(assignment.get("cancelledBy")).isEqualTo("WORKER");
+        assertThat(assignment.containsKey("cancellableUntil")).isFalse();
+        var assignmentId = UUID.fromString((String) assignment.get("id"));
+        assertThat(events.all()).contains(new AssignmentCancelled(
+                agency.id(), assignmentId, shiftId, workerId(worker), AssignmentCancelled.Cause.WORKER));
+        assertThat(takenSlots(shiftId)).isZero();
+
+        expectProblem(cancel(shiftId, worker), 409, "assignment_not_active");
+        // A worker claims a shift once, also after dropping out; the spot goes to someone else.
+        expectProblem(claim(shiftId, worker), 409, "shift_already_claimed");
+        claim(shiftId, activeWorker()).expectStatus().isCreated();
+    }
+
+    @Test
+    void afterTheDeadlineTheWorkerCannotDropOut() {
+        // Starts in less than the default 24 hours.
+        var soon = publish("Inventur", Instant.now().plus(Duration.ofHours(12)), 4, 5);
+        claim(soon, worker).expectStatus().isCreated();
+
+        expectProblem(cancel(soon, worker), 409, "cancellation_deadline_passed");
+        assertThat(takenSlots(soon)).isEqualTo(1);
+
+        // With a shorter deadline set by the admin, dropping out is possible again.
+        var admin = login(data.account(agency, Role.ADMIN), DASHBOARD);
+        client.put().uri("/api/v1/agency/settings")
+                .headers(headers -> headers.setBearerAuth(admin.accessToken()))
+                .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                .body(Map.of("autoConfirm", false, "cancellationDeadlineHours", 6))
+                .exchange()
+                .expectStatus().isOk();
+        cancel(soon, worker)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.assignment.status").isEqualTo("CANCELLED");
+    }
+
+    @Test
+    void droppingOutOfAShiftThatWasNotClaimedFails() {
+        var shiftId = publish("Lagerunterstützung", TOMORROW.plus(Duration.ofDays(2)), 8, 5);
+        var draft = create(shiftRequest("Entwurf", TOMORROW, 8, 5));
+
+        expectProblem(cancel(shiftId, worker), 404, "assignment_not_found");
+        expectProblem(cancel(draft, worker), 404, "shift_not_found");
+        expectProblem(cancel(UUID.randomUUID(), worker), 404, "shift_not_found");
+        expectProblem(cancel(shiftId, dispatcher), 403, "forbidden");
+    }
+
+    @Test
     void aWorkerOfAnotherAgencyNeitherSeesNorClaimsTheShift() {
         var shiftId = publish("Lagerunterstützung", TOMORROW, 8, 5);
         var otherAgency = data.agency("Alpen Events");
@@ -350,6 +421,7 @@ class WorkerShiftIntegrationTests extends IntegrationTest {
             expectProblem(get("/api/v1/worker/shifts/" + shiftId, tokens), 403, "worker_not_active");
             expectProblem(claim(shiftId, tokens), 403, "worker_not_active");
             expectProblem(get("/api/v1/worker/my-shifts", tokens), 403, "worker_not_active");
+            expectProblem(cancel(shiftId, tokens), 403, "worker_not_active");
         }
         expectProblem(get("/api/v1/worker/shifts", dispatcher), 403, "forbidden");
         expectProblem(get("/api/v1/worker/shifts/" + shiftId, dispatcher), 403, "forbidden");
@@ -403,6 +475,10 @@ class WorkerShiftIntegrationTests extends IntegrationTest {
 
     private RestTestClient.ResponseSpec claim(UUID shiftId, TokenPair tokens) {
         return post("/api/v1/worker/shifts/" + shiftId + "/claim", tokens);
+    }
+
+    private RestTestClient.ResponseSpec cancel(UUID shiftId, TokenPair tokens) {
+        return post("/api/v1/worker/shifts/" + shiftId + "/cancel", tokens);
     }
 
     /** Runs the calls at the same moment, each on its own thread, and returns what they answered. */

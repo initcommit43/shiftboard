@@ -94,6 +94,59 @@ class ShiftTests {
         assertThat(draft.getTakenSlots()).isZero();
     }
 
+    @Test
+    void releasingASlotFreesItOnAPublishedShiftOnly() {
+        var shift = shift(START.plus(Duration.ofHours(8)), "16.50", 2, Set.of());
+        shift.publish();
+        shift.claim(START.minus(Duration.ofDays(1)));
+        shift.claim(START.minus(Duration.ofDays(1)));
+
+        shift.release();
+
+        assertThat(shift.getTakenSlots()).isEqualTo(1);
+        shift.cancel(START.minus(Duration.ofDays(1)));
+        shift.release();
+        assertThat(shift.getTakenSlots()).isZero();
+    }
+
+    @Test
+    void aDraftOrPublishedShiftCanBeCancelledUntilItEnds() {
+        var end = START.plus(Duration.ofHours(8));
+        var draft = shift(end, "16.50", 2, Set.of());
+        var running = shift(end, "16.50", 2, Set.of());
+        running.publish();
+        running.claim(START.minus(Duration.ofDays(1)));
+
+        draft.cancel(START.minus(Duration.ofDays(1)));
+        running.cancel(end.minusSeconds(1));
+
+        assertThat(draft.getStatus()).isEqualTo(ShiftStatus.CANCELLED);
+        assertThat(running.getStatus()).isEqualTo(ShiftStatus.CANCELLED);
+        assertThat(running.getTakenSlots()).isZero();
+        assertThatExceptionOfType(ShiftNotCancellableException.class).isThrownBy(() -> running.cancel(START));
+
+        var ended = shift(end, "16.50", 2, Set.of());
+        ended.publish();
+        assertThatExceptionOfType(ShiftNotCancellableException.class).isThrownBy(() -> ended.cancel(end));
+        ended.complete(end);
+        assertThatExceptionOfType(ShiftNotCancellableException.class)
+                .isThrownBy(() -> ended.cancel(START.minus(Duration.ofDays(1))));
+    }
+
+    @Test
+    void aPublishedShiftIsCompletedOnceItHasEnded() {
+        var end = START.plus(Duration.ofHours(8));
+        var shift = shift(end, "16.50", 2, Set.of());
+        assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> shift.complete(end));
+        shift.publish();
+        assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> shift.complete(end.minusSeconds(1)));
+
+        shift.complete(end);
+
+        assertThat(shift.getStatus()).isEqualTo(ShiftStatus.COMPLETED);
+        assertNotClaimable("shift_not_open", shift, START.minus(Duration.ofDays(1)));
+    }
+
     private static void assertNotClaimable(String code, Shift shift, Instant now) {
         assertThatExceptionOfType(ShiftNotClaimableException.class)
                 .isThrownBy(() -> shift.claim(now))

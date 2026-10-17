@@ -31,4 +31,16 @@ public interface Shifts {
      *         the shift won; the transaction cannot be continued
      */
     ShiftDetails claim(UUID shiftId);
+
+    /**
+     * Frees the slot of a claim that no longer holds one. Joins the transaction of the caller. A
+     * shift that is no longer published keeps its count, since its slots are no longer offered.
+     *
+     * @throws org.springframework.dao.OptimisticLockingFailureException if a concurrent change of
+     *         the shift won; the transaction cannot be continued
+     */
+    void release(UUID shiftId);
+
+    /** Whether the agency has a shift with this id, drafts included. */
+    boolean exists(UUID shiftId);
 }

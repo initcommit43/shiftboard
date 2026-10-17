@@ -29,6 +29,10 @@ management:
         include: health
 
 shiftboard:
+  jobs:
+    # Background jobs; ShedLock lets one instance run each of them at a time.
+    enabled: true
+    complete-shifts-every: PT1M
   api:
     # Version of the contract in api/openapi.yaml that this backend implements.
     version: 0.1.0

@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 
@@ -23,6 +25,25 @@ interface AssignmentRepository extends Repository<Assignment, UUID> {
     List<Assignment> findByWorkerIdAndShiftIdIn(UUID workerId, Collection<UUID> shiftIds);
 
     Page<Assignment> findByWorkerId(UUID workerId, Pageable pageable);
+
+    Page<Assignment> findByShiftId(UUID shiftId, Pageable pageable);
+
+    Page<Assignment> findByShiftIdAndStatus(UUID shiftId, AssignmentStatus status, Pageable pageable);
+
+    // The finders below lock the rows they return, so that two concurrent changes of one claim,
+    // such as an approval and a rejection, run one after the other and the second sees the first.
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select a from Assignment a where a.id = :id and a.shiftId = :shiftId")
+    Optional<Assignment> findForUpdate(UUID id, UUID shiftId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select a from Assignment a where a.shiftId = :shiftId and a.workerId = :workerId")
+    Optional<Assignment> findForUpdateByShiftIdAndWorkerId(UUID shiftId, UUID workerId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select a from Assignment a where a.shiftId = :shiftId and a.status in :statuses order by a.id")
+    List<Assignment> findForUpdateByShiftIdAndStatusIn(UUID shiftId, Collection<AssignmentStatus> statuses);
 
     /** Whether the worker is booked, in one of the given statuses, for any time between start and end. */
     @Query("""

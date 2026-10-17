@@ -14,14 +14,22 @@ import app.shiftboard.agency.Agencies;
 import app.shiftboard.agency.QualificationSummary;
 import app.shiftboard.client.Clients;
 import app.shiftboard.identity.UserAccounts;
+import app.shiftboard.agency.TenantContext;
+import app.shiftboard.shift.ShiftCancelled;
+import app.shiftboard.shift.ShiftCompleted;
 import app.shiftboard.shift.ShiftDetails;
 import app.shiftboard.shift.Shifts;
 import app.shiftboard.shift.internal.ShiftController.ClientSummary;
 import app.shiftboard.shift.internal.ShiftController.ShiftPage;
+import app.shiftboard.shift.internal.ShiftController.ShiftPeriod;
 import app.shiftboard.shift.internal.ShiftController.ShiftRequest;
 import app.shiftboard.shift.internal.ShiftController.ShiftResponse;
 import app.shiftboard.system.ApiException;
+import app.shiftboard.system.ConflictRetry;
 import app.shiftboard.system.InvalidFieldException;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -29,12 +37,17 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Service
 class ShiftService implements Shifts {
 
     private static final Sort EARLIEST_START_FIRST = Sort.by("startsAt", "id");
-    private static final List<ShiftStatus> UPCOMING = List.of(ShiftStatus.DRAFT, ShiftStatus.PUBLISHED);
+    private static final Sort LATEST_START_FIRST = Sort.by(Sort.Direction.DESC, "startsAt", "id");
+    private static final List<ShiftStatus> UPCOMING =
+            List.of(ShiftStatus.DRAFT, ShiftStatus.PUBLISHED, ShiftStatus.CANCELLED);
+    private static final List<ShiftStatus> PAST =
+            List.of(ShiftStatus.PUBLISHED, ShiftStatus.COMPLETED, ShiftStatus.CANCELLED);
     private static final String NOT_FOUND = "not_found";
 
     private final ShiftRepository shifts;
@@ -43,20 +56,77 @@ class ShiftService implements Shifts {
 
     private final UserAccounts userAccounts;
 
-    ShiftService(ShiftRepository shifts, Clients clients, Agencies agencies, UserAccounts userAccounts) {
+    private final ApplicationEventPublisher events;
+
+    private final TransactionTemplate transactions;
+
+    ShiftService(
+            ShiftRepository shifts, Clients clients, Agencies agencies, UserAccounts userAccounts,
+            ApplicationEventPublisher events, TransactionTemplate transactions) {
         this.shifts = shifts;
         this.clients = clients;
         this.agencies = agencies;
         this.userAccounts = userAccounts;
+        this.events = events;
+        this.transactions = transactions;
     }
 
-    /** Draft and published shifts that have not ended yet. */
+    /**
+     * Upcoming: draft, published and cancelled shifts that have not ended yet, earliest start
+     * first. Past: published, completed and cancelled shifts that have ended, latest start first.
+     */
     @Transactional(readOnly = true)
-    ShiftPage listUpcoming(int page, int size) {
-        var result = shifts.findByStatusInAndEndsAtAfter(
-                UPCOMING, Instant.now(), PageRequest.of(page, size, EARLIEST_START_FIRST));
+    ShiftPage list(ShiftPeriod period, int page, int size) {
+        var now = Instant.now();
+        var result = period == ShiftPeriod.PAST
+                ? shifts.findByStatusInAndEndsAtLessThanEqual(PAST, now, PageRequest.of(page, size, LATEST_START_FIRST))
+                : shifts.findByStatusInAndEndsAtAfter(UPCOMING, now, PageRequest.of(page, size, EARLIEST_START_FIRST));
         return new ShiftPage(
                 responses(result.getContent()), page, size, result.getTotalElements(), result.getTotalPages());
+    }
+
+    @Transactional(readOnly = true)
+    ShiftResponse get(UUID shiftId) {
+        return responses(List.of(shifts.findById(shiftId).orElseThrow(ShiftService::notFound))).getFirst();
+    }
+
+    /**
+     * Calls the shift off, together with its claims: the listeners of {@link ShiftCancelled}
+     * cancel them in the same transaction. Each attempt is a transaction of its own, so that a
+     * concurrent claim that was faster is seen by the next one.
+     */
+    ShiftResponse cancel(UUID shiftId) {
+        return ConflictRetry.run(() -> transactions.execute(_ -> {
+            var shift = shifts.findById(shiftId).orElseThrow(ShiftService::notFound);
+            shift.cancel(Instant.now());
+            var cancelled = shifts.saveAndFlush(shift);
+            events.publishEvent(new ShiftCancelled(TenantContext.require(), shiftId));
+            return responses(List.of(cancelled)).getFirst();
+        }), ConflictRetry::busy);
+    }
+
+    /**
+     * Completes the published shifts of the current agency that have ended, at most
+     * {@code limit} of them, each in a transaction of its own together with its claims (the
+     * listeners of {@link ShiftCompleted}). Returns how many were completed.
+     */
+    int completeEnded(Instant now, int limit) {
+        var ended = shifts.findByStatusAndEndsAtLessThanEqualOrderByEndsAt(ShiftStatus.PUBLISHED, now, Limit.of(limit));
+        var completed = 0;
+        for (var candidate : ended) {
+            try {
+                transactions.executeWithoutResult(_ -> {
+                    var shift = shifts.findById(candidate.getId()).orElseThrow();
+                    shift.complete(now);
+                    shifts.saveAndFlush(shift);
+                    events.publishEvent(new ShiftCompleted(TenantContext.require(), shift.getId()));
+                });
+                completed++;
+            } catch (OptimisticLockingFailureException e) {
+                // Changed at the same moment, for example cancelled; the next run looks at it again.
+            }
+        }
+        return completed;
     }
 
     @Transactional
@@ -129,6 +199,21 @@ class ShiftService implements Shifts {
         shift.claim(Instant.now());
         // Written right away: this is where a concurrent claim that was faster makes the version check fail.
         return details(List.of(shifts.saveAndFlush(shift))).getFirst();
+    }
+
+    @Override
+    @Transactional
+    public void release(UUID shiftId) {
+        var shift = shifts.findById(shiftId).orElseThrow(ShiftService::notFound);
+        shift.release();
+        // Written right away, so that a concurrent change of the shift fails this one here.
+        shifts.saveAndFlush(shift);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean exists(UUID shiftId) {
+        return shifts.existsById(shiftId);
     }
 
     private static boolean visibleToWorkers(Shift shift) {

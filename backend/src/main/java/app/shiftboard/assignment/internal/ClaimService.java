@@ -3,7 +3,9 @@ package app.shiftboard.assignment.internal;
 import java.time.Instant;
 import java.util.UUID;
 
+import app.shiftboard.agency.Agencies;
 import app.shiftboard.agency.TenantContext;
+import app.shiftboard.assignment.AssignmentConfirmed;
 import app.shiftboard.assignment.ShiftClaimed;
 import app.shiftboard.shift.Shifts;
 import app.shiftboard.system.ApiException;
@@ -25,11 +27,14 @@ class ClaimService {
 
     private final Shifts shifts;
 
+    private final Agencies agencies;
+
     private final ApplicationEventPublisher events;
 
-    ClaimService(AssignmentRepository assignments, Shifts shifts, ApplicationEventPublisher events) {
+    ClaimService(AssignmentRepository assignments, Shifts shifts, Agencies agencies, ApplicationEventPublisher events) {
         this.assignments = assignments;
         this.shifts = shifts;
+        this.agencies = agencies;
         this.events = events;
     }
 
@@ -46,16 +51,21 @@ class ClaimService {
         if (assignments.isBooked(workerId, AssignmentStatus.HOLDING, shift.startsAt(), shift.endsAt())) {
             throw overlap();
         }
+        var autoConfirm = agencies.settings().autoConfirm();
         Assignment assignment;
         try {
-            assignment = assignments.saveAndFlush(
-                    Assignment.claim(shiftId, workerId, shift.startsAt(), shift.endsAt(), Instant.now()));
+            assignment = assignments.saveAndFlush(Assignment.claim(
+                    shiftId, workerId, shift.startsAt(), shift.endsAt(), Instant.now(), autoConfirm));
         } catch (DataIntegrityViolationException e) {
             // A concurrent claim of the same worker was stored between the checks above and this
             // insert; the constraints caught it.
             throw byConstraint(e);
         }
-        events.publishEvent(new ShiftClaimed(TenantContext.require(), assignment.getId(), shiftId, workerId));
+        var agencyId = TenantContext.require();
+        events.publishEvent(new ShiftClaimed(agencyId, assignment.getId(), shiftId, workerId));
+        if (assignment.getStatus() == AssignmentStatus.CONFIRMED) {
+            events.publishEvent(new AssignmentConfirmed(agencyId, assignment.getId(), shiftId, workerId));
+        }
     }
 
     private static RuntimeException byConstraint(DataIntegrityViolationException e) {
