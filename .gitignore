@@ -18,6 +18,11 @@ plans/
 *.jks
 *.keystore
 secrets/
+# Firebase: service account keys and app configuration (ADR 0024)
+*firebase-adminsdk*.json
+google-services.json
+GoogleService-Info.plist
+mobile/firebase.json
 
 # OS
 .DS_Store

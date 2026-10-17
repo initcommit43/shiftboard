@@ -58,7 +58,7 @@ class SecurityConfiguration {
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/api/v1/ping", "/api/v1/signup/**", "/api/v1/auth/**", "/actuator/health")
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/agency/settings")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/agency/**")
                         .hasAnyRole(Role.DISPATCHER.name(), Role.ADMIN.name())
                         .requestMatchers("/api/v1/agency/**")
                         .hasRole(Role.ADMIN.name())
