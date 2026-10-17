@@ -311,5 +311,23 @@
       "keep": "Abbrechen",
       "confirm": "Entfernen"
     }
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "description": "Wie eure Agentur mit Anfragen und Absagen arbeitet.",
+    "loading": "Einstellungen werden geladen …",
+    "autoConfirm": "Anfragen automatisch bestätigen",
+    "autoConfirmHint": "Mitarbeiter:innen bekommen den Platz sofort, ohne dass ihr freigebt. Gilt für neue Anfragen.",
+    "deadline": "Absagefrist in Stunden",
+    "deadlineHint": "So lange vor Beginn können Mitarbeiter:innen in der App absagen. 0 heißt: bis zum Beginn.",
+    "deadlineInvalid": "Eine ganze Zahl zwischen 0 und 336.",
+    "adminsOnly": "Nur Admins können die Einstellungen ändern.",
+    "save": "Speichern",
+    "saved": "Die Einstellungen sind gespeichert",
+    "error": {
+      "title": "Die Einstellungen konnten nicht geladen werden",
+      "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu.",
+      "retry": "Erneut versuchen"
+    }
   }
 }

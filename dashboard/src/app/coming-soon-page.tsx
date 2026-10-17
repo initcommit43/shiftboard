@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/page-header'
 import { StateCard } from '@/components/state-card'
 
 /** Placeholder for the areas of the navigation that later slices fill. */
-export function ComingSoonPage({ area }: { area: 'messages' | 'settings' }) {
+export function ComingSoonPage({ area }: { area: 'messages' }) {
   const { t } = useTranslation()
 
   return (
