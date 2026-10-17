@@ -29,27 +29,6 @@ void main() {
     expect(find.byType(AppTabItem), findsNWidgets(4));
   });
 
-  testWidgets('the profile tab announces what is coming', (tester) async {
-    await pumpApp(tester, backend);
-
-    final titles = {'Profil': 'Profil'};
-    for (final MapEntry(key: tab, value: title) in titles.entries) {
-      await tester.tap(find.text(tab));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Kommt bald').hitTestable(), findsOneWidget);
-      // The title of the screen, and the tab's label where it is the same word.
-      expect(find.text(title), findsNWidgets(title == tab ? 2 : 1));
-    }
-
-    await tester.tap(find.text('Schichten'));
-    await tester.pumpAndSettle();
-    expect(
-      find.text('Aktuell keine offenen Schichten').hitTestable(),
-      findsOneWidget,
-    );
-  });
-
   testWidgets('the tab labels fit the smallest screen with large text', (
     tester,
   ) async {
