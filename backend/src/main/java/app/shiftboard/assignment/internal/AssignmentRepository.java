@@ -30,6 +30,9 @@ interface AssignmentRepository extends Repository<Assignment, UUID> {
 
     Page<Assignment> findByShiftIdAndStatus(UUID shiftId, AssignmentStatus status, Pageable pageable);
 
+    @Query("select a.workerId from Assignment a where a.shiftId = :shiftId and a.status = :status order by a.claimedAt")
+    List<UUID> findWorkerIdsByShiftIdAndStatus(UUID shiftId, AssignmentStatus status);
+
     // The finders below lock the rows they return, so that two concurrent changes of one claim,
     // such as an approval and a rejection, run one after the other and the second sees the first.
 
