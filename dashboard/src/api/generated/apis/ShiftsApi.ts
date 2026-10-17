@@ -29,10 +29,22 @@ import {
     ShiftPageToJSON,
 } from '../models/ShiftPage';
 import {
+    type ShiftPeriod,
+    ShiftPeriodFromJSON,
+    ShiftPeriodToJSON,
+} from '../models/ShiftPeriod';
+import {
     type ShiftRequest,
     ShiftRequestFromJSON,
     ShiftRequestToJSON,
 } from '../models/ShiftRequest';
+
+export interface CancelShiftRequest {
+    /**
+     * 
+     */
+    shiftId: string;
+}
 
 export interface CreateShiftRequest {
     /**
@@ -41,7 +53,18 @@ export interface CreateShiftRequest {
     shiftRequest: ShiftRequest;
 }
 
+export interface GetShiftRequest {
+    /**
+     * 
+     */
+    shiftId: string;
+}
+
 export interface ListShiftsRequest {
+    /**
+     * Which shifts to list.
+     */
+    period?: ShiftPeriod;
     /**
      * Page number, starting at 0.
      */
@@ -63,6 +86,61 @@ export interface PublishShiftRequest {
  * 
  */
 export class ShiftsApi extends runtime.BaseAPI {
+
+    /**
+     * Creates request options for cancelShift without sending the request
+     */
+    async cancelShiftRequestOpts(requestParameters: CancelShiftRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['shiftId'] == null) {
+            throw new runtime.RequiredError(
+                'shiftId',
+                'Required parameter "shiftId" was null or undefined when calling cancelShift().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/shifts/{shiftId}/cancel`;
+        urlPath = urlPath.replace('{shiftId}', encodeURIComponent(String(requestParameters['shiftId'])));
+
+        return {
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Sets a draft or published shift to `CANCELLED`, together with all its pending and confirmed assignments (`cancelledBy` is `AGENCY`). Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404), `shift_not_cancellable` (409, the shift is completed or already cancelled). 
+     * Call off a shift
+     */
+    async cancelShiftRaw(requestParameters: CancelShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Shift>> {
+        const requestOptions = await this.cancelShiftRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ShiftFromJSON(jsonValue));
+    }
+
+    /**
+     * Sets a draft or published shift to `CANCELLED`, together with all its pending and confirmed assignments (`cancelledBy` is `AGENCY`). Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404), `shift_not_cancellable` (409, the shift is completed or already cancelled). 
+     * Call off a shift
+     */
+    async cancelShift(requestParameters: CancelShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Shift> {
+        const response = await this.cancelShiftRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * Creates request options for createShift without sending the request
@@ -122,10 +200,69 @@ export class ShiftsApi extends runtime.BaseAPI {
     }
 
     /**
+     * Creates request options for getShift without sending the request
+     */
+    async getShiftRequestOpts(requestParameters: GetShiftRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['shiftId'] == null) {
+            throw new runtime.RequiredError(
+                'shiftId',
+                'Required parameter "shiftId" was null or undefined when calling getShift().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/shifts/{shiftId}`;
+        urlPath = urlPath.replace('{shiftId}', encodeURIComponent(String(requestParameters['shiftId'])));
+
+        return {
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Any shift of the agency, drafts included. Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404). 
+     * One shift of the agency
+     */
+    async getShiftRaw(requestParameters: GetShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Shift>> {
+        const requestOptions = await this.getShiftRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ShiftFromJSON(jsonValue));
+    }
+
+    /**
+     * Any shift of the agency, drafts included. Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404). 
+     * One shift of the agency
+     */
+    async getShift(requestParameters: GetShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Shift> {
+        const response = await this.getShiftRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * Creates request options for listShifts without sending the request
      */
     async listShiftsRequestOpts(requestParameters: ListShiftsRequest): Promise<runtime.RequestOpts> {
         const queryParameters: any = {};
+
+        if (requestParameters['period'] != null) {
+            queryParameters['period'] = requestParameters['period'];
+        }
 
         if (requestParameters['page'] != null) {
             queryParameters['page'] = requestParameters['page'];
@@ -157,8 +294,8 @@ export class ShiftsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Draft and published shifts that have not ended yet, sorted by start time, earliest first. Dispatchers and admins only.  Error codes: `forbidden` (403). 
-     * List the agency\'s upcoming shifts
+     * `UPCOMING` (the default): draft, published and cancelled shifts that have not ended yet, sorted by start time, earliest first. `PAST`: published, completed and cancelled shifts that have ended, latest start first; drafts that were never published are left out. Dispatchers and admins only.  Error codes: `forbidden` (403). 
+     * List the agency\'s upcoming or past shifts
      */
     async listShiftsRaw(requestParameters: ListShiftsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ShiftPage>> {
         const requestOptions = await this.listShiftsRequestOpts(requestParameters);
@@ -168,8 +305,8 @@ export class ShiftsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Draft and published shifts that have not ended yet, sorted by start time, earliest first. Dispatchers and admins only.  Error codes: `forbidden` (403). 
-     * List the agency\'s upcoming shifts
+     * `UPCOMING` (the default): draft, published and cancelled shifts that have not ended yet, sorted by start time, earliest first. `PAST`: published, completed and cancelled shifts that have ended, latest start first; drafts that were never published are left out. Dispatchers and admins only.  Error codes: `forbidden` (403). 
+     * List the agency\'s upcoming or past shifts
      */
     async listShifts(requestParameters: ListShiftsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ShiftPage> {
         const response = await this.listShiftsRaw(requestParameters, initOverrides);

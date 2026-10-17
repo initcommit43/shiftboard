@@ -1,6 +1,8 @@
 .openapi-generator-ignore
+apis/AssignmentsApi.ts
 apis/AuthApi.ts
 apis/ClientsApi.ts
+apis/SettingsApi.ts
 apis/ShiftsApi.ts
 apis/SignupApi.ts
 apis/SystemApi.ts
@@ -8,9 +10,12 @@ apis/WorkerShiftsApi.ts
 apis/WorkersApi.ts
 apis/index.ts
 index.ts
+models/AgencySettings.ts
 models/AgencySummary.ts
+models/AssignedWorker.ts
 models/AssignmentStatus.ts
 models/AssignmentSummary.ts
+models/CancelledBy.ts
 models/Client.ts
 models/ClientPage.ts
 models/ClientSummary.ts
@@ -24,10 +29,14 @@ models/Problem.ts
 models/Qualification.ts
 models/QualificationPage.ts
 models/RefreshTokenRequest.ts
+models/RemoveAssignmentRequest.ts
 models/Role.ts
 models/Shift.ts
+models/ShiftAssignment.ts
+models/ShiftAssignmentPage.ts
 models/ShiftContact.ts
 models/ShiftPage.ts
+models/ShiftPeriod.ts
 models/ShiftRequest.ts
 models/ShiftStatus.ts
 models/SignupInfo.ts

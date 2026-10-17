@@ -62,13 +62,15 @@ Please follow the [installation procedure](#installation--usage) and then run th
 import 'package:shiftboard_api/shiftboard_api.dart';
 
 
-final api = ShiftboardApi().getAuthApi();
+final api = ShiftboardApi().getAssignmentsApi();
+final String shiftId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
+final String assignmentId = 38400000-8cf0-11bd-b23e-10b96e4ef00d; // String | 
 
 try {
-    final response = await api.getCurrentUser();
+    final response = await api.approveAssignment(shiftId, assignmentId);
     print(response);
 } on DioException catch (e) {
-    print("Exception when calling AuthApi->getCurrentUser: $e\n");
+    print("Exception when calling AssignmentsApi->approveAssignment: $e\n");
 }
 
 ```
@@ -79,18 +81,28 @@ All URIs are relative to *http://localhost:8080/api/v1*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
+[*AssignmentsApi*](doc/AssignmentsApi.md) | [**approveAssignment**](doc/AssignmentsApi.md#approveassignment) | **POST** /shifts/{shiftId}/assignments/{assignmentId}/approve | Approve a claim
+[*AssignmentsApi*](doc/AssignmentsApi.md) | [**listShiftAssignments**](doc/AssignmentsApi.md#listshiftassignments) | **GET** /shifts/{shiftId}/assignments | List the claims on a shift
+[*AssignmentsApi*](doc/AssignmentsApi.md) | [**markNoShow**](doc/AssignmentsApi.md#marknoshow) | **POST** /shifts/{shiftId}/assignments/{assignmentId}/no-show | Mark a worker as not turned up
+[*AssignmentsApi*](doc/AssignmentsApi.md) | [**rejectAssignment**](doc/AssignmentsApi.md#rejectassignment) | **POST** /shifts/{shiftId}/assignments/{assignmentId}/reject | Reject a claim
+[*AssignmentsApi*](doc/AssignmentsApi.md) | [**removeAssignment**](doc/AssignmentsApi.md#removeassignment) | **POST** /shifts/{shiftId}/assignments/{assignmentId}/remove | Remove a worker from a shift
 [*AuthApi*](doc/AuthApi.md) | [**getCurrentUser**](doc/AuthApi.md#getcurrentuser) | **GET** /me | The logged-in user
 [*AuthApi*](doc/AuthApi.md) | [**login**](doc/AuthApi.md#login) | **POST** /auth/login | Log in with email and password
 [*AuthApi*](doc/AuthApi.md) | [**logout**](doc/AuthApi.md#logout) | **POST** /auth/logout | End the session on this device
 [*AuthApi*](doc/AuthApi.md) | [**refreshToken**](doc/AuthApi.md#refreshtoken) | **POST** /auth/refresh | Exchange a refresh token for a new token pair
 [*ClientsApi*](doc/ClientsApi.md) | [**listClients**](doc/ClientsApi.md#listclients) | **GET** /clients | List the agency&#39;s clients with their locations
 [*ClientsApi*](doc/ClientsApi.md) | [**listQualifications**](doc/ClientsApi.md#listqualifications) | **GET** /qualifications | List the agency&#39;s qualifications
+[*SettingsApi*](doc/SettingsApi.md) | [**getAgencySettings**](doc/SettingsApi.md#getagencysettings) | **GET** /agency/settings | The agency&#39;s workflow settings
+[*SettingsApi*](doc/SettingsApi.md) | [**updateAgencySettings**](doc/SettingsApi.md#updateagencysettings) | **PUT** /agency/settings | Change the agency&#39;s workflow settings
+[*ShiftsApi*](doc/ShiftsApi.md) | [**cancelShift**](doc/ShiftsApi.md#cancelshift) | **POST** /shifts/{shiftId}/cancel | Call off a shift
 [*ShiftsApi*](doc/ShiftsApi.md) | [**createShift**](doc/ShiftsApi.md#createshift) | **POST** /shifts | Create a shift
-[*ShiftsApi*](doc/ShiftsApi.md) | [**listShifts**](doc/ShiftsApi.md#listshifts) | **GET** /shifts | List the agency&#39;s upcoming shifts
+[*ShiftsApi*](doc/ShiftsApi.md) | [**getShift**](doc/ShiftsApi.md#getshift) | **GET** /shifts/{shiftId} | One shift of the agency
+[*ShiftsApi*](doc/ShiftsApi.md) | [**listShifts**](doc/ShiftsApi.md#listshifts) | **GET** /shifts | List the agency&#39;s upcoming or past shifts
 [*ShiftsApi*](doc/ShiftsApi.md) | [**publishShift**](doc/ShiftsApi.md#publishshift) | **POST** /shifts/{shiftId}/publish | Publish a draft
 [*SignupApi*](doc/SignupApi.md) | [**getSignupInfo**](doc/SignupApi.md#getsignupinfo) | **GET** /signup/{signupCode} | Look up the agency behind a signup link
 [*SignupApi*](doc/SignupApi.md) | [**signUp**](doc/SignupApi.md#signup) | **POST** /signup/{signupCode} | Sign up as a worker of the agency
 [*SystemApi*](doc/SystemApi.md) | [**ping**](doc/SystemApi.md#ping) | **GET** /ping | Check that the API is reachable
+[*WorkerShiftsApi*](doc/WorkerShiftsApi.md) | [**cancelClaim**](doc/WorkerShiftsApi.md#cancelclaim) | **POST** /worker/shifts/{shiftId}/cancel | Drop out of a claimed shift
 [*WorkerShiftsApi*](doc/WorkerShiftsApi.md) | [**claimShift**](doc/WorkerShiftsApi.md#claimshift) | **POST** /worker/shifts/{shiftId}/claim | Claim a spot on a shift
 [*WorkerShiftsApi*](doc/WorkerShiftsApi.md) | [**getWorkerShift**](doc/WorkerShiftsApi.md#getworkershift) | **GET** /worker/shifts/{shiftId} | One shift as a worker sees it
 [*WorkerShiftsApi*](doc/WorkerShiftsApi.md) | [**listMyShifts**](doc/WorkerShiftsApi.md#listmyshifts) | **GET** /worker/my-shifts | List the shifts the worker has claimed
@@ -102,9 +114,12 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AgencySettings](doc/AgencySettings.md)
  - [AgencySummary](doc/AgencySummary.md)
+ - [AssignedWorker](doc/AssignedWorker.md)
  - [AssignmentStatus](doc/AssignmentStatus.md)
  - [AssignmentSummary](doc/AssignmentSummary.md)
+ - [CancelledBy](doc/CancelledBy.md)
  - [Client](doc/Client.md)
  - [ClientPage](doc/ClientPage.md)
  - [ClientSummary](doc/ClientSummary.md)
@@ -118,10 +133,14 @@ Class | Method | HTTP request | Description
  - [Qualification](doc/Qualification.md)
  - [QualificationPage](doc/QualificationPage.md)
  - [RefreshTokenRequest](doc/RefreshTokenRequest.md)
+ - [RemoveAssignmentRequest](doc/RemoveAssignmentRequest.md)
  - [Role](doc/Role.md)
  - [Shift](doc/Shift.md)
+ - [ShiftAssignment](doc/ShiftAssignment.md)
+ - [ShiftAssignmentPage](doc/ShiftAssignmentPage.md)
  - [ShiftContact](doc/ShiftContact.md)
  - [ShiftPage](doc/ShiftPage.md)
+ - [ShiftPeriod](doc/ShiftPeriod.md)
  - [ShiftRequest](doc/ShiftRequest.md)
  - [ShiftStatus](doc/ShiftStatus.md)
  - [SignupInfo](doc/SignupInfo.md)

@@ -38,6 +38,10 @@ tags:
     description: The agency's customers, their locations and the qualifications a shift can ask for
   - name: shifts
     description: Shifts the agency creates and publishes
+  - name: assignments
+    description: The claims on a shift and the agency's decisions on them
+  - name: settings
+    description: Workflow settings of the agency
   - name: worker-shifts
     description: What a worker sees of the agency's shifts, claiming a spot, and the shifts they claimed
 security:
@@ -378,17 +382,82 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /agency/settings:
+    get:
+      operationId: getAgencySettings
+      tags: [settings]
+      summary: The agency's workflow settings
+      description: |
+        Dispatchers and admins.
+
+        Error codes: `forbidden` (403).
+      responses:
+        "200":
+          description: The settings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgencySettings"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+    put:
+      operationId: updateAgencySettings
+      tags: [settings]
+      summary: Change the agency's workflow settings
+      description: |
+        Applies to claims and cancellations made afterwards; decisions already
+        made stay as they are. Admins only.
+
+        Field error codes: `required`, `out_of_range`
+        (`cancellationDeadlineHours` below 0 or above 336).
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403, not an admin).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgencySettings"
+      responses:
+        "200":
+          description: The changed settings.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgencySettings"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
   /shifts:
     get:
       operationId: listShifts
       tags: [shifts]
-      summary: List the agency's upcoming shifts
+      summary: List the agency's upcoming or past shifts
       description: |
-        Draft and published shifts that have not ended yet, sorted by start
-        time, earliest first. Dispatchers and admins only.
+        `UPCOMING` (the default): draft, published and cancelled shifts that
+        have not ended yet, sorted by start time, earliest first. `PAST`:
+        published, completed and cancelled shifts that have ended, latest
+        start first; drafts that were never published are left out.
+        Dispatchers and admins only.
 
         Error codes: `forbidden` (403).
       parameters:
+        - name: period
+          in: query
+          description: Which shifts to list.
+          schema:
+            $ref: "#/components/schemas/ShiftPeriod"
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/Size"
       responses:
@@ -443,6 +512,33 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /shifts/{shiftId}:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+    get:
+      operationId: getShift
+      tags: [shifts]
+      summary: One shift of the agency
+      description: |
+        Any shift of the agency, drafts included. Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `shift_not_found` (404).
+      responses:
+        "200":
+          description: The shift.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shift"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
   /shifts/{shiftId}/publish:
     parameters:
       - $ref: "#/components/parameters/ShiftId"
@@ -463,6 +559,213 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Shift"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /shifts/{shiftId}/cancel:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+    post:
+      operationId: cancelShift
+      tags: [shifts]
+      summary: Call off a shift
+      description: |
+        Sets a draft or published shift to `CANCELLED`, together with all its
+        pending and confirmed assignments (`cancelledBy` is `AGENCY`).
+        Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `shift_not_found` (404),
+        `shift_not_cancellable` (409, the shift is completed or already
+        cancelled).
+      responses:
+        "200":
+          description: The cancelled shift.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shift"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /shifts/{shiftId}/assignments:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+    get:
+      operationId: listShiftAssignments
+      tags: [assignments]
+      summary: List the claims on a shift
+      description: |
+        The assignments of the shift, sorted by claim time, oldest first.
+        Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `shift_not_found` (404).
+      parameters:
+        - name: status
+          in: query
+          description: Only assignments with this status.
+          schema:
+            $ref: "#/components/schemas/AssignmentStatus"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of assignments.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShiftAssignmentPage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /shifts/{shiftId}/assignments/{assignmentId}/approve:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+      - $ref: "#/components/parameters/AssignmentId"
+    post:
+      operationId: approveAssignment
+      tags: [assignments]
+      summary: Approve a claim
+      description: |
+        Sets a pending assignment to `CONFIRMED`. Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `shift_not_found` (404),
+        `assignment_not_found` (404), `assignment_not_pending` (409).
+      responses:
+        "200":
+          description: The assignment after the change.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShiftAssignment"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /shifts/{shiftId}/assignments/{assignmentId}/reject:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+      - $ref: "#/components/parameters/AssignmentId"
+    post:
+      operationId: rejectAssignment
+      tags: [assignments]
+      summary: Reject a claim
+      description: |
+        Sets a pending assignment to `REJECTED` and frees its spot. Dispatchers
+        and admins only.
+
+        Error codes: `forbidden` (403), `shift_not_found` (404),
+        `assignment_not_found` (404), `assignment_not_pending` (409).
+      responses:
+        "200":
+          description: The assignment after the change.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShiftAssignment"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /shifts/{shiftId}/assignments/{assignmentId}/remove:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+      - $ref: "#/components/parameters/AssignmentId"
+    post:
+      operationId: removeAssignment
+      tags: [assignments]
+      summary: Remove a worker from a shift
+      description: |
+        Sets a pending or confirmed assignment to `CANCELLED` with
+        `cancelledBy` `AGENCY` and frees its spot. The reason is kept for the
+        agency; the worker does not see it. Dispatchers and admins only.
+
+        Field error codes: `required`, `invalid_length` (`reason`).
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403), `shift_not_found` (404), `assignment_not_found` (404),
+        `assignment_not_active` (409, not pending or confirmed).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RemoveAssignmentRequest"
+      responses:
+        "200":
+          description: The assignment after the change.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShiftAssignment"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /shifts/{shiftId}/assignments/{assignmentId}/no-show:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+      - $ref: "#/components/parameters/AssignmentId"
+    post:
+      operationId: markNoShow
+      tags: [assignments]
+      summary: Mark a worker as not turned up
+      description: |
+        Sets a completed assignment to `NO_SHOW`. Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `shift_not_found` (404),
+        `assignment_not_found` (404), `assignment_not_completed` (409).
+      responses:
+        "200":
+          description: The assignment after the change.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShiftAssignment"
         "401":
           $ref: "#/components/responses/Problem"
         "403":
@@ -575,6 +878,42 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /worker/shifts/{shiftId}/cancel:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+    post:
+      operationId: cancelClaim
+      tags: [worker-shifts]
+      summary: Drop out of a claimed shift
+      description: |
+        Sets the worker's pending or confirmed assignment to `CANCELLED` with
+        `cancelledBy` `WORKER` and frees the spot. Possible until
+        `assignment.cancellableUntil`, which follows from the agency's
+        cancellation deadline; afterwards the worker has to contact the
+        agency. Active workers only.
+
+        Error codes: `forbidden` (403), `worker_not_active` (403),
+        `shift_not_found` (404), `assignment_not_found` (404, the worker has
+        not claimed the shift), and with 409: `assignment_not_active` (not
+        pending or confirmed) and `cancellation_deadline_passed`.
+      responses:
+        "200":
+          description: The shift with the worker's cancelled assignment.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerShift"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
   /worker/my-shifts:
     get:
       operationId: listMyShifts
@@ -628,6 +967,13 @@ components:
         format: uuid
     ShiftId:
       name: shiftId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    AssignmentId:
+      name: assignmentId
       in: path
       required: true
       schema:
@@ -965,6 +1311,14 @@ components:
         `takenSlots` and `slots`.
       enum: [DRAFT, PUBLISHED, COMPLETED, CANCELLED]
 
+    ShiftPeriod:
+      type: string
+      description: |
+        `UPCOMING`: shifts that have not ended yet. `PAST`: shifts that have
+        ended.
+      enum: [UPCOMING, PAST]
+      default: UPCOMING
+
     ShiftRequest:
       type: object
       required: [clientId, locationId, title, startsAt, endsAt, hourlyRateCents, slots]
@@ -1112,6 +1466,13 @@ components:
         Pending and confirmed assignments hold a spot.
       enum: [PENDING, CONFIRMED, REJECTED, CANCELLED, COMPLETED, NO_SHOW]
 
+    CancelledBy:
+      type: string
+      description: |
+        Who cancelled an assignment: `WORKER` when they dropped out, `AGENCY`
+        when the agency removed them or called off the shift.
+      enum: [WORKER, AGENCY]
+
     AssignmentSummary:
       type: object
       description: A worker's claim on a shift.
@@ -1125,6 +1486,105 @@ components:
         claimedAt:
           type: string
           format: date-time
+        cancellableUntil:
+          type: string
+          format: date-time
+          description: |
+            Until when the worker can drop out in the app. Present while the
+            assignment is pending or confirmed; may already be in the past.
+        cancelledBy:
+          description: Present when the status is `CANCELLED`.
+          $ref: "#/components/schemas/CancelledBy"
+
+    AssignedWorker:
+      type: object
+      description: The worker behind a claim, as the agency sees them.
+      required: [id, firstName, lastName, phone]
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+          examples: ["+43 660 5550101"]
+
+    ShiftAssignment:
+      type: object
+      description: A claim on a shift as the agency sees it.
+      required: [id, status, worker, claimedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/AssignmentStatus"
+        worker:
+          $ref: "#/components/schemas/AssignedWorker"
+        claimedAt:
+          type: string
+          format: date-time
+        decidedAt:
+          type: string
+          format: date-time
+          description: When the claim was last decided on, cancelled or completed. Absent while pending.
+        cancelledBy:
+          description: Present when the status is `CANCELLED`.
+          $ref: "#/components/schemas/CancelledBy"
+        reason:
+          type: string
+          description: Why the agency removed the worker. Present only for a removal.
+
+    ShiftAssignmentPage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ShiftAssignment"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+
+    RemoveAssignmentRequest:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+          examples: [Kann laut Rücksprache nicht kommen]
+
+    AgencySettings:
+      type: object
+      required: [autoConfirm, cancellationDeadlineHours]
+      properties:
+        autoConfirm:
+          type: boolean
+          description: Claims are confirmed right away instead of waiting for the agency. Off by default.
+        cancellationDeadlineHours:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 336
+          description: |
+            How many hours before the start a worker can still drop out in the
+            app. 24 by default; 0 means until the start.
+          examples: [24]
 
     ShiftContact:
       type: object

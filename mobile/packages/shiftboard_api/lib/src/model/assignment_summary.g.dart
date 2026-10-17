@@ -13,13 +13,21 @@ class _$AssignmentSummary extends AssignmentSummary {
   final AssignmentStatus status;
   @override
   final DateTime claimedAt;
+  @override
+  final DateTime? cancellableUntil;
+  @override
+  final CancelledBy? cancelledBy;
 
   factory _$AssignmentSummary(
           [void Function(AssignmentSummaryBuilder)? updates]) =>
       (AssignmentSummaryBuilder()..update(updates))._build();
 
   _$AssignmentSummary._(
-      {required this.id, required this.status, required this.claimedAt})
+      {required this.id,
+      required this.status,
+      required this.claimedAt,
+      this.cancellableUntil,
+      this.cancelledBy})
       : super._();
   @override
   AssignmentSummary rebuild(void Function(AssignmentSummaryBuilder) updates) =>
@@ -35,7 +43,9 @@ class _$AssignmentSummary extends AssignmentSummary {
     return other is AssignmentSummary &&
         id == other.id &&
         status == other.status &&
-        claimedAt == other.claimedAt;
+        claimedAt == other.claimedAt &&
+        cancellableUntil == other.cancellableUntil &&
+        cancelledBy == other.cancelledBy;
   }
 
   @override
@@ -44,6 +54,8 @@ class _$AssignmentSummary extends AssignmentSummary {
     _$hash = $jc(_$hash, id.hashCode);
     _$hash = $jc(_$hash, status.hashCode);
     _$hash = $jc(_$hash, claimedAt.hashCode);
+    _$hash = $jc(_$hash, cancellableUntil.hashCode);
+    _$hash = $jc(_$hash, cancelledBy.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -53,7 +65,9 @@ class _$AssignmentSummary extends AssignmentSummary {
     return (newBuiltValueToStringHelper(r'AssignmentSummary')
           ..add('id', id)
           ..add('status', status)
-          ..add('claimedAt', claimedAt))
+          ..add('claimedAt', claimedAt)
+          ..add('cancellableUntil', cancellableUntil)
+          ..add('cancelledBy', cancelledBy))
         .toString();
   }
 }
@@ -74,6 +88,16 @@ class AssignmentSummaryBuilder
   DateTime? get claimedAt => _$this._claimedAt;
   set claimedAt(DateTime? claimedAt) => _$this._claimedAt = claimedAt;
 
+  DateTime? _cancellableUntil;
+  DateTime? get cancellableUntil => _$this._cancellableUntil;
+  set cancellableUntil(DateTime? cancellableUntil) =>
+      _$this._cancellableUntil = cancellableUntil;
+
+  CancelledBy? _cancelledBy;
+  CancelledBy? get cancelledBy => _$this._cancelledBy;
+  set cancelledBy(CancelledBy? cancelledBy) =>
+      _$this._cancelledBy = cancelledBy;
+
   AssignmentSummaryBuilder() {
     AssignmentSummary._defaults(this);
   }
@@ -84,6 +108,8 @@ class AssignmentSummaryBuilder
       _id = $v.id;
       _status = $v.status;
       _claimedAt = $v.claimedAt;
+      _cancellableUntil = $v.cancellableUntil;
+      _cancelledBy = $v.cancelledBy;
       _$v = null;
     }
     return this;
@@ -111,6 +137,8 @@ class AssignmentSummaryBuilder
               status, r'AssignmentSummary', 'status'),
           claimedAt: BuiltValueNullFieldError.checkNotNull(
               claimedAt, r'AssignmentSummary', 'claimedAt'),
+          cancellableUntil: cancellableUntil,
+          cancelledBy: cancelledBy,
         );
     replace(_$result);
     return _$result;

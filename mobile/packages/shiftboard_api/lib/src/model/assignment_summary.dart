@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:shiftboard_api/src/model/cancelled_by.dart';
 import 'package:shiftboard_api/src/model/assignment_status.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
@@ -15,6 +16,8 @@ part 'assignment_summary.g.dart';
 /// * [id]
 /// * [status]
 /// * [claimedAt]
+/// * [cancellableUntil] - Until when the worker can drop out in the app. Present while the assignment is pending or confirmed; may already be in the past.
+/// * [cancelledBy] - Present when the status is `CANCELLED`.
 @BuiltValue()
 abstract class AssignmentSummary
     implements Built<AssignmentSummary, AssignmentSummaryBuilder> {
@@ -27,6 +30,15 @@ abstract class AssignmentSummary
 
   @BuiltValueField(wireName: r'claimedAt')
   DateTime get claimedAt;
+
+  /// Until when the worker can drop out in the app. Present while the assignment is pending or confirmed; may already be in the past.
+  @BuiltValueField(wireName: r'cancellableUntil')
+  DateTime? get cancellableUntil;
+
+  /// Present when the status is `CANCELLED`.
+  @BuiltValueField(wireName: r'cancelledBy')
+  CancelledBy? get cancelledBy;
+  // enum cancelledByEnum {  WORKER,  AGENCY,  };
 
   AssignmentSummary._();
 
@@ -69,6 +81,20 @@ class _$AssignmentSummarySerializer
       object.claimedAt,
       specifiedType: const FullType(DateTime),
     );
+    if (object.cancellableUntil != null) {
+      yield r'cancellableUntil';
+      yield serializers.serialize(
+        object.cancellableUntil,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    if (object.cancelledBy != null) {
+      yield r'cancelledBy';
+      yield serializers.serialize(
+        object.cancelledBy,
+        specifiedType: const FullType(CancelledBy),
+      );
+    }
   }
 
   @override
@@ -114,6 +140,22 @@ class _$AssignmentSummarySerializer
             specifiedType: const FullType(DateTime),
           ) as DateTime;
           result.claimedAt = valueDes;
+          break;
+        case r'cancellableUntil':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(DateTime),
+          ) as DateTime?;
+          if (valueDes == null) continue;
+          result.cancellableUntil = valueDes;
+          break;
+        case r'cancelledBy':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(CancelledBy),
+          ) as CancelledBy?;
+          if (valueDes == null) continue;
+          result.cancelledBy = valueDes;
           break;
         default:
           unhandled.add(key);

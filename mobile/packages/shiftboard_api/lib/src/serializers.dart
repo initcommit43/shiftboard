@@ -14,9 +14,12 @@ import 'package:built_value/iso_8601_date_time_serializer.dart';
 import 'package:shiftboard_api/src/date_serializer.dart';
 import 'package:shiftboard_api/src/model/date.dart';
 
+import 'package:shiftboard_api/src/model/agency_settings.dart';
 import 'package:shiftboard_api/src/model/agency_summary.dart';
+import 'package:shiftboard_api/src/model/assigned_worker.dart';
 import 'package:shiftboard_api/src/model/assignment_status.dart';
 import 'package:shiftboard_api/src/model/assignment_summary.dart';
+import 'package:shiftboard_api/src/model/cancelled_by.dart';
 import 'package:shiftboard_api/src/model/client.dart';
 import 'package:shiftboard_api/src/model/client_page.dart';
 import 'package:shiftboard_api/src/model/client_summary.dart';
@@ -30,10 +33,14 @@ import 'package:shiftboard_api/src/model/problem.dart';
 import 'package:shiftboard_api/src/model/qualification.dart';
 import 'package:shiftboard_api/src/model/qualification_page.dart';
 import 'package:shiftboard_api/src/model/refresh_token_request.dart';
+import 'package:shiftboard_api/src/model/remove_assignment_request.dart';
 import 'package:shiftboard_api/src/model/role.dart';
 import 'package:shiftboard_api/src/model/shift.dart';
+import 'package:shiftboard_api/src/model/shift_assignment.dart';
+import 'package:shiftboard_api/src/model/shift_assignment_page.dart';
 import 'package:shiftboard_api/src/model/shift_contact.dart';
 import 'package:shiftboard_api/src/model/shift_page.dart';
+import 'package:shiftboard_api/src/model/shift_period.dart';
 import 'package:shiftboard_api/src/model/shift_request.dart';
 import 'package:shiftboard_api/src/model/shift_status.dart';
 import 'package:shiftboard_api/src/model/signup_info.dart';
@@ -49,9 +56,12 @@ import 'package:shiftboard_api/src/model/worker_status.dart';
 part 'serializers.g.dart';
 
 @SerializersFor([
+  AgencySettings,
   AgencySummary,
+  AssignedWorker,
   AssignmentStatus,
   AssignmentSummary,
+  CancelledBy,
   Client,
   ClientPage,
   ClientSummary,
@@ -65,10 +75,14 @@ part 'serializers.g.dart';
   Qualification,
   QualificationPage,
   RefreshTokenRequest,
+  RemoveAssignmentRequest,
   Role,
   Shift,
+  ShiftAssignment,
+  ShiftAssignmentPage,
   ShiftContact,
   ShiftPage,
+  ShiftPeriod,
   ShiftRequest,
   ShiftStatus,
   SignupInfo,
@@ -101,6 +115,10 @@ Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Shift)]),
         () => ListBuilder<Shift>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(ShiftAssignment)]),
+        () => ListBuilder<ShiftAssignment>(),
       )
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(FieldError)]),
