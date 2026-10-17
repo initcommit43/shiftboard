@@ -9,8 +9,10 @@ import 'package:shiftboard_api/src/auth/api_key_auth.dart';
 import 'package:shiftboard_api/src/auth/basic_auth.dart';
 import 'package:shiftboard_api/src/auth/bearer_auth.dart';
 import 'package:shiftboard_api/src/auth/oauth.dart';
+import 'package:shiftboard_api/src/api/assignments_api.dart';
 import 'package:shiftboard_api/src/api/auth_api.dart';
 import 'package:shiftboard_api/src/api/clients_api.dart';
+import 'package:shiftboard_api/src/api/settings_api.dart';
 import 'package:shiftboard_api/src/api/shifts_api.dart';
 import 'package:shiftboard_api/src/api/signup_api.dart';
 import 'package:shiftboard_api/src/api/system_api.dart';
@@ -137,6 +139,12 @@ class ShiftboardApi {
     }
   }
 
+  /// Get AssignmentsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  AssignmentsApi getAssignmentsApi() {
+    return AssignmentsApi(dio, serializers);
+  }
+
   /// Get AuthApi instance, base route and serializer can be overridden by a given but be careful,
   /// by doing that all interceptors will not be executed
   AuthApi getAuthApi() {
@@ -147,6 +155,12 @@ class ShiftboardApi {
   /// by doing that all interceptors will not be executed
   ClientsApi getClientsApi() {
     return ClientsApi(dio, serializers);
+  }
+
+  /// Get SettingsApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  SettingsApi getSettingsApi() {
+    return SettingsApi(dio, serializers);
   }
 
   /// Get ShiftsApi instance, base route and serializer can be overridden by a given but be careful,

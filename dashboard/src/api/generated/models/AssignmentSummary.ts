@@ -13,6 +13,13 @@
  */
 
 import { mapValues, parseDate, parseDateTime, serializeDate, serializeDateTime } from '../runtime';
+import type { CancelledBy } from './CancelledBy';
+import {
+    CancelledByFromJSON,
+    CancelledByFromJSONTyped,
+    CancelledByToJSON,
+    CancelledByToJSONTyped,
+} from './CancelledBy';
 import type { AssignmentStatus } from './AssignmentStatus';
 import {
     AssignmentStatusFromJSON,
@@ -39,6 +46,16 @@ export interface AssignmentSummary {
      * 
      */
     claimedAt: Date;
+    /**
+     * Until when the worker can drop out in the app. Present while the
+     * assignment is pending or confirmed; may already be in the past.
+     * 
+     */
+    cancellableUntil?: Date;
+    /**
+     * Present when the status is `CANCELLED`.
+     */
+    cancelledBy?: CancelledBy;
 }
 
 
@@ -66,6 +83,8 @@ export function AssignmentSummaryFromJSONTyped(json: any, ignoreDiscriminator: b
         'id': json['id'],
         'status': AssignmentStatusFromJSON(json['status']),
         'claimedAt': (json['claimedAt'] == null ? json['claimedAt'] : parseDateTime(json['claimedAt'])),
+        'cancellableUntil': json['cancellableUntil'] == null ? undefined : (parseDateTime(json['cancellableUntil'])),
+        'cancelledBy': json['cancelledBy'] == null ? undefined : CancelledByFromJSON(json['cancelledBy']),
     };
 }
 
@@ -83,6 +102,8 @@ export function AssignmentSummaryToJSONTyped(value?: AssignmentSummary | null, i
         'id': value['id'],
         'status': AssignmentStatusToJSON(value['status']),
         'claimedAt': value['claimedAt'] == null ? value['claimedAt'] : serializeDateTime(value['claimedAt']),
+        'cancellableUntil': value['cancellableUntil'] == null ? value['cancellableUntil'] : serializeDateTime(value['cancellableUntil']),
+        'cancelledBy': CancelledByToJSON(value['cancelledBy']),
     };
 }
 

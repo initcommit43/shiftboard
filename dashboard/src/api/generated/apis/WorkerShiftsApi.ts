@@ -29,6 +29,13 @@ import {
     WorkerShiftPageToJSON,
 } from '../models/WorkerShiftPage';
 
+export interface CancelClaimRequest {
+    /**
+     * 
+     */
+    shiftId: string;
+}
+
 export interface ClaimShiftRequest {
     /**
      * 
@@ -69,6 +76,61 @@ export interface ListWorkerShiftsRequest {
  * 
  */
 export class WorkerShiftsApi extends runtime.BaseAPI {
+
+    /**
+     * Creates request options for cancelClaim without sending the request
+     */
+    async cancelClaimRequestOpts(requestParameters: CancelClaimRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['shiftId'] == null) {
+            throw new runtime.RequiredError(
+                'shiftId',
+                'Required parameter "shiftId" was null or undefined when calling cancelClaim().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/worker/shifts/{shiftId}/cancel`;
+        urlPath = urlPath.replace('{shiftId}', encodeURIComponent(String(requestParameters['shiftId'])));
+
+        return {
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Sets the worker\'s pending or confirmed assignment to `CANCELLED` with `cancelledBy` `WORKER` and frees the spot. Possible until `assignment.cancellableUntil`, which follows from the agency\'s cancellation deadline; afterwards the worker has to contact the agency. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403), `shift_not_found` (404), `assignment_not_found` (404, the worker has not claimed the shift), and with 409: `assignment_not_active` (not pending or confirmed), `cancellation_deadline_passed` and `concurrent_change` (the shift kept changing at the same moment; try again). 
+     * Drop out of a claimed shift
+     */
+    async cancelClaimRaw(requestParameters: CancelClaimRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WorkerShift>> {
+        const requestOptions = await this.cancelClaimRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => WorkerShiftFromJSON(jsonValue));
+    }
+
+    /**
+     * Sets the worker\'s pending or confirmed assignment to `CANCELLED` with `cancelledBy` `WORKER` and frees the spot. Possible until `assignment.cancellableUntil`, which follows from the agency\'s cancellation deadline; afterwards the worker has to contact the agency. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403), `shift_not_found` (404), `assignment_not_found` (404, the worker has not claimed the shift), and with 409: `assignment_not_active` (not pending or confirmed), `cancellation_deadline_passed` and `concurrent_change` (the shift kept changing at the same moment; try again). 
+     * Drop out of a claimed shift
+     */
+    async cancelClaim(requestParameters: CancelClaimRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WorkerShift> {
+        const response = await this.cancelClaimRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * Creates request options for claimShift without sending the request
