@@ -65,6 +65,22 @@ describe('agency settings', () => {
     expect(screen.queryByRole('button', { name: 'Speichern' })).not.toBeInTheDocument()
   })
 
+  it('lets an admin switch on the WhatsApp contact', async () => {
+    const user = userEvent.setup()
+    signInAs('ADMIN')
+    renderApp('/settings')
+
+    const toggle = await screen.findByLabelText('WhatsApp-Kontakt anzeigen')
+    expect(toggle).not.toBeChecked()
+    await user.click(toggle)
+    await user.click(screen.getByRole('button', { name: 'Zusatzfunktionen speichern' }))
+
+    expect(await screen.findByText('Die Zusatzfunktionen sind gespeichert')).toBeInTheDocument()
+    expect(api.features).toEqual({ contactButton: true })
+    expect(api.count('PUT /agency/features')).toBe(1)
+    expect(api.count('PUT /agency/settings')).toBe(0)
+  })
+
   it('shows an error and recovers on retry', async () => {
     const user = userEvent.setup()
     signInAs('ADMIN')
