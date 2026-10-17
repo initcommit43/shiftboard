@@ -64,6 +64,7 @@ class SecurityConfiguration {
                         .hasRole(Role.ADMIN.name())
                         .requestMatchers(
                                 "/api/v1/workers/**",
+                                "/api/v1/conversations/**",
                                 "/api/v1/clients/**",
                                 "/api/v1/qualifications/**",
                                 "/api/v1/shifts/**")

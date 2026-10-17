@@ -43,17 +43,19 @@ class SeedDataIntegrationTests {
 
     @Test
     void seedsTheDemoAgenciesOnStartup() {
-        assertThat(rowCounts()).containsExactlyInAnyOrderEntriesOf(Map.of(
-                "agency", 2,
-                "qualification", 6,
-                "user_account", 16,
-                "worker", 12,
-                "worker_qualification", 15,
-                "client", 4,
-                "location", 5,
-                "shift", 8,
-                "shift_qualification", 8,
-                "assignment", 7));
+        assertThat(rowCounts()).containsExactlyInAnyOrderEntriesOf(Map.ofEntries(
+                Map.entry("agency", 2),
+                Map.entry("qualification", 6),
+                Map.entry("user_account", 16),
+                Map.entry("worker", 12),
+                Map.entry("worker_qualification", 15),
+                Map.entry("client", 4),
+                Map.entry("location", 5),
+                Map.entry("shift", 8),
+                Map.entry("shift_qualification", 8),
+                Map.entry("assignment", 7),
+                Map.entry("conversation", 2),
+                Map.entry("message", 3)));
         assertThat(workersOfDonauPersonalWith("ACTIVE")).isEqualTo(6);
         assertThat(workersOfDonauPersonalWith("PENDING")).isEqualTo(4);
         assertThat(workersOfDonauPersonalWith("INACTIVE")).isEqualTo(1);
@@ -151,7 +153,7 @@ class SeedDataIntegrationTests {
         var counts = new LinkedHashMap<String, Integer>();
         for (var table : List.of(
                 "agency", "qualification", "user_account", "worker", "worker_qualification", "client", "location",
-                "shift", "shift_qualification", "assignment")) {
+                "shift", "shift_qualification", "assignment", "conversation", "message")) {
             counts.put(table, jdbc.sql("select count(*) from " + table).query(Integer.class).single());
         }
         return counts;

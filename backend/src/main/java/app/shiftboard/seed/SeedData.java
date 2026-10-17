@@ -111,6 +111,43 @@ class SeedData implements ApplicationRunner {
         claim(agency, weddingBar, sophie, "PENDING");
         claim(agency, inventory, jakob, "COMPLETED");
         claim(agency, inventory, paul, "COMPLETED");
+
+        // Lena asked about the wedding and has no answer yet; Jakob got his confirmation.
+        var lenaChat = conversation(agency, lena);
+        message(agency, lenaChat, weddingService, null, true, "TEXT", null,
+                "Hallo, gibt es vor Ort einen Parkplatz für Mitarbeiter:innen?", 2, false);
+        var jakobChat = conversation(agency, jakob);
+        message(agency, jakobChat, warehouseHelp, null, false, "SYSTEM", "CLAIM_CONFIRMED",
+                "Deine Schicht „Lagerunterstützung“ ist bestätigt.", 30, true);
+        message(agency, jakobChat, warehouseHelp, dispatcher, false, "TEXT", null,
+                "Danke, dass du einspringst! Bitte melde dich beim Tor 3.", 25, true);
+    }
+
+    private UUID conversation(UUID agencyId, UUID workerId) {
+        return jdbc.sql("""
+                insert into conversation (id, agency_id, worker_id, last_message_at)
+                values (uuidv7(), ?, ?, now()) returning id
+                """).params(agencyId, workerId).query(UUID.class).single();
+    }
+
+    /** A message written {@code minutesAgo}, read by the other side if {@code read}. */
+    private void message(
+            UUID agencyId, UUID conversationId, UUID shiftId, UUID senderUserId, boolean fromWorker, String type,
+            String event, String body, int minutesAgo, boolean read) {
+        jdbc.sql("""
+                insert into message (
+                    id, agency_id, conversation_id, shift_id, sender_user_id, from_worker, type, event, body,
+                    created_at, read_at)
+                values (uuidv7(), ?, ?, ?, ?, ?, ?, ?, ?, now() - make_interval(mins => ?),
+                        case when ? then now() end)
+                """)
+                .params(agencyId, conversationId, shiftId, senderUserId, fromWorker, type, event, body, minutesAgo,
+                        read)
+                .update();
+        jdbc.sql("""
+                update conversation set last_message_at = greatest(last_message_at, now() - make_interval(mins => ?))
+                where id = ?
+                """).params(minutesAgo, conversationId).update();
     }
 
     private void seedAlpenEvents() {
