@@ -20,6 +20,10 @@ abstract final class ApiErrorCode {
   static const shiftStarted = 'shift_started';
   static const shiftNotOpen = 'shift_not_open';
   static const shiftOverlap = 'shift_overlap';
+  static const assignmentNotFound = 'assignment_not_found';
+  static const assignmentNotActive = 'assignment_not_active';
+  static const cancellationDeadlinePassed = 'cancellation_deadline_passed';
+  static const concurrentChange = 'concurrent_change';
 }
 
 /// A failed API call, reduced to what the UI decides on.
@@ -60,6 +64,7 @@ class ApiError {
       ApiErrorCode.validationFailed => l10n.errorValidationFailed,
       ApiErrorCode.signupCodeUnknown => l10n.signupInvalidLinkTitle,
       ApiErrorCode.emailAlreadyRegistered => l10n.errorEmailAlreadyRegistered,
+      ApiErrorCode.concurrentChange => l10n.errorConcurrentChange,
       _ when status == HttpStatus.tooManyRequests => l10n.errorTooManyAttempts,
       _ => l10n.errorGeneric,
     };

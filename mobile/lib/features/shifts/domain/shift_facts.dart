@@ -13,4 +13,16 @@ extension ShiftFacts on WorkerShift {
     if (minutes <= 0) return 0;
     return (minutes * hourlyRateCents / Duration.minutesPerHour).round();
   }
+
+  /// Whether the worker's claim holds a spot: pending or confirmed.
+  bool get holdsSpot => switch (assignment?.status) {
+    AssignmentStatus.PENDING || AssignmentStatus.CONFIRMED => true,
+    _ => false,
+  };
+
+  /// Whether the worker can still drop out in the app at [now].
+  bool canCancelAt(DateTime now) {
+    final until = assignment?.cancellableUntil;
+    return holdsSpot && until != null && now.isBefore(until);
+  }
 }

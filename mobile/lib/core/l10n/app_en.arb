@@ -119,5 +119,21 @@
   "claimErrorAlreadyClaimed": "You've already requested this shift.",
   "claimErrorStarted": "This shift has already started.",
   "claimErrorNotOpen": "This shift is no longer open.",
-  "claimErrorOverlap": "You already have a shift at that time."
+  "claimErrorOverlap": "You already have a shift at that time.",
+  "cancelAction": "Cancel shift",
+  "cancelUntil": "You can cancel in the app until {date}, {time}",
+  "cancelDeadlinePassed": "Cancellation deadline passed",
+  "cancelDeadlinePassedHint": "If you can't make it, let {contact} know.",
+  "cancelSheetTitle": "Cancel this shift?",
+  "cancelSheetMessage": "Your spot becomes free again. You can't request this shift again afterwards.",
+  "cancelSubmit": "Cancel shift",
+  "cancelSubmitting": "Cancelling …",
+  "cancelKeep": "Keep shift",
+  "cancelDone": "You cancelled the shift.",
+  "cancelErrorDeadline": "The cancellation deadline just passed. Let the agency know.",
+  "cancelErrorNotActive": "This shift is already cancelled.",
+  "errorConcurrentChange": "Something about the shift changed just now. Please try again.",
+  "claimCancelledByYou": "You cancelled this shift.",
+  "claimRemovedByAgency": "{agency} took you off this shift.",
+  "shiftCancelledByAgency": "{agency} cancelled this shift."
 }

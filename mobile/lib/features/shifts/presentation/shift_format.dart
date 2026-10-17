@@ -22,8 +22,8 @@ class ShiftFormat {
 
   /// For example "18:00 – ca. 23:30".
   String timeRange(WorkerShift shift) {
-    final start = _time(shift.startsAt);
-    final end = _time(shift.endsAt);
+    final start = time(shift.startsAt);
+    final end = time(shift.endsAt);
     return shift.endIsEstimate
         ? _l10n.shiftTimeRangeEstimate(start, end)
         : _l10n.shiftTimeRange(start, end);
@@ -52,7 +52,8 @@ class ShiftFormat {
       ? _l10n.shiftNoSpotsLeft
       : _l10n.shiftSpotsLeft(shift.spotsLeft, shift.slots);
 
-  String _time(DateTime time) => DateFormat.Hm(_locale).format(time.toLocal());
+  /// For example "18:00".
+  String time(DateTime time) => DateFormat.Hm(_locale).format(time.toLocal());
 }
 
 /// The badge of a shift: the worker's own claim if there is one, otherwise

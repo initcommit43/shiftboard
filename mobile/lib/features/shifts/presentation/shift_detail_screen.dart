@@ -7,6 +7,7 @@ import 'package:shiftboard_api/shiftboard_api.dart';
 
 import '../../../core/api/api_error.dart';
 import '../../../core/l10n/l10n.dart';
+import '../../../core/platform/clock.dart';
 import '../../../core/platform/url_opener.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
@@ -17,13 +18,15 @@ import '../../../core/widgets/status_message.dart';
 import '../../auth/data/session.dart';
 import '../data/worker_shifts_provider.dart';
 import '../domain/shift_facts.dart';
+import 'cancel_sheet.dart';
 import 'claim_sheet.dart';
 import 'shift_card.dart';
 import 'shift_format.dart';
 
 /// Everything about one shift: the card's facts plus the description, the
 /// required qualifications, the address with a map link and the contact.
-/// A shift the worker has not claimed yet offers the claim at the bottom.
+/// A shift the worker has not claimed yet offers the claim at the bottom; a
+/// claimed one that has not started offers to drop out.
 class ShiftDetailScreen extends ConsumerWidget {
   const ShiftDetailScreen({super.key, required this.shiftId});
 
@@ -34,6 +37,7 @@ class ShiftDetailScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final provider = workerShiftProvider(shiftId);
     final shift = ref.watch(provider);
+    final now = ref.watch(clockProvider)();
     Future<void> reload() => ref.refresh(provider.future);
 
     final Widget body;
@@ -105,8 +109,13 @@ class ShiftDetailScreen extends ConsumerWidget {
               ),
             ),
             Expanded(child: body),
-            if (shift.value case final shift? when shift.assignment == null)
-              _ClaimBar(shift: shift),
+            if (shift.value case final shift?)
+              if (shift.assignment == null)
+                _ClaimBar(shift: shift)
+              else if (shift.holdsSpot &&
+                  shift.assignment?.cancellableUntil != null &&
+                  now.isBefore(shift.startsAt))
+                _CancelBar(shift: shift, now: now),
           ],
         ),
       ),
@@ -161,6 +170,113 @@ class _ClaimBar extends ConsumerWidget {
   }
 }
 
+/// The pinned bar of a claimed shift: drop out until the agency's deadline,
+/// afterwards the reason and who to tell instead.
+class _CancelBar extends ConsumerWidget {
+  const _CancelBar({required this.shift, required this.now});
+
+  final WorkerShift shift;
+  final DateTime now;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+    final margin = screenMargin(context);
+    final phone = shift.contact.phone;
+
+    final Widget content;
+    if (shift.canCancelAt(now)) {
+      content = AppButton(
+        label: l10n.cancelAction,
+        variant: AppButtonVariant.danger,
+        onPressed: () async {
+          final cancelled = await showCancelSheet(context, shift);
+          if (!cancelled || !context.mounted) return;
+          _tell(context, l10n.cancelDone);
+        },
+      );
+    } else {
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppButton(
+            label: l10n.cancelDeadlinePassed,
+            variant: AppButtonVariant.danger,
+            onPressed: null,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            l10n.cancelDeadlinePassedHint(shift.contact.name),
+            textAlign: TextAlign.center,
+            style: AppTypography.footnote.copyWith(
+              color: context.colors.inkSecondary,
+            ),
+          ),
+          if (phone != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            AppButton(
+              label: l10n.shiftCall,
+              variant: AppButtonVariant.outline,
+              onPressed: () async {
+                final opened = await ref.read(urlOpenerProvider)(
+                  phoneUri(phone),
+                );
+                if (!opened && context.mounted) {
+                  _tell(context, l10n.shiftCallFailed);
+                }
+              },
+            ),
+          ],
+        ],
+      );
+    }
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: context.colors.hairline)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            margin,
+            AppSpacing.md,
+            margin,
+            AppSpacing.sm,
+          ),
+          child: content,
+        ),
+      ),
+    );
+  }
+}
+
+/// What the worker should know about their claim beyond its badge: until
+/// when they can drop out, or who cancelled it.
+String? _claimNote(
+  WorkerShift shift,
+  AppLocalizations l10n,
+  ShiftFormat format,
+  String agency,
+  DateTime now,
+) {
+  final assignment = shift.assignment;
+  if (assignment == null) return null;
+  if (assignment.status == AssignmentStatus.CANCELLED) {
+    if (assignment.cancelledBy == CancelledBy.WORKER) {
+      return l10n.claimCancelledByYou;
+    }
+    return shift.status == ShiftStatus.CANCELLED
+        ? l10n.shiftCancelledByAgency(agency)
+        : l10n.claimRemovedByAgency(agency);
+  }
+  if (assignment.cancellableUntil case final until?
+      when shift.holdsSpot && now.isBefore(until)) {
+    return l10n.cancelUntil(format.date(until), format.time(until));
+  }
+  return null;
+}
+
 class _Details extends ConsumerWidget {
   const _Details({required this.shift});
 
@@ -187,6 +303,14 @@ class _Details extends ConsumerWidget {
       color: colors.inkSecondary,
     );
     final contactPhone = shift.contact.phone;
+    final agency = ref.watch(currentUserProvider)?.agency.name ?? '';
+    final note = _claimNote(
+      shift,
+      l10n,
+      format,
+      agency,
+      ref.watch(clockProvider)(),
+    );
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -210,6 +334,10 @@ class _Details extends ConsumerWidget {
         ),
         const SizedBox(height: AppSpacing.xxs),
         Text(shift.client.name, style: secondary),
+        if (note != null) ...[
+          const SizedBox(height: AppSpacing.md),
+          Text(note, style: AppTypography.subhead.copyWith(color: colors.ink)),
+        ],
         const SizedBox(height: AppSpacing.xl),
         _Group(
           children: [
