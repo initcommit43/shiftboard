@@ -142,6 +142,18 @@
         "slots_out_of_range": "Zwischen 1 und 500 Plätze.",
         "unknown": "Diese Angabe wurde nicht angenommen."
       }
+    },
+    "descriptionPast": "Schichten, die vorbei sind: wer gearbeitet hat und wer nicht erschienen ist.",
+    "periods": {
+      "label": "Zeitraum",
+      "upcoming": "Anstehend",
+      "past": "Vergangen"
+    },
+    "countPast_one": "{{count}} vergangene Schicht",
+    "countPast_other": "{{count}} vergangene Schichten",
+    "emptyPast": {
+      "title": "Noch keine vergangenen Schichten",
+      "description": "Veröffentlichte Schichten erscheinen hier, sobald sie vorbei sind."
     }
   },
   "signups": {
@@ -213,6 +225,91 @@
     "shift_not_found": "Diese Schicht gibt es nicht mehr. Die Liste wurde aktualisiert.",
     "shift_not_draft": "Diese Schicht ist kein Entwurf mehr. Die Liste wurde aktualisiert.",
     "network": "Der Server ist nicht erreichbar. Prüfe deine Verbindung und versuche es noch einmal.",
-    "unknown": "Etwas ist schiefgelaufen. Bitte versuche es noch einmal."
+    "unknown": "Etwas ist schiefgelaufen. Bitte versuche es noch einmal.",
+    "assignment_not_found": "Diese Anfrage gibt es nicht mehr. Die Liste wurde aktualisiert.",
+    "assignment_not_pending": "Über diese Anfrage wurde bereits entschieden. Die Liste wurde aktualisiert.",
+    "assignment_not_active": "Diese Person hat keinen Platz mehr. Die Liste wurde aktualisiert.",
+    "assignment_not_completed": "Nur wer gearbeitet hat, kann als nicht erschienen markiert werden.",
+    "shift_not_cancellable": "Diese Schicht ist schon vorbei oder abgesagt.",
+    "concurrent_change": "Die Schicht wurde gerade gleichzeitig geändert. Bitte versuche es noch einmal."
+  },
+  "shiftDetail": {
+    "back": "Alle Schichten",
+    "loading": "Schicht wird geladen …",
+    "hourlyRate": "Stundenlohn",
+    "notFound": {
+      "title": "Schicht nicht gefunden",
+      "description": "Diese Schicht gibt es nicht oder nicht mehr."
+    },
+    "error": {
+      "title": "Die Schicht konnte nicht geladen werden",
+      "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu.",
+      "retry": "Erneut versuchen"
+    },
+    "cancel": {
+      "action": "Schicht absagen",
+      "title": "Schicht absagen?",
+      "description_one": "{{title}} wird abgesagt. Die {{count}} Person mit Platz wird mit abgesagt und sieht das in der App.",
+      "description_other": "{{title}} wird abgesagt. Alle {{count}} Personen mit Platz werden mit abgesagt und sehen das in der App.",
+      "description_zero": "{{title}} wird abgesagt. Noch hat niemand einen Platz.",
+      "keep": "Nicht absagen",
+      "confirm": "Absagen"
+    },
+    "cancelled": {
+      "title": "{{title}} wurde abgesagt",
+      "description": "Alle offenen und bestätigten Plätze sind mit abgesagt."
+    },
+    "claims": {
+      "loading": "Anfragen werden geladen …",
+      "error": "Die Anfragen konnten nicht geladen werden.",
+      "pending_zero": "Offene Anfragen",
+      "pending_one": "{{count}} offene Anfrage",
+      "pending_other": "{{count}} offene Anfragen",
+      "noPending": "Keine offenen Anfragen. Neue Anfragen erscheinen hier, die älteste zuerst.",
+      "team": "Eingeteilt und Verlauf",
+      "noTeam": "Noch niemand eingeteilt.",
+      "columns": {
+        "name": "Name",
+        "phone": "Telefon",
+        "claimedAt": "Angefragt am",
+        "status": "Status",
+        "decidedAt": "Geändert am"
+      },
+      "approve": "Bestätigen",
+      "approveNamed": "{{name}} bestätigen",
+      "reject": "Ablehnen",
+      "rejectNamed": "{{name}} ablehnen",
+      "noShow": "Nicht erschienen",
+      "noShowNamed": "{{name}} als nicht erschienen markieren",
+      "reason": "Grund: {{reason}}",
+      "status": {
+        "PENDING": "Offen",
+        "CONFIRMED": "Bestätigt",
+        "REJECTED": "Abgelehnt",
+        "COMPLETED": "Gearbeitet",
+        "NO_SHOW": "Nicht erschienen",
+        "CANCELLED": "Abgesagt",
+        "cancelledByWorker": "Selbst abgesagt",
+        "removed": "Entfernt",
+        "cancelledWithShift": "Mit Schicht abgesagt"
+      }
+    },
+    "decided": {
+      "approve": "{{name}} ist bestätigt",
+      "reject": "Die Anfrage von {{name}} wurde abgelehnt",
+      "noShow": "{{name}} ist als nicht erschienen markiert",
+      "remove": "{{name}} wurde aus der Schicht entfernt"
+    },
+    "remove": {
+      "action": "Entfernen",
+      "actionNamed": "{{name}} entfernen",
+      "title": "{{name}} aus der Schicht entfernen?",
+      "description": "Der Platz wird wieder frei. In der App steht, dass die Agentur abgesagt hat; den Grund sieht nur ihr.",
+      "reason": "Grund",
+      "reasonPlaceholder": "z. B. Kann laut Rücksprache nicht kommen",
+      "reasonRequired": "Bitte gib einen Grund an.",
+      "keep": "Abbrechen",
+      "confirm": "Entfernen"
+    }
   }
 }

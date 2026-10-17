@@ -1,10 +1,12 @@
 import { ApiError } from './errors'
 import {
+  AssignmentsApi,
   AuthApi,
   ClientsApi,
   Configuration,
   type Middleware,
   ProblemFromJSON,
+  SettingsApi,
   ShiftsApi,
   WorkersApi,
 } from './generated'
@@ -106,7 +108,9 @@ const configuration = new Configuration({
   middleware: [refreshOnUnauthorized, throwApiError],
 })
 
+export const assignmentsApi = new AssignmentsApi(configuration)
 export const authApi = new AuthApi(configuration)
 export const clientsApi = new ClientsApi(configuration)
+export const settingsApi = new SettingsApi(configuration)
 export const shiftsApi = new ShiftsApi(configuration)
 export const workersApi = new WorkersApi(configuration)

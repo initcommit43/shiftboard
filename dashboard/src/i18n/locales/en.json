@@ -142,6 +142,18 @@
         "slots_out_of_range": "Between 1 and 500 spots.",
         "unknown": "This entry was not accepted."
       }
+    },
+    "descriptionPast": "Shifts that are over: who worked and who did not turn up.",
+    "periods": {
+      "label": "Period",
+      "upcoming": "Upcoming",
+      "past": "Past"
+    },
+    "countPast_one": "{{count}} past shift",
+    "countPast_other": "{{count}} past shifts",
+    "emptyPast": {
+      "title": "No past shifts yet",
+      "description": "Published shifts appear here once they are over."
     }
   },
   "signups": {
@@ -213,6 +225,91 @@
     "shift_not_found": "This shift no longer exists. The list has been updated.",
     "shift_not_draft": "This shift is no longer a draft. The list has been updated.",
     "network": "The server cannot be reached. Check your connection and try again.",
-    "unknown": "Something went wrong. Please try again."
+    "unknown": "Something went wrong. Please try again.",
+    "assignment_not_found": "This request no longer exists. The list has been updated.",
+    "assignment_not_pending": "This request has already been decided. The list has been updated.",
+    "assignment_not_active": "This person no longer has a spot. The list has been updated.",
+    "assignment_not_completed": "Only someone who worked can be marked as a no-show.",
+    "shift_not_cancellable": "This shift is already over or cancelled.",
+    "concurrent_change": "The shift was changed at the same moment. Please try again."
+  },
+  "shiftDetail": {
+    "back": "All shifts",
+    "loading": "Loading shift …",
+    "hourlyRate": "Hourly rate",
+    "notFound": {
+      "title": "Shift not found",
+      "description": "This shift does not exist or no longer exists."
+    },
+    "error": {
+      "title": "The shift could not be loaded",
+      "description": "Please try again. If the problem persists, reload the page.",
+      "retry": "Try again"
+    },
+    "cancel": {
+      "action": "Cancel shift",
+      "title": "Cancel this shift?",
+      "description_one": "{{title}} will be cancelled. The {{count}} person with a spot is cancelled too and sees it in the app.",
+      "description_other": "{{title}} will be cancelled. All {{count}} people with a spot are cancelled too and see it in the app.",
+      "description_zero": "{{title}} will be cancelled. Nobody has a spot yet.",
+      "keep": "Keep shift",
+      "confirm": "Cancel shift"
+    },
+    "cancelled": {
+      "title": "{{title}} was cancelled",
+      "description": "All pending and confirmed spots are cancelled with it."
+    },
+    "claims": {
+      "loading": "Loading requests …",
+      "error": "The requests could not be loaded.",
+      "pending_zero": "Pending requests",
+      "pending_one": "{{count}} pending request",
+      "pending_other": "{{count}} pending requests",
+      "noPending": "No pending requests. New requests appear here, oldest first.",
+      "team": "Staffed and history",
+      "noTeam": "Nobody is staffed yet.",
+      "columns": {
+        "name": "Name",
+        "phone": "Phone",
+        "claimedAt": "Requested",
+        "status": "Status",
+        "decidedAt": "Changed"
+      },
+      "approve": "Confirm",
+      "approveNamed": "Confirm {{name}}",
+      "reject": "Reject",
+      "rejectNamed": "Reject {{name}}",
+      "noShow": "No-show",
+      "noShowNamed": "Mark {{name}} as no-show",
+      "reason": "Reason: {{reason}}",
+      "status": {
+        "PENDING": "Pending",
+        "CONFIRMED": "Confirmed",
+        "REJECTED": "Rejected",
+        "COMPLETED": "Worked",
+        "NO_SHOW": "No-show",
+        "CANCELLED": "Cancelled",
+        "cancelledByWorker": "Dropped out",
+        "removed": "Removed",
+        "cancelledWithShift": "Cancelled with shift"
+      }
+    },
+    "decided": {
+      "approve": "{{name}} is confirmed",
+      "reject": "The request of {{name}} was rejected",
+      "noShow": "{{name}} is marked as no-show",
+      "remove": "{{name}} was removed from the shift"
+    },
+    "remove": {
+      "action": "Remove",
+      "actionNamed": "Remove {{name}}",
+      "title": "Remove {{name}} from the shift?",
+      "description": "The spot becomes free again. The app says the agency cancelled; only your team sees the reason.",
+      "reason": "Reason",
+      "reasonPlaceholder": "e.g. Cannot make it after all, as discussed",
+      "reasonRequired": "Please give a reason.",
+      "keep": "Back",
+      "confirm": "Remove"
+    }
   }
 }
