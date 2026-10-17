@@ -1,5 +1,15 @@
 import type { TFunction } from 'i18next'
 
+import { ShiftStatus } from '@/api/generated'
+
+/** The badge each shift status is shown with. */
+export const STATUS_VARIANT = {
+  [ShiftStatus.DRAFT]: 'tag',
+  [ShiftStatus.PUBLISHED]: 'open',
+  [ShiftStatus.COMPLETED]: 'confirmed',
+  [ShiftStatus.CANCELLED]: 'cancelled',
+} as const
+
 function sameDay(a: Date, b: Date) {
   return (
     a.getFullYear() === b.getFullYear() &&

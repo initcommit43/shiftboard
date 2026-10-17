@@ -132,4 +132,28 @@ describe('upcoming shifts', () => {
     expect(await screen.findByRole('row', { name: /Schicht 21/ })).toBeInTheDocument()
     expect(screen.getAllByRole('row')).toHaveLength(2)
   })
+
+  it('switches to the shifts that have ended', async () => {
+    const user = userEvent.setup()
+    renderApp('/shifts')
+
+    const periods = within(await screen.findByRole('navigation', { name: 'Zeitraum' }))
+    expect(periods.getByRole('link', { name: 'Anstehend' })).toHaveAttribute('aria-current', 'page')
+    await user.click(periods.getByRole('link', { name: 'Vergangen' }))
+
+    expect(await screen.findByRole('row', { name: /Messeaufbau/ })).toBeInTheDocument()
+    expect(row('Messeaufbau').getByText('Abgeschlossen')).toBeInTheDocument()
+    expect(screen.getByText('1 vergangene Schicht')).toBeInTheDocument()
+    expect(screen.queryByRole('row', { name: /Lagerunterstützung/ })).not.toBeInTheDocument()
+    expect(api.calls.some((call) => call.route === 'GET /shifts')).toBe(true)
+  })
+
+  it('shows an empty state when no shift has ended yet', async () => {
+    api.pastShifts = []
+    renderApp('/shifts?period=past')
+
+    expect(
+      await screen.findByRole('heading', { name: 'Noch keine vergangenen Schichten' }),
+    ).toBeInTheDocument()
+  })
 })

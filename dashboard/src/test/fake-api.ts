@@ -1,6 +1,10 @@
 import { vi } from 'vitest'
 
 import {
+  type AgencySettings,
+  AgencySettingsToJSON,
+  AssignmentStatus,
+  CancelledBy,
   type Client,
   ClientToJSON,
   type CurrentUser,
@@ -10,6 +14,8 @@ import {
   type Qualification,
   QualificationToJSON,
   type Shift,
+  type ShiftAssignment,
+  ShiftAssignmentToJSON,
   ShiftStatus,
   ShiftToJSON,
   type Worker,
@@ -132,6 +138,33 @@ export const inventory = shift(3, {
   takenSlots: 2,
 })
 
+export function assignment(
+  number: number,
+  person: Worker,
+  values: Partial<ShiftAssignment> = {},
+): ShiftAssignment {
+  return {
+    id: `0199c3a0-0000-7000-8000-0000000005${String(number).padStart(2, '0')}`,
+    status: AssignmentStatus.PENDING,
+    worker: {
+      id: person.id,
+      firstName: person.firstName,
+      lastName: person.lastName,
+      phone: person.phone,
+    },
+    claimedAt: new Date(2026, 9, 12, 10, number),
+    ...values,
+  }
+}
+
+export const lastWeek = shift(4, {
+  title: 'Messeaufbau',
+  status: ShiftStatus.COMPLETED,
+  startsAt: new Date(2026, 9, 8, 7, 0),
+  endsAt: new Date(2026, 9, 8, 15, 0),
+  takenSlots: 1,
+})
+
 interface Call {
   route: string
   body: unknown
@@ -172,6 +205,25 @@ export function installFakeApi() {
     clients: [hafenhalle, nordlicht],
     qualifications: [service, forklift],
     shifts: [warehouse, gala, inventory],
+    pastShifts: [lastWeek],
+    /** The claims per shift id, oldest first. */
+    assignments: {
+      [warehouse.id]: [
+        assignment(1, lena),
+        assignment(2, jakob, { status: AssignmentStatus.CONFIRMED, decidedAt: new Date(2026, 9, 12, 12, 0) }),
+        assignment(3, mira, {
+          status: AssignmentStatus.CANCELLED,
+          cancelledBy: CancelledBy.AGENCY,
+          reason: 'Doppelt gebucht',
+          decidedAt: new Date(2026, 9, 12, 13, 0),
+        }),
+      ],
+      [lastWeek.id]: [
+        assignment(4, jakob, { status: AssignmentStatus.COMPLETED, decidedAt: new Date(2026, 9, 8, 15, 1) }),
+      ],
+    } as Record<string, ShiftAssignment[]>,
+    settings: { autoConfirm: false, cancellationDeadlineHours: 24 } as AgencySettings,
+    user: dispatcher,
 
     /** Number of requests to a route such as `POST /auth/refresh`. */
     count(route: string) {
@@ -243,13 +295,97 @@ export function installFakeApi() {
     return json(ShiftToJSON(created), 201)
   }
 
+  function allShifts() {
+    return [...api.shifts, ...api.pastShifts]
+  }
+
+  function replaceShift(next: Shift) {
+    api.shifts = api.shifts.map((it) => (it.id === next.id ? next : it))
+    api.pastShifts = api.pastShifts.map((it) => (it.id === next.id ? next : it))
+  }
+
+  function shiftAction(
+    url: URL,
+    shiftId: string,
+    sub: string | undefined,
+    assignmentId: string | undefined,
+    action: string | undefined,
+    body: unknown,
+  ) {
+    const found = allShifts().find((it) => it.id === shiftId)
+    if (!found) {
+      return problem(404, 'shift_not_found')
+    }
+    if (sub === undefined) {
+      return json(ShiftToJSON(found))
+    }
+    const claims = api.assignments[shiftId] ?? []
+    if (sub === '/cancel') {
+      if (found.status !== ShiftStatus.DRAFT && found.status !== ShiftStatus.PUBLISHED) {
+        return problem(409, 'shift_not_cancellable')
+      }
+      const cancelled = { ...found, status: ShiftStatus.CANCELLED, takenSlots: 0 }
+      replaceShift(cancelled)
+      api.assignments[shiftId] = claims.map((it) =>
+        it.status === AssignmentStatus.PENDING || it.status === AssignmentStatus.CONFIRMED
+          ? { ...it, status: AssignmentStatus.CANCELLED, cancelledBy: CancelledBy.AGENCY }
+          : it,
+      )
+      return json(ShiftToJSON(cancelled))
+    }
+    if (sub === '/assignments' && assignmentId === undefined) {
+      return page(url, claims, ShiftAssignmentToJSON)
+    }
+    const claim = claims.find((it) => it.id === assignmentId)
+    if (!claim) {
+      return problem(404, 'assignment_not_found')
+    }
+    const holding =
+      claim.status === AssignmentStatus.PENDING || claim.status === AssignmentStatus.CONFIRMED
+    let next: ShiftAssignment
+    let freesSpot = false
+    if (action === 'approve' || action === 'reject') {
+      if (claim.status !== AssignmentStatus.PENDING) {
+        return problem(409, 'assignment_not_pending')
+      }
+      next = {
+        ...claim,
+        status: action === 'approve' ? AssignmentStatus.CONFIRMED : AssignmentStatus.REJECTED,
+      }
+      freesSpot = action === 'reject'
+    } else if (action === 'remove') {
+      const reason = ((body as Record<string, string>)['reason'] ?? '').trim()
+      if (!reason) {
+        return problem(400, 'validation_failed', [{ field: 'reason', code: 'required' }])
+      }
+      if (!holding) {
+        return problem(409, 'assignment_not_active')
+      }
+      next = { ...claim, status: AssignmentStatus.CANCELLED, cancelledBy: CancelledBy.AGENCY, reason }
+      freesSpot = true
+    } else if (action === 'no-show') {
+      if (claim.status !== AssignmentStatus.COMPLETED) {
+        return problem(409, 'assignment_not_completed')
+      }
+      next = { ...claim, status: AssignmentStatus.NO_SHOW }
+    } else {
+      return problem(404, 'not_found')
+    }
+    next = { ...next, decidedAt: new Date(2026, 9, 13, 9, 0) }
+    api.assignments[shiftId] = claims.map((it) => (it === claim ? next : it))
+    if (freesSpot) {
+      replaceShift({ ...found, takenSlots: found.takenSlots - 1 })
+    }
+    return json(ShiftAssignmentToJSON(next))
+  }
+
   function respond(route: string, url: URL, body: unknown, authorization: string | null) {
     if (route === 'POST /auth/login') {
       const { email, password, client } = body as Record<string, string>
       if (client !== 'DASHBOARD') {
         return problem(403, 'wrong_client')
       }
-      return email === dispatcher.email && password === PASSWORD
+      return email === api.user.email && password === PASSWORD
         ? json(issueTokens())
         : problem(401, 'invalid_credentials')
     }
@@ -268,7 +404,7 @@ export function installFakeApi() {
       return problem(401, 'unauthenticated')
     }
     if (route === 'GET /me') {
-      return json(CurrentUserToJSON(dispatcher))
+      return json(CurrentUserToJSON(api.user))
     }
     if (route === 'GET /workers') {
       return page(url, api.pending, WorkerToJSON)
@@ -280,7 +416,22 @@ export function installFakeApi() {
       return page(url, api.qualifications, QualificationToJSON)
     }
     if (route === 'GET /shifts') {
-      return page(url, api.shifts, ShiftToJSON)
+      const past = url.searchParams.get('period') === 'PAST'
+      return page(url, past ? api.pastShifts : api.shifts, ShiftToJSON)
+    }
+    if (route === 'GET /agency/settings') {
+      return json(AgencySettingsToJSON(api.settings))
+    }
+    if (route === 'PUT /agency/settings') {
+      if (api.user.role !== 'ADMIN') {
+        return problem(403, 'forbidden')
+      }
+      api.settings = body as AgencySettings
+      return json(AgencySettingsToJSON(api.settings))
+    }
+    const shiftRoute = /^(GET|POST) \/shifts\/([^/]+)(\/[a-z-]+)?(?:\/([^/]+)\/([a-z-]+))?$/.exec(route)
+    if (shiftRoute && shiftRoute[3] !== '/publish') {
+      return shiftAction(url, shiftRoute[2] ?? '', shiftRoute[3], shiftRoute[4], shiftRoute[5], body)
     }
     if (route === 'POST /shifts') {
       return createShift(body as Record<string, unknown>)

@@ -1,6 +1,7 @@
 import { LoaderCircle } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 
 import { type Shift, ShiftStatus } from '@/api/generated'
 import { Badge } from '@/components/ui/badge'
@@ -15,15 +16,9 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-import { formatShiftDate, formatShiftTime } from './format'
+import { formatShiftDate, formatShiftTime, STATUS_VARIANT } from './format'
 import { usePublishShift } from './queries'
 
-const STATUS_VARIANT = {
-  [ShiftStatus.DRAFT]: 'tag',
-  [ShiftStatus.PUBLISHED]: 'open',
-  [ShiftStatus.COMPLETED]: 'confirmed',
-  [ShiftStatus.CANCELLED]: 'cancelled',
-} as const
 
 function ShiftTableFrame({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
@@ -66,7 +61,11 @@ function ShiftRow({ shift }: { shift: Shift }) {
 
   return (
     <TableRow>
-      <TableCell className="font-semibold">{shift.title}</TableCell>
+      <TableCell className="font-semibold">
+        <Link to={`/shifts/${shift.id}`} className="hover:underline">
+          {shift.title}
+        </Link>
+      </TableCell>
       <TableCell>{shift.client.name}</TableCell>
       <TableCell>{shift.location.name}</TableCell>
       <TableCell className="tabular-nums">{formatShiftDate(shift.startsAt, i18n.language)}</TableCell>
