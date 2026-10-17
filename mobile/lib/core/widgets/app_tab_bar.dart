@@ -13,7 +13,12 @@ class AppTab {
     required this.icon,
     required this.selectedIcon,
     this.semanticLabel,
+    this.badge = 0,
   });
+
+  /// A count that needs the worker's attention, such as unread messages; shown
+  /// as a red oval on the icon when above zero.
+  final int badge;
 
   /// One short word; four tabs share the width of the screen.
   final String label;
@@ -122,10 +127,16 @@ class AppTabItem extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                selected ? tab.selectedIcon : tab.icon,
-                size: AppSize.iconMd,
-                color: color,
+              Badge(
+                isLabelVisible: tab.badge > 0,
+                label: Text('${tab.badge}'),
+                backgroundColor: colors.danger,
+                textColor: colors.onDanger,
+                child: Icon(
+                  selected ? tab.selectedIcon : tab.icon,
+                  size: AppSize.iconMd,
+                  color: color,
+                ),
               ),
               const SizedBox(height: AppSpacing.xxs),
               Text(

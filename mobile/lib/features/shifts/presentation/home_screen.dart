@@ -10,6 +10,8 @@ import '../../../core/widgets/form_page.dart';
 import '../../../core/widgets/initials_avatar.dart';
 import '../../../core/widgets/status_message.dart';
 import '../../auth/data/session.dart';
+import '../../messages/data/messages_provider.dart';
+import '../../messages/presentation/chat_view.dart';
 import 'account_sheet.dart';
 import 'my_shifts_view.dart';
 import 'shifts_view.dart';
@@ -23,6 +25,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  static const _messagesTab = 2;
+
   int _tab = 0;
 
   @override
@@ -58,8 +62,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           label: l10n.navMessages,
           icon: CupertinoIcons.chat_bubble,
           selectedIcon: CupertinoIcons.chat_bubble_fill,
+          badge: ref.watch(unreadMessagesProvider).value ?? 0,
         ),
-        view: const _ComingSoon(),
+        view: const ChatView(),
       ),
       (
         title: l10n.navProfile,
@@ -133,7 +138,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       bottomNavigationBar: AppTabBar(
         tabs: [for (final tab in tabs) tab.tab],
         selectedIndex: _tab,
-        onSelected: (index) => setState(() => _tab = index),
+        onSelected: (index) {
+          // The chat loads what came in meanwhile, which also clears the badge.
+          if (index == _messagesTab) ref.invalidate(myMessagesProvider);
+          setState(() => _tab = index);
+        },
       ),
     );
   }

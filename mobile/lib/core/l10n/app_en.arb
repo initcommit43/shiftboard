@@ -135,5 +135,19 @@
   "errorConcurrentChange": "Something about the shift changed just now. Please try again.",
   "claimCancelledByYou": "You cancelled this shift.",
   "claimRemovedByAgency": "{agency} took you off this shift.",
-  "shiftCancelledByAgency": "{agency} cancelled this shift."
+  "shiftCancelledByAgency": "{agency} cancelled this shift.",
+  "chatEmptyTitle": "No messages yet",
+  "chatEmptyMessage": "Write to {agency} if you have a question. Confirmations and cancellations show up here too.",
+  "chatErrorTitle": "Messages couldn't be loaded",
+  "chatHint": "Message",
+  "chatSend": "Send",
+  "chatAbout": "{title} · {date}",
+  "chatRemoveShift": "Remove shift",
+  "chatBroadcast": "To everyone confirmed",
+  "chatWriteAbout": "Send a message",
+  "chatEventConfirmed": "Your request is confirmed.",
+  "chatEventRejected": "Your request was declined.",
+  "chatEventCancelledByYou": "You cancelled.",
+  "chatEventRemoved": "The agency took you off the shift.",
+  "chatEventShiftCancelled": "The shift was cancelled."
 }

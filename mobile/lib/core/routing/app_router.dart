@@ -8,6 +8,8 @@ import '../../features/approval/presentation/waiting_screen.dart';
 import '../../features/auth/data/session.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/start_screen.dart';
+import '../../features/messages/presentation/chat_screen.dart';
+import '../../features/messages/presentation/chat_view.dart';
 import '../../features/shifts/presentation/home_screen.dart';
 import '../../features/shifts/presentation/shift_detail_screen.dart';
 import '../../features/signup/domain/invitation_code.dart';
@@ -24,6 +26,10 @@ abstract final class AppRoutes {
   static const waiting = '/waiting';
   static const notActive = '/not-active';
   static const shifts = '/shifts';
+
+  /// The chat on its own screen, on top of the tabs; pass a [ChatShift] as
+  /// `extra` to write about that shift.
+  static const chat = '$shifts/messages';
 
   /// The detail of one shift, on top of the tabs.
   static String shift(String shiftId) =>
@@ -84,6 +90,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.shifts,
         builder: (context, state) => const HomeScreen(),
         routes: [
+          GoRoute(
+            path: 'messages',
+            builder: (context, state) =>
+                ChatScreen(shift: state.extra as ChatShift?),
+          ),
           GoRoute(
             path: ':${AppRoutes._shiftId}',
             builder: (context, state) => ShiftDetailScreen(
