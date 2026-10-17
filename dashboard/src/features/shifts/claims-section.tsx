@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/table'
 import { initials } from '@/lib/initials'
 
+import { BroadcastToShift } from './broadcast-to-shift'
 import { useAssignmentDecision, useShiftAssignments, workerName } from './queries'
 import { RemoveWorker } from './remove-worker'
 
@@ -72,6 +73,7 @@ export function ClaimsSection({ shift }: { shift: Shift }) {
   const all = assignments.data.content
   const pending = all.filter((it) => it.status === AssignmentStatus.PENDING)
   const others = all.filter((it) => it.status !== AssignmentStatus.PENDING)
+  const confirmed = all.filter((it) => it.status === AssignmentStatus.CONFIRMED).length
 
   return (
     <div className="space-y-8">
@@ -103,9 +105,12 @@ export function ClaimsSection({ shift }: { shift: Shift }) {
       </section>
 
       <section aria-labelledby="claims-team" className="space-y-4">
-        <h2 id="claims-team" className="type-heading-sm">
-          {t('shiftDetail.claims.team')}
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h2 id="claims-team" className="type-heading-sm">
+            {t('shiftDetail.claims.team')}
+          </h2>
+          {confirmed > 0 && <BroadcastToShift shiftId={shift.id} confirmed={confirmed} />}
+        </div>
         {others.length === 0 ? (
           <EmptyRow icon={<Users />} text={t('shiftDetail.claims.noTeam')} />
         ) : (
