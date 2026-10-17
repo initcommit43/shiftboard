@@ -311,5 +311,23 @@
       "keep": "Back",
       "confirm": "Remove"
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "How your agency handles requests and cancellations.",
+    "loading": "Loading settings …",
+    "autoConfirm": "Confirm requests automatically",
+    "autoConfirmHint": "Workers get the spot right away, without your approval. Applies to new requests.",
+    "deadline": "Cancellation deadline in hours",
+    "deadlineHint": "How long before the start workers can cancel in the app. 0 means until the start.",
+    "deadlineInvalid": "A whole number from 0 to 336.",
+    "adminsOnly": "Only admins can change the settings.",
+    "save": "Save",
+    "saved": "The settings are saved",
+    "error": {
+      "title": "The settings could not be loaded",
+      "description": "Please try again. If the problem persists, reload the page.",
+      "retry": "Try again"
+    }
   }
 }

@@ -4,6 +4,7 @@ import { redirectSignedIn, requireSession } from '@/features/auth/guards'
 import { LoginPage } from '@/features/auth/login-page'
 import { SessionLoading } from '@/features/auth/session-loading'
 import { APP_ROUTE_ID } from '@/features/auth/use-session'
+import { SettingsPage } from '@/features/settings/settings-page'
 import { NewShiftPage } from '@/features/shifts/new-shift-page'
 import { ShiftDetailPage } from '@/features/shifts/shift-detail-page'
 import { ShiftsPage } from '@/features/shifts/shifts-page'
@@ -31,7 +32,7 @@ export const routes: RouteObject[] = [
           { path: 'shifts/:shiftId', element: <ShiftDetailPage /> },
           { path: 'signups', element: <SignupsPage /> },
           { path: 'messages', element: <ComingSoonPage area="messages" /> },
-          { path: 'settings', element: <ComingSoonPage area="settings" /> },
+          { path: 'settings', element: <SettingsPage /> },
           { path: '*', element: <NotFoundPage /> },
         ],
       },
