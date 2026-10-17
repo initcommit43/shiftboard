@@ -137,6 +137,40 @@ class Shift {
         takenSlots++;
     }
 
+    /**
+     * Frees the slot of a claim that no longer holds one. Only a published shift offers its
+     * slots; a cancelled or completed one keeps its count.
+     */
+    void release() {
+        if (status != ShiftStatus.PUBLISHED) {
+            return;
+        }
+        if (takenSlots == 0) {
+            throw new IllegalStateException("No slot of shift " + id + " is taken");
+        }
+        takenSlots--;
+    }
+
+    /**
+     * Calls the shift off. A draft or published shift can be cancelled until it ends, also while
+     * it runs; its claims are cancelled with it, so no slot stays taken.
+     */
+    void cancel(Instant now) {
+        if ((status != ShiftStatus.DRAFT && status != ShiftStatus.PUBLISHED) || !now.isBefore(endsAt)) {
+            throw new ShiftNotCancellableException();
+        }
+        status = ShiftStatus.CANCELLED;
+        takenSlots = 0;
+    }
+
+    /** A published shift that has ended took place. */
+    void complete(Instant now) {
+        if (status != ShiftStatus.PUBLISHED || now.isBefore(endsAt)) {
+            throw new IllegalStateException("Shift " + id + " cannot be completed");
+        }
+        status = ShiftStatus.COMPLETED;
+    }
+
     UUID getId() {
         return id;
     }

@@ -42,9 +42,15 @@ class ShiftController {
 
     @GetMapping
     ShiftPage list(
+            @RequestParam(defaultValue = "UPCOMING") ShiftPeriod period,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
-        return shiftService.listUpcoming(page, size);
+        return shiftService.list(period, page, size);
+    }
+
+    @GetMapping("/{shiftId}")
+    ShiftResponse get(@PathVariable UUID shiftId) {
+        return shiftService.get(shiftId);
     }
 
     /** The dispatcher who creates the shift becomes its contact person. */
@@ -57,6 +63,16 @@ class ShiftController {
     @PostMapping("/{shiftId}/publish")
     ShiftResponse publish(@PathVariable UUID shiftId) {
         return shiftService.publish(shiftId);
+    }
+
+    @PostMapping("/{shiftId}/cancel")
+    ShiftResponse cancel(@PathVariable UUID shiftId) {
+        return shiftService.cancel(shiftId);
+    }
+
+    enum ShiftPeriod {
+        UPCOMING,
+        PAST
     }
 
     /**

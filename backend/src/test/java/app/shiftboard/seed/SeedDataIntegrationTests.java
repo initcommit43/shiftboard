@@ -51,9 +51,9 @@ class SeedDataIntegrationTests {
                 "worker_qualification", 15,
                 "client", 4,
                 "location", 5,
-                "shift", 7,
-                "shift_qualification", 7,
-                "assignment", 5));
+                "shift", 8,
+                "shift_qualification", 8,
+                "assignment", 7));
         assertThat(workersOfDonauPersonalWith("ACTIVE")).isEqualTo(6);
         assertThat(workersOfDonauPersonalWith("PENDING")).isEqualTo(4);
         assertThat(workersOfDonauPersonalWith("INACTIVE")).isEqualTo(1);

@@ -1,5 +1,6 @@
 package app.shiftboard.worker.internal;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -15,6 +16,8 @@ interface WorkerRepository extends Repository<Worker, UUID> {
     Worker save(Worker worker);
 
     Optional<Worker> findByUserAccountId(UUID userAccountId);
+
+    List<Worker> findAllById(Iterable<UUID> ids);
 
     Page<Worker> findAll(Pageable pageable);
 

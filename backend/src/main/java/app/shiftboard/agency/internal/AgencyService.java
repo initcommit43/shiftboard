@@ -2,12 +2,15 @@ package app.shiftboard.agency.internal;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import app.shiftboard.agency.Agencies;
+import app.shiftboard.agency.AgencySettings;
 import app.shiftboard.agency.AgencySummary;
 import app.shiftboard.agency.QualificationSummary;
 import app.shiftboard.agency.TenantContext;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 class AgencyService implements Agencies {
@@ -35,6 +38,29 @@ class AgencyService implements Agencies {
         return qualifications.findAllByOrderByName().stream()
                 .map(qualification -> new QualificationSummary(qualification.getId(), qualification.getName()))
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AgencySettings settings() {
+        return currentAgency().getSettings();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UUID> ids() {
+        return agencies.findAllIds();
+    }
+
+    @Transactional
+    AgencySettings changeSettings(AgencySettings settings) {
+        var agency = currentAgency();
+        agency.changeSettings(settings);
+        return agency.getSettings();
+    }
+
+    private Agency currentAgency() {
+        return agencies.findById(TenantContext.require()).orElseThrow();
     }
 
     private static AgencySummary summary(Agency agency) {

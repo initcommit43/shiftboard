@@ -1,5 +1,7 @@
 package app.shiftboard.assignment.internal;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -7,6 +9,9 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import app.shiftboard.agency.Agencies;
+import app.shiftboard.agency.TenantContext;
+import app.shiftboard.assignment.AssignmentCancelled;
 import app.shiftboard.assignment.internal.WorkerShiftController.AssignmentSummary;
 import app.shiftboard.assignment.internal.WorkerShiftController.ClientSummary;
 import app.shiftboard.assignment.internal.WorkerShiftController.Contact;
@@ -16,12 +21,15 @@ import app.shiftboard.identity.WorkerProfileProvider;
 import app.shiftboard.shift.ShiftDetails;
 import app.shiftboard.shift.Shifts;
 import app.shiftboard.system.ApiException;
+import app.shiftboard.system.ConflictRetry;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * The shifts of the agency as one worker sees them: each with the worker's own claim, if any.
@@ -48,13 +56,23 @@ class WorkerShiftService {
 
     private final WorkerProfileProvider workerProfiles;
 
+    private final Agencies agencies;
+
+    private final ApplicationEventPublisher events;
+
+    private final TransactionTemplate transactions;
+
     WorkerShiftService(
             AssignmentRepository assignments, ClaimService claims, Shifts shifts,
-            WorkerProfileProvider workerProfiles) {
+            WorkerProfileProvider workerProfiles, Agencies agencies, ApplicationEventPublisher events,
+            TransactionTemplate transactions) {
         this.assignments = assignments;
         this.claims = claims;
         this.shifts = shifts;
         this.workerProfiles = workerProfiles;
+        this.agencies = agencies;
+        this.events = events;
+        this.transactions = transactions;
     }
 
     /** The published shifts that have not started yet. */
@@ -66,18 +84,18 @@ class WorkerShiftService {
                 .findByWorkerIdAndShiftIdIn(workerId, result.getContent().stream().map(ShiftDetails::id).toList())
                 .stream()
                 .collect(Collectors.toMap(Assignment::getShiftId, Function.identity()));
+        var deadline = cancellationDeadline();
         return new WorkerShiftPage(
-                result.getContent().stream().map(shift -> response(shift, own.get(shift.id()))).toList(),
+                result.getContent().stream().map(shift -> response(shift, own.get(shift.id()), deadline)).toList(),
                 page, size, result.getTotalElements(), result.getTotalPages());
     }
 
     @Transactional(readOnly = true)
     WorkerShiftResponse get(UUID accountId, UUID shiftId) {
         var workerId = activeWorker(accountId);
-        var shift = shifts.find(shiftId)
-                .orElseThrow(() -> new ApiException(
-                        HttpStatus.NOT_FOUND, "shift_not_found", "The agency has no shift with this id."));
-        return response(shift, assignments.findByShiftIdAndWorkerId(shiftId, workerId).orElse(null));
+        var shift = shifts.find(shiftId).orElseThrow(WorkerShiftService::shiftNotFound);
+        return response(
+                shift, assignments.findByShiftIdAndWorkerId(shiftId, workerId).orElse(null), cancellationDeadline());
     }
 
     /** Every shift the worker has claimed, whatever became of the claim. */
@@ -87,8 +105,10 @@ class WorkerShiftService {
         var result = assignments.findByWorkerId(workerId, PageRequest.of(page, size, EARLIEST_START_FIRST));
         Map<UUID, ShiftDetails> claimed =
                 shifts.findAll(result.getContent().stream().map(Assignment::getShiftId).toList());
+        var deadline = cancellationDeadline();
         List<WorkerShiftResponse> content = result.getContent().stream()
-                .map(assignment -> response(Objects.requireNonNull(claimed.get(assignment.getShiftId())), assignment))
+                .map(assignment -> response(
+                        Objects.requireNonNull(claimed.get(assignment.getShiftId())), assignment, deadline))
                 .toList();
         return new WorkerShiftPage(content, page, size, result.getTotalElements(), result.getTotalPages());
     }
@@ -111,6 +131,38 @@ class WorkerShiftService {
         }
     }
 
+    /**
+     * Drops out of a claimed shift before the agency's cancellation deadline. Freeing the spot
+     * changes the shift, so the attempt is repeated on a conflict there.
+     */
+    WorkerShiftResponse cancel(UUID accountId, UUID shiftId) {
+        var workerId = activeWorker(accountId);
+        ConflictRetry.run(() -> transactions.execute(_ -> {
+            if (shifts.find(shiftId).isEmpty()) {
+                throw shiftNotFound();
+            }
+            var assignment = assignments.findForUpdateByShiftIdAndWorkerId(shiftId, workerId)
+                    .orElseThrow(() -> new ApiException(
+                            HttpStatus.NOT_FOUND, "assignment_not_found", "The worker has not claimed this shift."));
+            assignment.cancelByWorker(Instant.now(), cancellationDeadline());
+            assignments.saveAndFlush(assignment);
+            shifts.release(shiftId);
+            events.publishEvent(new AssignmentCancelled(
+                    TenantContext.require(), assignment.getId(), shiftId, workerId,
+                    AssignmentCancelled.Cause.WORKER));
+            return assignment;
+        }), ConflictRetry::busy);
+        return get(accountId, shiftId);
+    }
+
+    private Duration cancellationDeadline() {
+        return agencies.settings().cancellationDeadline();
+    }
+
+    private static ApiException shiftNotFound() {
+        return new ApiException(HttpStatus.NOT_FOUND, "shift_not_found", "The agency has no shift with this id.");
+    }
+
     private UUID activeWorker(UUID accountId) {
         return workerProfiles.findByAccountId(accountId)
                 .filter(worker -> ACTIVE.equals(worker.status()))
@@ -120,7 +172,7 @@ class WorkerShiftService {
                 .id();
     }
 
-    private static WorkerShiftResponse response(ShiftDetails shift, Assignment assignment) {
+    private static WorkerShiftResponse response(ShiftDetails shift, Assignment assignment, Duration deadline) {
         return new WorkerShiftResponse(
                 shift.id(),
                 shift.title(),
@@ -139,6 +191,10 @@ class WorkerShiftService {
                 assignment == null
                         ? null
                         : new AssignmentSummary(
-                                assignment.getId(), assignment.getStatus(), assignment.getClaimedAt()));
+                                assignment.getId(),
+                                assignment.getStatus(),
+                                assignment.getClaimedAt(),
+                                assignment.cancellableUntilIfHolding(deadline).orElse(null),
+                                assignment.getCancelledBy()));
     }
 }

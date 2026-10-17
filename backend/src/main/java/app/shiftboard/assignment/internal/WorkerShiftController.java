@@ -53,6 +53,11 @@ class WorkerShiftController {
         return workerShiftService.claim(accountId(accessToken), shiftId);
     }
 
+    @PostMapping("/shifts/{shiftId}/cancel")
+    WorkerShiftResponse cancel(@AuthenticationPrincipal Jwt accessToken, @PathVariable UUID shiftId) {
+        return workerShiftService.cancel(accountId(accessToken), shiftId);
+    }
+
     @GetMapping("/my-shifts")
     WorkerShiftPage listClaimed(
             @AuthenticationPrincipal Jwt accessToken,
@@ -71,7 +76,16 @@ class WorkerShiftController {
     record Contact(String name, @JsonInclude(JsonInclude.Include.NON_NULL) String phone) {
     }
 
-    record AssignmentSummary(UUID id, AssignmentStatus status, Instant claimedAt) {
+    /**
+     * @param cancellableUntil until when the worker can drop out in the app; only while pending or confirmed
+     * @param cancelledBy      who cancelled; only when cancelled
+     */
+    record AssignmentSummary(
+            UUID id,
+            AssignmentStatus status,
+            Instant claimedAt,
+            @JsonInclude(JsonInclude.Include.NON_NULL) Instant cancellableUntil,
+            @JsonInclude(JsonInclude.Include.NON_NULL) CancelledBy cancelledBy) {
     }
 
     /**
