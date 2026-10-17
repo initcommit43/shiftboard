@@ -683,5 +683,77 @@
         "example": "Donau Personal"
       }
     }
+  },
+  "chatEmptyTitle": "Noch keine Nachrichten",
+  "@chatEmptyTitle": {
+    "description": "Empty chat title."
+  },
+  "chatEmptyMessage": "Schreib {agency}, wenn du eine Frage hast. Bestätigungen und Absagen landen auch hier.",
+  "@chatEmptyMessage": {
+    "description": "Empty chat message.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "chatErrorTitle": "Die Nachrichten konnten nicht geladen werden",
+  "@chatErrorTitle": {
+    "description": "The chat failed to load."
+  },
+  "chatHint": "Nachricht",
+  "@chatHint": {
+    "description": "Placeholder of the chat field."
+  },
+  "chatSend": "Senden",
+  "@chatSend": {
+    "description": "Tooltip of the send button."
+  },
+  "chatAbout": "{title} · {date}",
+  "@chatAbout": {
+    "description": "Tag of a message about a shift.",
+    "placeholders": {
+      "title": {
+        "type": "String",
+        "example": "Lagerunterstützung"
+      },
+      "date": {
+        "type": "String",
+        "example": "Sa., 17. Okt."
+      }
+    }
+  },
+  "chatRemoveShift": "Schicht entfernen",
+  "@chatRemoveShift": {
+    "description": "Tooltip that removes the shift tag from a new message."
+  },
+  "chatBroadcast": "An alle Bestätigten",
+  "@chatBroadcast": {
+    "description": "Label of a broadcast message."
+  },
+  "chatWriteAbout": "Nachricht schreiben",
+  "@chatWriteAbout": {
+    "description": "Button on a shift that opens the chat about it."
+  },
+  "chatEventConfirmed": "Deine Anfrage ist bestätigt.",
+  "@chatEventConfirmed": {
+    "description": "System message."
+  },
+  "chatEventRejected": "Deine Anfrage wurde abgelehnt.",
+  "@chatEventRejected": {
+    "description": "System message."
+  },
+  "chatEventCancelledByYou": "Du hast abgesagt.",
+  "@chatEventCancelledByYou": {
+    "description": "System message."
+  },
+  "chatEventRemoved": "Die Agentur hat dich aus der Schicht genommen.",
+  "@chatEventRemoved": {
+    "description": "System message."
+  },
+  "chatEventShiftCancelled": "Die Schicht wurde abgesagt.",
+  "@chatEventShiftCancelled": {
+    "description": "System message."
   }
 }

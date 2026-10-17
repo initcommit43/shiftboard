@@ -29,10 +29,10 @@ void main() {
     expect(find.byType(AppTabItem), findsNWidgets(4));
   });
 
-  testWidgets('the other tabs announce what is coming', (tester) async {
+  testWidgets('the profile tab announces what is coming', (tester) async {
     await pumpApp(tester, backend);
 
-    final titles = {'Nachrichten': 'Nachrichten', 'Profil': 'Profil'};
+    final titles = {'Profil': 'Profil'};
     for (final MapEntry(key: tab, value: title) in titles.entries) {
       await tester.tap(find.text(tab));
       await tester.pumpAndSettle();

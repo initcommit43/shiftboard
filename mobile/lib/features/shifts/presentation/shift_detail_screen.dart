@@ -3,12 +3,14 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shiftboard_api/shiftboard_api.dart';
 
 import '../../../core/api/api_error.dart';
 import '../../../core/l10n/l10n.dart';
 import '../../../core/platform/clock.dart';
 import '../../../core/platform/url_opener.dart';
+import '../../../core/routing/app_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_button.dart';
@@ -123,6 +125,14 @@ class ShiftDetailScreen extends ConsumerWidget {
   }
 }
 
+/// Opens the chat with a new message about [shift].
+void _writeAbout(BuildContext context, WorkerShift shift) {
+  context.push(
+    AppRoutes.chat,
+    extra: (id: shift.id, title: shift.title, startsAt: shift.startsAt),
+  );
+}
+
 void _tell(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
 }
@@ -211,6 +221,12 @@ class _CancelBar extends ConsumerWidget {
             style: AppTypography.footnote.copyWith(
               color: context.colors.inkSecondary,
             ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          AppButton(
+            label: l10n.chatWriteAbout,
+            variant: AppButtonVariant.outline,
+            onPressed: () => _writeAbout(context, shift),
           ),
           if (phone != null) ...[
             const SizedBox(height: AppSpacing.sm),
@@ -433,8 +449,14 @@ class _Details extends ConsumerWidget {
                 ),
               ],
             ),
+            const SizedBox(height: AppSpacing.md),
+            AppButton(
+              label: l10n.chatWriteAbout,
+              variant: AppButtonVariant.outline,
+              onPressed: () => _writeAbout(context, shift),
+            ),
             if (contactPhone != null) ...[
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.sm),
               AppButton(
                 label: l10n.shiftCall,
                 variant: AppButtonVariant.outline,
