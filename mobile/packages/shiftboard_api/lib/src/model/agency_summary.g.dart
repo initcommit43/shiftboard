@@ -11,11 +11,14 @@ class _$AgencySummary extends AgencySummary {
   final String id;
   @override
   final String name;
+  @override
+  final AgencyFeatures? features;
 
   factory _$AgencySummary([void Function(AgencySummaryBuilder)? updates]) =>
       (AgencySummaryBuilder()..update(updates))._build();
 
-  _$AgencySummary._({required this.id, required this.name}) : super._();
+  _$AgencySummary._({required this.id, required this.name, this.features})
+      : super._();
   @override
   AgencySummary rebuild(void Function(AgencySummaryBuilder) updates) =>
       (toBuilder()..update(updates)).build();
@@ -26,7 +29,10 @@ class _$AgencySummary extends AgencySummary {
   @override
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
-    return other is AgencySummary && id == other.id && name == other.name;
+    return other is AgencySummary &&
+        id == other.id &&
+        name == other.name &&
+        features == other.features;
   }
 
   @override
@@ -34,6 +40,7 @@ class _$AgencySummary extends AgencySummary {
     var _$hash = 0;
     _$hash = $jc(_$hash, id.hashCode);
     _$hash = $jc(_$hash, name.hashCode);
+    _$hash = $jc(_$hash, features.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -42,7 +49,8 @@ class _$AgencySummary extends AgencySummary {
   String toString() {
     return (newBuiltValueToStringHelper(r'AgencySummary')
           ..add('id', id)
-          ..add('name', name))
+          ..add('name', name)
+          ..add('features', features))
         .toString();
   }
 }
@@ -59,6 +67,11 @@ class AgencySummaryBuilder
   String? get name => _$this._name;
   set name(String? name) => _$this._name = name;
 
+  AgencyFeaturesBuilder? _features;
+  AgencyFeaturesBuilder get features =>
+      _$this._features ??= AgencyFeaturesBuilder();
+  set features(AgencyFeaturesBuilder? features) => _$this._features = features;
+
   AgencySummaryBuilder() {
     AgencySummary._defaults(this);
   }
@@ -68,6 +81,7 @@ class AgencySummaryBuilder
     if ($v != null) {
       _id = $v.id;
       _name = $v.name;
+      _features = $v.features?.toBuilder();
       _$v = null;
     }
     return this;
@@ -87,12 +101,27 @@ class AgencySummaryBuilder
   AgencySummary build() => _build();
 
   _$AgencySummary _build() {
-    final _$result = _$v ??
-        _$AgencySummary._(
-          id: BuiltValueNullFieldError.checkNotNull(id, r'AgencySummary', 'id'),
-          name: BuiltValueNullFieldError.checkNotNull(
-              name, r'AgencySummary', 'name'),
-        );
+    _$AgencySummary _$result;
+    try {
+      _$result = _$v ??
+          _$AgencySummary._(
+            id: BuiltValueNullFieldError.checkNotNull(
+                id, r'AgencySummary', 'id'),
+            name: BuiltValueNullFieldError.checkNotNull(
+                name, r'AgencySummary', 'name'),
+            features: _features?.build(),
+          );
+    } catch (_) {
+      late String _$failedField;
+      try {
+        _$failedField = 'features';
+        _features?.build();
+      } catch (e) {
+        throw BuiltValueNestedFieldError(
+            r'AgencySummary', _$failedField, e.toString());
+      }
+      rethrow;
+    }
     replace(_$result);
     return _$result;
   }

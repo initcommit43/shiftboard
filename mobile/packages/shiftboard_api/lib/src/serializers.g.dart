@@ -7,22 +7,36 @@ part of 'serializers.dart';
 // **************************************************************************
 
 Serializers _$serializers = (Serializers().toBuilder()
+      ..add(AgencyFeatures.serializer)
       ..add(AgencySettings.serializer)
       ..add(AgencySummary.serializer)
       ..add(AssignedWorker.serializer)
       ..add(AssignmentStatus.serializer)
       ..add(AssignmentSummary.serializer)
+      ..add(BroadcastRequest.serializer)
+      ..add(BroadcastResult.serializer)
       ..add(CancelledBy.serializer)
       ..add(Client.serializer)
       ..add(ClientPage.serializer)
       ..add(ClientSummary.serializer)
       ..add(ClientType.serializer)
+      ..add(Conversation.serializer)
+      ..add(ConversationPage.serializer)
+      ..add(ConversationWorker.serializer)
       ..add(CurrentUser.serializer)
       ..add(FieldError.serializer)
       ..add(Location.serializer)
       ..add(LoginRequest.serializer)
+      ..add(Message.serializer)
+      ..add(MessagePage.serializer)
+      ..add(MessageRequest.serializer)
+      ..add(MessageShift.serializer)
+      ..add(MessageType.serializer)
+      ..add(NotificationSettings.serializer)
       ..add(Ping.serializer)
       ..add(Problem.serializer)
+      ..add(PushPlatform.serializer)
+      ..add(PushTokenRequest.serializer)
       ..add(Qualification.serializer)
       ..add(QualificationPage.serializer)
       ..add(RefreshTokenRequest.serializer)
@@ -37,7 +51,9 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..add(ShiftRequest.serializer)
       ..add(ShiftStatus.serializer)
       ..add(SignupInfo.serializer)
+      ..add(SystemEvent.serializer)
       ..add(TokenResponse.serializer)
+      ..add(UnreadCount.serializer)
       ..add(Worker.serializer)
       ..add(WorkerPage.serializer)
       ..add(WorkerProfile.serializer)
@@ -49,11 +65,17 @@ Serializers _$serializers = (Serializers().toBuilder()
           const FullType(BuiltList, const [const FullType(Client)]),
           () => ListBuilder<Client>())
       ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(Conversation)]),
+          () => ListBuilder<Conversation>())
+      ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(FieldError)]),
           () => ListBuilder<FieldError>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(Location)]),
           () => ListBuilder<Location>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(Message)]),
+          () => ListBuilder<Message>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(Qualification)]),
           () => ListBuilder<Qualification>())

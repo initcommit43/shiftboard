@@ -14,6 +14,11 @@
 
 import * as runtime from '../runtime';
 import {
+    type AgencyFeatures,
+    AgencyFeaturesFromJSON,
+    AgencyFeaturesToJSON,
+} from '../models/AgencyFeatures';
+import {
     type AgencySettings,
     AgencySettingsFromJSON,
     AgencySettingsToJSON,
@@ -23,6 +28,13 @@ import {
     ProblemFromJSON,
     ProblemToJSON,
 } from '../models/Problem';
+
+export interface UpdateAgencyFeaturesRequest {
+    /**
+     * 
+     */
+    agencyFeatures: AgencyFeatures;
+}
 
 export interface UpdateAgencySettingsRequest {
     /**
@@ -35,6 +47,53 @@ export interface UpdateAgencySettingsRequest {
  * 
  */
 export class SettingsApi extends runtime.BaseAPI {
+
+    /**
+     * Creates request options for getAgencyFeatures without sending the request
+     */
+    async getAgencyFeaturesRequestOpts(): Promise<runtime.RequestOpts> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/agency/features`;
+
+        return {
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Dispatchers and admins.  Error codes: `forbidden` (403). 
+     * The optional features the agency has switched on
+     */
+    async getAgencyFeaturesRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AgencyFeatures>> {
+        const requestOptions = await this.getAgencyFeaturesRequestOpts();
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => AgencyFeaturesFromJSON(jsonValue));
+    }
+
+    /**
+     * Dispatchers and admins.  Error codes: `forbidden` (403). 
+     * The optional features the agency has switched on
+     */
+    async getAgencyFeatures(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AgencyFeatures> {
+        const response = await this.getAgencyFeaturesRaw(initOverrides);
+        return await response.value();
+    }
 
     /**
      * Creates request options for getAgencySettings without sending the request
@@ -80,6 +139,63 @@ export class SettingsApi extends runtime.BaseAPI {
      */
     async getAgencySettings(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AgencySettings> {
         const response = await this.getAgencySettingsRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for updateAgencyFeatures without sending the request
+     */
+    async updateAgencyFeaturesRequestOpts(requestParameters: UpdateAgencyFeaturesRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['agencyFeatures'] == null) {
+            throw new runtime.RequiredError(
+                'agencyFeatures',
+                'Required parameter "agencyFeatures" was null or undefined when calling updateAgencyFeatures().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/agency/features`;
+
+        return {
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: AgencyFeaturesToJSON(requestParameters['agencyFeatures']),
+        };
+    }
+
+    /**
+     * Admins only.  Field error codes: `required`.  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403, not an admin). 
+     * Switch optional features on or off
+     */
+    async updateAgencyFeaturesRaw(requestParameters: UpdateAgencyFeaturesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AgencyFeatures>> {
+        const requestOptions = await this.updateAgencyFeaturesRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => AgencyFeaturesFromJSON(jsonValue));
+    }
+
+    /**
+     * Admins only.  Field error codes: `required`.  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403, not an admin). 
+     * Switch optional features on or off
+     */
+    async updateAgencyFeatures(requestParameters: UpdateAgencyFeaturesRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AgencyFeatures> {
+        const response = await this.updateAgencyFeaturesRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

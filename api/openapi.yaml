@@ -44,6 +44,10 @@ tags:
     description: Workflow settings of the agency
   - name: worker-shifts
     description: What a worker sees of the agency's shifts, claiming a spot, and the shifts they claimed
+  - name: messages
+    description: The conversation between each worker and the agency, system messages and broadcasts
+  - name: notifications
+    description: Push notification devices and preferences of a worker
 security:
   - bearerAuth: []
 paths:
@@ -439,6 +443,181 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /agency/features:
+    get:
+      operationId: getAgencyFeatures
+      tags: [settings]
+      summary: The optional features the agency has switched on
+      description: |
+        Dispatchers and admins.
+
+        Error codes: `forbidden` (403).
+      responses:
+        "200":
+          description: The features.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgencyFeatures"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+    put:
+      operationId: updateAgencyFeatures
+      tags: [settings]
+      summary: Switch optional features on or off
+      description: |
+        Admins only.
+
+        Field error codes: `required`.
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403, not an admin).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgencyFeatures"
+      responses:
+        "200":
+          description: The changed features.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgencyFeatures"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /conversations:
+    get:
+      operationId: listConversations
+      tags: [messages]
+      summary: The agency's shared inbox
+      description: |
+        Every worker conversation that has a message, the most recent message
+        first, with how many of the worker's messages nobody at the agency has
+        read yet. Dispatchers and admins only; any of them can answer any
+        conversation.
+
+        Error codes: `forbidden` (403).
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of conversations.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConversationPage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /conversations/unread-count:
+    get:
+      operationId: getInboxUnreadCount
+      tags: [messages]
+      summary: How many worker messages nobody at the agency has read
+      description: |
+        For the badge of the inbox. Dispatchers and admins only.
+
+        Error codes: `forbidden` (403).
+      responses:
+        "200":
+          description: The count.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnreadCount"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /conversations/{conversationId}/messages:
+    parameters:
+      - $ref: "#/components/parameters/ConversationId"
+    get:
+      operationId: listConversationMessages
+      tags: [messages]
+      summary: The messages of one conversation
+      description: |
+        Newest first; the first page is what a chat shows at the bottom.
+        Marks the worker's messages in it as read. Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `conversation_not_found` (404).
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of messages, newest first.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessagePage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+    post:
+      operationId: replyToConversation
+      tags: [messages]
+      summary: Answer a worker
+      description: |
+        Sends a text message from the agency to the worker. Dispatchers and
+        admins only.
+
+        Field error codes: `required`, `invalid_length` (`body`), `not_found`
+        (`shiftId` is not a published, completed or cancelled shift of the
+        agency).
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403), `conversation_not_found` (404).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageRequest"
+      responses:
+        "201":
+          description: The sent message.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
   /shifts:
     get:
       operationId: listShifts
@@ -594,6 +773,49 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Shift"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /shifts/{shiftId}/broadcast:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+    post:
+      operationId: broadcastToShift
+      tags: [messages]
+      summary: Message all confirmed workers of a shift
+      description: |
+        Puts the message into the conversation of every worker whose
+        assignment on the shift is `CONFIRMED`, tagged with the shift and
+        typed `BROADCAST`. Others do not get it. Dispatchers and admins only.
+
+        Field error codes: `required`, `invalid_length` (`body`).
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403), `shift_not_found` (404), `no_recipients` (409, nobody is
+        confirmed).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BroadcastRequest"
+      responses:
+        "201":
+          description: How many workers got the message.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BroadcastResult"
+        "400":
+          $ref: "#/components/responses/Problem"
         "401":
           $ref: "#/components/responses/Problem"
         "403":
@@ -950,6 +1172,208 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /worker/conversation:
+    get:
+      operationId: getMyConversation
+      tags: [messages]
+      summary: The worker's conversation with the agency
+      description: |
+        How many messages from the agency the worker has not read yet. There is
+        one conversation per worker; before the first message it is empty.
+        Active workers only.
+
+        Error codes: `forbidden` (403), `worker_not_active` (403).
+      responses:
+        "200":
+          description: The count.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnreadCount"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /worker/conversation/messages:
+    get:
+      operationId: listMyMessages
+      tags: [messages]
+      summary: The messages of the worker's conversation
+      description: |
+        Newest first. Marks the agency's messages, system messages and
+        broadcasts in it as read. Active workers only.
+
+        Error codes: `forbidden` (403), `worker_not_active` (403).
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of messages, newest first.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessagePage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+    post:
+      operationId: sendMessage
+      tags: [messages]
+      summary: Write to the agency
+      description: |
+        Sends a text message, optionally about a shift (`shiftId`), for
+        example when started from the shift's detail. Active workers only.
+
+        Field error codes: `required`, `invalid_length` (`body`), `not_found`
+        (`shiftId` is not a shift the worker can see).
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403), `worker_not_active` (403).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageRequest"
+      responses:
+        "201":
+          description: The sent message.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /worker/push-tokens:
+    post:
+      operationId: registerPushToken
+      tags: [notifications]
+      summary: Register this device for push notifications
+      description: |
+        Stores the device's Firebase Cloud Messaging token for the worker.
+        Registering a token again is harmless; a token that belonged to
+        another account moves to this one. Workers only, also while pending.
+
+        Field error codes: `required`, `invalid_length` (`token`).
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PushTokenRequest"
+      responses:
+        "204":
+          description: The token is registered.
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /worker/push-tokens/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 4096
+    delete:
+      operationId: unregisterPushToken
+      tags: [notifications]
+      summary: Stop push notifications to this device
+      description: |
+        For logging out. Unknown tokens are ignored. Workers only.
+
+        Error codes: `forbidden` (403).
+      responses:
+        "204":
+          description: The device gets no more push notifications.
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /worker/notification-settings:
+    get:
+      operationId: getNotificationSettings
+      tags: [notifications]
+      summary: The worker's notification preferences
+      description: |
+        Active workers only.
+
+        Error codes: `forbidden` (403), `worker_not_active` (403).
+      responses:
+        "200":
+          description: The preferences.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationSettings"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+    put:
+      operationId: updateNotificationSettings
+      tags: [notifications]
+      summary: Pause or resume new-shift notifications
+      description: |
+        While `newShiftsPaused` is true, the worker gets no push for new
+        shifts; claim decisions, cancellations and messages still reach them.
+        Active workers only.
+
+        Field error codes: `required`.
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403), `worker_not_active` (403).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationSettings"
+      responses:
+        "200":
+          description: The changed preferences.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotificationSettings"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -982,6 +1406,13 @@ components:
         format: uuid
     AssignmentId:
       name: assignmentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ConversationId:
+      name: conversationId
       in: path
       required: true
       schema:
@@ -1141,6 +1572,19 @@ components:
           format: uuid
         name:
           type: string
+        features:
+          description: The optional features the agency has switched on.
+          $ref: "#/components/schemas/AgencyFeatures"
+
+    AgencyFeatures:
+      type: object
+      required: [contactButton]
+      properties:
+        contactButton:
+          type: boolean
+          description: |
+            Workers see a WhatsApp button for the contact person on a shift,
+            for agencies that prefer that over the in-app chat. Off by default.
 
     WorkerProfile:
       type: object
@@ -1692,6 +2136,201 @@ components:
         totalPages:
           type: integer
           format: int32
+
+    UnreadCount:
+      type: object
+      required: [unreadCount]
+      properties:
+        unreadCount:
+          type: integer
+          format: int32
+          minimum: 0
+
+    MessageType:
+      type: string
+      description: |
+        `TEXT` from the worker or the agency, `SYSTEM` written by the platform
+        when a claim or shift changed, `BROADCAST` sent by the agency to all
+        confirmed workers of a shift.
+      enum: [TEXT, SYSTEM, BROADCAST]
+
+    SystemEvent:
+      type: string
+      description: |
+        What a `SYSTEM` message reports, so that clients can word it in their
+        language. `body` carries a German text as a fallback.
+      enum: [CLAIM_CONFIRMED, CLAIM_REJECTED, CLAIM_CANCELLED_BY_WORKER, REMOVED_BY_AGENCY, SHIFT_CANCELLED]
+
+    MessageShift:
+      type: object
+      description: The shift a message is about.
+      required: [id, title, startsAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+
+    Message:
+      type: object
+      required: [id, type, body, fromWorker, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: "#/components/schemas/MessageType"
+        event:
+          description: Present for `SYSTEM` messages.
+          $ref: "#/components/schemas/SystemEvent"
+        body:
+          type: string
+        fromWorker:
+          type: boolean
+          description: Written by the worker; otherwise by the agency or the platform.
+        senderName:
+          type: string
+          description: The dispatcher who wrote a `TEXT` or `BROADCAST` message. Absent for the worker's own and for `SYSTEM` messages.
+          examples: [Anna Berger]
+        shift:
+          $ref: "#/components/schemas/MessageShift"
+        createdAt:
+          type: string
+          format: date-time
+        readAt:
+          type: string
+          format: date-time
+          description: When the other side read it. Absent while unread.
+
+    MessagePage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+
+    MessageRequest:
+      type: object
+      required: [body]
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        shiftId:
+          type: string
+          format: uuid
+          description: The shift the message is about.
+
+    BroadcastRequest:
+      type: object
+      required: [body]
+      properties:
+        body:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          examples: [Bitte Sicherheitsschuhe mitbringen, Treffpunkt ist heute Tor 5.]
+
+    BroadcastResult:
+      type: object
+      required: [recipients]
+      properties:
+        recipients:
+          type: integer
+          format: int32
+          description: How many confirmed workers got the message.
+
+    ConversationWorker:
+      type: object
+      required: [id, firstName, lastName]
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+
+    Conversation:
+      type: object
+      required: [id, worker, lastMessage, unreadCount]
+      properties:
+        id:
+          type: string
+          format: uuid
+        worker:
+          $ref: "#/components/schemas/ConversationWorker"
+        lastMessage:
+          $ref: "#/components/schemas/Message"
+        unreadCount:
+          type: integer
+          format: int32
+          description: Messages of the worker nobody at the agency has read yet.
+
+    ConversationPage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/Conversation"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+
+    PushPlatform:
+      type: string
+      enum: [ANDROID, IOS]
+
+    PushTokenRequest:
+      type: object
+      required: [token, platform]
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 4096
+          description: The Firebase Cloud Messaging registration token of the device.
+        platform:
+          $ref: "#/components/schemas/PushPlatform"
+
+    NotificationSettings:
+      type: object
+      required: [newShiftsPaused]
+      properties:
+        newShiftsPaused:
+          type: boolean
+          description: No push for new shifts while true.
 
     FieldError:
       type: object

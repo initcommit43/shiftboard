@@ -92,7 +92,21 @@ Class | Method | HTTP request | Description
 [*AuthApi*](doc/AuthApi.md) | [**refreshToken**](doc/AuthApi.md#refreshtoken) | **POST** /auth/refresh | Exchange a refresh token for a new token pair
 [*ClientsApi*](doc/ClientsApi.md) | [**listClients**](doc/ClientsApi.md#listclients) | **GET** /clients | List the agency&#39;s clients with their locations
 [*ClientsApi*](doc/ClientsApi.md) | [**listQualifications**](doc/ClientsApi.md#listqualifications) | **GET** /qualifications | List the agency&#39;s qualifications
+[*MessagesApi*](doc/MessagesApi.md) | [**broadcastToShift**](doc/MessagesApi.md#broadcasttoshift) | **POST** /shifts/{shiftId}/broadcast | Message all confirmed workers of a shift
+[*MessagesApi*](doc/MessagesApi.md) | [**getInboxUnreadCount**](doc/MessagesApi.md#getinboxunreadcount) | **GET** /conversations/unread-count | How many worker messages nobody at the agency has read
+[*MessagesApi*](doc/MessagesApi.md) | [**getMyConversation**](doc/MessagesApi.md#getmyconversation) | **GET** /worker/conversation | The worker&#39;s conversation with the agency
+[*MessagesApi*](doc/MessagesApi.md) | [**listConversationMessages**](doc/MessagesApi.md#listconversationmessages) | **GET** /conversations/{conversationId}/messages | The messages of one conversation
+[*MessagesApi*](doc/MessagesApi.md) | [**listConversations**](doc/MessagesApi.md#listconversations) | **GET** /conversations | The agency&#39;s shared inbox
+[*MessagesApi*](doc/MessagesApi.md) | [**listMyMessages**](doc/MessagesApi.md#listmymessages) | **GET** /worker/conversation/messages | The messages of the worker&#39;s conversation
+[*MessagesApi*](doc/MessagesApi.md) | [**replyToConversation**](doc/MessagesApi.md#replytoconversation) | **POST** /conversations/{conversationId}/messages | Answer a worker
+[*MessagesApi*](doc/MessagesApi.md) | [**sendMessage**](doc/MessagesApi.md#sendmessage) | **POST** /worker/conversation/messages | Write to the agency
+[*NotificationsApi*](doc/NotificationsApi.md) | [**getNotificationSettings**](doc/NotificationsApi.md#getnotificationsettings) | **GET** /worker/notification-settings | The worker&#39;s notification preferences
+[*NotificationsApi*](doc/NotificationsApi.md) | [**registerPushToken**](doc/NotificationsApi.md#registerpushtoken) | **POST** /worker/push-tokens | Register this device for push notifications
+[*NotificationsApi*](doc/NotificationsApi.md) | [**unregisterPushToken**](doc/NotificationsApi.md#unregisterpushtoken) | **DELETE** /worker/push-tokens/{token} | Stop push notifications to this device
+[*NotificationsApi*](doc/NotificationsApi.md) | [**updateNotificationSettings**](doc/NotificationsApi.md#updatenotificationsettings) | **PUT** /worker/notification-settings | Pause or resume new-shift notifications
+[*SettingsApi*](doc/SettingsApi.md) | [**getAgencyFeatures**](doc/SettingsApi.md#getagencyfeatures) | **GET** /agency/features | The optional features the agency has switched on
 [*SettingsApi*](doc/SettingsApi.md) | [**getAgencySettings**](doc/SettingsApi.md#getagencysettings) | **GET** /agency/settings | The agency&#39;s workflow settings
+[*SettingsApi*](doc/SettingsApi.md) | [**updateAgencyFeatures**](doc/SettingsApi.md#updateagencyfeatures) | **PUT** /agency/features | Switch optional features on or off
 [*SettingsApi*](doc/SettingsApi.md) | [**updateAgencySettings**](doc/SettingsApi.md#updateagencysettings) | **PUT** /agency/settings | Change the agency&#39;s workflow settings
 [*ShiftsApi*](doc/ShiftsApi.md) | [**cancelShift**](doc/ShiftsApi.md#cancelshift) | **POST** /shifts/{shiftId}/cancel | Call off a shift
 [*ShiftsApi*](doc/ShiftsApi.md) | [**createShift**](doc/ShiftsApi.md#createshift) | **POST** /shifts | Create a shift
@@ -114,22 +128,36 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
+ - [AgencyFeatures](doc/AgencyFeatures.md)
  - [AgencySettings](doc/AgencySettings.md)
  - [AgencySummary](doc/AgencySummary.md)
  - [AssignedWorker](doc/AssignedWorker.md)
  - [AssignmentStatus](doc/AssignmentStatus.md)
  - [AssignmentSummary](doc/AssignmentSummary.md)
+ - [BroadcastRequest](doc/BroadcastRequest.md)
+ - [BroadcastResult](doc/BroadcastResult.md)
  - [CancelledBy](doc/CancelledBy.md)
  - [Client](doc/Client.md)
  - [ClientPage](doc/ClientPage.md)
  - [ClientSummary](doc/ClientSummary.md)
  - [ClientType](doc/ClientType.md)
+ - [Conversation](doc/Conversation.md)
+ - [ConversationPage](doc/ConversationPage.md)
+ - [ConversationWorker](doc/ConversationWorker.md)
  - [CurrentUser](doc/CurrentUser.md)
  - [FieldError](doc/FieldError.md)
  - [Location](doc/Location.md)
  - [LoginRequest](doc/LoginRequest.md)
+ - [Message](doc/Message.md)
+ - [MessagePage](doc/MessagePage.md)
+ - [MessageRequest](doc/MessageRequest.md)
+ - [MessageShift](doc/MessageShift.md)
+ - [MessageType](doc/MessageType.md)
+ - [NotificationSettings](doc/NotificationSettings.md)
  - [Ping](doc/Ping.md)
  - [Problem](doc/Problem.md)
+ - [PushPlatform](doc/PushPlatform.md)
+ - [PushTokenRequest](doc/PushTokenRequest.md)
  - [Qualification](doc/Qualification.md)
  - [QualificationPage](doc/QualificationPage.md)
  - [RefreshTokenRequest](doc/RefreshTokenRequest.md)
@@ -144,7 +172,9 @@ Class | Method | HTTP request | Description
  - [ShiftRequest](doc/ShiftRequest.md)
  - [ShiftStatus](doc/ShiftStatus.md)
  - [SignupInfo](doc/SignupInfo.md)
+ - [SystemEvent](doc/SystemEvent.md)
  - [TokenResponse](doc/TokenResponse.md)
+ - [UnreadCount](doc/UnreadCount.md)
  - [Worker](doc/Worker.md)
  - [WorkerPage](doc/WorkerPage.md)
  - [WorkerProfile](doc/WorkerProfile.md)

@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:shiftboard_api/src/model/agency_features.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -13,6 +14,7 @@ part 'agency_summary.g.dart';
 /// Properties:
 /// * [id]
 /// * [name]
+/// * [features] - The optional features the agency has switched on.
 @BuiltValue()
 abstract class AgencySummary
     implements Built<AgencySummary, AgencySummaryBuilder> {
@@ -21,6 +23,10 @@ abstract class AgencySummary
 
   @BuiltValueField(wireName: r'name')
   String get name;
+
+  /// The optional features the agency has switched on.
+  @BuiltValueField(wireName: r'features')
+  AgencyFeatures? get features;
 
   AgencySummary._();
 
@@ -57,6 +63,13 @@ class _$AgencySummarySerializer implements PrimitiveSerializer<AgencySummary> {
       object.name,
       specifiedType: const FullType(String),
     );
+    if (object.features != null) {
+      yield r'features';
+      yield serializers.serialize(
+        object.features,
+        specifiedType: const FullType(AgencyFeatures),
+      );
+    }
   }
 
   @override
@@ -95,6 +108,14 @@ class _$AgencySummarySerializer implements PrimitiveSerializer<AgencySummary> {
             specifiedType: const FullType(String),
           ) as String;
           result.name = valueDes;
+          break;
+        case r'features':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(AgencyFeatures),
+          ) as AgencyFeatures?;
+          if (valueDes == null) continue;
+          result.features.replace(valueDes);
           break;
         default:
           unhandled.add(key);
