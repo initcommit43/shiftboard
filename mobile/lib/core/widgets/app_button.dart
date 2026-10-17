@@ -16,6 +16,10 @@ enum AppButtonVariant {
 
   /// A quiet action without a surface, such as "Abmelden" below a button.
   text,
+
+  /// A destructive action, such as "Schicht absagen". Never the loud call to
+  /// action of a screen that offers something else.
+  danger,
 }
 
 /// The app's pill button.
@@ -63,9 +67,16 @@ class AppButton extends StatelessWidget {
         colors.surfaceSoft,
         colors.ink,
       ),
+      AppButtonVariant.danger => (
+        colors.danger,
+        colors.dangerText,
+        colors.onDanger,
+      ),
     };
     final filled =
-        variant == AppButtonVariant.action || variant == AppButtonVariant.soft;
+        variant == AppButtonVariant.action ||
+        variant == AppButtonVariant.soft ||
+        variant == AppButtonVariant.danger;
     final enabled = onPressed != null || loading;
 
     final style = ButtonStyle(

@@ -137,11 +137,14 @@ Map<String, Object?> workerShift({
   List<String> qualifications = const [],
   String? contactPhone = '+43 660 5550100',
   String? assignmentStatus,
+  DateTime? cancellableUntil,
+  String? cancelledBy,
+  String status = 'PUBLISHED',
 }) => {
   'id': id,
   'title': title,
   'description': ?description,
-  'status': 'PUBLISHED',
+  'status': status,
   'client': {
     'id': '0199c0de-0000-7000-8000-0000000000d1',
     'name': 'Nordlicht Logistik',
@@ -167,6 +170,8 @@ Map<String, Object?> workerShift({
       'id': '0199c0de-0000-7000-8000-000000000101',
       'status': assignmentStatus,
       'claimedAt': '2026-10-14T08:00:00Z',
+      'cancellableUntil': ?cancellableUntil?.toUtc().toIso8601String(),
+      'cancelledBy': ?cancelledBy,
     },
 };
 

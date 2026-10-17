@@ -591,5 +591,97 @@
   "claimErrorOverlap": "Du hast zu dieser Zeit schon eine Schicht.",
   "@claimErrorOverlap": {
     "description": "A claim failed because it overlaps another claimed shift."
+  },
+  "cancelAction": "Schicht absagen",
+  "@cancelAction": {
+    "description": "Button on the detail of a claimed shift that starts dropping out."
+  },
+  "cancelUntil": "Absagen in der App bis {date}, {time}",
+  "@cancelUntil": {
+    "description": "Note on a claimed shift: until when the worker can drop out in the app.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Fr., 16. Okt."
+      },
+      "time": {
+        "type": "String",
+        "example": "18:00"
+      }
+    }
+  },
+  "cancelDeadlinePassed": "Absagefrist vorbei",
+  "@cancelDeadlinePassed": {
+    "description": "Disabled cancel button after the agency's cancellation deadline."
+  },
+  "cancelDeadlinePassedHint": "Wenn du nicht kommen kannst, sag {contact} Bescheid.",
+  "@cancelDeadlinePassedHint": {
+    "description": "Below the disabled cancel button: who to tell instead.",
+    "placeholders": {
+      "contact": {
+        "type": "String",
+        "example": "Anna Berger"
+      }
+    }
+  },
+  "cancelSheetTitle": "Schicht absagen?",
+  "@cancelSheetTitle": {
+    "description": "Title of the sheet that confirms dropping out of a shift."
+  },
+  "cancelSheetMessage": "Dein Platz wird wieder frei. Anfragen kannst du diese Schicht danach nicht mehr.",
+  "@cancelSheetMessage": {
+    "description": "Message of the sheet that confirms dropping out."
+  },
+  "cancelSubmit": "Absagen",
+  "@cancelSubmit": {
+    "description": "Button in the sheet that drops out of the shift."
+  },
+  "cancelSubmitting": "Wird abgesagt …",
+  "@cancelSubmitting": {
+    "description": "The sheet's button while the cancellation is sent."
+  },
+  "cancelKeep": "Behalten",
+  "@cancelKeep": {
+    "description": "Button that closes the cancel sheet without cancelling."
+  },
+  "cancelDone": "Du hast die Schicht abgesagt.",
+  "@cancelDone": {
+    "description": "Snackbar after the worker dropped out."
+  },
+  "cancelErrorDeadline": "Die Absagefrist ist gerade abgelaufen. Sag der Agentur Bescheid.",
+  "@cancelErrorDeadline": {
+    "description": "The cancellation came in after the deadline."
+  },
+  "cancelErrorNotActive": "Diese Schicht ist schon abgesagt.",
+  "@cancelErrorNotActive": {
+    "description": "The claim no longer holds a spot."
+  },
+  "errorConcurrentChange": "Gerade hat sich an der Schicht etwas geändert. Versuch es noch einmal.",
+  "@errorConcurrentChange": {
+    "description": "The shift kept changing at the same moment."
+  },
+  "claimCancelledByYou": "Du hast diese Schicht abgesagt.",
+  "@claimCancelledByYou": {
+    "description": "Note on a shift the worker dropped out of."
+  },
+  "claimRemovedByAgency": "{agency} hat dich aus dieser Schicht genommen.",
+  "@claimRemovedByAgency": {
+    "description": "Note on a shift the agency removed the worker from.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "shiftCancelledByAgency": "{agency} hat diese Schicht abgesagt.",
+  "@shiftCancelledByAgency": {
+    "description": "Note on a claimed shift the agency called off.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
   }
 }
