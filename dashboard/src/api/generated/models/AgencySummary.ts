@@ -13,6 +13,14 @@
  */
 
 import { mapValues } from '../runtime';
+import type { AgencyFeatures } from './AgencyFeatures';
+import {
+    AgencyFeaturesFromJSON,
+    AgencyFeaturesFromJSONTyped,
+    AgencyFeaturesToJSON,
+    AgencyFeaturesToJSONTyped,
+} from './AgencyFeatures';
+
 /**
  * 
  * @export
@@ -27,6 +35,10 @@ export interface AgencySummary {
      * 
      */
     name: string;
+    /**
+     * The optional features the agency has switched on.
+     */
+    features?: AgencyFeatures;
 }
 
 /**
@@ -50,6 +62,7 @@ export function AgencySummaryFromJSONTyped(json: any, ignoreDiscriminator: boole
         
         'id': json['id'],
         'name': json['name'],
+        'features': json['features'] == null ? undefined : AgencyFeaturesFromJSON(json['features']),
     };
 }
 
@@ -66,6 +79,7 @@ export function AgencySummaryToJSONTyped(value?: AgencySummary | null, ignoreDis
         
         'id': value['id'],
         'name': value['name'],
+        'features': AgencyFeaturesToJSON(value['features']),
     };
 }
 

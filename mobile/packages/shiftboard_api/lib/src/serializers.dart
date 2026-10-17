@@ -14,22 +14,36 @@ import 'package:built_value/iso_8601_date_time_serializer.dart';
 import 'package:shiftboard_api/src/date_serializer.dart';
 import 'package:shiftboard_api/src/model/date.dart';
 
+import 'package:shiftboard_api/src/model/agency_features.dart';
 import 'package:shiftboard_api/src/model/agency_settings.dart';
 import 'package:shiftboard_api/src/model/agency_summary.dart';
 import 'package:shiftboard_api/src/model/assigned_worker.dart';
 import 'package:shiftboard_api/src/model/assignment_status.dart';
 import 'package:shiftboard_api/src/model/assignment_summary.dart';
+import 'package:shiftboard_api/src/model/broadcast_request.dart';
+import 'package:shiftboard_api/src/model/broadcast_result.dart';
 import 'package:shiftboard_api/src/model/cancelled_by.dart';
 import 'package:shiftboard_api/src/model/client.dart';
 import 'package:shiftboard_api/src/model/client_page.dart';
 import 'package:shiftboard_api/src/model/client_summary.dart';
 import 'package:shiftboard_api/src/model/client_type.dart';
+import 'package:shiftboard_api/src/model/conversation.dart';
+import 'package:shiftboard_api/src/model/conversation_page.dart';
+import 'package:shiftboard_api/src/model/conversation_worker.dart';
 import 'package:shiftboard_api/src/model/current_user.dart';
 import 'package:shiftboard_api/src/model/field_error.dart';
 import 'package:shiftboard_api/src/model/location.dart';
 import 'package:shiftboard_api/src/model/login_request.dart';
+import 'package:shiftboard_api/src/model/message.dart';
+import 'package:shiftboard_api/src/model/message_page.dart';
+import 'package:shiftboard_api/src/model/message_request.dart';
+import 'package:shiftboard_api/src/model/message_shift.dart';
+import 'package:shiftboard_api/src/model/message_type.dart';
+import 'package:shiftboard_api/src/model/notification_settings.dart';
 import 'package:shiftboard_api/src/model/ping.dart';
 import 'package:shiftboard_api/src/model/problem.dart';
+import 'package:shiftboard_api/src/model/push_platform.dart';
+import 'package:shiftboard_api/src/model/push_token_request.dart';
 import 'package:shiftboard_api/src/model/qualification.dart';
 import 'package:shiftboard_api/src/model/qualification_page.dart';
 import 'package:shiftboard_api/src/model/refresh_token_request.dart';
@@ -44,7 +58,9 @@ import 'package:shiftboard_api/src/model/shift_period.dart';
 import 'package:shiftboard_api/src/model/shift_request.dart';
 import 'package:shiftboard_api/src/model/shift_status.dart';
 import 'package:shiftboard_api/src/model/signup_info.dart';
+import 'package:shiftboard_api/src/model/system_event.dart';
 import 'package:shiftboard_api/src/model/token_response.dart';
+import 'package:shiftboard_api/src/model/unread_count.dart';
 import 'package:shiftboard_api/src/model/worker.dart';
 import 'package:shiftboard_api/src/model/worker_page.dart';
 import 'package:shiftboard_api/src/model/worker_profile.dart';
@@ -56,22 +72,36 @@ import 'package:shiftboard_api/src/model/worker_status.dart';
 part 'serializers.g.dart';
 
 @SerializersFor([
+  AgencyFeatures,
   AgencySettings,
   AgencySummary,
   AssignedWorker,
   AssignmentStatus,
   AssignmentSummary,
+  BroadcastRequest,
+  BroadcastResult,
   CancelledBy,
   Client,
   ClientPage,
   ClientSummary,
   ClientType,
+  Conversation,
+  ConversationPage,
+  ConversationWorker,
   CurrentUser,
   FieldError,
   Location,
   LoginRequest,
+  Message,
+  MessagePage,
+  MessageRequest,
+  MessageShift,
+  MessageType,
+  NotificationSettings,
   Ping,
   Problem,
+  PushPlatform,
+  PushTokenRequest,
   Qualification,
   QualificationPage,
   RefreshTokenRequest,
@@ -86,7 +116,9 @@ part 'serializers.g.dart';
   ShiftRequest,
   ShiftStatus,
   SignupInfo,
+  SystemEvent,
   TokenResponse,
+  UnreadCount,
   Worker,
   WorkerPage,
   WorkerProfile,
@@ -99,6 +131,10 @@ Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Client)]),
         () => ListBuilder<Client>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Message)]),
+        () => ListBuilder<Message>(),
       )
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Qualification)]),
@@ -131,6 +167,10 @@ Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(WorkerShift)]),
         () => ListBuilder<WorkerShift>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Conversation)]),
+        () => ListBuilder<Conversation>(),
       )
       ..add(const OneOfSerializer())
       ..add(const AnyOfSerializer())
