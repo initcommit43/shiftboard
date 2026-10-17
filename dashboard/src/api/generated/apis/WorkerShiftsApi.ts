@@ -113,7 +113,7 @@ export class WorkerShiftsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Sets the worker\'s pending or confirmed assignment to `CANCELLED` with `cancelledBy` `WORKER` and frees the spot. Possible until `assignment.cancellableUntil`, which follows from the agency\'s cancellation deadline; afterwards the worker has to contact the agency. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403), `shift_not_found` (404), `assignment_not_found` (404, the worker has not claimed the shift), and with 409: `assignment_not_active` (not pending or confirmed) and `cancellation_deadline_passed`. 
+     * Sets the worker\'s pending or confirmed assignment to `CANCELLED` with `cancelledBy` `WORKER` and frees the spot. Possible until `assignment.cancellableUntil`, which follows from the agency\'s cancellation deadline; afterwards the worker has to contact the agency. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403), `shift_not_found` (404), `assignment_not_found` (404, the worker has not claimed the shift), and with 409: `assignment_not_active` (not pending or confirmed), `cancellation_deadline_passed` and `concurrent_change` (the shift kept changing at the same moment; try again). 
      * Drop out of a claimed shift
      */
     async cancelClaimRaw(requestParameters: CancelClaimRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WorkerShift>> {
@@ -124,7 +124,7 @@ export class WorkerShiftsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Sets the worker\'s pending or confirmed assignment to `CANCELLED` with `cancelledBy` `WORKER` and frees the spot. Possible until `assignment.cancellableUntil`, which follows from the agency\'s cancellation deadline; afterwards the worker has to contact the agency. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403), `shift_not_found` (404), `assignment_not_found` (404, the worker has not claimed the shift), and with 409: `assignment_not_active` (not pending or confirmed) and `cancellation_deadline_passed`. 
+     * Sets the worker\'s pending or confirmed assignment to `CANCELLED` with `cancelledBy` `WORKER` and frees the spot. Possible until `assignment.cancellableUntil`, which follows from the agency\'s cancellation deadline; afterwards the worker has to contact the agency. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403), `shift_not_found` (404), `assignment_not_found` (404, the worker has not claimed the shift), and with 409: `assignment_not_active` (not pending or confirmed), `cancellation_deadline_passed` and `concurrent_change` (the shift kept changing at the same moment; try again). 
      * Drop out of a claimed shift
      */
     async cancelClaim(requestParameters: CancelClaimRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WorkerShift> {

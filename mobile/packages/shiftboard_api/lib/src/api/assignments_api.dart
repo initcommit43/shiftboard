@@ -311,7 +311,7 @@ class AssignmentsApi {
   }
 
   /// Reject a claim
-  /// Sets a pending assignment to &#x60;REJECTED&#x60; and frees its spot. Dispatchers and admins only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;shift_not_found&#x60; (404), &#x60;assignment_not_found&#x60; (404), &#x60;assignment_not_pending&#x60; (409).
+  /// Sets a pending assignment to &#x60;REJECTED&#x60; and frees its spot. Dispatchers and admins only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;shift_not_found&#x60; (404), &#x60;assignment_not_found&#x60; (404), and with 409: &#x60;assignment_not_pending&#x60; and &#x60;concurrent_change&#x60; (the shift kept changing at the same moment; try again).
   ///
   /// Parameters:
   /// * [shiftId]
@@ -404,7 +404,7 @@ class AssignmentsApi {
   }
 
   /// Remove a worker from a shift
-  /// Sets a pending or confirmed assignment to &#x60;CANCELLED&#x60; with &#x60;cancelledBy&#x60; &#x60;AGENCY&#x60; and frees its spot. The reason is kept for the agency; the worker does not see it. Dispatchers and admins only.  Field error codes: &#x60;required&#x60;, &#x60;invalid_length&#x60; (&#x60;reason&#x60;).  Error codes: &#x60;validation_failed&#x60; (400, with &#x60;errors&#x60;), &#x60;forbidden&#x60; (403), &#x60;shift_not_found&#x60; (404), &#x60;assignment_not_found&#x60; (404), &#x60;assignment_not_active&#x60; (409, not pending or confirmed).
+  /// Sets a pending or confirmed assignment to &#x60;CANCELLED&#x60; with &#x60;cancelledBy&#x60; &#x60;AGENCY&#x60; and frees its spot. The reason is kept for the agency; the worker does not see it. Dispatchers and admins only.  Field error codes: &#x60;required&#x60;, &#x60;invalid_length&#x60; (&#x60;reason&#x60;).  Error codes: &#x60;validation_failed&#x60; (400, with &#x60;errors&#x60;), &#x60;forbidden&#x60; (403), &#x60;shift_not_found&#x60; (404), &#x60;assignment_not_found&#x60; (404), and with 409: &#x60;assignment_not_active&#x60; (not pending or confirmed) and &#x60;concurrent_change&#x60; (the shift kept changing at the same moment; try again).
   ///
   /// Parameters:
   /// * [shiftId]

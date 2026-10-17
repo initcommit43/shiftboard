@@ -21,7 +21,7 @@ class WorkerShiftsApi {
   const WorkerShiftsApi(this._dio, this._serializers);
 
   /// Drop out of a claimed shift
-  /// Sets the worker&#39;s pending or confirmed assignment to &#x60;CANCELLED&#x60; with &#x60;cancelledBy&#x60; &#x60;WORKER&#x60; and frees the spot. Possible until &#x60;assignment.cancellableUntil&#x60;, which follows from the agency&#39;s cancellation deadline; afterwards the worker has to contact the agency. Active workers only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;worker_not_active&#x60; (403), &#x60;shift_not_found&#x60; (404), &#x60;assignment_not_found&#x60; (404, the worker has not claimed the shift), and with 409: &#x60;assignment_not_active&#x60; (not pending or confirmed) and &#x60;cancellation_deadline_passed&#x60;.
+  /// Sets the worker&#39;s pending or confirmed assignment to &#x60;CANCELLED&#x60; with &#x60;cancelledBy&#x60; &#x60;WORKER&#x60; and frees the spot. Possible until &#x60;assignment.cancellableUntil&#x60;, which follows from the agency&#39;s cancellation deadline; afterwards the worker has to contact the agency. Active workers only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;worker_not_active&#x60; (403), &#x60;shift_not_found&#x60; (404), &#x60;assignment_not_found&#x60; (404, the worker has not claimed the shift), and with 409: &#x60;assignment_not_active&#x60; (not pending or confirmed), &#x60;cancellation_deadline_passed&#x60; and &#x60;concurrent_change&#x60; (the shift kept changing at the same moment; try again).
   ///
   /// Parameters:
   /// * [shiftId]

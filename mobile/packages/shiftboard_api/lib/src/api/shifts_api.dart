@@ -23,7 +23,7 @@ class ShiftsApi {
   const ShiftsApi(this._dio, this._serializers);
 
   /// Call off a shift
-  /// Sets a draft or published shift to &#x60;CANCELLED&#x60;, together with all its pending and confirmed assignments (&#x60;cancelledBy&#x60; is &#x60;AGENCY&#x60;). Dispatchers and admins only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;shift_not_found&#x60; (404), &#x60;shift_not_cancellable&#x60; (409, the shift is completed or already cancelled).
+  /// Sets a draft or published shift that has not ended to &#x60;CANCELLED&#x60;, together with all its pending and confirmed assignments (&#x60;cancelledBy&#x60; is &#x60;AGENCY&#x60;). Dispatchers and admins only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;shift_not_found&#x60; (404), and with 409: &#x60;shift_not_cancellable&#x60; (the shift has ended or is already cancelled) and &#x60;concurrent_change&#x60; (the shift kept changing at the same moment; try again).
   ///
   /// Parameters:
   /// * [shiftId]

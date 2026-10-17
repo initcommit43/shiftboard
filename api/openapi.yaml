@@ -578,13 +578,15 @@ paths:
       tags: [shifts]
       summary: Call off a shift
       description: |
-        Sets a draft or published shift to `CANCELLED`, together with all its
-        pending and confirmed assignments (`cancelledBy` is `AGENCY`).
+        Sets a draft or published shift that has not ended to `CANCELLED`,
+        together with all its pending and confirmed assignments (`cancelledBy`
+        is `AGENCY`).
         Dispatchers and admins only.
 
-        Error codes: `forbidden` (403), `shift_not_found` (404),
-        `shift_not_cancellable` (409, the shift is completed or already
-        cancelled).
+        Error codes: `forbidden` (403), `shift_not_found` (404), and with 409:
+        `shift_not_cancellable` (the shift has ended or is already
+        cancelled) and `concurrent_change` (the shift kept changing at the
+        same moment; try again).
       responses:
         "200":
           description: The cancelled shift.
@@ -683,7 +685,9 @@ paths:
         and admins only.
 
         Error codes: `forbidden` (403), `shift_not_found` (404),
-        `assignment_not_found` (404), `assignment_not_pending` (409).
+        `assignment_not_found` (404), and with 409: `assignment_not_pending`
+        and `concurrent_change` (the shift kept changing at the same moment;
+        try again).
       responses:
         "200":
           description: The assignment after the change.
@@ -718,8 +722,10 @@ paths:
         Field error codes: `required`, `invalid_length` (`reason`).
 
         Error codes: `validation_failed` (400, with `errors`), `forbidden`
-        (403), `shift_not_found` (404), `assignment_not_found` (404),
-        `assignment_not_active` (409, not pending or confirmed).
+        (403), `shift_not_found` (404), `assignment_not_found` (404), and with
+        409: `assignment_not_active` (not pending or confirmed) and
+        `concurrent_change` (the shift kept changing at the same moment; try
+        again).
       requestBody:
         required: true
         content:
@@ -895,7 +901,9 @@ paths:
         Error codes: `forbidden` (403), `worker_not_active` (403),
         `shift_not_found` (404), `assignment_not_found` (404, the worker has
         not claimed the shift), and with 409: `assignment_not_active` (not
-        pending or confirmed) and `cancellation_deadline_passed`.
+        pending or confirmed), `cancellation_deadline_passed` and
+        `concurrent_change` (the shift kept changing at the same moment; try
+        again).
       responses:
         "200":
           description: The shift with the worker's cancelled assignment.

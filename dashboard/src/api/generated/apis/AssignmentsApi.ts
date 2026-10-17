@@ -348,7 +348,7 @@ export class AssignmentsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Sets a pending assignment to `REJECTED` and frees its spot. Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404), `assignment_not_found` (404), `assignment_not_pending` (409). 
+     * Sets a pending assignment to `REJECTED` and frees its spot. Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404), `assignment_not_found` (404), and with 409: `assignment_not_pending` and `concurrent_change` (the shift kept changing at the same moment; try again). 
      * Reject a claim
      */
     async rejectAssignmentRaw(requestParameters: RejectAssignmentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ShiftAssignment>> {
@@ -359,7 +359,7 @@ export class AssignmentsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Sets a pending assignment to `REJECTED` and frees its spot. Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404), `assignment_not_found` (404), `assignment_not_pending` (409). 
+     * Sets a pending assignment to `REJECTED` and frees its spot. Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404), `assignment_not_found` (404), and with 409: `assignment_not_pending` and `concurrent_change` (the shift kept changing at the same moment; try again). 
      * Reject a claim
      */
     async rejectAssignment(requestParameters: RejectAssignmentRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ShiftAssignment> {
@@ -421,7 +421,7 @@ export class AssignmentsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Sets a pending or confirmed assignment to `CANCELLED` with `cancelledBy` `AGENCY` and frees its spot. The reason is kept for the agency; the worker does not see it. Dispatchers and admins only.  Field error codes: `required`, `invalid_length` (`reason`).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403), `shift_not_found` (404), `assignment_not_found` (404), `assignment_not_active` (409, not pending or confirmed). 
+     * Sets a pending or confirmed assignment to `CANCELLED` with `cancelledBy` `AGENCY` and frees its spot. The reason is kept for the agency; the worker does not see it. Dispatchers and admins only.  Field error codes: `required`, `invalid_length` (`reason`).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403), `shift_not_found` (404), `assignment_not_found` (404), and with 409: `assignment_not_active` (not pending or confirmed) and `concurrent_change` (the shift kept changing at the same moment; try again). 
      * Remove a worker from a shift
      */
     async removeAssignmentRaw(requestParameters: RemoveAssignmentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ShiftAssignment>> {
@@ -432,7 +432,7 @@ export class AssignmentsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Sets a pending or confirmed assignment to `CANCELLED` with `cancelledBy` `AGENCY` and frees its spot. The reason is kept for the agency; the worker does not see it. Dispatchers and admins only.  Field error codes: `required`, `invalid_length` (`reason`).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403), `shift_not_found` (404), `assignment_not_found` (404), `assignment_not_active` (409, not pending or confirmed). 
+     * Sets a pending or confirmed assignment to `CANCELLED` with `cancelledBy` `AGENCY` and frees its spot. The reason is kept for the agency; the worker does not see it. Dispatchers and admins only.  Field error codes: `required`, `invalid_length` (`reason`).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403), `shift_not_found` (404), `assignment_not_found` (404), and with 409: `assignment_not_active` (not pending or confirmed) and `concurrent_change` (the shift kept changing at the same moment; try again). 
      * Remove a worker from a shift
      */
     async removeAssignment(requestParameters: RemoveAssignmentOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ShiftAssignment> {

@@ -123,7 +123,7 @@ export class ShiftsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Sets a draft or published shift to `CANCELLED`, together with all its pending and confirmed assignments (`cancelledBy` is `AGENCY`). Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404), `shift_not_cancellable` (409, the shift is completed or already cancelled). 
+     * Sets a draft or published shift that has not ended to `CANCELLED`, together with all its pending and confirmed assignments (`cancelledBy` is `AGENCY`). Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404), and with 409: `shift_not_cancellable` (the shift has ended or is already cancelled) and `concurrent_change` (the shift kept changing at the same moment; try again). 
      * Call off a shift
      */
     async cancelShiftRaw(requestParameters: CancelShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Shift>> {
@@ -134,7 +134,7 @@ export class ShiftsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Sets a draft or published shift to `CANCELLED`, together with all its pending and confirmed assignments (`cancelledBy` is `AGENCY`). Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404), `shift_not_cancellable` (409, the shift is completed or already cancelled). 
+     * Sets a draft or published shift that has not ended to `CANCELLED`, together with all its pending and confirmed assignments (`cancelledBy` is `AGENCY`). Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404), and with 409: `shift_not_cancellable` (the shift has ended or is already cancelled) and `concurrent_change` (the shift kept changing at the same moment; try again). 
      * Call off a shift
      */
     async cancelShift(requestParameters: CancelShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Shift> {
