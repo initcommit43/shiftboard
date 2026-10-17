@@ -121,6 +121,8 @@ flutter analyze
 flutter test
 ```
 
+Push notifications in the app need a Firebase project (ADR 0024). Copy `mobile/firebase.json.example` to `mobile/firebase.json` (ignored by Git), fill in the project's values and run `flutter run --dart-define-from-file=firebase.json`. Without it the app runs without push. On iOS, push also needs the Push Notifications capability in Xcode and an APNs key in Firebase.
+
 CI runs the same checks per folder; see `.github/workflows/`. Each folder's README has more detail.
 
 ## Privacy and secrets
