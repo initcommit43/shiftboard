@@ -58,6 +58,9 @@ class Worker {
     @CreationTimestamp
     private Instant createdAt;
 
+    /** No push for new shifts while true; decisions and messages still reach the worker. */
+    private boolean notificationsPaused;
+
     @UpdateTimestamp
     private Instant updatedAt;
 
@@ -86,6 +89,14 @@ class Worker {
             throw new WorkerNotPendingException();
         }
         status = decision;
+    }
+
+    void pauseNewShiftNotifications(boolean paused) {
+        notificationsPaused = paused;
+    }
+
+    boolean isNotificationsPaused() {
+        return notificationsPaused;
     }
 
     UUID getId() {

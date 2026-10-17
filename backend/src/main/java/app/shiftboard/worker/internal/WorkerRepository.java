@@ -19,6 +19,9 @@ interface WorkerRepository extends Repository<Worker, UUID> {
 
     List<Worker> findAllById(Iterable<UUID> ids);
 
+    @Query("select w.id from Worker w where w.status = :status and w.notificationsPaused = false")
+    List<UUID> findIdsByStatusAndNotificationsPausedFalse(WorkerStatus status);
+
     Page<Worker> findAll(Pageable pageable);
 
     Page<Worker> findByStatus(WorkerStatus status, Pageable pageable);

@@ -33,6 +33,10 @@ shiftboard:
     # Background jobs; ShedLock lets one instance run each of them at a time.
     enabled: true
     complete-shifts-every: PT1M
+  push:
+    fcm:
+      # Service account key of the Firebase project. Without it, push notifications are only logged (ADR 0024).
+      credentials-file: ${FCM_CREDENTIALS_FILE:}
   api:
     # Version of the contract in api/openapi.yaml that this backend implements.
     version: 0.1.0

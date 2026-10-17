@@ -121,6 +121,8 @@ flutter analyze
 flutter test
 ```
 
+**Push notifications** are off until Firebase is configured (ADR 0024). The backend sends through FCM when `FCM_CREDENTIALS_FILE` points to the service account key of the Firebase project; without it, it only logs. Key files are ignored by Git; keep them outside the repository.
+
 CI runs the same checks per folder; see `.github/workflows/`. Each folder's README has more detail.
 
 ## Privacy and secrets
