@@ -50,6 +50,9 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..add(ShiftPeriod.serializer)
       ..add(ShiftRequest.serializer)
       ..add(ShiftStatus.serializer)
+      ..add(ShiftTemplate.serializer)
+      ..add(ShiftTemplatePage.serializer)
+      ..add(ShiftTemplateRequest.serializer)
       ..add(SignupInfo.serializer)
       ..add(SystemEvent.serializer)
       ..add(TokenResponse.serializer)
@@ -95,11 +98,20 @@ Serializers _$serializers = (Serializers().toBuilder()
           const FullType(BuiltList, const [const FullType(ShiftAssignment)]),
           () => ListBuilder<ShiftAssignment>())
       ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(ShiftTemplate)]),
+          () => ListBuilder<ShiftTemplate>())
+      ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(Worker)]),
           () => ListBuilder<Worker>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(WorkerShift)]),
           () => ListBuilder<WorkerShift>())
+      ..addBuilderFactory(
+          const FullType(BuiltSet, const [const FullType(String)]),
+          () => SetBuilder<String>())
+      ..addBuilderFactory(
+          const FullType(BuiltSet, const [const FullType(String)]),
+          () => SetBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltSet, const [const FullType(String)]),
           () => SetBuilder<String>()))

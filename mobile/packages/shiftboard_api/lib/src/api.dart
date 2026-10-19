@@ -15,6 +15,7 @@ import 'package:shiftboard_api/src/api/clients_api.dart';
 import 'package:shiftboard_api/src/api/messages_api.dart';
 import 'package:shiftboard_api/src/api/notifications_api.dart';
 import 'package:shiftboard_api/src/api/settings_api.dart';
+import 'package:shiftboard_api/src/api/shift_templates_api.dart';
 import 'package:shiftboard_api/src/api/shifts_api.dart';
 import 'package:shiftboard_api/src/api/signup_api.dart';
 import 'package:shiftboard_api/src/api/system_api.dart';
@@ -175,6 +176,12 @@ class ShiftboardApi {
   /// by doing that all interceptors will not be executed
   SettingsApi getSettingsApi() {
     return SettingsApi(dio, serializers);
+  }
+
+  /// Get ShiftTemplatesApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  ShiftTemplatesApi getShiftTemplatesApi() {
+    return ShiftTemplatesApi(dio, serializers);
   }
 
   /// Get ShiftsApi instance, base route and serializer can be overridden by a given but be careful,
