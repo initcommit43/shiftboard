@@ -1,4 +1,12 @@
-import type { Client, FieldError, Qualification, Shift, ShiftRequest } from '@/api/generated'
+import type {
+  Client,
+  FieldError,
+  Qualification,
+  Shift,
+  ShiftRequest,
+  ShiftTemplate,
+  ShiftTemplateRequest,
+} from '@/api/generated'
 
 /** The shift form as the dispatcher types it: every input as text. */
 export interface ShiftDraft {
@@ -156,6 +164,53 @@ export function shiftSource(shift: Shift): DraftSource {
   }
 }
 
+const MINUTES_PER_DAY = 24 * 60
+
+function minutesOfDay(time: string) {
+  const [hours = 0, minutes = 0] = time.split(':').map(Number)
+  return hours * 60 + minutes
+}
+
+/** `hh:mm` plus a number of minutes, wrapping past midnight. */
+function addMinutes(time: string, minutes: number) {
+  const total = (minutesOfDay(time) + minutes) % MINUTES_PER_DAY
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
+}
+
+/** What a template gives a new shift: everything but the date. */
+export function templateSource(template: ShiftTemplate): DraftSource {
+  return {
+    clientId: template.clientId,
+    locationId: template.locationId,
+    title: template.title,
+    description: template.description,
+    startTime: template.startTime,
+    endTime: addMinutes(template.startTime, template.durationMinutes),
+    endIsEstimate: template.endIsEstimate,
+    hourlyRateCents: template.hourlyRateCents,
+    slots: template.slots,
+    qualificationIds: [...template.qualificationIds],
+  }
+}
+
+/** A template request without its name, from values that already passed validation. */
+export function sourceToTemplate(source: DraftSource): Omit<ShiftTemplateRequest, 'name'> {
+  const length = minutesOfDay(source.endTime) - minutesOfDay(source.startTime)
+  return {
+    clientId: source.clientId,
+    locationId: source.locationId,
+    title: source.title,
+    ...(source.description && { description: source.description }),
+    startTime: source.startTime,
+    // An end before the start is on the next day.
+    durationMinutes: length > 0 ? length : length + MINUTES_PER_DAY,
+    endIsEstimate: source.endIsEstimate,
+    hourlyRateCents: source.hourlyRateCents,
+    slots: source.slots,
+    qualificationIds: new Set(source.qualificationIds),
+  }
+}
+
 export function soleLocationId(clients: Client[], clientId: string) {
   const locations = clients.find((client) => client.id === clientId)?.locations ?? []
   return locations.length === 1 ? (locations[0]?.id ?? '') : ''
@@ -227,6 +282,32 @@ export function validate(draft: ShiftDraft): DraftErrors {
   return errors
 }
 
+/** A template needs everything a shift needs except the date. */
+export function validateTemplate(draft: ShiftDraft): DraftErrors {
+  // Any date passes, so the date is the one field that cannot be wrong here.
+  return validate({ ...draft, date: 'any' })
+}
+
+/** The template for a draft that passed `validateTemplate`, without its name. */
+export function toTemplateRequest(draft: ShiftDraft): Omit<ShiftTemplateRequest, 'name'> {
+  const rate = parseRate(draft.hourlyRate)
+  if (rate === null) {
+    throw new Error('The draft has not been validated')
+  }
+  return sourceToTemplate({
+    clientId: draft.clientId,
+    locationId: draft.locationId,
+    title: draft.title.trim(),
+    description: draft.description.trim(),
+    startTime: draft.startTime,
+    endTime: draft.endTime,
+    endIsEstimate: draft.endIsEstimate,
+    hourlyRateCents: rate,
+    slots: Number(draft.slots),
+    qualificationIds: draft.qualificationIds,
+  })
+}
+
 /** The request for a draft that passed `validate`. */
 export function toShiftRequest(draft: ShiftDraft, publish: boolean): ShiftRequest {
   const times = shiftTimes(draft)
@@ -262,6 +343,13 @@ const REQUEST_FIELDS: Record<string, DraftField> = {
   qualificationIds: 'qualificationIds',
 }
 
+/** Where the field errors of a rejected template land on the form. */
+export const TEMPLATE_REQUEST_FIELDS: Record<string, DraftField> = {
+  ...REQUEST_FIELDS,
+  startTime: 'startTime',
+  durationMinutes: 'endTime',
+}
+
 const SHARED_CODES = new Set<string>([
   'required',
   'invalid_format',
@@ -271,10 +359,13 @@ const SHARED_CODES = new Set<string>([
 ])
 
 /** The field errors of a `validation_failed` response, placed on the fields of the form. */
-export function serverErrors(fieldErrors: FieldError[]): DraftErrors {
+export function serverErrors(
+  fieldErrors: FieldError[],
+  fields: Record<string, DraftField> = REQUEST_FIELDS,
+): DraftErrors {
   const errors: DraftErrors = {}
   for (const { field, code } of fieldErrors) {
-    const draftField = REQUEST_FIELDS[field]
+    const draftField = fields[field]
     if (!draftField) {
       continue
     }

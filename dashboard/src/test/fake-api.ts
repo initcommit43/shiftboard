@@ -24,6 +24,8 @@ import {
   type ShiftAssignment,
   ShiftAssignmentToJSON,
   ShiftStatus,
+  type ShiftTemplate,
+  ShiftTemplateToJSON,
   ShiftToJSON,
   type Worker,
   WorkerStatus,
@@ -145,6 +147,36 @@ export const inventory = shift(3, {
   takenSlots: 2,
 })
 
+export const morningTemplate: ShiftTemplate = {
+  id: '0199c3a0-0000-7000-8000-000000000701',
+  name: 'Lager Frühschicht',
+  clientId: nordlicht.id,
+  locationId: zentrallager.id,
+  title: 'Lagerunterstützung',
+  description: 'Sicherheitsschuhe mitbringen.',
+  startTime: '06:00',
+  durationMinutes: 480,
+  endIsEstimate: false,
+  hourlyRateCents: 1650,
+  slots: 3,
+  qualificationIds: new Set([forklift.id]),
+  createdAt: new Date(2026, 9, 12, 9, 0),
+}
+export const nightTemplate: ShiftTemplate = {
+  id: '0199c3a0-0000-7000-8000-000000000702',
+  name: 'Gala Nachtservice',
+  clientId: hafenhalle.id,
+  locationId: hafenhalleLinz.id,
+  title: 'Servicekraft Gala',
+  startTime: '22:00',
+  durationMinutes: 420,
+  endIsEstimate: true,
+  hourlyRateCents: 1850,
+  slots: 6,
+  qualificationIds: new Set([service.id]),
+  createdAt: new Date(2026, 9, 12, 9, 5),
+}
+
 export function assignment(
   number: number,
   person: Worker,
@@ -237,6 +269,8 @@ export function installFakeApi() {
     qualifications: [service, forklift],
     shifts: [warehouse, gala, inventory],
     pastShifts: [lastWeek],
+    /** Sorted by name, as the API sends them. */
+    templates: [nightTemplate, morningTemplate],
     /** The claims per shift id, oldest first. */
     assignments: {
       [warehouse.id]: [
@@ -335,6 +369,32 @@ export function installFakeApi() {
       (a, b) => a.startsAt.getTime() - b.startsAt.getTime(),
     )
     return json(ShiftToJSON(created), 201)
+  }
+
+  function createTemplate(body: Record<string, unknown>) {
+    const name = body['name'] as string
+    if (api.templates.some((it) => it.name.toLowerCase() === name.toLowerCase())) {
+      return problem(409, 'template_name_taken')
+    }
+    const created: ShiftTemplate = {
+      id: `0199c3a0-0000-7000-8000-0000000007${String(api.templates.length + 1).padStart(2, '0')}`,
+      name,
+      clientId: body['clientId'] as string,
+      locationId: body['locationId'] as string,
+      title: body['title'] as string,
+      ...(typeof body['description'] === 'string' && { description: body['description'] }),
+      startTime: body['startTime'] as string,
+      durationMinutes: body['durationMinutes'] as number,
+      endIsEstimate: body['endIsEstimate'] === true,
+      hourlyRateCents: body['hourlyRateCents'] as number,
+      slots: body['slots'] as number,
+      qualificationIds: new Set(body['qualificationIds'] as string[]),
+      createdAt: new Date(2026, 9, 14, 12, 0),
+    }
+    api.templates = [...api.templates, created].sort((a, b) =>
+      a.name.localeCompare(b.name, 'de', { sensitivity: 'base' }),
+    )
+    return json(ShiftTemplateToJSON(created), 201)
   }
 
   function allShifts() {
@@ -456,6 +516,12 @@ export function installFakeApi() {
     }
     if (route === 'GET /qualifications') {
       return page(url, api.qualifications, QualificationToJSON)
+    }
+    if (route === 'GET /shift-templates') {
+      return page(url, api.templates, ShiftTemplateToJSON)
+    }
+    if (route === 'POST /shift-templates') {
+      return createTemplate(body as Record<string, unknown>)
     }
     if (route === 'GET /shifts') {
       const past = url.searchParams.get('period') === 'PAST'

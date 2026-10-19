@@ -236,7 +236,8 @@
     "shift_not_cancellable": "Diese Schicht ist schon vorbei oder abgesagt.",
     "concurrent_change": "Die Schicht wurde gerade gleichzeitig geändert. Bitte versuche es noch einmal.",
     "conversation_not_found": "Diese Unterhaltung gibt es nicht mehr.",
-    "no_recipients": "Für diese Schicht ist noch niemand bestätigt."
+    "no_recipients": "Für diese Schicht ist noch niemand bestätigt.",
+    "template_name_taken": "Eine Vorlage mit diesem Namen gibt es schon."
   },
   "shiftDetail": {
     "back": "Alle Schichten",
@@ -392,5 +393,32 @@
     "send": "Senden",
     "sent_one": "Nachricht an {{count}} Person gesendet",
     "sent_other": "Nachricht an {{count}} Personen gesendet"
+  },
+  "templates": {
+    "save": {
+      "action": "Als Vorlage speichern",
+      "title": "Als Vorlage speichern",
+      "description": "Alles außer dem Datum wird gespeichert. Alle in eurer Agentur können die Vorlage für neue Schichten verwenden.",
+      "name": "Name der Vorlage",
+      "nameHint": "Zum Beispiel Kunde und Schicht, damit sie leicht zu finden ist.",
+      "cancel": "Abbrechen",
+      "confirm": "Vorlage speichern",
+      "errors": {
+        "required": "Bitte gib einen Namen ein.",
+        "taken": "Eine Vorlage mit diesem Namen gibt es schon."
+      }
+    },
+    "saved": {
+      "title": "Vorlage „{{name}}“ gespeichert",
+      "description": "Du findest sie beim Anlegen einer neuen Schicht."
+    },
+    "use": {
+      "label": "Vorlage verwenden",
+      "none": "Ohne Vorlage",
+      "loading": "Vorlagen werden geladen …",
+      "hint": "Füllt das Formular aus, du wählst nur noch das Datum.",
+      "empty": "Noch keine Vorlagen. Speichere eine Schicht mit „Als Vorlage speichern“, dann erscheint sie hier.",
+      "error": "Die Vorlagen konnten nicht geladen werden."
+    }
   }
 }
