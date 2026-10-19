@@ -67,7 +67,8 @@ class SecurityConfiguration {
                                 "/api/v1/conversations/**",
                                 "/api/v1/clients/**",
                                 "/api/v1/qualifications/**",
-                                "/api/v1/shifts/**")
+                                "/api/v1/shifts/**",
+                                "/api/v1/shift-templates/**")
                         .hasAnyRole(Role.DISPATCHER.name(), Role.ADMIN.name())
                         .requestMatchers("/api/v1/worker/**")
                         .hasRole(Role.WORKER.name())
