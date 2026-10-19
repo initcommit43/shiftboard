@@ -143,7 +143,12 @@
         "rate_out_of_range": "The hourly rate has to be above €0.",
         "slots_out_of_range": "Between 1 and 500 spots.",
         "unknown": "This entry was not accepted."
-      }
+      },
+      "duplicate": {
+        "title": "Duplicate shift",
+        "description": "Everything is copied except the date. Pick one, then publish or save as a draft."
+      },
+      "missing": "No longer available, so left empty: {{fields}}. Please choose again."
     },
     "descriptionPast": "Shifts that are over: who worked and who did not turn up.",
     "periods": {
@@ -310,7 +315,8 @@
       "reasonRequired": "Please give a reason.",
       "keep": "Back",
       "confirm": "Remove"
-    }
+    },
+    "duplicate": "Duplicate"
   },
   "settings": {
     "title": "Settings",

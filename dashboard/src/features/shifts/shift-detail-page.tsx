@@ -1,4 +1,4 @@
-import { ArrowLeft, LoaderCircle, SearchX, TriangleAlert } from 'lucide-react'
+import { ArrowLeft, Copy, LoaderCircle, SearchX, TriangleAlert } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
@@ -87,6 +87,12 @@ function ShiftDetail({ shift }: { shift: Shift }) {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline">
+            <Link to={`/shifts/new?from=${shift.id}`}>
+              <Copy aria-hidden />
+              {t('shiftDetail.duplicate')}
+            </Link>
+          </Button>
           {isCancellable(shift) && <CancelShift shift={shift} />}
           {shift.status === ShiftStatus.DRAFT && (
             <Button
