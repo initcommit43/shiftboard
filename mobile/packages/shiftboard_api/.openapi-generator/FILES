@@ -8,6 +8,7 @@ lib/src/api/clients_api.dart
 lib/src/api/messages_api.dart
 lib/src/api/notifications_api.dart
 lib/src/api/settings_api.dart
+lib/src/api/shift_templates_api.dart
 lib/src/api/shifts_api.dart
 lib/src/api/signup_api.dart
 lib/src/api/system_api.dart
@@ -64,6 +65,9 @@ lib/src/model/shift_page.dart
 lib/src/model/shift_period.dart
 lib/src/model/shift_request.dart
 lib/src/model/shift_status.dart
+lib/src/model/shift_template.dart
+lib/src/model/shift_template_page.dart
+lib/src/model/shift_template_request.dart
 lib/src/model/signup_info.dart
 lib/src/model/system_event.dart
 lib/src/model/token_response.dart
