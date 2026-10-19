@@ -28,3 +28,4 @@ One short record per real decision. Format: `NNNN-title.md` with the sections Co
 | [0022](0022-staff-names-and-shift-contact.md) | Names on staff accounts and the contact person of a shift |
 | [0023](0023-background-jobs.md) | Background jobs with @Scheduled and ShedLock |
 | [0024](0024-push-off-until-configured.md) | Push notifications are off until Firebase is configured |
+| [0025](0025-shift-templates.md) | Shift templates are shared per agency and store a local time of day |
