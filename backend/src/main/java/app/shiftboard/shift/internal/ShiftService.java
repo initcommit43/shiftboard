@@ -11,7 +11,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import app.shiftboard.agency.Agencies;
-import app.shiftboard.agency.QualificationSummary;
 import app.shiftboard.client.Clients;
 import app.shiftboard.identity.UserAccounts;
 import app.shiftboard.agency.TenantContext;
