@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.UUID;
 
 import app.shiftboard.IntegrationTest;
@@ -61,6 +62,29 @@ class ShiftTemplateIntegrationTests extends IntegrationTest {
         var stored = jdbc.sql("select hourly_rate from shift_template where agency_id = ?")
                 .param(agency.id()).query(BigDecimal.class).single();
         assertThat(stored).isEqualByComparingTo("16.50");
+    }
+
+    @Test
+    void storesTheStartAsTypedWhateverTheServersTimeZone() {
+        var serverZone = TimeZone.getDefault();
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone("Europe/Vienna"));
+            var request = templateRequest("Nachtschicht");
+            request.put("startTime", "22:00");
+            post("/api/v1/shift-templates", dispatcher, request).expectStatus().isCreated();
+
+            var stored = jdbc.sql("select start_time::text from shift_template where agency_id = ?")
+                    .param(agency.id()).query(String.class).single();
+            assertThat(stored).isEqualTo("22:00:00");
+
+            // Written outside the application, like the seed data.
+            jdbc.sql("update shift_template set start_time = '06:15' where agency_id = ?").param(agency.id()).update();
+            get("/api/v1/shift-templates", dispatcher)
+                    .expectStatus().isOk()
+                    .expectBody().jsonPath("$.content[0].startTime").isEqualTo("06:15");
+        } finally {
+            TimeZone.setDefault(serverZone);
+        }
     }
 
     @Test

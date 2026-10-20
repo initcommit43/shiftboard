@@ -17,9 +17,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcType;
 import org.hibernate.annotations.TenantId;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.descriptor.jdbc.LocalTimeJdbcType;
 
 /**
  * A shift without a date, shared by the whole agency (ADR 0025). The start is a local time of
@@ -49,6 +51,11 @@ class ShiftTemplate {
 
     private String description;
 
+    /**
+     * Bound as a plain {@code time}. The default binding converts through the JDBC time zone (UTC),
+     * which moves the time by the server's offset.
+     */
+    @JdbcType(LocalTimeJdbcType.class)
     private LocalTime startTime;
 
     private int durationMinutes;
