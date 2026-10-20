@@ -39,8 +39,7 @@ class ShiftTemplateService {
 
     @Transactional
     ShiftTemplateResponse create(ShiftTemplateRequest request) {
-        var qualificationIds = request.qualificationIds() == null ? Set.<UUID>of() : request.qualificationIds();
-        references.check(request.clientId(), request.locationId(), qualificationIds);
+        var qualificationIds = checkedQualifications(request);
         var name = request.name().strip();
         if (templates.existsByNameIgnoreCase(name)) {
             throw nameTaken();
@@ -51,13 +50,56 @@ class ShiftTemplateService {
                 request.clientId(),
                 request.locationId(),
                 request.title().strip(),
-                request.description() == null || request.description().isBlank() ? null : request.description().strip(),
+                description(request),
                 LocalTime.parse(request.startTime()),
                 request.durationMinutes(),
                 Boolean.TRUE.equals(request.endIsEstimate()),
                 BigDecimal.valueOf(request.hourlyRateCents(), 2),
                 request.slots(),
                 qualificationIds);
+        return save(template);
+    }
+
+    @Transactional
+    ShiftTemplateResponse update(UUID templateId, ShiftTemplateRequest request) {
+        var template = templates.findById(templateId).orElseThrow(ShiftTemplateService::notFound);
+        var qualificationIds = checkedQualifications(request);
+        var name = request.name().strip();
+        if (templates.existsByNameIgnoreCaseAndIdNot(name, templateId)) {
+            throw nameTaken();
+        }
+
+        template.update(
+                name,
+                request.clientId(),
+                request.locationId(),
+                request.title().strip(),
+                description(request),
+                LocalTime.parse(request.startTime()),
+                request.durationMinutes(),
+                Boolean.TRUE.equals(request.endIsEstimate()),
+                BigDecimal.valueOf(request.hourlyRateCents(), 2),
+                request.slots(),
+                qualificationIds);
+        return save(template);
+    }
+
+    @Transactional
+    void delete(UUID templateId) {
+        templates.delete(templates.findById(templateId).orElseThrow(ShiftTemplateService::notFound));
+    }
+
+    private Set<UUID> checkedQualifications(ShiftTemplateRequest request) {
+        var qualificationIds = request.qualificationIds() == null ? Set.<UUID>of() : request.qualificationIds();
+        references.check(request.clientId(), request.locationId(), qualificationIds);
+        return qualificationIds;
+    }
+
+    private static String description(ShiftTemplateRequest request) {
+        return request.description() == null || request.description().isBlank() ? null : request.description().strip();
+    }
+
+    private ShiftTemplateResponse save(ShiftTemplate template) {
         try {
             return response(templates.saveAndFlush(template));
         } catch (DataIntegrityViolationException e) {
@@ -81,6 +123,11 @@ class ShiftTemplateService {
                 template.getSlots(),
                 Set.copyOf(template.getQualificationIds()),
                 template.getCreatedAt());
+    }
+
+    private static ApiException notFound() {
+        return new ApiException(
+                HttpStatus.NOT_FOUND, "template_not_found", "The agency has no template with this id.");
     }
 
     private static ApiException nameTaken() {

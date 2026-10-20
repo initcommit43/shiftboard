@@ -86,6 +86,18 @@ class ShiftTemplate {
             String name, UUID clientId, UUID locationId, String title, String description, LocalTime startTime,
             int durationMinutes, boolean endIsEstimate, BigDecimal hourlyRate, int slots,
             Set<UUID> qualificationIds) {
+        update(name, clientId, locationId, title, description, startTime, durationMinutes, endIsEstimate,
+                hourlyRate, slots, qualificationIds);
+    }
+
+    /**
+     * Replaces every field. Shifts created from the template keep what they were created with, as
+     * they hold no link to it (ADR 0025).
+     */
+    void update(
+            String name, UUID clientId, UUID locationId, String title, String description, LocalTime startTime,
+            int durationMinutes, boolean endIsEstimate, BigDecimal hourlyRate, int slots,
+            Set<UUID> qualificationIds) {
         if (durationMinutes < 1 || durationMinutes > MAX_DURATION_MINUTES) {
             throw new InvalidFieldException("durationMinutes", "out_of_range");
         }
@@ -106,6 +118,7 @@ class ShiftTemplate {
         this.endIsEstimate = endIsEstimate;
         this.hourlyRate = hourlyRate;
         this.slots = slots;
+        this.qualificationIds.clear();
         this.qualificationIds.addAll(qualificationIds);
     }
 

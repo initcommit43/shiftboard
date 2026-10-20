@@ -1,5 +1,6 @@
 package app.shiftboard.shift.internal;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -13,5 +14,11 @@ interface ShiftTemplateRepository extends Repository<ShiftTemplate, UUID> {
 
     Page<ShiftTemplate> findAll(Pageable pageable);
 
+    Optional<ShiftTemplate> findById(UUID id);
+
     boolean existsByNameIgnoreCase(String name);
+
+    boolean existsByNameIgnoreCaseAndIdNot(String name, UUID id);
+
+    void delete(ShiftTemplate template);
 }
