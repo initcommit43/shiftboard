@@ -371,14 +371,12 @@ export function installFakeApi() {
     return json(ShiftToJSON(created), 201)
   }
 
-  function createTemplate(body: Record<string, unknown>) {
-    const name = body['name'] as string
-    if (api.templates.some((it) => it.name.toLowerCase() === name.toLowerCase())) {
-      return problem(409, 'template_name_taken')
-    }
-    const created: ShiftTemplate = {
-      id: `0199c3a0-0000-7000-8000-0000000007${String(api.templates.length + 1).padStart(2, '0')}`,
-      name,
+  // Ids of new templates follow the two the fake starts with.
+  let templateNumber = 2
+
+  function templateFrom(body: Record<string, unknown>) {
+    return {
+      name: body['name'] as string,
       clientId: body['clientId'] as string,
       locationId: body['locationId'] as string,
       title: body['title'] as string,
@@ -389,12 +387,36 @@ export function installFakeApi() {
       hourlyRateCents: body['hourlyRateCents'] as number,
       slots: body['slots'] as number,
       qualificationIds: new Set(body['qualificationIds'] as string[]),
+    }
+  }
+
+  function sortTemplates(templates: ShiftTemplate[]) {
+    return templates.sort((a, b) => a.name.localeCompare(b.name, 'de', { sensitivity: 'base' }))
+  }
+
+  function createTemplate(body: Record<string, unknown>) {
+    const name = body['name'] as string
+    if (api.templates.some((it) => it.name.toLowerCase() === name.toLowerCase())) {
+      return problem(409, 'template_name_taken')
+    }
+    templateNumber += 1
+    const created: ShiftTemplate = {
+      ...templateFrom(body),
+      id: `0199c3a0-0000-7000-8000-0000000007${String(templateNumber).padStart(2, '0')}`,
       createdAt: new Date(2026, 9, 14, 12, 0),
     }
-    api.templates = [...api.templates, created].sort((a, b) =>
-      a.name.localeCompare(b.name, 'de', { sensitivity: 'base' }),
-    )
+    api.templates = sortTemplates([...api.templates, created])
     return json(ShiftTemplateToJSON(created), 201)
+  }
+
+  function updateTemplate(template: ShiftTemplate, body: Record<string, unknown>) {
+    const name = body['name'] as string
+    if (api.templates.some((it) => it !== template && it.name.toLowerCase() === name.toLowerCase())) {
+      return problem(409, 'template_name_taken')
+    }
+    const updated: ShiftTemplate = { ...templateFrom(body), id: template.id, createdAt: template.createdAt }
+    api.templates = sortTemplates(api.templates.map((it) => (it === template ? updated : it)))
+    return json(ShiftTemplateToJSON(updated))
   }
 
   function allShifts() {
@@ -522,6 +544,19 @@ export function installFakeApi() {
     }
     if (route === 'POST /shift-templates') {
       return createTemplate(body as Record<string, unknown>)
+    }
+    const templateRoute = /^(PUT|DELETE) \/shift-templates\/([^/]+)$/.exec(route)
+    if (templateRoute) {
+      const id = templateRoute[2] ?? ''
+      const found = api.templates.find((it) => it.id === id)
+      if (!found) {
+        return problem(404, 'template_not_found')
+      }
+      if (templateRoute[1] === 'DELETE') {
+        api.templates = api.templates.filter((it) => it !== found)
+        return new Response(null, { status: 204 })
+      }
+      return updateTemplate(found, body as Record<string, unknown>)
     }
     if (route === 'GET /shifts') {
       const past = url.searchParams.get('period') === 'PAST'

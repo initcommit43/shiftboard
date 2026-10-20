@@ -9,6 +9,7 @@ import type {
   ShiftAssignment,
   ShiftPeriod,
   ShiftRequest,
+  ShiftTemplate,
   ShiftTemplateRequest,
 } from '@/api/generated'
 
@@ -96,6 +97,38 @@ export function useCreateShiftTemplate() {
       })
       return queryClient.invalidateQueries({ queryKey: templateKeys.all })
     },
+  })
+}
+
+export function useUpdateShiftTemplate(templateId: string) {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (shiftTemplateRequest: ShiftTemplateRequest) =>
+      shiftTemplatesApi.updateShiftTemplate({ templateId, shiftTemplateRequest }),
+    onSuccess: (template) => {
+      toast.success(t('templates.updated', { name: template.name }))
+      return queryClient.invalidateQueries({ queryKey: templateKeys.all })
+    },
+  })
+}
+
+export function useDeleteShiftTemplate() {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (template: ShiftTemplate) =>
+      shiftTemplatesApi.deleteShiftTemplate({ templateId: template.id }),
+    onSuccess: (_data, template) => {
+      toast.success(t('templates.deleted', { name: template.name }))
+    },
+    onError: (error) => {
+      toast.error(errorMessage(t, error))
+    },
+    // Also after an error: a colleague may have deleted it already.
+    onSettled: () => queryClient.invalidateQueries({ queryKey: templateKeys.all }),
   })
 }
 
