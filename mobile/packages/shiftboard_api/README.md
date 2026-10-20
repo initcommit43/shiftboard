@@ -117,6 +117,7 @@ Class | Method | HTTP request | Description
 [*ShiftsApi*](doc/ShiftsApi.md) | [**getShift**](doc/ShiftsApi.md#getshift) | **GET** /shifts/{shiftId} | One shift of the agency
 [*ShiftsApi*](doc/ShiftsApi.md) | [**listShifts**](doc/ShiftsApi.md#listshifts) | **GET** /shifts | List the agency&#39;s upcoming or past shifts
 [*ShiftsApi*](doc/ShiftsApi.md) | [**publishShift**](doc/ShiftsApi.md#publishshift) | **POST** /shifts/{shiftId}/publish | Publish a draft
+[*ShiftsApi*](doc/ShiftsApi.md) | [**updateShift**](doc/ShiftsApi.md#updateshift) | **PUT** /shifts/{shiftId} | Change a shift
 [*SignupApi*](doc/SignupApi.md) | [**getSignupInfo**](doc/SignupApi.md#getsignupinfo) | **GET** /signup/{signupCode} | Look up the agency behind a signup link
 [*SignupApi*](doc/SignupApi.md) | [**signUp**](doc/SignupApi.md#signup) | **POST** /signup/{signupCode} | Sign up as a worker of the agency
 [*SystemApi*](doc/SystemApi.md) | [**ping**](doc/SystemApi.md#ping) | **GET** /ping | Check that the API is reachable
@@ -170,6 +171,7 @@ Class | Method | HTTP request | Description
  - [Shift](doc/Shift.md)
  - [ShiftAssignment](doc/ShiftAssignment.md)
  - [ShiftAssignmentPage](doc/ShiftAssignmentPage.md)
+ - [ShiftChangeRequest](doc/ShiftChangeRequest.md)
  - [ShiftContact](doc/ShiftContact.md)
  - [ShiftPage](doc/ShiftPage.md)
  - [ShiftPeriod](doc/ShiftPeriod.md)

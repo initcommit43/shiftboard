@@ -16,7 +16,7 @@ part 'message.g.dart';
 /// Properties:
 /// * [id]
 /// * [type]
-/// * [event] - Present for `SYSTEM` messages.
+/// * [event] - Present for `SYSTEM` messages that clients word themselves. A change of the shift has none: its `body` says what changed.
 /// * [body]
 /// * [fromWorker] - Written by the worker; otherwise by the agency or the platform.
 /// * [senderName] - The dispatcher who wrote a `TEXT` or `BROADCAST` message. Absent for the worker's own and for `SYSTEM` messages.
@@ -32,7 +32,7 @@ abstract class Message implements Built<Message, MessageBuilder> {
   MessageType get type;
   // enum typeEnum {  TEXT,  SYSTEM,  BROADCAST,  };
 
-  /// Present for `SYSTEM` messages.
+  /// Present for `SYSTEM` messages that clients word themselves. A change of the shift has none: its `body` says what changed.
   @BuiltValueField(wireName: r'event')
   SystemEvent? get event;
   // enum eventEnum {  CLAIM_CONFIRMED,  CLAIM_REJECTED,  CLAIM_CANCELLED_BY_WORKER,  REMOVED_BY_AGENCY,  SHIFT_CANCELLED,  };

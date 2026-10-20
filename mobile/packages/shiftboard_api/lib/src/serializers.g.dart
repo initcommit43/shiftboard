@@ -45,6 +45,7 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..add(Shift.serializer)
       ..add(ShiftAssignment.serializer)
       ..add(ShiftAssignmentPage.serializer)
+      ..add(ShiftChangeRequest.serializer)
       ..add(ShiftContact.serializer)
       ..add(ShiftPage.serializer)
       ..add(ShiftPeriod.serializer)
@@ -106,6 +107,9 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(WorkerShift)]),
           () => ListBuilder<WorkerShift>())
+      ..addBuilderFactory(
+          const FullType(BuiltSet, const [const FullType(String)]),
+          () => SetBuilder<String>())
       ..addBuilderFactory(
           const FullType(BuiltSet, const [const FullType(String)]),
           () => SetBuilder<String>())

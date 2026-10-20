@@ -38,6 +38,7 @@ export * from './Role';
 export * from './Shift';
 export * from './ShiftAssignment';
 export * from './ShiftAssignmentPage';
+export * from './ShiftChangeRequest';
 export * from './ShiftContact';
 export * from './ShiftPage';
 export * from './ShiftPeriod';
