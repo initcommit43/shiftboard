@@ -719,6 +719,51 @@ paths:
           $ref: "#/components/responses/Problem"
         default:
           $ref: "#/components/responses/Problem"
+    put:
+      operationId: updateShift
+      tags: [shifts]
+      summary: Change a shift
+      description: |
+        Replaces every field of a draft, or of a published shift that has
+        not started yet; its status, spots taken and claims stay. Workers who
+        hold a spot get a system message that says what changed, and a push.
+        Saving without a change tells nobody. Dispatchers and admins only.
+
+        Field error codes: the same as when creating a shift, plus
+        `below_taken` (`slots` is below the spots that confirmed and pending
+        claims hold).
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403), `shift_not_found` (404), and with 409: `shift_not_editable`
+        (the shift has started, ended, or is cancelled or completed),
+        `shift_overlap` (at the new time, a worker who holds a spot would
+        overlap another shift they hold) and `concurrent_change` (the shift
+        kept changing at the same moment; try again).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShiftChangeRequest"
+      responses:
+        "200":
+          description: The changed shift.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shift"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
 
   /shifts/{shiftId}/publish:
     parameters:
@@ -1968,6 +2013,55 @@ components:
           default: false
           description: Publish the shift right away instead of saving it as a draft.
 
+    ShiftChangeRequest:
+      type: object
+      description: Every field of a shift, as when creating one; the status does not change.
+      required: [clientId, locationId, title, startsAt, endsAt, hourlyRateCents, slots]
+      properties:
+        clientId:
+          type: string
+          format: uuid
+        locationId:
+          type: string
+          format: uuid
+          description: A location of the client.
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+        description:
+          type: string
+          maxLength: 2000
+          description: Absent or empty removes the description.
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+          description: Must be after `startsAt`.
+        endIsEstimate:
+          type: boolean
+          default: false
+        hourlyRateCents:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Gross pay per hour in euro cents.
+        slots:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 500
+          description: Not below the spots taken.
+        qualificationIds:
+          type: array
+          description: Empty or absent means none.
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+
     Shift:
       type: object
       required:
@@ -2466,7 +2560,9 @@ components:
         type:
           $ref: "#/components/schemas/MessageType"
         event:
-          description: Present for `SYSTEM` messages.
+          description: |
+            Present for `SYSTEM` messages that clients word themselves. A
+            change of the shift has none: its `body` says what changed.
           $ref: "#/components/schemas/SystemEvent"
         body:
           type: string

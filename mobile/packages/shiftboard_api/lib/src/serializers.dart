@@ -52,6 +52,7 @@ import 'package:shiftboard_api/src/model/role.dart';
 import 'package:shiftboard_api/src/model/shift.dart';
 import 'package:shiftboard_api/src/model/shift_assignment.dart';
 import 'package:shiftboard_api/src/model/shift_assignment_page.dart';
+import 'package:shiftboard_api/src/model/shift_change_request.dart';
 import 'package:shiftboard_api/src/model/shift_contact.dart';
 import 'package:shiftboard_api/src/model/shift_page.dart';
 import 'package:shiftboard_api/src/model/shift_period.dart';
@@ -113,6 +114,7 @@ part 'serializers.g.dart';
   Shift,
   ShiftAssignment,
   ShiftAssignmentPage,
+  ShiftChangeRequest,
   ShiftContact,
   ShiftPage,
   ShiftPeriod,

@@ -24,6 +24,11 @@ import {
     ShiftToJSON,
 } from '../models/Shift';
 import {
+    type ShiftChangeRequest,
+    ShiftChangeRequestFromJSON,
+    ShiftChangeRequestToJSON,
+} from '../models/ShiftChangeRequest';
+import {
     type ShiftPage,
     ShiftPageFromJSON,
     ShiftPageToJSON,
@@ -80,6 +85,17 @@ export interface PublishShiftRequest {
      * 
      */
     shiftId: string;
+}
+
+export interface UpdateShiftRequest {
+    /**
+     * 
+     */
+    shiftId: string;
+    /**
+     * 
+     */
+    shiftChangeRequest: ShiftChangeRequest;
 }
 
 /**
@@ -365,6 +381,71 @@ export class ShiftsApi extends runtime.BaseAPI {
      */
     async publishShift(requestParameters: PublishShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Shift> {
         const response = await this.publishShiftRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for updateShift without sending the request
+     */
+    async updateShiftRequestOpts(requestParameters: UpdateShiftRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['shiftId'] == null) {
+            throw new runtime.RequiredError(
+                'shiftId',
+                'Required parameter "shiftId" was null or undefined when calling updateShift().'
+            );
+        }
+
+        if (requestParameters['shiftChangeRequest'] == null) {
+            throw new runtime.RequiredError(
+                'shiftChangeRequest',
+                'Required parameter "shiftChangeRequest" was null or undefined when calling updateShift().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/shifts/{shiftId}`;
+        urlPath = urlPath.replace('{shiftId}', encodeURIComponent(String(requestParameters['shiftId'])));
+
+        return {
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ShiftChangeRequestToJSON(requestParameters['shiftChangeRequest']),
+        };
+    }
+
+    /**
+     * Replaces every field of a draft, or of a published shift that has not started yet; its status, spots taken and claims stay. Workers who hold a spot get a system message that says what changed, and a push. Saving without a change tells nobody. Dispatchers and admins only.  Field error codes: the same as when creating a shift, plus `below_taken` (`slots` is below the spots that confirmed and pending claims hold).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403), `shift_not_found` (404), and with 409: `shift_not_editable` (the shift has started, ended, or is cancelled or completed), `shift_overlap` (at the new time, a worker who holds a spot would overlap another shift they hold) and `concurrent_change` (the shift kept changing at the same moment; try again). 
+     * Change a shift
+     */
+    async updateShiftRaw(requestParameters: UpdateShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Shift>> {
+        const requestOptions = await this.updateShiftRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ShiftFromJSON(jsonValue));
+    }
+
+    /**
+     * Replaces every field of a draft, or of a published shift that has not started yet; its status, spots taken and claims stay. Workers who hold a spot get a system message that says what changed, and a push. Saving without a change tells nobody. Dispatchers and admins only.  Field error codes: the same as when creating a shift, plus `below_taken` (`slots` is below the spots that confirmed and pending claims hold).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403), `shift_not_found` (404), and with 409: `shift_not_editable` (the shift has started, ended, or is cancelled or completed), `shift_overlap` (at the new time, a worker who holds a spot would overlap another shift they hold) and `concurrent_change` (the shift kept changing at the same moment; try again). 
+     * Change a shift
+     */
+    async updateShift(requestParameters: UpdateShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Shift> {
+        const response = await this.updateShiftRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

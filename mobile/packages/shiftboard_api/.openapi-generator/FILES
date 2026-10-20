@@ -60,6 +60,7 @@ lib/src/model/role.dart
 lib/src/model/shift.dart
 lib/src/model/shift_assignment.dart
 lib/src/model/shift_assignment_page.dart
+lib/src/model/shift_change_request.dart
 lib/src/model/shift_contact.dart
 lib/src/model/shift_page.dart
 lib/src/model/shift_period.dart
