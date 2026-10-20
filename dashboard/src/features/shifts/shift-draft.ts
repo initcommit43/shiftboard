@@ -1,11 +1,13 @@
-import type {
-  Client,
-  FieldError,
-  Qualification,
-  Shift,
-  ShiftRequest,
-  ShiftTemplate,
-  ShiftTemplateRequest,
+import {
+  type Client,
+  type FieldError,
+  type Qualification,
+  type Shift,
+  type ShiftChangeRequest,
+  type ShiftRequest,
+  ShiftStatus,
+  type ShiftTemplate,
+  type ShiftTemplateRequest,
 } from '@/api/generated'
 
 /** The shift form as the dispatcher types it: every input as text. */
@@ -52,6 +54,7 @@ export type DraftError =
   | 'not_found'
   | 'rate_out_of_range'
   | 'slots_out_of_range'
+  | 'below_taken'
   | 'unknown'
 
 export type DraftErrors = Partial<Record<DraftField, DraftError>>
@@ -94,6 +97,11 @@ export interface DraftSource {
 
 /** A field whose value no longer exists and was left empty. */
 export type MissingField = 'clientId' | 'locationId' | 'qualificationIds'
+
+/** `yyyy-mm-dd` of a point in time, in the time zone of the browser. */
+export function dateOf(date: Date) {
+  return `${String(date.getFullYear())}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+}
 
 /** `hh:mm` of a point in time, in the time zone of the browser. */
 export function timeOfDay(date: Date) {
@@ -175,6 +183,25 @@ function minutesOfDay(time: string) {
 function addMinutes(time: string, minutes: number) {
   const total = (minutesOfDay(time) + minutes) % MINUTES_PER_DAY
   return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
+}
+
+/** A draft can be changed any time, a published shift until it starts (ADR 0026). */
+export function isEditable(shift: Shift) {
+  return (
+    shift.status === ShiftStatus.DRAFT ||
+    (shift.status === ShiftStatus.PUBLISHED && shift.startsAt.getTime() > Date.now())
+  )
+}
+
+/** The draft for changing a shift: everything it has, its date included. */
+export function editDraftFrom(
+  shift: Shift,
+  clients: Client[],
+  qualifications: Qualification[],
+  language: string,
+): { draft: ShiftDraft; missing: MissingField[] } {
+  const filled = draftFrom(shiftSource(shift), clients, qualifications, language)
+  return { ...filled, draft: { ...filled.draft, date: dateOf(shift.startsAt) } }
 }
 
 /** What a template gives a new shift: everything but the date. */
@@ -308,8 +335,8 @@ export function toTemplateRequest(draft: ShiftDraft): Omit<ShiftTemplateRequest,
   })
 }
 
-/** The request for a draft that passed `validate`. */
-export function toShiftRequest(draft: ShiftDraft, publish: boolean): ShiftRequest {
+/** The change for a draft that passed `validate`; the status of the shift stays. */
+export function toChangeRequest(draft: ShiftDraft): ShiftChangeRequest {
   const times = shiftTimes(draft)
   const rate = parseRate(draft.hourlyRate)
   if (!times || rate === null) {
@@ -327,8 +354,12 @@ export function toShiftRequest(draft: ShiftDraft, publish: boolean): ShiftReques
     hourlyRateCents: rate,
     slots: Number(draft.slots),
     qualificationIds: new Set(draft.qualificationIds),
-    publish,
   }
+}
+
+/** The request for a new shift from a draft that passed `validate`. */
+export function toShiftRequest(draft: ShiftDraft, publish: boolean): ShiftRequest {
+  return { ...toChangeRequest(draft), publish }
 }
 
 const REQUEST_FIELDS: Record<string, DraftField> = {
@@ -356,6 +387,7 @@ const SHARED_CODES = new Set<string>([
   'invalid_length',
   'before_start',
   'not_found',
+  'below_taken',
 ])
 
 /** The field errors of a `validation_failed` response, placed on the fields of the form. */

@@ -1,4 +1,4 @@
-import { ArrowLeft, Copy, LoaderCircle, SearchX, TriangleAlert } from 'lucide-react'
+import { ArrowLeft, Copy, LoaderCircle, Pencil, SearchX, TriangleAlert } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
@@ -16,7 +16,7 @@ import { ClaimsSection } from './claims-section'
 import { formatShiftDate, formatShiftTime, STATUS_VARIANT } from './format'
 import { usePublishShift, useShift } from './queries'
 import { SaveAsTemplate } from './save-as-template'
-import { shiftSource, sourceToTemplate } from './shift-draft'
+import { isEditable, shiftSource, sourceToTemplate } from './shift-draft'
 
 export function ShiftDetailPage() {
   const { shiftId = '' } = useParams()
@@ -89,6 +89,14 @@ function ShiftDetail({ shift }: { shift: Shift }) {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {isEditable(shift) && (
+            <Button asChild variant="outline">
+              <Link to={`/shifts/${shift.id}/edit`}>
+                <Pencil aria-hidden />
+                {t('shiftDetail.edit')}
+              </Link>
+            </Button>
+          )}
           <Button asChild variant="outline">
             <Link to={`/shifts/new?from=${shift.id}`}>
               <Copy aria-hidden />

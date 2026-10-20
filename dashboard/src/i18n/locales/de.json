@@ -143,7 +143,8 @@
         "not_found": "Diese Auswahl gibt es nicht mehr. Lade die Seite neu.",
         "rate_out_of_range": "Der Stundenlohn muss über 0 € liegen.",
         "slots_out_of_range": "Zwischen 1 und 500 Plätze.",
-        "unknown": "Diese Angabe wurde nicht angenommen."
+        "unknown": "Diese Angabe wurde nicht angenommen.",
+        "below_taken": "Weniger Plätze als vergeben. Lehne zuerst jemanden ab oder nimm jemanden heraus."
       },
       "duplicate": {
         "title": "Schicht duplizieren",
@@ -239,7 +240,9 @@
     "conversation_not_found": "Diese Unterhaltung gibt es nicht mehr.",
     "no_recipients": "Für diese Schicht ist noch niemand bestätigt.",
     "template_name_taken": "Eine Vorlage mit diesem Namen gibt es schon.",
-    "template_not_found": "Diese Vorlage gibt es nicht mehr. Die Liste wurde aktualisiert."
+    "template_not_found": "Diese Vorlage gibt es nicht mehr. Die Liste wurde aktualisiert.",
+    "shift_not_editable": "Diese Schicht hat schon begonnen oder ist abgesagt. Sie lässt sich nicht mehr bearbeiten.",
+    "shift_overlap": "Zur neuen Zeit hätte jemand mit Platz schon eine andere Schicht. Wähle eine andere Zeit oder nimm die Person zuerst heraus."
   },
   "shiftDetail": {
     "back": "Alle Schichten",
@@ -319,7 +322,21 @@
       "keep": "Abbrechen",
       "confirm": "Entfernen"
     },
-    "duplicate": "Duplizieren"
+    "duplicate": "Duplizieren",
+    "edit": "Bearbeiten"
+  },
+  "shiftEdit": {
+    "title": "Schicht bearbeiten",
+    "description": "Wer einen Platz hat, behält ihn und erfährt, was sich geändert hat.",
+    "notice_one": "{{count}} Person hat einen Platz. Sie bekommt beim Speichern eine Nachricht mit den Änderungen.",
+    "notice_other": "{{count}} Personen haben einen Platz. Sie bekommen beim Speichern eine Nachricht mit den Änderungen.",
+    "save": "Änderungen speichern",
+    "saved": "Änderungen an „{{title}}“ gespeichert",
+    "notEditable": {
+      "title": "Diese Schicht lässt sich nicht mehr bearbeiten",
+      "description": "Sie hat schon begonnen oder ist abgesagt oder abgeschlossen.",
+      "back": "Zur Schicht"
+    }
   },
   "settings": {
     "title": "Einstellungen",
