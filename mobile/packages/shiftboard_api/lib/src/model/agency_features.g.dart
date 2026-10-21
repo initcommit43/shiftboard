@@ -9,11 +9,13 @@ part of 'agency_features.dart';
 class _$AgencyFeatures extends AgencyFeatures {
   @override
   final bool contactButton;
+  @override
+  final bool? checkIn;
 
   factory _$AgencyFeatures([void Function(AgencyFeaturesBuilder)? updates]) =>
       (AgencyFeaturesBuilder()..update(updates))._build();
 
-  _$AgencyFeatures._({required this.contactButton}) : super._();
+  _$AgencyFeatures._({required this.contactButton, this.checkIn}) : super._();
   @override
   AgencyFeatures rebuild(void Function(AgencyFeaturesBuilder) updates) =>
       (toBuilder()..update(updates)).build();
@@ -24,13 +26,16 @@ class _$AgencyFeatures extends AgencyFeatures {
   @override
   bool operator ==(Object other) {
     if (identical(other, this)) return true;
-    return other is AgencyFeatures && contactButton == other.contactButton;
+    return other is AgencyFeatures &&
+        contactButton == other.contactButton &&
+        checkIn == other.checkIn;
   }
 
   @override
   int get hashCode {
     var _$hash = 0;
     _$hash = $jc(_$hash, contactButton.hashCode);
+    _$hash = $jc(_$hash, checkIn.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -38,7 +43,8 @@ class _$AgencyFeatures extends AgencyFeatures {
   @override
   String toString() {
     return (newBuiltValueToStringHelper(r'AgencyFeatures')
-          ..add('contactButton', contactButton))
+          ..add('contactButton', contactButton)
+          ..add('checkIn', checkIn))
         .toString();
   }
 }
@@ -52,6 +58,10 @@ class AgencyFeaturesBuilder
   set contactButton(bool? contactButton) =>
       _$this._contactButton = contactButton;
 
+  bool? _checkIn;
+  bool? get checkIn => _$this._checkIn;
+  set checkIn(bool? checkIn) => _$this._checkIn = checkIn;
+
   AgencyFeaturesBuilder() {
     AgencyFeatures._defaults(this);
   }
@@ -60,6 +70,7 @@ class AgencyFeaturesBuilder
     final $v = _$v;
     if ($v != null) {
       _contactButton = $v.contactButton;
+      _checkIn = $v.checkIn;
       _$v = null;
     }
     return this;
@@ -83,6 +94,7 @@ class AgencyFeaturesBuilder
         _$AgencyFeatures._(
           contactButton: BuiltValueNullFieldError.checkNotNull(
               contactButton, r'AgencyFeatures', 'contactButton'),
+          checkIn: checkIn,
         );
     replace(_$result);
     return _$result;

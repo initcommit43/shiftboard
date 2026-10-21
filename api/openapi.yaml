@@ -50,6 +50,8 @@ tags:
     description: The conversation between each worker and the agency, system messages and broadcasts
   - name: notifications
     description: Push notification devices and preferences of a worker
+  - name: hours
+    description: Check-in and check-out, and the hours the agency approves for payroll
 security:
   - bearerAuth: []
 paths:
@@ -1033,7 +1035,9 @@ paths:
         Sets a completed assignment to `NO_SHOW`. Dispatchers and admins only.
 
         Error codes: `forbidden` (403), `shift_not_found` (404),
-        `assignment_not_found` (404), `assignment_not_completed` (409).
+        `assignment_not_found` (404), and with 409:
+        `assignment_not_completed` and `worker_attended` (the worker checked
+        in or has approved hours).
       responses:
         "200":
           description: The assignment after the change.
@@ -1048,6 +1052,106 @@ paths:
         "404":
           $ref: "#/components/responses/Problem"
         "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /shifts/{shiftId}/assignments/{assignmentId}/hours:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+      - $ref: "#/components/parameters/AssignmentId"
+    put:
+      operationId: approveHours
+      tags: [hours]
+      summary: Approve the hours a worker worked
+      description: |
+        Saves start, end and break of a worker who held a confirmed spot on a
+        shift that has started, and approves them for payroll. The hours can
+        be saved again; the latest save counts. Dispatchers and admins only.
+
+        Field error codes: `required`, `before_start` (`endedAt` is not
+        after `startedAt`), `too_long` (`endedAt` is more than 24 hours after
+        `startedAt`, or `breakMinutes` is not shorter than the time between
+        them), `out_of_range`.
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403), `shift_not_found` (404), `assignment_not_found` (404), and
+        with 409: `shift_not_started` and `assignment_not_worked` (the
+        assignment is not confirmed or completed).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/HoursRequest"
+      responses:
+        "200":
+          description: The assignment with its approved hours.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShiftAssignment"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /hours:
+    get:
+      operationId: listHours
+      tags: [hours]
+      summary: List the hours of a period
+      description: |
+        One entry per worker who held a confirmed spot on a shift that has
+        started, for shifts starting in `[from, to)`, sorted by shift start,
+        then by the worker's last name. An entry is `OPEN` until the agency
+        approved its hours. Feeds the payroll export, which the dashboard
+        builds. Dispatchers and admins only.
+
+        Error codes: `validation_failed` (400, `to` is not after `from`),
+        `forbidden` (403).
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: Shifts starting at or after this time.
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          required: true
+          description: Shifts starting before this time.
+          schema:
+            type: string
+            format: date-time
+        - name: status
+          in: query
+          description: Only entries with this status.
+          schema:
+            $ref: "#/components/schemas/HoursStatus"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of entries.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HoursEntryPage"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
           $ref: "#/components/responses/Problem"
         default:
           $ref: "#/components/responses/Problem"
@@ -1307,6 +1411,76 @@ paths:
       responses:
         "200":
           description: The shift with the worker's cancelled assignment.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerShift"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /worker/shifts/{shiftId}/check-in:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+    post:
+      operationId: checkIn
+      tags: [hours]
+      summary: Check in on arrival
+      description: |
+        Records the time the worker arrived. Possible once, with a confirmed
+        spot, from `assignment.checkInFrom` until the shift's end, when the
+        agency uses check-in. No location is stored. Active workers only.
+
+        Error codes: `forbidden` (403), `worker_not_active` (403),
+        `shift_not_found` (404), `assignment_not_found` (404, the worker has
+        not claimed the shift), and with 409: `check_in_disabled` (the agency
+        does not use check-in), `assignment_not_confirmed`,
+        `check_in_not_open` (too early or after the end) and
+        `already_checked_in`.
+      responses:
+        "200":
+          description: The shift with the worker's assignment and its check-in time.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerShift"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /worker/shifts/{shiftId}/check-out:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+    post:
+      operationId: checkOut
+      tags: [hours]
+      summary: Check out when leaving
+      description: |
+        Records the time the worker left. Possible once after checking in,
+        also after the planned end, until the agency approved the hours.
+        Active workers only.
+
+        Error codes: `forbidden` (403), `worker_not_active` (403),
+        `shift_not_found` (404), `assignment_not_found` (404), and with 409:
+        `check_in_disabled`, `not_checked_in`, `already_checked_out` and
+        `hours_approved`.
+      responses:
+        "200":
+          description: The shift with the worker's assignment and its check-out time.
           content:
             application/json:
               schema:
@@ -1770,6 +1944,12 @@ components:
           description: |
             Workers see a WhatsApp button for the contact person on a shift,
             for agencies that prefer that over the in-app chat. Off by default.
+        checkIn:
+          type: boolean
+          description: |
+            Workers check in and out of their shifts in the app. Off by
+            default. Always present in responses; absent in a request, it
+            stays as it is.
 
     WorkerProfile:
       type: object
@@ -2322,6 +2502,25 @@ components:
         cancelledBy:
           description: Present when the status is `CANCELLED`.
           $ref: "#/components/schemas/CancelledBy"
+        checkInFrom:
+          type: string
+          format: date-time
+          description: |
+            From when the worker can check in; possible until the shift's end.
+            Present when the agency uses check-in and the assignment is
+            confirmed or completed; clients show check-in and check-out only
+            then.
+        checkedInAt:
+          type: string
+          format: date-time
+          description: When the worker checked in.
+        checkedOutAt:
+          type: string
+          format: date-time
+          description: When the worker checked out.
+        hoursApproved:
+          type: boolean
+          description: The agency approved the hours; checking out is no longer possible.
 
     AssignedWorker:
       type: object
@@ -2364,6 +2563,17 @@ components:
         reason:
           type: string
           description: Why the agency removed the worker. Present only for a removal.
+        checkedInAt:
+          type: string
+          format: date-time
+          description: When the worker checked in in the app.
+        checkedOutAt:
+          type: string
+          format: date-time
+          description: When the worker checked out in the app.
+        hours:
+          description: The approved hours. Absent until the agency approved them.
+          $ref: "#/components/schemas/WorkedHours"
 
     ShiftAssignmentPage:
       type: object
@@ -2395,6 +2605,126 @@ components:
           minLength: 1
           maxLength: 500
           examples: [Kann laut Rücksprache nicht kommen]
+
+    HoursRequest:
+      type: object
+      description: The hours a worker worked, as the agency approves them.
+      required: [startedAt, endedAt, breakMinutes]
+      properties:
+        startedAt:
+          type: string
+          format: date-time
+        endedAt:
+          type: string
+          format: date-time
+          description: After `startedAt`, at most 24 hours later.
+        breakMinutes:
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 1440
+          description: Unpaid break. Shorter than the time between start and end.
+
+    WorkedHours:
+      type: object
+      description: Approved hours of one worker on one shift.
+      required: [startedAt, endedAt, breakMinutes, workedMinutes, grossCents, approvedAt]
+      properties:
+        startedAt:
+          type: string
+          format: date-time
+        endedAt:
+          type: string
+          format: date-time
+        breakMinutes:
+          type: integer
+          format: int32
+        workedMinutes:
+          type: integer
+          format: int32
+          description: End minus start minus break, in whole minutes. Not rounded.
+        grossCents:
+          type: integer
+          format: int64
+          description: Worked minutes times the shift's hourly rate, in euro cents, rounded half up.
+        approvedAt:
+          type: string
+          format: date-time
+          description: When the hours were last saved.
+
+    HoursStatus:
+      type: string
+      description: "`OPEN` until the agency approved the hours, then `APPROVED`."
+      enum: [OPEN, APPROVED]
+
+    HoursShift:
+      type: object
+      description: The shift of an hours entry.
+      required: [id, title, startsAt, endsAt, hourlyRateCents, client, location]
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        hourlyRateCents:
+          type: integer
+          format: int32
+        client:
+          $ref: "#/components/schemas/ClientSummary"
+        location:
+          $ref: "#/components/schemas/Location"
+
+    HoursEntry:
+      type: object
+      description: The hours of one worker on one shift.
+      required: [assignmentId, status, shift, worker]
+      properties:
+        assignmentId:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/HoursStatus"
+        shift:
+          $ref: "#/components/schemas/HoursShift"
+        worker:
+          $ref: "#/components/schemas/AssignedWorker"
+        checkedInAt:
+          type: string
+          format: date-time
+        checkedOutAt:
+          type: string
+          format: date-time
+        hours:
+          description: Present when the status is `APPROVED`.
+          $ref: "#/components/schemas/WorkedHours"
+
+    HoursEntryPage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/HoursEntry"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
 
     AgencySettings:
       type: object

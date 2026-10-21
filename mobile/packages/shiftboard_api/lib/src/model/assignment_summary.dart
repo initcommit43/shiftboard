@@ -18,6 +18,10 @@ part 'assignment_summary.g.dart';
 /// * [claimedAt]
 /// * [cancellableUntil] - Until when the worker can drop out in the app. Present while the assignment is pending or confirmed; may already be in the past.
 /// * [cancelledBy] - Present when the status is `CANCELLED`.
+/// * [checkInFrom] - From when the worker can check in; possible until the shift's end. Present when the agency uses check-in and the assignment is confirmed or completed; clients show check-in and check-out only then.
+/// * [checkedInAt] - When the worker checked in.
+/// * [checkedOutAt] - When the worker checked out.
+/// * [hoursApproved] - The agency approved the hours; checking out is no longer possible.
 @BuiltValue()
 abstract class AssignmentSummary
     implements Built<AssignmentSummary, AssignmentSummaryBuilder> {
@@ -39,6 +43,22 @@ abstract class AssignmentSummary
   @BuiltValueField(wireName: r'cancelledBy')
   CancelledBy? get cancelledBy;
   // enum cancelledByEnum {  WORKER,  AGENCY,  };
+
+  /// From when the worker can check in; possible until the shift's end. Present when the agency uses check-in and the assignment is confirmed or completed; clients show check-in and check-out only then.
+  @BuiltValueField(wireName: r'checkInFrom')
+  DateTime? get checkInFrom;
+
+  /// When the worker checked in.
+  @BuiltValueField(wireName: r'checkedInAt')
+  DateTime? get checkedInAt;
+
+  /// When the worker checked out.
+  @BuiltValueField(wireName: r'checkedOutAt')
+  DateTime? get checkedOutAt;
+
+  /// The agency approved the hours; checking out is no longer possible.
+  @BuiltValueField(wireName: r'hoursApproved')
+  bool? get hoursApproved;
 
   AssignmentSummary._();
 
@@ -93,6 +113,34 @@ class _$AssignmentSummarySerializer
       yield serializers.serialize(
         object.cancelledBy,
         specifiedType: const FullType(CancelledBy),
+      );
+    }
+    if (object.checkInFrom != null) {
+      yield r'checkInFrom';
+      yield serializers.serialize(
+        object.checkInFrom,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    if (object.checkedInAt != null) {
+      yield r'checkedInAt';
+      yield serializers.serialize(
+        object.checkedInAt,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    if (object.checkedOutAt != null) {
+      yield r'checkedOutAt';
+      yield serializers.serialize(
+        object.checkedOutAt,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    if (object.hoursApproved != null) {
+      yield r'hoursApproved';
+      yield serializers.serialize(
+        object.hoursApproved,
+        specifiedType: const FullType(bool),
       );
     }
   }
@@ -156,6 +204,38 @@ class _$AssignmentSummarySerializer
           ) as CancelledBy?;
           if (valueDes == null) continue;
           result.cancelledBy = valueDes;
+          break;
+        case r'checkInFrom':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(DateTime),
+          ) as DateTime?;
+          if (valueDes == null) continue;
+          result.checkInFrom = valueDes;
+          break;
+        case r'checkedInAt':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(DateTime),
+          ) as DateTime?;
+          if (valueDes == null) continue;
+          result.checkedInAt = valueDes;
+          break;
+        case r'checkedOutAt':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(DateTime),
+          ) as DateTime?;
+          if (valueDes == null) continue;
+          result.checkedOutAt = valueDes;
+          break;
+        case r'hoursApproved':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(bool),
+          ) as bool?;
+          if (valueDes == null) continue;
+          result.hoursApproved = valueDes;
           break;
         default:
           unhandled.add(key);

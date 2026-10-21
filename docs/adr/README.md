@@ -31,3 +31,4 @@ One short record per real decision. Format: `NNNN-title.md` with the sections Co
 | [0025](0025-shift-templates.md) | Shift templates are shared per agency and store a local time of day |
 | [0026](0026-editing-shifts.md) | Shifts stay editable until they start, and workers are told what changed |
 | [0027](0027-undecided-claims-rejected.md) | Requests nobody decided on are rejected when the shift ends |
+| [0028](0028-check-in-and-hours.md) | Check-in in the app, hours approved by the agency, CSV built in the dashboard |

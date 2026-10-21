@@ -12,12 +12,17 @@ part 'agency_features.g.dart';
 ///
 /// Properties:
 /// * [contactButton] - Workers see a WhatsApp button for the contact person on a shift, for agencies that prefer that over the in-app chat. Off by default.
+/// * [checkIn] - Workers check in and out of their shifts in the app. Off by default. Always present in responses; absent in a request, it stays as it is.
 @BuiltValue()
 abstract class AgencyFeatures
     implements Built<AgencyFeatures, AgencyFeaturesBuilder> {
   /// Workers see a WhatsApp button for the contact person on a shift, for agencies that prefer that over the in-app chat. Off by default.
   @BuiltValueField(wireName: r'contactButton')
   bool get contactButton;
+
+  /// Workers check in and out of their shifts in the app. Off by default. Always present in responses; absent in a request, it stays as it is.
+  @BuiltValueField(wireName: r'checkIn')
+  bool? get checkIn;
 
   AgencyFeatures._();
 
@@ -50,6 +55,13 @@ class _$AgencyFeaturesSerializer
       object.contactButton,
       specifiedType: const FullType(bool),
     );
+    if (object.checkIn != null) {
+      yield r'checkIn';
+      yield serializers.serialize(
+        object.checkIn,
+        specifiedType: const FullType(bool),
+      );
+    }
   }
 
   @override
@@ -81,6 +93,14 @@ class _$AgencyFeaturesSerializer
             specifiedType: const FullType(bool),
           ) as bool;
           result.contactButton = valueDes;
+          break;
+        case r'checkIn':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(bool),
+          ) as bool?;
+          if (valueDes == null) continue;
+          result.checkIn = valueDes;
           break;
         default:
           unhandled.add(key);

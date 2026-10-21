@@ -2,6 +2,7 @@
 apis/AssignmentsApi.ts
 apis/AuthApi.ts
 apis/ClientsApi.ts
+apis/HoursApi.ts
 apis/MessagesApi.ts
 apis/NotificationsApi.ts
 apis/SettingsApi.ts
@@ -31,6 +32,11 @@ models/ConversationPage.ts
 models/ConversationWorker.ts
 models/CurrentUser.ts
 models/FieldError.ts
+models/HoursEntry.ts
+models/HoursEntryPage.ts
+models/HoursRequest.ts
+models/HoursShift.ts
+models/HoursStatus.ts
 models/Location.ts
 models/LoginRequest.ts
 models/Message.ts
@@ -64,6 +70,7 @@ models/SignupInfo.ts
 models/SystemEvent.ts
 models/TokenResponse.ts
 models/UnreadCount.ts
+models/WorkedHours.ts
 models/Worker.ts
 models/WorkerPage.ts
 models/WorkerProfile.ts

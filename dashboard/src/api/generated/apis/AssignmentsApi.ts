@@ -285,7 +285,7 @@ export class AssignmentsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Sets a completed assignment to `NO_SHOW`. Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404), `assignment_not_found` (404), `assignment_not_completed` (409). 
+     * Sets a completed assignment to `NO_SHOW`. Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404), `assignment_not_found` (404), and with 409: `assignment_not_completed` and `worker_attended` (the worker checked in or has approved hours). 
      * Mark a worker as not turned up
      */
     async markNoShowRaw(requestParameters: MarkNoShowRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ShiftAssignment>> {
@@ -296,7 +296,7 @@ export class AssignmentsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Sets a completed assignment to `NO_SHOW`. Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404), `assignment_not_found` (404), `assignment_not_completed` (409). 
+     * Sets a completed assignment to `NO_SHOW`. Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404), `assignment_not_found` (404), and with 409: `assignment_not_completed` and `worker_attended` (the worker checked in or has approved hours). 
      * Mark a worker as not turned up
      */
     async markNoShow(requestParameters: MarkNoShowRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ShiftAssignment> {

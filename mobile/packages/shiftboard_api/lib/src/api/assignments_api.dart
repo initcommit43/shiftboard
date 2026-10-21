@@ -218,7 +218,7 @@ class AssignmentsApi {
   }
 
   /// Mark a worker as not turned up
-  /// Sets a completed assignment to &#x60;NO_SHOW&#x60;. Dispatchers and admins only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;shift_not_found&#x60; (404), &#x60;assignment_not_found&#x60; (404), &#x60;assignment_not_completed&#x60; (409).
+  /// Sets a completed assignment to &#x60;NO_SHOW&#x60;. Dispatchers and admins only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;shift_not_found&#x60; (404), &#x60;assignment_not_found&#x60; (404), and with 409: &#x60;assignment_not_completed&#x60; and &#x60;worker_attended&#x60; (the worker checked in or has approved hours).
   ///
   /// Parameters:
   /// * [shiftId]

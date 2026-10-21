@@ -32,6 +32,11 @@ import 'package:shiftboard_api/src/model/conversation_page.dart';
 import 'package:shiftboard_api/src/model/conversation_worker.dart';
 import 'package:shiftboard_api/src/model/current_user.dart';
 import 'package:shiftboard_api/src/model/field_error.dart';
+import 'package:shiftboard_api/src/model/hours_entry.dart';
+import 'package:shiftboard_api/src/model/hours_entry_page.dart';
+import 'package:shiftboard_api/src/model/hours_request.dart';
+import 'package:shiftboard_api/src/model/hours_shift.dart';
+import 'package:shiftboard_api/src/model/hours_status.dart';
 import 'package:shiftboard_api/src/model/location.dart';
 import 'package:shiftboard_api/src/model/login_request.dart';
 import 'package:shiftboard_api/src/model/message.dart';
@@ -65,6 +70,7 @@ import 'package:shiftboard_api/src/model/signup_info.dart';
 import 'package:shiftboard_api/src/model/system_event.dart';
 import 'package:shiftboard_api/src/model/token_response.dart';
 import 'package:shiftboard_api/src/model/unread_count.dart';
+import 'package:shiftboard_api/src/model/worked_hours.dart';
 import 'package:shiftboard_api/src/model/worker.dart';
 import 'package:shiftboard_api/src/model/worker_page.dart';
 import 'package:shiftboard_api/src/model/worker_profile.dart';
@@ -94,6 +100,11 @@ part 'serializers.g.dart';
   ConversationWorker,
   CurrentUser,
   FieldError,
+  HoursEntry,
+  HoursEntryPage,
+  HoursRequest,
+  HoursShift,
+  HoursStatus,
   Location,
   LoginRequest,
   Message,
@@ -127,6 +138,7 @@ part 'serializers.g.dart';
   SystemEvent,
   TokenResponse,
   UnreadCount,
+  WorkedHours,
   Worker,
   WorkerPage,
   WorkerProfile,
@@ -137,20 +149,12 @@ part 'serializers.g.dart';
 ])
 Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(
-        const FullType(BuiltList, [FullType(Client)]),
-        () => ListBuilder<Client>(),
-      )
-      ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Message)]),
         () => ListBuilder<Message>(),
       )
       ..addBuilderFactory(
-        const FullType(BuiltList, [FullType(Qualification)]),
-        () => ListBuilder<Qualification>(),
-      )
-      ..addBuilderFactory(
-        const FullType(BuiltList, [FullType(Worker)]),
-        () => ListBuilder<Worker>(),
+        const FullType(BuiltList, [FullType(HoursEntry)]),
+        () => ListBuilder<HoursEntry>(),
       )
       ..addBuilderFactory(
         const FullType(BuiltSet, [FullType(String)]),
@@ -161,16 +165,28 @@ Serializers serializers = (_$serializers.toBuilder()
         () => ListBuilder<Shift>(),
       )
       ..addBuilderFactory(
-        const FullType(BuiltList, [FullType(ShiftAssignment)]),
-        () => ListBuilder<ShiftAssignment>(),
-      )
-      ..addBuilderFactory(
         const FullType(BuiltList, [FullType(FieldError)]),
         () => ListBuilder<FieldError>(),
       )
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Location)]),
         () => ListBuilder<Location>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Client)]),
+        () => ListBuilder<Client>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Qualification)]),
+        () => ListBuilder<Qualification>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(Worker)]),
+        () => ListBuilder<Worker>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(ShiftAssignment)]),
+        () => ListBuilder<ShiftAssignment>(),
       )
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(WorkerShift)]),

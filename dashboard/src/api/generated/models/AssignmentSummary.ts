@@ -56,6 +56,26 @@ export interface AssignmentSummary {
      * Present when the status is `CANCELLED`.
      */
     cancelledBy?: CancelledBy;
+    /**
+     * From when the worker can check in; possible until the shift's end.
+     * Present when the agency uses check-in and the assignment is
+     * confirmed or completed; clients show check-in and check-out only
+     * then.
+     * 
+     */
+    checkInFrom?: Date;
+    /**
+     * When the worker checked in.
+     */
+    checkedInAt?: Date;
+    /**
+     * When the worker checked out.
+     */
+    checkedOutAt?: Date;
+    /**
+     * The agency approved the hours; checking out is no longer possible.
+     */
+    hoursApproved?: boolean;
 }
 
 
@@ -85,6 +105,10 @@ export function AssignmentSummaryFromJSONTyped(json: any, ignoreDiscriminator: b
         'claimedAt': (json['claimedAt'] == null ? json['claimedAt'] : parseDateTime(json['claimedAt'])),
         'cancellableUntil': json['cancellableUntil'] == null ? undefined : (parseDateTime(json['cancellableUntil'])),
         'cancelledBy': json['cancelledBy'] == null ? undefined : CancelledByFromJSON(json['cancelledBy']),
+        'checkInFrom': json['checkInFrom'] == null ? undefined : (parseDateTime(json['checkInFrom'])),
+        'checkedInAt': json['checkedInAt'] == null ? undefined : (parseDateTime(json['checkedInAt'])),
+        'checkedOutAt': json['checkedOutAt'] == null ? undefined : (parseDateTime(json['checkedOutAt'])),
+        'hoursApproved': json['hoursApproved'] == null ? undefined : json['hoursApproved'],
     };
 }
 
@@ -104,6 +128,10 @@ export function AssignmentSummaryToJSONTyped(value?: AssignmentSummary | null, i
         'claimedAt': value['claimedAt'] == null ? value['claimedAt'] : serializeDateTime(value['claimedAt']),
         'cancellableUntil': value['cancellableUntil'] == null ? value['cancellableUntil'] : serializeDateTime(value['cancellableUntil']),
         'cancelledBy': CancelledByToJSON(value['cancelledBy']),
+        'checkInFrom': value['checkInFrom'] == null ? value['checkInFrom'] : serializeDateTime(value['checkInFrom']),
+        'checkedInAt': value['checkedInAt'] == null ? value['checkedInAt'] : serializeDateTime(value['checkedInAt']),
+        'checkedOutAt': value['checkedOutAt'] == null ? value['checkedOutAt'] : serializeDateTime(value['checkedOutAt']),
+        'hoursApproved': value['hoursApproved'],
     };
 }
 

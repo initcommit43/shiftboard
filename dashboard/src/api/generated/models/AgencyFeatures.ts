@@ -25,6 +25,13 @@ export interface AgencyFeatures {
      * 
      */
     contactButton: boolean;
+    /**
+     * Workers check in and out of their shifts in the app. Off by
+     * default. Always present in responses; absent in a request, it
+     * stays as it is.
+     * 
+     */
+    checkIn?: boolean;
 }
 
 /**
@@ -46,6 +53,7 @@ export function AgencyFeaturesFromJSONTyped(json: any, ignoreDiscriminator: bool
     return {
         
         'contactButton': json['contactButton'],
+        'checkIn': json['checkIn'] == null ? undefined : json['checkIn'],
     };
 }
 
@@ -61,6 +69,7 @@ export function AgencyFeaturesToJSONTyped(value?: AgencyFeatures | null, ignoreD
     return {
         
         'contactButton': value['contactButton'],
+        'checkIn': value['checkIn'],
     };
 }
 

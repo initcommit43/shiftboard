@@ -21,6 +21,12 @@ class _$ShiftAssignment extends ShiftAssignment {
   final CancelledBy? cancelledBy;
   @override
   final String? reason;
+  @override
+  final DateTime? checkedInAt;
+  @override
+  final DateTime? checkedOutAt;
+  @override
+  final WorkedHours? hours;
 
   factory _$ShiftAssignment([void Function(ShiftAssignmentBuilder)? updates]) =>
       (ShiftAssignmentBuilder()..update(updates))._build();
@@ -32,7 +38,10 @@ class _$ShiftAssignment extends ShiftAssignment {
       required this.claimedAt,
       this.decidedAt,
       this.cancelledBy,
-      this.reason})
+      this.reason,
+      this.checkedInAt,
+      this.checkedOutAt,
+      this.hours})
       : super._();
   @override
   ShiftAssignment rebuild(void Function(ShiftAssignmentBuilder) updates) =>
@@ -51,7 +60,10 @@ class _$ShiftAssignment extends ShiftAssignment {
         claimedAt == other.claimedAt &&
         decidedAt == other.decidedAt &&
         cancelledBy == other.cancelledBy &&
-        reason == other.reason;
+        reason == other.reason &&
+        checkedInAt == other.checkedInAt &&
+        checkedOutAt == other.checkedOutAt &&
+        hours == other.hours;
   }
 
   @override
@@ -64,6 +76,9 @@ class _$ShiftAssignment extends ShiftAssignment {
     _$hash = $jc(_$hash, decidedAt.hashCode);
     _$hash = $jc(_$hash, cancelledBy.hashCode);
     _$hash = $jc(_$hash, reason.hashCode);
+    _$hash = $jc(_$hash, checkedInAt.hashCode);
+    _$hash = $jc(_$hash, checkedOutAt.hashCode);
+    _$hash = $jc(_$hash, hours.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -77,7 +92,10 @@ class _$ShiftAssignment extends ShiftAssignment {
           ..add('claimedAt', claimedAt)
           ..add('decidedAt', decidedAt)
           ..add('cancelledBy', cancelledBy)
-          ..add('reason', reason))
+          ..add('reason', reason)
+          ..add('checkedInAt', checkedInAt)
+          ..add('checkedOutAt', checkedOutAt)
+          ..add('hours', hours))
         .toString();
   }
 }
@@ -116,6 +134,19 @@ class ShiftAssignmentBuilder
   String? get reason => _$this._reason;
   set reason(String? reason) => _$this._reason = reason;
 
+  DateTime? _checkedInAt;
+  DateTime? get checkedInAt => _$this._checkedInAt;
+  set checkedInAt(DateTime? checkedInAt) => _$this._checkedInAt = checkedInAt;
+
+  DateTime? _checkedOutAt;
+  DateTime? get checkedOutAt => _$this._checkedOutAt;
+  set checkedOutAt(DateTime? checkedOutAt) =>
+      _$this._checkedOutAt = checkedOutAt;
+
+  WorkedHoursBuilder? _hours;
+  WorkedHoursBuilder get hours => _$this._hours ??= WorkedHoursBuilder();
+  set hours(WorkedHoursBuilder? hours) => _$this._hours = hours;
+
   ShiftAssignmentBuilder() {
     ShiftAssignment._defaults(this);
   }
@@ -130,6 +161,9 @@ class ShiftAssignmentBuilder
       _decidedAt = $v.decidedAt;
       _cancelledBy = $v.cancelledBy;
       _reason = $v.reason;
+      _checkedInAt = $v.checkedInAt;
+      _checkedOutAt = $v.checkedOutAt;
+      _hours = $v.hours?.toBuilder();
       _$v = null;
     }
     return this;
@@ -163,12 +197,18 @@ class ShiftAssignmentBuilder
             decidedAt: decidedAt,
             cancelledBy: cancelledBy,
             reason: reason,
+            checkedInAt: checkedInAt,
+            checkedOutAt: checkedOutAt,
+            hours: _hours?.build(),
           );
     } catch (_) {
       late String _$failedField;
       try {
         _$failedField = 'worker';
         worker.build();
+
+        _$failedField = 'hours';
+        _hours?.build();
       } catch (e) {
         throw BuiltValueNestedFieldError(
             r'ShiftAssignment', _$failedField, e.toString());

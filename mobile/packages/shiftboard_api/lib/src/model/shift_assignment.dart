@@ -6,6 +6,7 @@
 import 'package:shiftboard_api/src/model/cancelled_by.dart';
 import 'package:shiftboard_api/src/model/assignment_status.dart';
 import 'package:shiftboard_api/src/model/assigned_worker.dart';
+import 'package:shiftboard_api/src/model/worked_hours.dart';
 import 'package:built_value/built_value.dart';
 import 'package:built_value/serializer.dart';
 
@@ -21,6 +22,9 @@ part 'shift_assignment.g.dart';
 /// * [decidedAt] - When the claim was last decided on, cancelled or completed. Absent while pending.
 /// * [cancelledBy] - Present when the status is `CANCELLED`.
 /// * [reason] - Why the agency removed the worker. Present only for a removal.
+/// * [checkedInAt] - When the worker checked in in the app.
+/// * [checkedOutAt] - When the worker checked out in the app.
+/// * [hours] - The approved hours. Absent until the agency approved them.
 @BuiltValue()
 abstract class ShiftAssignment
     implements Built<ShiftAssignment, ShiftAssignmentBuilder> {
@@ -49,6 +53,18 @@ abstract class ShiftAssignment
   /// Why the agency removed the worker. Present only for a removal.
   @BuiltValueField(wireName: r'reason')
   String? get reason;
+
+  /// When the worker checked in in the app.
+  @BuiltValueField(wireName: r'checkedInAt')
+  DateTime? get checkedInAt;
+
+  /// When the worker checked out in the app.
+  @BuiltValueField(wireName: r'checkedOutAt')
+  DateTime? get checkedOutAt;
+
+  /// The approved hours. Absent until the agency approved them.
+  @BuiltValueField(wireName: r'hours')
+  WorkedHours? get hours;
 
   ShiftAssignment._();
 
@@ -115,6 +131,27 @@ class _$ShiftAssignmentSerializer
       yield serializers.serialize(
         object.reason,
         specifiedType: const FullType(String),
+      );
+    }
+    if (object.checkedInAt != null) {
+      yield r'checkedInAt';
+      yield serializers.serialize(
+        object.checkedInAt,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    if (object.checkedOutAt != null) {
+      yield r'checkedOutAt';
+      yield serializers.serialize(
+        object.checkedOutAt,
+        specifiedType: const FullType(DateTime),
+      );
+    }
+    if (object.hours != null) {
+      yield r'hours';
+      yield serializers.serialize(
+        object.hours,
+        specifiedType: const FullType(WorkedHours),
       );
     }
   }
@@ -193,6 +230,30 @@ class _$ShiftAssignmentSerializer
           ) as String?;
           if (valueDes == null) continue;
           result.reason = valueDes;
+          break;
+        case r'checkedInAt':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(DateTime),
+          ) as DateTime?;
+          if (valueDes == null) continue;
+          result.checkedInAt = valueDes;
+          break;
+        case r'checkedOutAt':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(DateTime),
+          ) as DateTime?;
+          if (valueDes == null) continue;
+          result.checkedOutAt = valueDes;
+          break;
+        case r'hours':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(WorkedHours),
+          ) as WorkedHours?;
+          if (valueDes == null) continue;
+          result.hours.replace(valueDes);
           break;
         default:
           unhandled.add(key);
