@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 
@@ -76,9 +76,37 @@ describe('agency settings', () => {
     await user.click(screen.getByRole('button', { name: 'Zusatzfunktionen speichern' }))
 
     expect(await screen.findByText('Die Zusatzfunktionen sind gespeichert')).toBeInTheDocument()
-    expect(api.features).toEqual({ contactButton: true })
+    expect(api.features).toEqual({ contactButton: true, checkIn: false })
     expect(api.count('PUT /agency/features')).toBe(1)
     expect(api.count('PUT /agency/settings')).toBe(0)
+  })
+
+  it('lets an admin switch on check-in in the app and sends both features', async () => {
+    const user = userEvent.setup()
+    signInAs('ADMIN')
+    api.features = { contactButton: true, checkIn: false }
+    renderApp('/settings')
+
+    const toggle = await screen.findByLabelText('Einchecken in der App')
+    expect(toggle).not.toBeChecked()
+    expect(toggle).toHaveAccessibleDescription(/Ohne diese Funktion werden die Stunden nach den geplanten Zeiten freigegeben/)
+    await user.click(toggle)
+    await user.click(screen.getByRole('button', { name: 'Zusatzfunktionen speichern' }))
+
+    await waitFor(() => {
+      expect(api.features).toEqual({ contactButton: true, checkIn: true })
+    })
+  })
+
+  it('shows dispatchers the check-in switch without letting them change it', async () => {
+    signInAs('DISPATCHER')
+    api.features = { contactButton: false, checkIn: true }
+    renderApp('/settings')
+
+    const toggle = await screen.findByLabelText('Einchecken in der App')
+    expect(toggle).toBeChecked()
+    expect(toggle).toBeDisabled()
+    expect(screen.queryByRole('button', { name: 'Zusatzfunktionen speichern' })).not.toBeInTheDocument()
   })
 
   it('shows an error and recovers on retry', async () => {
