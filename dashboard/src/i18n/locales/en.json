@@ -313,8 +313,7 @@
       "columns": {
         "worker": "Worker",
         "shift": "Shift",
-        "date": "Date",
-        "time": "Time",
+        "date": "Date and time",
         "break": "Break",
         "hours": "Hours",
         "gross": "Gross",

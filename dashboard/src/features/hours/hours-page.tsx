@@ -198,7 +198,6 @@ function HoursTableFrame({ children }: { children: ReactNode }) {
           <TableHead>{t('hours.page.columns.worker')}</TableHead>
           <TableHead>{t('hours.page.columns.shift')}</TableHead>
           <TableHead>{t('hours.page.columns.date')}</TableHead>
-          <TableHead>{t('hours.page.columns.time')}</TableHead>
           <TableHead>{t('hours.page.columns.break')}</TableHead>
           <TableHead>{t('hours.page.columns.hours')}</TableHead>
           <TableHead>{t('hours.page.columns.gross')}</TableHead>
@@ -229,21 +228,17 @@ function HoursRow({ entry }: { entry: HoursEntry }) {
       </TableCell>
       <TableCell className="tabular-nums">
         {formatShiftDate(hours?.startedAt ?? shift.startsAt, i18n.language)}
-      </TableCell>
-      <TableCell className="tabular-nums">
-        {hours ? (
-          formatShiftTime(t, i18n.language, {
-            startsAt: hours.startedAt,
-            endsAt: hours.endedAt,
-            endIsEstimate: false,
-          })
-        ) : (
-          <span className="text-ink-secondary">
-            {t('hours.page.planned', {
-              time: formatShiftTime(t, i18n.language, { ...shift, endIsEstimate: false }),
-            })}
-          </span>
-        )}
+        <span className="type-body-sm block text-ink-secondary">
+          {hours
+            ? formatShiftTime(t, i18n.language, {
+                startsAt: hours.startedAt,
+                endsAt: hours.endedAt,
+                endIsEstimate: false,
+              })
+            : t('hours.page.planned', {
+                time: formatShiftTime(t, i18n.language, { ...shift, endIsEstimate: false }),
+              })}
+        </span>
       </TableCell>
       <TableCell className="tabular-nums">
         {hours ? t('hours.page.breakMinutes', { minutes: hours.breakMinutes }) : none}
@@ -254,7 +249,7 @@ function HoursRow({ entry }: { entry: HoursEntry }) {
       <TableCell className="tabular-nums">
         {hours ? formatMoney(i18n.language, hours.grossCents) : none}
       </TableCell>
-      <TableCell className="whitespace-normal">
+      <TableCell>
         <div className="flex flex-col items-start gap-1">
           <Badge variant={HOURS_STATUS_VARIANT[entry.status]}>{t(`hours.status.${entry.status}`)}</Badge>
           {!hours && (
@@ -282,7 +277,7 @@ function HoursTableSkeleton() {
       <HoursTableFrame>
         {Array.from({ length: SKELETON_ROWS }, (_, row) => (
           <TableRow key={row}>
-            {['w-28', 'w-36', 'w-24', 'w-24', 'w-14', 'w-16', 'w-16', 'w-20'].map((width, cell) => (
+            {['w-28', 'w-36', 'w-28', 'w-14', 'w-16', 'w-16', 'w-20'].map((width, cell) => (
               <TableCell key={cell}>
                 <Skeleton className={`h-3.5 ${width}`} />
               </TableCell>

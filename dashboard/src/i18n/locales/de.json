@@ -313,8 +313,7 @@
       "columns": {
         "worker": "Mitarbeiter:in",
         "shift": "Schicht",
-        "date": "Datum",
-        "time": "Zeit",
+        "date": "Datum und Zeit",
         "break": "Pause",
         "hours": "Stunden",
         "gross": "Brutto",
