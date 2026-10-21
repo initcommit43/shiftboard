@@ -1,4 +1,4 @@
-import { CircleAlert, LoaderCircle } from 'lucide-react'
+import { CircleAlert, Info, LoaderCircle } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
@@ -16,17 +16,22 @@ import { cn } from '@/lib/utils'
 
 import { formatShiftDate } from './format'
 import { useCreateShift } from './queries'
+import { SaveAsTemplate } from './save-as-template'
 import {
   DRAFT_FIELDS,
   type DraftErrors,
   type DraftField,
   emptyDraft,
+  type MissingField,
   serverErrors,
   type ShiftDraft,
   shiftTimes,
   soleLocationId,
+  TEMPLATE_REQUEST_FIELDS,
   toShiftRequest,
+  toTemplateRequest,
   validate,
+  validateTemplate,
 } from './shift-draft'
 
 const fieldId = (field: DraftField) => `shift-${field}`
@@ -50,14 +55,17 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 export function ShiftForm({
   clients,
   qualifications,
+  initial,
 }: {
   clients: Client[]
   qualifications: Qualification[]
+  /** A draft filled in from a shift or template, with what of it no longer exists. */
+  initial?: { draft: ShiftDraft; missing: MissingField[] }
 }) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const create = useCreateShift()
-  const [draft, setDraft] = useState(() => emptyDraft(clients))
+  const [draft, setDraft] = useState(() => initial?.draft ?? emptyDraft(clients))
   const [errors, setErrors] = useState<DraftErrors>({})
 
   const locations = clients.find((client) => client.id === draft.clientId)?.locations ?? []
@@ -138,6 +146,19 @@ export function ShiftForm({
         submit(true)
       }}
     >
+      {initial && initial.missing.length > 0 && (
+        <Alert>
+          <Info aria-hidden />
+          <AlertTitle>
+            {t('shifts.form.missing', {
+              fields: new Intl.ListFormat(i18n.language).format(
+                initial.missing.map((name) => t(`shifts.form.fields.${name}`)),
+              ),
+            })}
+          </AlertTitle>
+        </Alert>
+      )}
+
       {create.isError && (
         <Alert variant="destructive">
           <CircleAlert aria-hidden />
@@ -352,6 +373,23 @@ export function ShiftForm({
           {savingDraft && <LoaderCircle aria-hidden className="animate-spin" />}
           {t('shifts.form.saveDraft')}
         </Button>
+        <SaveAsTemplate
+          defaultName={draft.title.trim()}
+          prepare={() => {
+            const found = validateTemplate(draft)
+            setErrors(found)
+            if (Object.keys(found).length > 0) {
+              focusFirstError(found)
+              return null
+            }
+            return toTemplateRequest(draft)
+          }}
+          onFieldErrors={(fieldErrors) => {
+            const rejected = serverErrors(fieldErrors, TEMPLATE_REQUEST_FIELDS)
+            setErrors(rejected)
+            focusFirstError(rejected)
+          }}
+        />
         <Button asChild variant="ghost">
           <Link to="/shifts">{t('shifts.form.cancel')}</Link>
         </Button>

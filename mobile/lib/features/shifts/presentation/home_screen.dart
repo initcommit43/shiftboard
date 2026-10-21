@@ -8,10 +8,10 @@ import '../../../core/theme/tokens.dart';
 import '../../../core/widgets/app_tab_bar.dart';
 import '../../../core/widgets/form_page.dart';
 import '../../../core/widgets/initials_avatar.dart';
-import '../../../core/widgets/status_message.dart';
 import '../../auth/data/session.dart';
 import '../../messages/data/messages_provider.dart';
 import '../../messages/presentation/chat_view.dart';
+import '../../profile/presentation/profile_view.dart';
 import 'account_sheet.dart';
 import 'my_shifts_view.dart';
 import 'shifts_view.dart';
@@ -73,7 +73,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           icon: CupertinoIcons.person,
           selectedIcon: CupertinoIcons.person_fill,
         ),
-        view: const _ComingSoon(),
+        view: const ProfileView(),
       ),
     ];
     final worker = user.worker;
@@ -143,27 +143,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           if (index == _messagesTab) ref.invalidate(myMessagesProvider);
           setState(() => _tab = index);
         },
-      ),
-    );
-  }
-}
-
-/// Placeholder for the tabs that later slices fill.
-class _ComingSoon extends StatelessWidget {
-  const _ComingSoon();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-
-    return Center(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.all(screenMargin(context)),
-        child: StatusMessage(
-          icon: CupertinoIcons.hourglass,
-          title: l10n.comingSoonTitle,
-          message: l10n.comingSoonMessage,
-        ),
       ),
     );
   }

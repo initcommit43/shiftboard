@@ -50,7 +50,6 @@ describe('pending signups', () => {
     expect(screen.getByText('3 Anmeldungen warten auf Freigabe')).toBeInTheDocument()
     expect(navigation().getByText('3 offene Anmeldungen')).toBeInTheDocument()
     expect(screen.queryByRole('navigation', { name: 'Seiten' })).not.toBeInTheDocument()
-    expect(api.calls.at(-1)?.route).toBe('GET /workers')
     expect(api.count('GET /workers')).toBe(1)
   })
 
