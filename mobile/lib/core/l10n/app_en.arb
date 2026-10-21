@@ -106,8 +106,6 @@
   "myShiftsEmptyTitle": "No shifts requested yet",
   "myShiftsEmptyMessage": "When you request a shift, it shows up here with its status.",
   "myShiftsBrowse": "Browse open shifts",
-  "comingSoonTitle": "Coming soon",
-  "comingSoonMessage": "This area is still in the works.",
   "claimAction": "Request shift",
   "claimSheetTitle": "Request this shift?",
   "claimSheetMessage": "Your spot is held as soon as you request it. {agency} confirms the shift afterwards.",
@@ -149,5 +147,12 @@
   "chatEventRejected": "Your request was declined.",
   "chatEventCancelledByYou": "You cancelled.",
   "chatEventRemoved": "The agency took you off the shift.",
-  "chatEventShiftCancelled": "The shift was cancelled."
+  "chatEventShiftCancelled": "The shift was cancelled.",
+  "profileNotifications": "Notifications",
+  "profilePauseNewShifts": "Pause new shifts",
+  "profilePauseNewShiftsHint": "You still get confirmations, cancellations and messages.",
+  "profileNotificationsError": "The setting couldn't be loaded.",
+  "profilePushUnavailable": "Push notifications aren't set up in this version of the app yet.",
+  "shiftWhatsApp": "WhatsApp",
+  "shiftWhatsAppFailed": "WhatsApp couldn't be opened."
 }

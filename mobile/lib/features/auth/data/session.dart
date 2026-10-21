@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shiftboard_api/shiftboard_api.dart';
 
 import '../../../core/api/api_provider.dart';
+import '../../../core/push/push_registration.dart';
 import 'token_storage.dart';
 
 sealed class Session {
@@ -79,6 +80,8 @@ class SessionController extends AsyncNotifier<Session> {
   }
 
   Future<void> logout() async {
+    // While the access token is still valid.
+    await ref.read(pushRegistrationProvider).unregister();
     final tokens = await _storage.read();
     await _storage.clear();
     state = const AsyncData(SignedOut());
