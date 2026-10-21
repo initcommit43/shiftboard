@@ -50,7 +50,9 @@ export interface Message {
      */
     type: MessageType;
     /**
-     * Present for `SYSTEM` messages.
+     * Present for `SYSTEM` messages that clients word themselves. A
+     * change of the shift has none: its `body` says what changed.
+     * 
      */
     event?: SystemEvent;
     /**

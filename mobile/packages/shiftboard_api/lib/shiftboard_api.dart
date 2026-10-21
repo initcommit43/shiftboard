@@ -61,6 +61,7 @@ export 'package:shiftboard_api/src/model/role.dart';
 export 'package:shiftboard_api/src/model/shift.dart';
 export 'package:shiftboard_api/src/model/shift_assignment.dart';
 export 'package:shiftboard_api/src/model/shift_assignment_page.dart';
+export 'package:shiftboard_api/src/model/shift_change_request.dart';
 export 'package:shiftboard_api/src/model/shift_contact.dart';
 export 'package:shiftboard_api/src/model/shift_page.dart';
 export 'package:shiftboard_api/src/model/shift_period.dart';

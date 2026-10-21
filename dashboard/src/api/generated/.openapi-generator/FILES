@@ -51,6 +51,7 @@ models/Role.ts
 models/Shift.ts
 models/ShiftAssignment.ts
 models/ShiftAssignmentPage.ts
+models/ShiftChangeRequest.ts
 models/ShiftContact.ts
 models/ShiftPage.ts
 models/ShiftPeriod.ts
