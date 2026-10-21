@@ -15,6 +15,8 @@ import { CancelShift } from './cancel-shift'
 import { ClaimsSection } from './claims-section'
 import { formatShiftDate, formatShiftTime, STATUS_VARIANT } from './format'
 import { usePublishShift, useShift } from './queries'
+import { SaveAsTemplate } from './save-as-template'
+import { shiftSource, sourceToTemplate } from './shift-draft'
 
 export function ShiftDetailPage() {
   const { shiftId = '' } = useParams()
@@ -93,6 +95,10 @@ function ShiftDetail({ shift }: { shift: Shift }) {
               {t('shiftDetail.duplicate')}
             </Link>
           </Button>
+          <SaveAsTemplate
+            defaultName={shift.title}
+            prepare={() => sourceToTemplate(shiftSource(shift))}
+          />
           {isCancellable(shift) && <CancelShift shift={shift} />}
           {shift.status === ShiftStatus.DRAFT && (
             <Button

@@ -123,6 +123,62 @@ class ShiftTemplatesApi {
     );
   }
 
+  /// Delete a shift template
+  /// Shifts already created from the template do not change. Dispatchers and admins only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;template_not_found&#x60; (404).
+  ///
+  /// Parameters:
+  /// * [templateId]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future]
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<void>> deleteShiftTemplate({
+    required String templateId,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/shift-templates/{templateId}'.replaceAll(
+        '{' r'templateId' '}',
+        encodeQueryParameter(_serializers, templateId, const FullType(String))
+            .toString());
+    final _options = Options(
+      method: r'DELETE',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      validateStatus: validateStatus,
+    );
+
+    final _response = await _dio.request<Object>(
+      _path,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    return _response;
+  }
+
   /// List the agency&#39;s shift templates
   /// Every template of the agency, sorted by name. Templates are shared: every dispatcher and admin sees all of them. Dispatchers and admins only.  Error codes: &#x60;forbidden&#x60; (403).
   ///
@@ -204,6 +260,113 @@ class ShiftTemplatesApi {
     }
 
     return Response<ShiftTemplatePage>(
+      data: _responseData,
+      headers: _response.headers,
+      isRedirect: _response.isRedirect,
+      requestOptions: _response.requestOptions,
+      redirects: _response.redirects,
+      statusCode: _response.statusCode,
+      statusMessage: _response.statusMessage,
+      extra: _response.extra,
+    );
+  }
+
+  /// Change a shift template
+  /// Replaces every field of the template, its name included. Shifts already created from it do not change. Dispatchers and admins only.  Field error codes: the same as when saving a template.  Error codes: &#x60;validation_failed&#x60; (400, with &#x60;errors&#x60;), &#x60;forbidden&#x60; (403), &#x60;template_not_found&#x60; (404), &#x60;template_name_taken&#x60; (409, another template of the agency has this name, ignoring case).
+  ///
+  /// Parameters:
+  /// * [templateId]
+  /// * [shiftTemplateRequest]
+  /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
+  /// * [headers] - Can be used to add additional headers to the request
+  /// * [extras] - Can be used to add flags to the request
+  /// * [validateStatus] - A [ValidateStatus] callback that can be used to determine request success based on the HTTP status of the response
+  /// * [onSendProgress] - A [ProgressCallback] that can be used to get the send progress
+  /// * [onReceiveProgress] - A [ProgressCallback] that can be used to get the receive progress
+  ///
+  /// Returns a [Future] containing a [Response] with a [ShiftTemplate] as data
+  /// Throws [DioException] if API call or serialization fails
+  Future<Response<ShiftTemplate>> updateShiftTemplate({
+    required String templateId,
+    required ShiftTemplateRequest shiftTemplateRequest,
+    CancelToken? cancelToken,
+    Map<String, dynamic>? headers,
+    Map<String, dynamic>? extra,
+    ValidateStatus? validateStatus,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    final _path = r'/shift-templates/{templateId}'.replaceAll(
+        '{' r'templateId' '}',
+        encodeQueryParameter(_serializers, templateId, const FullType(String))
+            .toString());
+    final _options = Options(
+      method: r'PUT',
+      headers: <String, dynamic>{
+        ...?headers,
+      },
+      extra: <String, dynamic>{
+        'secure': <Map<String, String>>[
+          {
+            'type': 'http',
+            'scheme': 'bearer',
+            'name': 'bearerAuth',
+          },
+        ],
+        ...?extra,
+      },
+      contentType: 'application/json',
+      validateStatus: validateStatus,
+    );
+
+    dynamic _bodyData;
+
+    try {
+      const _type = FullType(ShiftTemplateRequest);
+      _bodyData =
+          _serializers.serialize(shiftTemplateRequest, specifiedType: _type);
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _options.compose(
+          _dio.options,
+          _path,
+        ),
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final _response = await _dio.request<Object>(
+      _path,
+      data: _bodyData,
+      options: _options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+
+    ShiftTemplate? _responseData;
+
+    try {
+      final rawResponse = _response.data;
+      _responseData = rawResponse == null
+          ? null
+          : _serializers.deserialize(
+              rawResponse,
+              specifiedType: const FullType(ShiftTemplate),
+            ) as ShiftTemplate;
+    } catch (error, stackTrace) {
+      throw DioException(
+        requestOptions: _response.requestOptions,
+        response: _response,
+        type: DioExceptionType.unknown,
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    return Response<ShiftTemplate>(
       data: _responseData,
       headers: _response.headers,
       isRedirect: _response.isRedirect,

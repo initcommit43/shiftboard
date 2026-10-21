@@ -9,6 +9,7 @@ import {
   ProblemFromJSON,
   SettingsApi,
   ShiftsApi,
+  ShiftTemplatesApi,
   WorkersApi,
 } from './generated'
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from './tokens'
@@ -115,4 +116,5 @@ export const clientsApi = new ClientsApi(configuration)
 export const messagesApi = new MessagesApi(configuration)
 export const settingsApi = new SettingsApi(configuration)
 export const shiftsApi = new ShiftsApi(configuration)
+export const shiftTemplatesApi = new ShiftTemplatesApi(configuration)
 export const workersApi = new WorkersApi(configuration)

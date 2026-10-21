@@ -16,6 +16,7 @@ import { cn } from '@/lib/utils'
 
 import { formatShiftDate } from './format'
 import { useCreateShift } from './queries'
+import { SaveAsTemplate } from './save-as-template'
 import {
   DRAFT_FIELDS,
   type DraftErrors,
@@ -26,8 +27,11 @@ import {
   type ShiftDraft,
   shiftTimes,
   soleLocationId,
+  TEMPLATE_REQUEST_FIELDS,
   toShiftRequest,
+  toTemplateRequest,
   validate,
+  validateTemplate,
 } from './shift-draft'
 
 const fieldId = (field: DraftField) => `shift-${field}`
@@ -369,6 +373,23 @@ export function ShiftForm({
           {savingDraft && <LoaderCircle aria-hidden className="animate-spin" />}
           {t('shifts.form.saveDraft')}
         </Button>
+        <SaveAsTemplate
+          defaultName={draft.title.trim()}
+          prepare={() => {
+            const found = validateTemplate(draft)
+            setErrors(found)
+            if (Object.keys(found).length > 0) {
+              focusFirstError(found)
+              return null
+            }
+            return toTemplateRequest(draft)
+          }}
+          onFieldErrors={(fieldErrors) => {
+            const rejected = serverErrors(fieldErrors, TEMPLATE_REQUEST_FIELDS)
+            setErrors(rejected)
+            focusFirstError(rejected)
+          }}
+        />
         <Button asChild variant="ghost">
           <Link to="/shifts">{t('shifts.form.cancel')}</Link>
         </Button>

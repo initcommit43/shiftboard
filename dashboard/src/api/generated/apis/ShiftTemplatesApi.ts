@@ -41,6 +41,13 @@ export interface CreateShiftTemplateRequest {
     shiftTemplateRequest: ShiftTemplateRequest;
 }
 
+export interface DeleteShiftTemplateRequest {
+    /**
+     * 
+     */
+    templateId: string;
+}
+
 export interface ListShiftTemplatesRequest {
     /**
      * Page number, starting at 0.
@@ -50,6 +57,17 @@ export interface ListShiftTemplatesRequest {
      * Page size.
      */
     size?: number;
+}
+
+export interface UpdateShiftTemplateRequest {
+    /**
+     * 
+     */
+    templateId: string;
+    /**
+     * 
+     */
+    shiftTemplateRequest: ShiftTemplateRequest;
 }
 
 /**
@@ -115,6 +133,60 @@ export class ShiftTemplatesApi extends runtime.BaseAPI {
     }
 
     /**
+     * Creates request options for deleteShiftTemplate without sending the request
+     */
+    async deleteShiftTemplateRequestOpts(requestParameters: DeleteShiftTemplateRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['templateId'] == null) {
+            throw new runtime.RequiredError(
+                'templateId',
+                'Required parameter "templateId" was null or undefined when calling deleteShiftTemplate().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/shift-templates/{templateId}`;
+        urlPath = urlPath.replace('{templateId}', encodeURIComponent(String(requestParameters['templateId'])));
+
+        return {
+            path: urlPath,
+            method: 'DELETE',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Shifts already created from the template do not change. Dispatchers and admins only.  Error codes: `forbidden` (403), `template_not_found` (404). 
+     * Delete a shift template
+     */
+    async deleteShiftTemplateRaw(requestParameters: DeleteShiftTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+        const requestOptions = await this.deleteShiftTemplateRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Shifts already created from the template do not change. Dispatchers and admins only.  Error codes: `forbidden` (403), `template_not_found` (404). 
+     * Delete a shift template
+     */
+    async deleteShiftTemplate(requestParameters: DeleteShiftTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
+        await this.deleteShiftTemplateRaw(requestParameters, initOverrides);
+    }
+
+    /**
      * Creates request options for listShiftTemplates without sending the request
      */
     async listShiftTemplatesRequestOpts(requestParameters: ListShiftTemplatesRequest): Promise<runtime.RequestOpts> {
@@ -166,6 +238,71 @@ export class ShiftTemplatesApi extends runtime.BaseAPI {
      */
     async listShiftTemplates(requestParameters: ListShiftTemplatesRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ShiftTemplatePage> {
         const response = await this.listShiftTemplatesRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for updateShiftTemplate without sending the request
+     */
+    async updateShiftTemplateRequestOpts(requestParameters: UpdateShiftTemplateRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['templateId'] == null) {
+            throw new runtime.RequiredError(
+                'templateId',
+                'Required parameter "templateId" was null or undefined when calling updateShiftTemplate().'
+            );
+        }
+
+        if (requestParameters['shiftTemplateRequest'] == null) {
+            throw new runtime.RequiredError(
+                'shiftTemplateRequest',
+                'Required parameter "shiftTemplateRequest" was null or undefined when calling updateShiftTemplate().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/shift-templates/{templateId}`;
+        urlPath = urlPath.replace('{templateId}', encodeURIComponent(String(requestParameters['templateId'])));
+
+        return {
+            path: urlPath,
+            method: 'PUT',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ShiftTemplateRequestToJSON(requestParameters['shiftTemplateRequest']),
+        };
+    }
+
+    /**
+     * Replaces every field of the template, its name included. Shifts already created from it do not change. Dispatchers and admins only.  Field error codes: the same as when saving a template.  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403), `template_not_found` (404), `template_name_taken` (409, another template of the agency has this name, ignoring case). 
+     * Change a shift template
+     */
+    async updateShiftTemplateRaw(requestParameters: UpdateShiftTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ShiftTemplate>> {
+        const requestOptions = await this.updateShiftTemplateRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => ShiftTemplateFromJSON(jsonValue));
+    }
+
+    /**
+     * Replaces every field of the template, its name included. Shifts already created from it do not change. Dispatchers and admins only.  Field error codes: the same as when saving a template.  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403), `template_not_found` (404), `template_name_taken` (409, another template of the agency has this name, ignoring case). 
+     * Change a shift template
+     */
+    async updateShiftTemplate(requestParameters: UpdateShiftTemplateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ShiftTemplate> {
+        const response = await this.updateShiftTemplateRaw(requestParameters, initOverrides);
         return await response.value();
     }
 

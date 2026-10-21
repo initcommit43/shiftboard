@@ -109,7 +109,9 @@ Class | Method | HTTP request | Description
 [*SettingsApi*](doc/SettingsApi.md) | [**updateAgencyFeatures**](doc/SettingsApi.md#updateagencyfeatures) | **PUT** /agency/features | Switch optional features on or off
 [*SettingsApi*](doc/SettingsApi.md) | [**updateAgencySettings**](doc/SettingsApi.md#updateagencysettings) | **PUT** /agency/settings | Change the agency&#39;s workflow settings
 [*ShiftTemplatesApi*](doc/ShiftTemplatesApi.md) | [**createShiftTemplate**](doc/ShiftTemplatesApi.md#createshifttemplate) | **POST** /shift-templates | Save a shift template
+[*ShiftTemplatesApi*](doc/ShiftTemplatesApi.md) | [**deleteShiftTemplate**](doc/ShiftTemplatesApi.md#deleteshifttemplate) | **DELETE** /shift-templates/{templateId} | Delete a shift template
 [*ShiftTemplatesApi*](doc/ShiftTemplatesApi.md) | [**listShiftTemplates**](doc/ShiftTemplatesApi.md#listshifttemplates) | **GET** /shift-templates | List the agency&#39;s shift templates
+[*ShiftTemplatesApi*](doc/ShiftTemplatesApi.md) | [**updateShiftTemplate**](doc/ShiftTemplatesApi.md#updateshifttemplate) | **PUT** /shift-templates/{templateId} | Change a shift template
 [*ShiftsApi*](doc/ShiftsApi.md) | [**cancelShift**](doc/ShiftsApi.md#cancelshift) | **POST** /shifts/{shiftId}/cancel | Call off a shift
 [*ShiftsApi*](doc/ShiftsApi.md) | [**createShift**](doc/ShiftsApi.md#createshift) | **POST** /shifts | Create a shift
 [*ShiftsApi*](doc/ShiftsApi.md) | [**getShift**](doc/ShiftsApi.md#getshift) | **GET** /shifts/{shiftId} | One shift of the agency
