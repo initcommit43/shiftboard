@@ -143,7 +143,12 @@
         "rate_out_of_range": "Der Stundenlohn muss über 0 € liegen.",
         "slots_out_of_range": "Zwischen 1 und 500 Plätze.",
         "unknown": "Diese Angabe wurde nicht angenommen."
-      }
+      },
+      "duplicate": {
+        "title": "Schicht duplizieren",
+        "description": "Alles ist übernommen außer dem Datum. Wähle es aus, dann veröffentlichen oder als Entwurf speichern."
+      },
+      "missing": "Nicht mehr vorhanden und daher leer: {{fields}}. Bitte neu auswählen."
     },
     "descriptionPast": "Schichten, die vorbei sind: wer gearbeitet hat und wer nicht erschienen ist.",
     "periods": {
@@ -310,7 +315,8 @@
       "reasonRequired": "Bitte gib einen Grund an.",
       "keep": "Abbrechen",
       "confirm": "Entfernen"
-    }
+    },
+    "duplicate": "Duplizieren"
   },
   "settings": {
     "title": "Einstellungen",

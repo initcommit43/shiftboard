@@ -1,4 +1,4 @@
-import type { Client, FieldError, ShiftRequest } from '@/api/generated'
+import type { Client, FieldError, Qualification, Shift, ShiftRequest } from '@/api/generated'
 
 /** The shift form as the dispatcher types it: every input as text. */
 export interface ShiftDraft {
@@ -67,6 +67,92 @@ export function emptyDraft(clients: Client[]): ShiftDraft {
     hourlyRate: '',
     slots: '1',
     qualificationIds: [],
+  }
+}
+
+/** What a new shift can be filled in from: an existing shift or a template. Times are `hh:mm`. */
+export interface DraftSource {
+  clientId: string
+  locationId: string
+  title: string
+  description?: string | undefined
+  startTime: string
+  endTime: string
+  endIsEstimate: boolean
+  hourlyRateCents: number
+  slots: number
+  qualificationIds: string[]
+}
+
+/** A field whose value no longer exists and was left empty. */
+export type MissingField = 'clientId' | 'locationId' | 'qualificationIds'
+
+/** `hh:mm` of a point in time, in the time zone of the browser. */
+export function timeOfDay(date: Date) {
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+}
+
+/** Euro cents as the rate field shows them: "16,50" in German, "16.50" otherwise. */
+export function rateText(cents: number, language: string) {
+  const text = (cents / 100).toFixed(2)
+  return language.startsWith('de') ? text.replace('.', ',') : text
+}
+
+/**
+ * A draft filled in from a shift or template, without a date. A client, location or
+ * qualification that no longer exists is left out and named in `missing`.
+ */
+export function draftFrom(
+  source: DraftSource,
+  clients: Client[],
+  qualifications: Qualification[],
+  language: string,
+): { draft: ShiftDraft; missing: MissingField[] } {
+  const missing: MissingField[] = []
+  const client = clients.find((it) => it.id === source.clientId)
+  if (!client) {
+    missing.push('clientId')
+  }
+  const location = client?.locations.find((it) => it.id === source.locationId)
+  if (client && !location) {
+    missing.push('locationId')
+  }
+  const known = source.qualificationIds.filter((id) => qualifications.some((it) => it.id === id))
+  if (known.length < source.qualificationIds.length) {
+    missing.push('qualificationIds')
+  }
+
+  return {
+    draft: {
+      clientId: client?.id ?? '',
+      locationId: location?.id ?? '',
+      title: source.title,
+      description: source.description ?? '',
+      date: '',
+      startTime: source.startTime,
+      endTime: source.endTime,
+      endIsEstimate: source.endIsEstimate,
+      hourlyRate: rateText(source.hourlyRateCents, language),
+      slots: String(source.slots),
+      qualificationIds: known,
+    },
+    missing,
+  }
+}
+
+/** What a shift gives a duplicate: everything but its date, claims and status. */
+export function shiftSource(shift: Shift): DraftSource {
+  return {
+    clientId: shift.client.id,
+    locationId: shift.location.id,
+    title: shift.title,
+    description: shift.description,
+    startTime: timeOfDay(shift.startsAt),
+    endTime: timeOfDay(shift.endsAt),
+    endIsEstimate: shift.endIsEstimate,
+    hourlyRateCents: shift.hourlyRateCents,
+    slots: shift.slots,
+    qualificationIds: shift.qualifications.map((it) => it.id),
   }
 }
 
