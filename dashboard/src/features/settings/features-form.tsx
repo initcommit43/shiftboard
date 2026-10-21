@@ -27,6 +27,7 @@ function Features({ saved }: { saved: AgencyFeatures }) {
   const { role } = useCurrentUser()
   const save = useSaveAgencyFeatures()
   const [contactButton, setContactButton] = useState(saved.contactButton)
+  const [checkIn, setCheckIn] = useState(saved.checkIn ?? false)
   const readOnly = role !== 'ADMIN'
 
   return (
@@ -34,7 +35,7 @@ function Features({ saved }: { saved: AgencyFeatures }) {
       className="flex max-w-[40rem] flex-col gap-6"
       onSubmit={(event) => {
         event.preventDefault()
-        save.mutate({ contactButton })
+        save.mutate({ contactButton, checkIn })
       }}
     >
       <h2 className="type-heading-sm">{t('settings.features.title')}</h2>
@@ -45,27 +46,22 @@ function Features({ saved }: { saved: AgencyFeatures }) {
         </Alert>
       )}
       <Card>
-        <div className="flex items-start gap-4">
-          <input
-            id="settings-contact-button"
-            type="checkbox"
-            className="mt-1 size-5 shrink-0 accent-action"
-            checked={contactButton}
-            disabled={readOnly}
-            aria-describedby="settings-contact-button-hint"
-            onChange={(event) => {
-              setContactButton(event.target.checked)
-            }}
-          />
-          <div className="space-y-1">
-            <Label htmlFor="settings-contact-button" className="type-body-md-bold text-ink">
-              {t('settings.features.contactButton')}
-            </Label>
-            <p id="settings-contact-button-hint" className="type-body-sm text-ink-secondary">
-              {t('settings.features.contactButtonHint')}
-            </p>
-          </div>
-        </div>
+        <Feature
+          id="settings-contact-button"
+          label={t('settings.features.contactButton')}
+          hint={t('settings.features.contactButtonHint')}
+          checked={contactButton}
+          disabled={readOnly}
+          onChange={setContactButton}
+        />
+        <Feature
+          id="settings-check-in"
+          label={t('settings.features.checkIn')}
+          hint={t('settings.features.checkInHint')}
+          checked={checkIn}
+          disabled={readOnly}
+          onChange={setCheckIn}
+        />
       </Card>
       {!readOnly && (
         <div>
@@ -76,5 +72,45 @@ function Features({ saved }: { saved: AgencyFeatures }) {
         </div>
       )}
     </form>
+  )
+}
+
+function Feature({
+  id,
+  label,
+  hint,
+  checked,
+  disabled,
+  onChange,
+}: {
+  id: string
+  label: string
+  hint: string
+  checked: boolean
+  disabled: boolean
+  onChange: (checked: boolean) => void
+}) {
+  return (
+    <div className="flex items-start gap-4">
+      <input
+        id={id}
+        type="checkbox"
+        className="mt-1 size-5 shrink-0 accent-action"
+        checked={checked}
+        disabled={disabled}
+        aria-describedby={`${id}-hint`}
+        onChange={(event) => {
+          onChange(event.target.checked)
+        }}
+      />
+      <div className="space-y-1">
+        <Label htmlFor={id} className="type-body-md-bold text-ink">
+          {label}
+        </Label>
+        <p id={`${id}-hint`} className="type-body-sm text-ink-secondary">
+          {hint}
+        </p>
+      </div>
+    </div>
   )
 }

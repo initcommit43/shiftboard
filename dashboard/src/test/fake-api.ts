@@ -12,6 +12,9 @@ import {
   type CurrentUser,
   CurrentUserToJSON,
   type FieldError,
+  type HoursEntry,
+  HoursEntryToJSON,
+  HoursStatus,
   type Conversation,
   ConversationToJSON,
   type Location,
@@ -261,6 +264,7 @@ export function installFakeApi() {
   let accessToken: string | null = null
   let refreshToken: string | null = null
   const overrides = new Map<string, Reply[]>()
+  const queries: { route: string; query: URLSearchParams }[] = []
 
   const api = {
     calls: [] as Call[],
@@ -288,7 +292,7 @@ export function installFakeApi() {
       ],
     } as Record<string, ShiftAssignment[]>,
     settings: { autoConfirm: false, cancellationDeadlineHours: 24 } as AgencySettings,
-    features: { contactButton: false } as AgencyFeatures,
+    features: { contactButton: false, checkIn: false } as AgencyFeatures,
     conversations: [lenaConversation, jakobConversation],
     /** The messages per conversation id, newest first as the API sends them. */
     messages: {
@@ -301,6 +305,10 @@ export function installFakeApi() {
     } as Record<string, Message[]>,
     user: dispatcher,
 
+    /** The query parameters of each request to a route, oldest first. */
+    queries(route: string) {
+      return queries.filter((it) => it.route === route).map((it) => it.query)
+    },
     /** Number of requests to a route such as `POST /auth/refresh`. */
     count(route: string) {
       return api.calls.filter((call) => call.route === route).length
@@ -533,6 +541,9 @@ export function installFakeApi() {
       if (claim.status !== AssignmentStatus.COMPLETED) {
         return problem(409, 'assignment_not_completed')
       }
+      if (claim.checkedInAt || claim.hours) {
+        return problem(409, 'worker_attended')
+      }
       next = { ...claim, status: AssignmentStatus.NO_SHOW }
     } else {
       return problem(404, 'not_found')
@@ -543,6 +554,92 @@ export function installFakeApi() {
       replaceShift({ ...found, takenSlots: found.takenSlots - 1 })
     }
     return json(ShiftAssignmentToJSON(next))
+  }
+
+  function hasWorked(claim: ShiftAssignment) {
+    return claim.status === AssignmentStatus.CONFIRMED || claim.status === AssignmentStatus.COMPLETED
+  }
+
+  function approveHours(shiftId: string, assignmentId: string, body: Record<string, unknown>) {
+    const found = allShifts().find((it) => it.id === shiftId)
+    if (!found) {
+      return problem(404, 'shift_not_found')
+    }
+    const claims = api.assignments[shiftId] ?? []
+    const claim = claims.find((it) => it.id === assignmentId)
+    if (!claim) {
+      return problem(404, 'assignment_not_found')
+    }
+    if (found.startsAt.getTime() > Date.now()) {
+      return problem(409, 'shift_not_started')
+    }
+    if (!hasWorked(claim)) {
+      return problem(409, 'assignment_not_worked')
+    }
+    const startedAt = new Date(body['startedAt'] as string)
+    const endedAt = new Date(body['endedAt'] as string)
+    const breakMinutes = body['breakMinutes'] as number
+    const minutes = (endedAt.getTime() - startedAt.getTime()) / 60000
+    if (minutes <= 0) {
+      return problem(400, 'validation_failed', [{ field: 'endedAt', code: 'before_start' }])
+    }
+    if (minutes > 24 * 60) {
+      return problem(400, 'validation_failed', [{ field: 'endedAt', code: 'too_long' }])
+    }
+    if (breakMinutes >= minutes) {
+      return problem(400, 'validation_failed', [{ field: 'breakMinutes', code: 'too_long' }])
+    }
+    const workedMinutes = minutes - breakMinutes
+    const next: ShiftAssignment = {
+      ...claim,
+      hours: {
+        startedAt,
+        endedAt,
+        breakMinutes,
+        workedMinutes,
+        grossCents: Math.round((workedMinutes * found.hourlyRateCents) / 60),
+        approvedAt: new Date(2026, 9, 20, 10, 0),
+      },
+    }
+    api.assignments[shiftId] = claims.map((it) => (it === claim ? next : it))
+    return json(ShiftAssignmentToJSON(next))
+  }
+
+  /** One entry per worker who held a confirmed spot on a started shift starting in [from, to). */
+  function listHours(url: URL) {
+    const from = new Date(url.searchParams.get('from') ?? '').getTime()
+    const to = new Date(url.searchParams.get('to') ?? '').getTime()
+    if (!(to > from)) {
+      return problem(400, 'validation_failed', [{ field: 'to', code: 'before_start' }])
+    }
+    const entries: HoursEntry[] = allShifts()
+      .filter(
+        (it) =>
+          it.startsAt.getTime() >= from &&
+          it.startsAt.getTime() < to &&
+          it.startsAt.getTime() <= Date.now(),
+      )
+      .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
+      .flatMap((it) =>
+        (api.assignments[it.id] ?? []).filter(hasWorked).map((claim) => ({
+          assignmentId: claim.id,
+          status: claim.hours ? HoursStatus.APPROVED : HoursStatus.OPEN,
+          shift: {
+            id: it.id,
+            title: it.title,
+            startsAt: it.startsAt,
+            endsAt: it.endsAt,
+            hourlyRateCents: it.hourlyRateCents,
+            client: it.client,
+            location: it.location,
+          },
+          worker: claim.worker,
+          ...(claim.checkedInAt && { checkedInAt: claim.checkedInAt }),
+          ...(claim.checkedOutAt && { checkedOutAt: claim.checkedOutAt }),
+          ...(claim.hours && { hours: claim.hours }),
+        })),
+      )
+    return page(url, entries, HoursEntryToJSON)
   }
 
   function respond(route: string, url: URL, body: unknown, authorization: string | null) {
@@ -656,6 +753,13 @@ export function installFakeApi() {
       api.settings = body as AgencySettings
       return json(AgencySettingsToJSON(api.settings))
     }
+    if (route === 'GET /hours') {
+      return listHours(url)
+    }
+    const hoursRoute = /^PUT \/shifts\/([^/]+)\/assignments\/([^/]+)\/hours$/.exec(route)
+    if (hoursRoute) {
+      return approveHours(hoursRoute[1] ?? '', hoursRoute[2] ?? '', body as Record<string, unknown>)
+    }
     const shiftUpdate = /^PUT \/shifts\/([^/]+)$/.exec(route)
     if (shiftUpdate) {
       return updateShift(shiftUpdate[1] ?? '', body as Record<string, unknown>)
@@ -700,6 +804,7 @@ export function installFakeApi() {
       const route = `${init?.method ?? 'GET'} ${url.pathname.replace('/api/v1', '')}`
       const body: unknown = typeof init?.body === 'string' ? JSON.parse(init.body) : undefined
       api.calls.push({ route, body })
+      queries.push({ route, query: url.searchParams })
 
       const override = overrides.get(route)?.shift()
       if (override instanceof Error) {
