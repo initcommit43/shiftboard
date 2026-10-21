@@ -236,7 +236,8 @@
     "shift_not_cancellable": "This shift is already over or cancelled.",
     "concurrent_change": "The shift was changed at the same moment. Please try again.",
     "conversation_not_found": "This conversation no longer exists.",
-    "no_recipients": "Nobody is confirmed for this shift yet."
+    "no_recipients": "Nobody is confirmed for this shift yet.",
+    "template_name_taken": "A template with this name already exists."
   },
   "shiftDetail": {
     "back": "All shifts",
@@ -392,5 +393,32 @@
     "send": "Send",
     "sent_one": "Message sent to {{count}} person",
     "sent_other": "Message sent to {{count}} people"
+  },
+  "templates": {
+    "save": {
+      "action": "Save as template",
+      "title": "Save as template",
+      "description": "Everything except the date is saved. Everyone at your agency can start new shifts from it.",
+      "name": "Template name",
+      "nameHint": "For example client and shift, so it is easy to find.",
+      "cancel": "Cancel",
+      "confirm": "Save template",
+      "errors": {
+        "required": "Please enter a name.",
+        "taken": "A template with this name already exists."
+      }
+    },
+    "saved": {
+      "title": "Template “{{name}}” saved",
+      "description": "You'll find it when you create a new shift."
+    },
+    "use": {
+      "label": "Use a template",
+      "none": "No template",
+      "loading": "Loading templates …",
+      "hint": "Fills in the form; you only pick the date.",
+      "empty": "No templates yet. Save a shift with “Save as template” and it shows up here.",
+      "error": "The templates could not be loaded."
+    }
   }
 }
