@@ -18,7 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Two fictional agencies with their qualifications, settings, dashboard users, workers, clients,
- * locations, shifts and a few claims. The rows are written with plain SQL, like a migration would, because nothing in the
+ * locations, shifts, shift templates and a few claims. The rows are written with plain SQL, like a migration would, because nothing in the
  * application creates agencies, dashboard users or clients yet. Runs once: a database that has
  * the demo agency is left alone.
  */
@@ -90,7 +90,18 @@ class SeedData implements ApplicationRunner {
         var inventory = shift(agency, logistics, warehouse, dispatcher, "Inventur", null, -3, 7, 8, false, "16.50", 3,
                 "COMPLETED", lager);
 
-        var lena = worker(agency, 1, "Lena", "Hofer", "1996-03-14", "ACTIVE", 60, service, bar);
+        // Jobs that come up again and again, one of them overnight.
+        template(agency, "Lager Frühschicht", logistics, warehouse, "Lagerunterstützung",
+                "Sicherheitsschuhe mitbringen. Treffpunkt beim Tor 3.", "07:00", 8 * 60, false, "16.50", 5, lager);
+        template(agency, "Stapler Wels", logistics, depot, "Staplerfahrer:in", "Staplerschein nicht vergessen.",
+                "06:00", 8 * 60, false, "19.00", 2, lager, staplerschein);
+        template(agency, "Bankett Abend", hotel, ballroom, "Service Bankett",
+                "Schwarze Hose, weißes Hemd. Treffpunkt an der Rezeption.", "17:00", 6 * 60, true, "15.00", 6,
+                service);
+        template(agency, "Messe Nachtabbau", catering, hall, "Abbau Messe", "Arbeitshandschuhe werden gestellt.",
+                "22:00", 8 * 60, true, "16.00", 8);
+
+        var lena = worker(agency, 1,"Lena", "Hofer", "1996-03-14", "ACTIVE", 60, service, bar);
         var jakob = worker(agency, 2, "Jakob", "Steiner", "1988-11-02", "ACTIVE", 52, lager, staplerschein);
         worker(agency, 3, "Mira", "Aigner", "2001-07-23", "ACTIVE", 45, service);
         var felix = worker(agency, 4, "Felix", "Brandner", "1993-01-30", "ACTIVE", 31, bar);
@@ -165,8 +176,10 @@ class SeedData implements ApplicationRunner {
         var stadium = location(agency, arena, "Haupteingang", "Arenaweg 2, 6020 Innsbruck");
         shift(agency, arena, stadium, dispatcher, "Einlass Konzert", null, 4, 17, 6, true, "15.00", 12, "PUBLISHED",
                 service);
+        template(agency, "Einlass Konzert", arena, stadium, "Einlass Konzert", null, "17:00", 6 * 60, true, "15.00",
+                12, service);
 
-        worker(agency, 12, "Tobias", "Gruber", "1990-06-09", "ACTIVE", 20, service);
+        worker(agency, 12,"Tobias", "Gruber", "1990-06-09", "ACTIVE", 20, service);
     }
 
     private UUID agency(String name, String signupCode) {
@@ -230,6 +243,27 @@ class SeedData implements ApplicationRunner {
                     .params(shiftId, qualificationId).update();
         }
         return shiftId;
+    }
+
+    /** A shift template starting at {@code startTime}, a local time of day as {@code hh:mm} (ADR 0025). */
+    private void template(
+            UUID agencyId, String name, UUID clientId, UUID locationId, String title, String description,
+            String startTime, int durationMinutes, boolean endIsEstimate, String hourlyRate, int slots,
+            UUID... qualificationIds) {
+        var templateId = jdbc.sql("""
+                insert into shift_template (
+                    id, agency_id, name, client_id, location_id, title, description, start_time, duration_minutes,
+                    end_is_estimate, hourly_rate, slots)
+                values (uuidv7(), ?, ?, ?, ?, ?, ?, ?::time, ?, ?, ?, ?) returning id
+                """)
+                .params(
+                        agencyId, name, clientId, locationId, title, description, startTime,
+                        durationMinutes, endIsEstimate, new BigDecimal(hourlyRate), slots)
+                .query(UUID.class).single();
+        for (var qualificationId : qualificationIds) {
+            jdbc.sql("insert into shift_template_qualification (shift_template_id, qualification_id) values (?, ?)")
+                    .params(templateId, qualificationId).update();
+        }
     }
 
     /**

@@ -107,7 +107,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login -H 'Content-Type: applicati
     -d '{"email": "dispatcher1.donau@example.com", "password": "shiftboard-demo", "client": "DASHBOARD"}'
 ```
 
-Donau Personal also has three clients (Nordlicht Logistik, Hotel Lindenhof, Genusswerk Catering) with four locations, and six shifts in the next nine days: five published and one draft. Alpen Events has one client with one published shift. Five claims are pending at Donau Personal: Lena Hofer has one on "Service Hochzeit", "Lagerunterstützung" has two of five spots taken and "Barkeeper:in Hochzeit" is full. The dispatchers and admins have fictional names, two of them a phone number; they are the contact persons of the shifts. The shifts are dated relative to the day the database was seeded, so an old demo database shows them in the past; `docker compose down -v` gives fresh ones.
+Donau Personal also has three clients (Nordlicht Logistik, Hotel Lindenhof, Genusswerk Catering) with four locations, and six shifts in the next nine days: five published and one draft. Alpen Events has one client with one published shift. Five claims are pending at Donau Personal: Lena Hofer has one on "Service Hochzeit", "Lagerunterstützung" has two of five spots taken and "Barkeeper:in Hochzeit" is full. The dispatchers and admins have fictional names, two of them a phone number; they are the contact persons of the shifts. Donau Personal has four shift templates, one for each location ("Messe Nachtabbau" runs past midnight), and Alpen Events has one. The shifts are dated relative to the day the database was seeded, so an old demo database shows them in the past; `docker compose down -v` gives fresh ones.
 
 ## Test
 

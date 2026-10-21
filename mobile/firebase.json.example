@@ -1,0 +1,8 @@
+{
+  "FIREBASE_API_KEY": "placeholder-api-key",
+  "FIREBASE_PROJECT_ID": "placeholder-project-id",
+  "FIREBASE_SENDER_ID": "000000000000",
+  "FIREBASE_ANDROID_APP_ID": "1:000000000000:android:0000000000000000",
+  "FIREBASE_IOS_APP_ID": "1:000000000000:ios:0000000000000000",
+  "FIREBASE_IOS_BUNDLE_ID": "app.shiftboard.mobile"
+}

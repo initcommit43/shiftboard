@@ -135,7 +135,7 @@ class ProblemDetailsHandler extends ResponseEntityExceptionHandler {
             case "NotNull", "NotBlank", "NotEmpty" -> "required";
             case "Size" -> "invalid_length";
             case "Min", "Max", "DateOfBirth" -> "out_of_range";
-            case "Email" -> INVALID_FORMAT;
+            case "Email", "Pattern" -> INVALID_FORMAT;
             default -> "invalid";
         };
     }

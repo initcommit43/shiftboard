@@ -53,6 +53,8 @@ class SeedDataIntegrationTests {
                 Map.entry("location", 5),
                 Map.entry("shift", 8),
                 Map.entry("shift_qualification", 8),
+                Map.entry("shift_template", 5),
+                Map.entry("shift_template_qualification", 5),
                 Map.entry("assignment", 7),
                 Map.entry("conversation", 2),
                 Map.entry("message", 3)));
@@ -134,6 +136,28 @@ class SeedDataIntegrationTests {
     }
 
     @Test
+    void theSeededDispatchersSeeTheTemplatesOfTheirOwnAgency() {
+        client.get().uri("/api/v1/shift-templates")
+                .headers(headers -> headers.setBearerAuth(login("dispatcher2.donau@example.com", "DASHBOARD")))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[*].name").isEqualTo(List.of(
+                        "Bankett Abend", "Lager Frühschicht", "Messe Nachtabbau", "Stapler Wels"))
+                // Runs past midnight.
+                .jsonPath("$.content[2].startTime").isEqualTo("22:00")
+                .jsonPath("$.content[2].durationMinutes").isEqualTo(480)
+                .jsonPath("$.content[3].qualificationIds.length()").isEqualTo(2);
+
+        client.get().uri("/api/v1/shift-templates")
+                .headers(headers -> headers.setBearerAuth(login("dispatcher.alpen@example.com", "DASHBOARD")))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[*].name").isEqualTo(List.of("Einlass Konzert"));
+    }
+
+    @Test
     void theSeededAdminAndWorkersCanLogIn() {
         assertThat(login("admin.donau@example.com", "DASHBOARD")).isNotBlank();
         assertThat(login("lena.hofer@example.com", "WORKER_APP")).isNotBlank();
@@ -153,7 +177,7 @@ class SeedDataIntegrationTests {
         var counts = new LinkedHashMap<String, Integer>();
         for (var table : List.of(
                 "agency", "qualification", "user_account", "worker", "worker_qualification", "client", "location",
-                "shift", "shift_qualification", "assignment", "conversation", "message")) {
+                "shift", "shift_qualification", "shift_template", "shift_template_qualification", "assignment", "conversation", "message")) {
             counts.put(table, jdbc.sql("select count(*) from " + table).query(Integer.class).single());
         }
         return counts;

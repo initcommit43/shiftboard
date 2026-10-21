@@ -14,6 +14,9 @@ public interface Agencies {
     /** The qualifications of the current agency, sorted by name. */
     List<QualificationSummary> qualifications();
 
+    /** The optional features of the current agency. */
+    AgencyFeatures features();
+
     /** The workflow settings of the current agency. */
     AgencySettings settings();
 
