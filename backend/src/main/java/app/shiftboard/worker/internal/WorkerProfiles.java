@@ -1,6 +1,7 @@
 package app.shiftboard.worker.internal;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,6 +28,12 @@ class WorkerProfiles implements WorkerProfileProvider, Workers {
         return workers.findByUserAccountId(accountId)
                 .map(worker -> new WorkerProfile(
                         worker.getId(), worker.getFirstName(), worker.getLastName(), worker.getStatus().name()));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UUID> reachableForNewShifts() {
+        return workers.findIdsByStatusAndNotificationsPausedFalse(WorkerStatus.ACTIVE);
     }
 
     @Override

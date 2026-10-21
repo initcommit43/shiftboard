@@ -105,14 +105,19 @@ Map<String, Object?> tokenPair([String suffix = '1']) => {
   'expiresIn': 900,
 };
 
-/// The fictional worker Lena Hofer of the agency Donau Personal.
-Map<String, Object?> currentUser(String workerStatus) => {
+/// The fictional worker Lena Hofer of the agency Donau Personal. With
+/// [contactButton] the agency shows the WhatsApp contact.
+Map<String, Object?> currentUser(
+  String workerStatus, {
+  bool contactButton = false,
+}) => {
   'id': '0199c0de-0000-7000-8000-000000000001',
   'email': 'lena.hofer@example.com',
   'role': 'WORKER',
   'agency': {
     'id': '0199c0de-0000-7000-8000-0000000000a1',
     'name': 'Donau Personal',
+    'features': {'contactButton': contactButton},
   },
   'worker': {
     'id': '0199c0de-0000-7000-8000-0000000000b1',

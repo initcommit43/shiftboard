@@ -11,13 +11,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import app.shiftboard.agency.Agencies;
-import app.shiftboard.agency.QualificationSummary;
 import app.shiftboard.client.Clients;
 import app.shiftboard.identity.UserAccounts;
 import app.shiftboard.agency.TenantContext;
 import app.shiftboard.shift.ShiftCancelled;
 import app.shiftboard.shift.ShiftCompleted;
 import app.shiftboard.shift.ShiftDetails;
+import app.shiftboard.shift.ShiftPublished;
 import app.shiftboard.shift.Shifts;
 import app.shiftboard.shift.internal.ShiftController.ClientSummary;
 import app.shiftboard.shift.internal.ShiftController.ShiftPage;
@@ -26,7 +26,6 @@ import app.shiftboard.shift.internal.ShiftController.ShiftRequest;
 import app.shiftboard.shift.internal.ShiftController.ShiftResponse;
 import app.shiftboard.system.ApiException;
 import app.shiftboard.system.ConflictRetry;
-import app.shiftboard.system.InvalidFieldException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.Limit;
@@ -48,11 +47,10 @@ class ShiftService implements Shifts {
             List.of(ShiftStatus.DRAFT, ShiftStatus.PUBLISHED, ShiftStatus.CANCELLED);
     private static final List<ShiftStatus> PAST =
             List.of(ShiftStatus.PUBLISHED, ShiftStatus.COMPLETED, ShiftStatus.CANCELLED);
-    private static final String NOT_FOUND = "not_found";
-
     private final ShiftRepository shifts;
     private final Clients clients;
     private final Agencies agencies;
+    private final ShiftReferences references;
 
     private final UserAccounts userAccounts;
 
@@ -61,11 +59,12 @@ class ShiftService implements Shifts {
     private final TransactionTemplate transactions;
 
     ShiftService(
-            ShiftRepository shifts, Clients clients, Agencies agencies, UserAccounts userAccounts,
-            ApplicationEventPublisher events, TransactionTemplate transactions) {
+            ShiftRepository shifts, Clients clients, Agencies agencies, ShiftReferences references,
+            UserAccounts userAccounts, ApplicationEventPublisher events, TransactionTemplate transactions) {
         this.shifts = shifts;
         this.clients = clients;
         this.agencies = agencies;
+        this.references = references;
         this.userAccounts = userAccounts;
         this.events = events;
         this.transactions = transactions;
@@ -131,16 +130,8 @@ class ShiftService implements Shifts {
 
     @Transactional
     ShiftResponse create(ShiftRequest request, UUID contactUserId) {
-        var client = clients.find(request.clientId())
-                .orElseThrow(() -> new InvalidFieldException("clientId", NOT_FOUND));
-        if (client.location(request.locationId()).isEmpty()) {
-            throw new InvalidFieldException("locationId", NOT_FOUND);
-        }
         var qualificationIds = request.qualificationIds() == null ? Set.<UUID>of() : request.qualificationIds();
-        var known = agencies.qualifications().stream().map(QualificationSummary::id).toList();
-        if (!known.containsAll(qualificationIds)) {
-            throw new InvalidFieldException("qualificationIds", NOT_FOUND);
-        }
+        references.check(request.clientId(), request.locationId(), qualificationIds);
 
         var shift = new Shift(
                 request.clientId(),
@@ -157,13 +148,18 @@ class ShiftService implements Shifts {
         if (Boolean.TRUE.equals(request.publish())) {
             shift.publish();
         }
-        return responses(List.of(shifts.saveAndFlush(shift))).getFirst();
+        var created = shifts.saveAndFlush(shift);
+        if (created.getStatus() == ShiftStatus.PUBLISHED) {
+            events.publishEvent(new ShiftPublished(TenantContext.require(), created.getId()));
+        }
+        return responses(List.of(created)).getFirst();
     }
 
     @Transactional
     ShiftResponse publish(UUID shiftId) {
         var shift = shifts.findById(shiftId).orElseThrow(ShiftService::notFound);
         shift.publish();
+        events.publishEvent(new ShiftPublished(TenantContext.require(), shift.getId()));
         return responses(List.of(shift)).getFirst();
     }
 
