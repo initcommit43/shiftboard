@@ -6,6 +6,7 @@
     "navigation": "Main navigation",
     "nav": {
       "shifts": "Shifts",
+      "templates": "Templates",
       "signups": "Signups",
       "messages": "Messages",
       "settings": "Settings",
@@ -237,7 +238,8 @@
     "concurrent_change": "The shift was changed at the same moment. Please try again.",
     "conversation_not_found": "This conversation no longer exists.",
     "no_recipients": "Nobody is confirmed for this shift yet.",
-    "template_name_taken": "A template with this name already exists."
+    "template_name_taken": "A template with this name already exists.",
+    "template_not_found": "This template no longer exists. The list has been updated."
   },
   "shiftDetail": {
     "back": "All shifts",
@@ -419,6 +421,53 @@
       "hint": "Fills in the form; you only pick the date.",
       "empty": "No templates yet. Save a shift with “Save as template” and it shows up here.",
       "error": "The templates could not be loaded."
+    },
+    "updated": "Template “{{name}}” saved",
+    "deleted": "Template “{{name}}” deleted",
+    "list": {
+      "title": "Templates",
+      "description": "Shifts that come up again and again. Everyone at your agency can use and change them.",
+      "loading": "Loading templates …",
+      "count_one": "{{count}} template",
+      "count_other": "{{count}} templates",
+      "columns": {
+        "name": "Template",
+        "rate": "Hourly rate",
+        "slots": "Spots"
+      },
+      "nextDay": "{{time}} (next day)",
+      "gone": "No longer available",
+      "empty": {
+        "title": "No templates yet",
+        "description": "Create a new shift and save it with “Save as template”. It then shows up here.",
+        "action": "New shift"
+      },
+      "error": {
+        "title": "The templates could not be loaded",
+        "description": "Please try again. If the problem persists, reload the page."
+      }
+    },
+    "edit": {
+      "action": "Edit",
+      "actionNamed": "Edit template “{{name}}”",
+      "title": "Edit template",
+      "description": "Shifts already created from this template do not change.",
+      "section": "Template",
+      "save": "Save template",
+      "endsNextDay": "Ends the next day.",
+      "notFound": {
+        "title": "This template no longer exists",
+        "description": "It may have been deleted in the meantime.",
+        "back": "Back to templates"
+      }
+    },
+    "delete": {
+      "action": "Delete",
+      "actionNamed": "Delete template “{{name}}”",
+      "title": "Delete template “{{name}}”?",
+      "description": "The template is then gone for everyone at your agency. Shifts already created from it stay as they are.",
+      "keep": "Keep",
+      "confirm": "Delete template"
     }
   }
 }
