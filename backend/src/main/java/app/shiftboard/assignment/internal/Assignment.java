@@ -125,6 +125,13 @@ class Assignment {
         cancel(CancelledBy.AGENCY, reason, now);
     }
 
+    /** The shift moved: the worker keeps the spot and is booked for the new time (ADR 0026). */
+    void reschedule(Instant startsAt, Instant endsAt) {
+        requireHoldsSlot();
+        this.startsAt = startsAt;
+        this.endsAt = endsAt;
+    }
+
     /** The agency called off the whole shift. */
     void cancelWithShift(Instant now) {
         requireHoldsSlot();

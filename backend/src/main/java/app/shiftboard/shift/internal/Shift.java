@@ -2,10 +2,13 @@ package app.shiftboard.shift.internal;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+import app.shiftboard.shift.ShiftChanged.Change;
 import app.shiftboard.system.InvalidFieldException;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -90,15 +93,7 @@ class Shift {
     Shift(
             UUID clientId, UUID locationId, UUID contactUserId, String title, String description, Instant startsAt,
             Instant endsAt, boolean endIsEstimate, BigDecimal hourlyRate, int slots, Set<UUID> qualificationIds) {
-        if (!endsAt.isAfter(startsAt)) {
-            throw new InvalidFieldException("endsAt", "before_start");
-        }
-        if (hourlyRate.signum() <= 0) {
-            throw new InvalidFieldException("hourlyRateCents", "out_of_range");
-        }
-        if (slots < 1 || slots > MAX_SLOTS) {
-            throw new InvalidFieldException("slots", "out_of_range");
-        }
+        checkTerms(startsAt, endsAt, hourlyRate, slots);
         this.clientId = clientId;
         this.locationId = locationId;
         this.contactUserId = contactUserId;
@@ -111,6 +106,73 @@ class Shift {
         this.slots = slots;
         this.qualificationIds.addAll(qualificationIds);
         this.status = ShiftStatus.DRAFT;
+    }
+
+    /**
+     * Replaces every field of a draft, or of a published shift that has not started (ADR 0026).
+     * Status, spots taken and contact stay. Spots cannot drop below the spots taken.
+     *
+     * @return what changed that matters to a worker who holds a spot; empty if nothing did
+     */
+    Set<Change> update(
+            UUID clientId, UUID locationId, String title, String description, Instant startsAt, Instant endsAt,
+            boolean endIsEstimate, BigDecimal hourlyRate, int slots, Set<UUID> qualificationIds, Instant now) {
+        var editable = status == ShiftStatus.DRAFT || (status == ShiftStatus.PUBLISHED && now.isBefore(this.startsAt));
+        if (!editable) {
+            throw new ShiftNotEditableException();
+        }
+        checkTerms(startsAt, endsAt, hourlyRate, slots);
+        if (slots < takenSlots) {
+            throw new InvalidFieldException("slots", "below_taken");
+        }
+
+        var changes = EnumSet.noneOf(Change.class);
+        if (!startsAt.equals(this.startsAt) || !endsAt.equals(this.endsAt) || endIsEstimate != this.endIsEstimate) {
+            changes.add(Change.TIME);
+        }
+        if (!clientId.equals(this.clientId)) {
+            changes.add(Change.CLIENT);
+        }
+        if (!locationId.equals(this.locationId)) {
+            changes.add(Change.LOCATION);
+        }
+        if (!title.equals(this.title)) {
+            changes.add(Change.TITLE);
+        }
+        if (!Objects.equals(description, this.description)) {
+            changes.add(Change.DESCRIPTION);
+        }
+        if (hourlyRate.compareTo(this.hourlyRate) != 0) {
+            changes.add(Change.PAY);
+        }
+        if (!qualificationIds.equals(this.qualificationIds)) {
+            changes.add(Change.QUALIFICATIONS);
+        }
+
+        this.clientId = clientId;
+        this.locationId = locationId;
+        this.title = title;
+        this.description = description;
+        this.startsAt = startsAt;
+        this.endsAt = endsAt;
+        this.endIsEstimate = endIsEstimate;
+        this.hourlyRate = hourlyRate;
+        this.slots = slots;
+        this.qualificationIds.clear();
+        this.qualificationIds.addAll(qualificationIds);
+        return changes;
+    }
+
+    private static void checkTerms(Instant startsAt, Instant endsAt, BigDecimal hourlyRate, int slots) {
+        if (!endsAt.isAfter(startsAt)) {
+            throw new InvalidFieldException("endsAt", "before_start");
+        }
+        if (hourlyRate.signum() <= 0) {
+            throw new InvalidFieldException("hourlyRateCents", "out_of_range");
+        }
+        if (slots < 1 || slots > MAX_SLOTS) {
+            throw new InvalidFieldException("slots", "out_of_range");
+        }
     }
 
     void publish() {

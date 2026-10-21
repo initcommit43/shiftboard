@@ -96,6 +96,28 @@ class PushNotificationIntegrationTests extends IntegrationTest {
     }
 
     @Test
+    void aChangeOfTheShiftReachesTheWorkersOnIt() {
+        var worker = activeWorker();
+        var device = device(worker);
+        var bystander = device(activeWorker());
+        var shiftId = publish(IN_THREE_DAYS);
+        claim(shiftId, worker);
+        await().atMost(Duration.ofSeconds(5)).until(() -> push.sentTo(bystander).size() == 1);
+
+        var request = shiftRequest(IN_THREE_DAYS);
+        request.put("hourlyRateCents", 1800);
+        put("/api/v1/shifts/" + shiftId, dispatcher, request).expectStatus().isOk();
+
+        await().atMost(Duration.ofSeconds(5)).until(() -> push.sentTo(device).size() == 2);
+        var sent = push.sentTo(device).getLast();
+        assertThat(sent.title()).isEqualTo("Schicht geändert");
+        assertThat(sent.body()).startsWith("Lagerunterstützung · ");
+        assertThat(sent.data()).containsEntry("type", "SHIFT_CHANGED").containsEntry("shiftId", shiftId.toString());
+        // Only the new shift reached the worker without a spot.
+        assertThat(push.sentTo(bystander)).hasSize(1);
+    }
+
+    @Test
     void droppingOutYourselfSendsNothing() {
         var worker = activeWorker();
         var device = device(worker);

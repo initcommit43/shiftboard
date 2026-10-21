@@ -1,5 +1,7 @@
 package app.shiftboard.messaging.internal;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -8,6 +10,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -25,6 +28,8 @@ import app.shiftboard.messaging.internal.MessagingController.MessagePage;
 import app.shiftboard.messaging.internal.MessagingController.MessageResponse;
 import app.shiftboard.messaging.internal.MessagingController.MessageShift;
 import app.shiftboard.messaging.internal.MessagingController.UnreadCount;
+import app.shiftboard.agency.QualificationSummary;
+import app.shiftboard.shift.ShiftChanged;
 import app.shiftboard.shift.ShiftDetails;
 import app.shiftboard.shift.Shifts;
 import app.shiftboard.system.ApiException;
@@ -55,6 +60,12 @@ class MessagingService {
 
     private static final DateTimeFormatter FALLBACK_DAY =
             DateTimeFormatter.ofPattern("EEE, d. MMM", Locale.GERMAN).withZone(FALLBACK_ZONE);
+
+    private static final DateTimeFormatter FALLBACK_DAY_AND_TIME =
+            DateTimeFormatter.ofPattern("EEE, d. MMM, HH:mm", Locale.GERMAN).withZone(FALLBACK_ZONE);
+
+    private static final DateTimeFormatter FALLBACK_TIME =
+            DateTimeFormatter.ofPattern("HH:mm", Locale.GERMAN).withZone(FALLBACK_ZONE);
 
     private final ConversationRepository conversations;
 
@@ -216,6 +227,62 @@ class MessagingService {
                 Message.system(conversation.getId(), event, fallbackText(event, shift), shiftId, dedupKey, now));
     }
 
+    /**
+     * A message to the worker that says what changed on the shift, with the new values (ADR 0026).
+     * Its text is all clients show of it.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    void recordShiftChange(UUID workerId, UUID shiftId, Set<ShiftChanged.Change> changes, String dedupKey) {
+        if (messages.existsByDedupKey(dedupKey)) {
+            return;
+        }
+        var shift = shifts.find(shiftId).orElseThrow();
+        var now = Instant.now();
+        var conversation = conversationOf(workerId, now);
+        messages.saveAndFlush(Message.system(
+                conversation.getId(), SystemEvent.SHIFT_CHANGED, changeText(changes, shift), shiftId, dedupKey, now));
+    }
+
+    /** Such as "Die Agentur hat „Lager“ geändert. Zeit: Do., 22. Okt., 08:00 – 16:00. Stundenlohn: 17,00 €." */
+    static String changeText(Set<ShiftChanged.Change> changes, ShiftDetails shift) {
+        var text = new StringBuilder("Die Agentur hat „").append(shift.title()).append("“ geändert.");
+        // In the order of the shift form.
+        for (var change : ShiftChanged.Change.values()) {
+            if (!changes.contains(change)) {
+                continue;
+            }
+            text.append(' ').append(switch (change) {
+                case TIME -> "Zeit: " + timeText(shift) + ".";
+                case CLIENT -> "Kunde: " + shift.client().name() + ".";
+                case LOCATION -> "Einsatzort: " + shift.location().name() + ", " + shift.location().address() + ".";
+                case TITLE -> "Neuer Titel.";
+                case DESCRIPTION -> shift.description() == null
+                        ? "Die Beschreibung wurde entfernt."
+                        : "Beschreibung: " + shift.description();
+                case PAY -> "Stundenlohn: " + euros(shift.hourlyRateCents()) + ".";
+                case QUALIFICATIONS -> shift.qualifications().isEmpty()
+                        ? "Keine Qualifikationen mehr nötig."
+                        : "Qualifikationen: " + String.join(", ",
+                                shift.qualifications().stream().map(QualificationSummary::name).toList()) + ".";
+            });
+        }
+        return text.toString();
+    }
+
+    private static String timeText(ShiftDetails shift) {
+        var sameDay = FALLBACK_DAY.format(shift.startsAt()).equals(FALLBACK_DAY.format(shift.endsAt()));
+        var end = (sameDay ? FALLBACK_TIME : FALLBACK_DAY_AND_TIME).format(shift.endsAt());
+        return FALLBACK_DAY_AND_TIME.format(shift.startsAt()) + " – " + (shift.endIsEstimate() ? "ca. " : "") + end;
+    }
+
+    /** Such as "17,00 €", with a plain space: the currency format puts a no-break one there. */
+    private static String euros(int cents) {
+        var format = NumberFormat.getNumberInstance(Locale.GERMANY);
+        format.setMinimumFractionDigits(2);
+        format.setMaximumFractionDigits(2);
+        return format.format(BigDecimal.valueOf(cents, 2)) + " €";
+    }
+
     private static String fallbackText(SystemEvent event, ShiftDetails shift) {
         var shiftName = "„" + shift.title() + "“ am " + FALLBACK_DAY.format(shift.startsAt());
         return switch (event) {
@@ -224,6 +291,7 @@ class MessagingService {
             case CLAIM_CANCELLED_BY_WORKER -> "Du hast " + shiftName + " abgesagt.";
             case REMOVED_BY_AGENCY -> "Die Agentur hat dich aus " + shiftName + " genommen.";
             case SHIFT_CANCELLED -> "Die Schicht " + shiftName + " wurde abgesagt.";
+            case SHIFT_CHANGED -> throw new IllegalArgumentException("A shift change brings its own text");
         };
     }
 
@@ -277,7 +345,8 @@ class MessagingService {
                     return new MessageResponse(
                             message.getId(),
                             message.getType(),
-                            message.getEvent(),
+                            // Not in the API yet: installed apps reject event values they do not know (ADR 0026).
+                            message.getEvent() == SystemEvent.SHIFT_CHANGED ? null : message.getEvent(),
                             message.getBody(),
                             message.isFromWorker(),
                             message.getSenderUserId() == null ? null : senders.get(message.getSenderUserId()),

@@ -13,6 +13,7 @@ import app.shiftboard.agency.TenantContext;
 import app.shiftboard.assignment.AssignmentCancelled;
 import app.shiftboard.assignment.AssignmentConfirmed;
 import app.shiftboard.assignment.AssignmentRejected;
+import app.shiftboard.assignment.AssignmentShiftChanged;
 import app.shiftboard.messaging.MessageSent;
 import app.shiftboard.notification.internal.PushSender.PushMessage;
 import app.shiftboard.shift.ShiftDetails;
@@ -91,6 +92,12 @@ class PushNotifications {
             case SHIFT_CANCELLED -> aboutShift(cancelled.agencyId(), cancelled.workerId(), cancelled.shiftId(),
                     "Schicht abgesagt", "SHIFT_CANCELLED");
         }
+    }
+
+    @Async
+    @TransactionalEventListener
+    void on(AssignmentShiftChanged changed) {
+        aboutShift(changed.agencyId(), changed.workerId(), changed.shiftId(), "Schicht geändert", "SHIFT_CHANGED");
     }
 
     /** Messages and broadcasts of the agency; the worker's own messages need no push. */

@@ -6,6 +6,7 @@ import app.shiftboard.agency.TenantContext;
 import app.shiftboard.assignment.AssignmentCancelled;
 import app.shiftboard.assignment.AssignmentConfirmed;
 import app.shiftboard.assignment.AssignmentRejected;
+import app.shiftboard.assignment.AssignmentShiftChanged;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -43,6 +44,16 @@ class SystemMessages {
             case SHIFT_CANCELLED -> SystemEvent.SHIFT_CANCELLED;
         };
         record(cancelled.agencyId(), cancelled.workerId(), cancelled.shiftId(), cancelled.assignmentId(), event);
+    }
+
+    /** Every change gets a message of its own. */
+    @TransactionalEventListener
+    void on(AssignmentShiftChanged changed) {
+        try (var _ = TenantContext.bind(changed.agencyId())) {
+            messaging.recordShiftChange(
+                    changed.workerId(), changed.shiftId(), changed.changes(),
+                    "assignment:" + changed.assignmentId() + ":" + SystemEvent.SHIFT_CHANGED + ":" + changed.changeId());
+        }
     }
 
     private void record(UUID agencyId, UUID workerId, UUID shiftId, UUID assignmentId, SystemEvent event) {

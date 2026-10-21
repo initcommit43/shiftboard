@@ -55,4 +55,13 @@ interface AssignmentRepository extends Repository<Assignment, UUID> {
               and a.startsAt < :endsAt and a.endsAt > :startsAt
             """)
     boolean isBooked(UUID workerId, Collection<AssignmentStatus> statuses, Instant startsAt, Instant endsAt);
+
+    /** Like {@link #isBooked}, leaving out one claim of the worker. */
+    @Query("""
+            select count(a) > 0 from Assignment a
+            where a.workerId = :workerId and a.id <> :except and a.status in :statuses
+              and a.startsAt < :endsAt and a.endsAt > :startsAt
+            """)
+    boolean isBookedElsewhere(
+            UUID workerId, UUID except, Collection<AssignmentStatus> statuses, Instant startsAt, Instant endsAt);
 }
