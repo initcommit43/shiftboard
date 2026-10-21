@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import app.shiftboard.agency.Agencies;
+import app.shiftboard.agency.AgencyFeatures;
 import app.shiftboard.agency.AgencySettings;
 import app.shiftboard.agency.AgencySummary;
 import app.shiftboard.agency.QualificationSummary;
@@ -42,6 +43,19 @@ class AgencyService implements Agencies {
 
     @Override
     @Transactional(readOnly = true)
+    public AgencyFeatures features() {
+        return currentAgency().getFeatures();
+    }
+
+    @Transactional
+    AgencyFeatures changeFeatures(AgencyFeatures features) {
+        var agency = currentAgency();
+        agency.changeFeatures(features);
+        return agency.getFeatures();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public AgencySettings settings() {
         return currentAgency().getSettings();
     }
@@ -64,6 +78,6 @@ class AgencyService implements Agencies {
     }
 
     private static AgencySummary summary(Agency agency) {
-        return new AgencySummary(agency.getId(), agency.getName());
+        return new AgencySummary(agency.getId(), agency.getName(), agency.getFeatures());
     }
 }

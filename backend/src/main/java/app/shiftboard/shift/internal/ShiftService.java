@@ -18,6 +18,7 @@ import app.shiftboard.agency.TenantContext;
 import app.shiftboard.shift.ShiftCancelled;
 import app.shiftboard.shift.ShiftCompleted;
 import app.shiftboard.shift.ShiftDetails;
+import app.shiftboard.shift.ShiftPublished;
 import app.shiftboard.shift.Shifts;
 import app.shiftboard.shift.internal.ShiftController.ClientSummary;
 import app.shiftboard.shift.internal.ShiftController.ShiftPage;
@@ -157,13 +158,18 @@ class ShiftService implements Shifts {
         if (Boolean.TRUE.equals(request.publish())) {
             shift.publish();
         }
-        return responses(List.of(shifts.saveAndFlush(shift))).getFirst();
+        var created = shifts.saveAndFlush(shift);
+        if (created.getStatus() == ShiftStatus.PUBLISHED) {
+            events.publishEvent(new ShiftPublished(TenantContext.require(), created.getId()));
+        }
+        return responses(List.of(created)).getFirst();
     }
 
     @Transactional
     ShiftResponse publish(UUID shiftId) {
         var shift = shifts.findById(shiftId).orElseThrow(ShiftService::notFound);
         shift.publish();
+        events.publishEvent(new ShiftPublished(TenantContext.require(), shift.getId()));
         return responses(List.of(shift)).getFirst();
     }
 

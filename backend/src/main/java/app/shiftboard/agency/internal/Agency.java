@@ -2,6 +2,7 @@ package app.shiftboard.agency.internal;
 
 import java.util.UUID;
 
+import app.shiftboard.agency.AgencyFeatures;
 import app.shiftboard.agency.AgencySettings;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -29,6 +30,11 @@ class Agency {
     @ColumnTransformer(write = "?::jsonb")
     private AgencySettings settings;
 
+    @Convert(converter = FeaturesConverter.class)
+    @Column(columnDefinition = "jsonb")
+    @ColumnTransformer(write = "?::jsonb")
+    private AgencyFeatures features;
+
     protected Agency() {
     }
 
@@ -42,6 +48,14 @@ class Agency {
 
     AgencySettings getSettings() {
         return settings;
+    }
+
+    AgencyFeatures getFeatures() {
+        return features;
+    }
+
+    void changeFeatures(AgencyFeatures features) {
+        this.features = features;
     }
 
     /** Applies to claims and cancellations from now on; decisions already made stay as they are. */
