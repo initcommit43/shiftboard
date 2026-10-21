@@ -21,6 +21,7 @@ import '../../auth/data/session.dart';
 import '../data/worker_shifts_provider.dart';
 import '../domain/shift_facts.dart';
 import 'cancel_sheet.dart';
+import 'check_in.dart';
 import 'claim_sheet.dart';
 import 'shift_card.dart';
 import 'shift_format.dart';
@@ -28,7 +29,8 @@ import 'shift_format.dart';
 /// Everything about one shift: the card's facts plus the description, the
 /// required qualifications, the address with a map link and the contact.
 /// A shift the worker has not claimed yet offers the claim at the bottom; a
-/// claimed one that has not started offers to drop out.
+/// claimed one that has not started offers to drop out. Where the agency uses
+/// check-in, checking in and out takes over the bar once check-in opens.
 class ShiftDetailScreen extends ConsumerWidget {
   const ShiftDetailScreen({super.key, required this.shiftId});
 
@@ -114,10 +116,14 @@ class ShiftDetailScreen extends ConsumerWidget {
             if (shift.value case final shift?)
               if (shift.assignment == null)
                 _ClaimBar(shift: shift)
+              else if (shift.checkInAt(now).hasAction)
+                CheckInBar(shift: shift, now: now)
               else if (shift.holdsSpot &&
                   shift.assignment?.cancellableUntil != null &&
                   now.isBefore(shift.startsAt))
-                _CancelBar(shift: shift, now: now),
+                _CancelBar(shift: shift, now: now)
+              else if (shift.checkInAt(now) == CheckIn.notYetOpen)
+                CheckInBar(shift: shift, now: now),
           ],
         ),
       ),
@@ -209,11 +215,24 @@ class _CancelBar extends ConsumerWidget {
       content = Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          AppButton(
-            label: l10n.cancelDeadlinePassed,
-            variant: AppButtonVariant.danger,
-            onPressed: null,
-          ),
+          // With check-in, the next step is checking in, so the disabled
+          // button says when that opens instead.
+          if (shift.checkInAt(now) == CheckIn.notYetOpen)
+            AppButton(
+              label: checkInOpensLabel(
+                shift,
+                now,
+                l10n,
+                ShiftFormat.of(context),
+              ),
+              onPressed: null,
+            )
+          else
+            AppButton(
+              label: l10n.cancelDeadlinePassed,
+              variant: AppButtonVariant.danger,
+              onPressed: null,
+            ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             l10n.cancelDeadlinePassedHint(shift.contact.name),
@@ -286,6 +305,8 @@ String? _claimNote(
         ? l10n.shiftCancelledByAgency(agency)
         : l10n.claimRemovedByAgency(agency);
   }
+  // Once check-in is open, the bar offers that instead of dropping out.
+  if (shift.checkInAt(now).hasAction) return null;
   if (assignment.cancellableUntil case final until?
       when shift.holdsSpot && now.isBefore(until)) {
     return l10n.cancelUntil(format.date(until), format.time(until));
@@ -323,13 +344,13 @@ class _Details extends ConsumerWidget {
     final agency = agencySummary?.name ?? '';
     // Agencies that prefer WhatsApp switch this on (S3-6).
     final whatsApp = agencySummary?.features?.contactButton ?? false;
-    final note = _claimNote(
-      shift,
-      l10n,
-      format,
-      agency,
-      ref.watch(clockProvider)(),
-    );
+    final now = ref.watch(clockProvider)();
+    final note = _claimNote(shift, l10n, format, agency, now);
+    // While the bar still offers dropping out, say here when check-in opens.
+    final checkInNote =
+        shift.checkInAt(now) == CheckIn.notYetOpen && shift.canCancelAt(now)
+        ? checkInOpensLabel(shift, now, l10n, format)
+        : null;
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -357,7 +378,19 @@ class _Details extends ConsumerWidget {
           const SizedBox(height: AppSpacing.md),
           Text(note, style: AppTypography.subhead.copyWith(color: colors.ink)),
         ],
+        if (checkInNote != null) ...[
+          SizedBox(height: note == null ? AppSpacing.md : AppSpacing.xxs),
+          Text(
+            checkInNote,
+            style: AppTypography.subhead.copyWith(color: colors.ink),
+          ),
+        ],
         const SizedBox(height: AppSpacing.xl),
+        if (shift.assignment?.checkedInAt != null &&
+            shift.checkInAt(now) != CheckIn.none) ...[
+          AttendanceCard(shift: shift),
+          const SizedBox(height: AppSpacing.lg),
+        ],
         _Group(
           children: [
             ShiftFactLine(

@@ -56,11 +56,18 @@ class ShiftFormat {
   String time(DateTime time) => DateFormat.Hm(_locale).format(time.toLocal());
 }
 
-/// The badge of a shift: the worker's own claim if there is one, otherwise
+/// The badge of a shift: the worker's own claim if there is one ("Eingecheckt"
+/// while checked in), otherwise
 /// whether the shift is full. Null for an open shift, which is the normal
 /// case and needs no mark.
 AppBadge? shiftBadge(WorkerShift shift, AppLocalizations l10n) {
   final claim = shift.assignment?.status;
+  // On the job: checked in, not yet out.
+  if (claim == AssignmentStatus.CONFIRMED &&
+      shift.assignment?.checkedInAt != null &&
+      shift.assignment?.checkedOutAt == null) {
+    return AppBadge(status: AppStatus.confirmed, label: l10n.checkedInBadge);
+  }
   if (claim != null) {
     final (status, label) = switch (claim) {
       AssignmentStatus.CONFIRMED => (AppStatus.confirmed, l10n.claimConfirmed),

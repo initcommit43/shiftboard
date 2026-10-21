@@ -24,6 +24,13 @@ abstract final class ApiErrorCode {
   static const assignmentNotActive = 'assignment_not_active';
   static const cancellationDeadlinePassed = 'cancellation_deadline_passed';
   static const concurrentChange = 'concurrent_change';
+  static const checkInDisabled = 'check_in_disabled';
+  static const assignmentNotConfirmed = 'assignment_not_confirmed';
+  static const checkInNotOpen = 'check_in_not_open';
+  static const alreadyCheckedIn = 'already_checked_in';
+  static const notCheckedIn = 'not_checked_in';
+  static const alreadyCheckedOut = 'already_checked_out';
+  static const hoursApproved = 'hours_approved';
 }
 
 /// A failed API call, reduced to what the UI decides on.
