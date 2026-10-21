@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { HoursSection } from '@/features/hours/hours-section'
 
 import { CancelShift } from './cancel-shift'
 import { ClaimsSection } from './claims-section'
@@ -140,6 +141,8 @@ function ShiftDetail({ shift }: { shift: Shift }) {
       </Card>
 
       <ClaimsSection shift={shift} />
+
+      <HoursSection shift={shift} />
     </>
   )
 }

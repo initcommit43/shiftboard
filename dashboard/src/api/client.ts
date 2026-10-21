@@ -4,6 +4,7 @@ import {
   AuthApi,
   ClientsApi,
   Configuration,
+  HoursApi,
   MessagesApi,
   type Middleware,
   ProblemFromJSON,
@@ -113,6 +114,7 @@ const configuration = new Configuration({
 export const assignmentsApi = new AssignmentsApi(configuration)
 export const authApi = new AuthApi(configuration)
 export const clientsApi = new ClientsApi(configuration)
+export const hoursApi = new HoursApi(configuration)
 export const messagesApi = new MessagesApi(configuration)
 export const settingsApi = new SettingsApi(configuration)
 export const shiftsApi = new ShiftsApi(configuration)

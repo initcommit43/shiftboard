@@ -242,7 +242,67 @@
     "template_name_taken": "Eine Vorlage mit diesem Namen gibt es schon.",
     "template_not_found": "Diese Vorlage gibt es nicht mehr. Die Liste wurde aktualisiert.",
     "shift_not_editable": "Diese Schicht hat schon begonnen oder ist abgesagt. Sie lässt sich nicht mehr bearbeiten.",
-    "shift_overlap": "Zur neuen Zeit hätte jemand mit Platz schon eine andere Schicht. Wähle eine andere Zeit oder nimm die Person zuerst heraus."
+    "shift_overlap": "Zur neuen Zeit hätte jemand mit Platz schon eine andere Schicht. Wähle eine andere Zeit oder nimm die Person zuerst heraus.",
+    "shift_not_started": "Die Schicht hat noch nicht begonnen. Stunden lassen sich erst danach erfassen.",
+    "assignment_not_worked": "Diese Person hat keinen bestätigten Platz mehr. Die Liste wurde aktualisiert.",
+    "worker_attended": "Diese Person war da: Sie hat eingecheckt oder hat freigegebene Stunden. Sie kann nicht als nicht erschienen markiert werden."
+  },
+  "hours": {
+    "amount": "{{hours}} Std.",
+    "status": {
+      "OPEN": "Offen",
+      "APPROVED": "Freigegeben"
+    },
+    "columns": {
+      "name": "Name",
+      "planned": "Geplant",
+      "checkedIn": "Eingecheckt",
+      "checkedOut": "Ausgecheckt",
+      "hours": "Stunden"
+    },
+    "section": {
+      "title": "Stunden",
+      "description": "Alle, die einen bestätigten Platz hatten. Gespeicherte Stunden sind für die Lohnverrechnung freigegeben.",
+      "empty": "Niemand hatte einen bestätigten Platz, daher gibt es keine Stunden.",
+      "notCheckedIn": "Nicht eingecheckt",
+      "notCheckedOut": "Nicht ausgecheckt",
+      "approved": "{{hours}} · {{gross}} ({{time}}, {{break}} Min. Pause)"
+    },
+    "approve": {
+      "action": "Stunden erfassen",
+      "actionNamed": "Stunden von {{name}} erfassen",
+      "change": "Stunden ändern",
+      "changeNamed": "Stunden von {{name}} ändern"
+    },
+    "dialog": {
+      "title": "Stunden von {{name}}",
+      "description": "Speichern gibt die Stunden für die Lohnverrechnung frei. Ihr könnt sie danach noch ändern.",
+      "fields": {
+        "date": "Datum",
+        "startTime": "Beginn",
+        "endTime": "Ende",
+        "breakMinutes": "Pause in Minuten"
+      },
+      "planned": "Geplant {{time}}",
+      "checkedIn": "Eingecheckt {{time}}",
+      "checkedOut": "Ausgecheckt {{time}}",
+      "endsNextDay": "Endet am Folgetag",
+      "breakHint": "Unbezahlt. Bei mehr als sechs Stunden Arbeit sind 30 Minuten vorgeschlagen.",
+      "worked": "Arbeitszeit",
+      "gross": "Brutto bei {{rate}} pro Stunde",
+      "cancel": "Abbrechen",
+      "save": "Stunden freigeben",
+      "errors": {
+        "required": "Bitte ausfüllen.",
+        "invalid_format": "Bitte eine ganze Zahl an Minuten.",
+        "before_start": "Das Ende muss nach dem Beginn liegen.",
+        "hours_too_long": "Höchstens 24 Stunden.",
+        "break_too_long": "Die Pause muss kürzer sein als die Arbeitszeit.",
+        "break_out_of_range": "Zwischen 0 und 1440 Minuten.",
+        "unknown": "Diese Angabe wurde nicht angenommen."
+      }
+    },
+    "approved": "Stunden von {{name}} freigegeben"
   },
   "shiftDetail": {
     "back": "Alle Schichten",
