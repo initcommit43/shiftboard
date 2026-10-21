@@ -6,6 +6,7 @@
     "navigation": "Hauptnavigation",
     "nav": {
       "shifts": "Schichten",
+      "templates": "Vorlagen",
       "signups": "Anmeldungen",
       "messages": "Nachrichten",
       "settings": "Einstellungen",
@@ -237,7 +238,8 @@
     "concurrent_change": "Die Schicht wurde gerade gleichzeitig geändert. Bitte versuche es noch einmal.",
     "conversation_not_found": "Diese Unterhaltung gibt es nicht mehr.",
     "no_recipients": "Für diese Schicht ist noch niemand bestätigt.",
-    "template_name_taken": "Eine Vorlage mit diesem Namen gibt es schon."
+    "template_name_taken": "Eine Vorlage mit diesem Namen gibt es schon.",
+    "template_not_found": "Diese Vorlage gibt es nicht mehr. Die Liste wurde aktualisiert."
   },
   "shiftDetail": {
     "back": "Alle Schichten",
@@ -419,6 +421,53 @@
       "hint": "Füllt das Formular aus, du wählst nur noch das Datum.",
       "empty": "Noch keine Vorlagen. Speichere eine Schicht mit „Als Vorlage speichern“, dann erscheint sie hier.",
       "error": "Die Vorlagen konnten nicht geladen werden."
+    },
+    "updated": "Vorlage „{{name}}“ gespeichert",
+    "deleted": "Vorlage „{{name}}“ gelöscht",
+    "list": {
+      "title": "Vorlagen",
+      "description": "Schichten, die immer wieder vorkommen. Alle in eurer Agentur können sie verwenden und ändern.",
+      "loading": "Vorlagen werden geladen …",
+      "count_one": "{{count}} Vorlage",
+      "count_other": "{{count}} Vorlagen",
+      "columns": {
+        "name": "Vorlage",
+        "rate": "Stundenlohn",
+        "slots": "Plätze"
+      },
+      "nextDay": "{{time}} (Folgetag)",
+      "gone": "Nicht mehr vorhanden",
+      "empty": {
+        "title": "Noch keine Vorlagen",
+        "description": "Leg eine neue Schicht an und speichere sie mit „Als Vorlage speichern“. Dann erscheint sie hier.",
+        "action": "Neue Schicht"
+      },
+      "error": {
+        "title": "Die Vorlagen konnten nicht geladen werden",
+        "description": "Bitte versuch es noch einmal. Wenn das Problem bleibt, lade die Seite neu."
+      }
+    },
+    "edit": {
+      "action": "Bearbeiten",
+      "actionNamed": "Vorlage „{{name}}“ bearbeiten",
+      "title": "Vorlage bearbeiten",
+      "description": "Schichten, die schon aus der Vorlage angelegt wurden, ändern sich nicht.",
+      "section": "Vorlage",
+      "save": "Vorlage speichern",
+      "endsNextDay": "Endet am Folgetag.",
+      "notFound": {
+        "title": "Diese Vorlage gibt es nicht mehr",
+        "description": "Vielleicht wurde sie in der Zwischenzeit gelöscht.",
+        "back": "Zu den Vorlagen"
+      }
+    },
+    "delete": {
+      "action": "Löschen",
+      "actionNamed": "Vorlage „{{name}}“ löschen",
+      "title": "Vorlage „{{name}}“ löschen?",
+      "description": "Die Vorlage ist dann für alle in eurer Agentur weg. Schichten, die schon aus ihr angelegt wurden, bleiben, wie sie sind.",
+      "keep": "Behalten",
+      "confirm": "Vorlage löschen"
     }
   }
 }

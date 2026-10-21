@@ -10,6 +10,8 @@ import { NewShiftPage } from '@/features/shifts/new-shift-page'
 import { ShiftDetailPage } from '@/features/shifts/shift-detail-page'
 import { ShiftsPage } from '@/features/shifts/shifts-page'
 import { SignupsPage } from '@/features/signups/signups-page'
+import { EditTemplatePage } from '@/features/templates/edit-template-page'
+import { TemplatesPage } from '@/features/templates/templates-page'
 
 import { AppShell } from './app-shell'
 import { NotFoundPage } from './not-found-page'
@@ -30,6 +32,8 @@ export const routes: RouteObject[] = [
           { path: 'shifts', element: <ShiftsPage /> },
           { path: 'shifts/new', element: <NewShiftPage /> },
           { path: 'shifts/:shiftId', element: <ShiftDetailPage /> },
+          { path: 'templates', element: <TemplatesPage /> },
+          { path: 'templates/:templateId', element: <EditTemplatePage /> },
           { path: 'signups', element: <SignupsPage /> },
           { path: 'messages', element: <MessagesPage /> },
           { path: 'messages/:conversationId', element: <MessagesPage /> },

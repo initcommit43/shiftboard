@@ -1,4 +1,5 @@
 import {
+  Bookmark,
   Calendar,
   type LucideIcon,
   MessageSquare,
@@ -92,6 +93,7 @@ export function AppShell() {
         </div>
         <nav aria-label={t('shell.navigation')} className="flex flex-col gap-1">
           <NavItem to="/shifts" icon={Calendar} label={t('shell.nav.shifts')} />
+          <NavItem to="/templates" icon={Bookmark} label={t('shell.nav.templates')} />
           <NavItem to="/signups" icon={UserPlus} label={t('shell.nav.signups')}>
             <PendingSignupsBadge />
           </NavItem>
