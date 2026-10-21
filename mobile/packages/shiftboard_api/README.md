@@ -92,6 +92,10 @@ Class | Method | HTTP request | Description
 [*AuthApi*](doc/AuthApi.md) | [**refreshToken**](doc/AuthApi.md#refreshtoken) | **POST** /auth/refresh | Exchange a refresh token for a new token pair
 [*ClientsApi*](doc/ClientsApi.md) | [**listClients**](doc/ClientsApi.md#listclients) | **GET** /clients | List the agency&#39;s clients with their locations
 [*ClientsApi*](doc/ClientsApi.md) | [**listQualifications**](doc/ClientsApi.md#listqualifications) | **GET** /qualifications | List the agency&#39;s qualifications
+[*HoursApi*](doc/HoursApi.md) | [**approveHours**](doc/HoursApi.md#approvehours) | **PUT** /shifts/{shiftId}/assignments/{assignmentId}/hours | Approve the hours a worker worked
+[*HoursApi*](doc/HoursApi.md) | [**checkIn**](doc/HoursApi.md#checkin) | **POST** /worker/shifts/{shiftId}/check-in | Check in on arrival
+[*HoursApi*](doc/HoursApi.md) | [**checkOut**](doc/HoursApi.md#checkout) | **POST** /worker/shifts/{shiftId}/check-out | Check out when leaving
+[*HoursApi*](doc/HoursApi.md) | [**listHours**](doc/HoursApi.md#listhours) | **GET** /hours | List the hours of a period
 [*MessagesApi*](doc/MessagesApi.md) | [**broadcastToShift**](doc/MessagesApi.md#broadcasttoshift) | **POST** /shifts/{shiftId}/broadcast | Message all confirmed workers of a shift
 [*MessagesApi*](doc/MessagesApi.md) | [**getInboxUnreadCount**](doc/MessagesApi.md#getinboxunreadcount) | **GET** /conversations/unread-count | How many worker messages nobody at the agency has read
 [*MessagesApi*](doc/MessagesApi.md) | [**getMyConversation**](doc/MessagesApi.md#getmyconversation) | **GET** /worker/conversation | The worker&#39;s conversation with the agency
@@ -151,6 +155,11 @@ Class | Method | HTTP request | Description
  - [ConversationWorker](doc/ConversationWorker.md)
  - [CurrentUser](doc/CurrentUser.md)
  - [FieldError](doc/FieldError.md)
+ - [HoursEntry](doc/HoursEntry.md)
+ - [HoursEntryPage](doc/HoursEntryPage.md)
+ - [HoursRequest](doc/HoursRequest.md)
+ - [HoursShift](doc/HoursShift.md)
+ - [HoursStatus](doc/HoursStatus.md)
  - [Location](doc/Location.md)
  - [LoginRequest](doc/LoginRequest.md)
  - [Message](doc/Message.md)
@@ -184,6 +193,7 @@ Class | Method | HTTP request | Description
  - [SystemEvent](doc/SystemEvent.md)
  - [TokenResponse](doc/TokenResponse.md)
  - [UnreadCount](doc/UnreadCount.md)
+ - [WorkedHours](doc/WorkedHours.md)
  - [Worker](doc/Worker.md)
  - [WorkerPage](doc/WorkerPage.md)
  - [WorkerProfile](doc/WorkerProfile.md)

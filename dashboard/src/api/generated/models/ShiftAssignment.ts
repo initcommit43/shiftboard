@@ -13,6 +13,13 @@
  */
 
 import { mapValues, parseDate, parseDateTime, serializeDate, serializeDateTime } from '../runtime';
+import type { WorkedHours } from './WorkedHours';
+import {
+    WorkedHoursFromJSON,
+    WorkedHoursFromJSONTyped,
+    WorkedHoursToJSON,
+    WorkedHoursToJSONTyped,
+} from './WorkedHours';
 import type { AssignedWorker } from './AssignedWorker';
 import {
     AssignedWorkerFromJSON,
@@ -69,6 +76,18 @@ export interface ShiftAssignment {
      * Why the agency removed the worker. Present only for a removal.
      */
     reason?: string;
+    /**
+     * When the worker checked in in the app.
+     */
+    checkedInAt?: Date;
+    /**
+     * When the worker checked out in the app.
+     */
+    checkedOutAt?: Date;
+    /**
+     * The approved hours. Absent until the agency approved them.
+     */
+    hours?: WorkedHours;
 }
 
 
@@ -101,6 +120,9 @@ export function ShiftAssignmentFromJSONTyped(json: any, ignoreDiscriminator: boo
         'decidedAt': json['decidedAt'] == null ? undefined : (parseDateTime(json['decidedAt'])),
         'cancelledBy': json['cancelledBy'] == null ? undefined : CancelledByFromJSON(json['cancelledBy']),
         'reason': json['reason'] == null ? undefined : json['reason'],
+        'checkedInAt': json['checkedInAt'] == null ? undefined : (parseDateTime(json['checkedInAt'])),
+        'checkedOutAt': json['checkedOutAt'] == null ? undefined : (parseDateTime(json['checkedOutAt'])),
+        'hours': json['hours'] == null ? undefined : WorkedHoursFromJSON(json['hours']),
     };
 }
 
@@ -122,6 +144,9 @@ export function ShiftAssignmentToJSONTyped(value?: ShiftAssignment | null, ignor
         'decidedAt': value['decidedAt'] == null ? value['decidedAt'] : serializeDateTime(value['decidedAt']),
         'cancelledBy': CancelledByToJSON(value['cancelledBy']),
         'reason': value['reason'],
+        'checkedInAt': value['checkedInAt'] == null ? value['checkedInAt'] : serializeDateTime(value['checkedInAt']),
+        'checkedOutAt': value['checkedOutAt'] == null ? value['checkedOutAt'] : serializeDateTime(value['checkedOutAt']),
+        'hours': WorkedHoursToJSON(value['hours']),
     };
 }
 

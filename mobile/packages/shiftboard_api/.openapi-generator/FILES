@@ -5,6 +5,7 @@ lib/src/api.dart
 lib/src/api/assignments_api.dart
 lib/src/api/auth_api.dart
 lib/src/api/clients_api.dart
+lib/src/api/hours_api.dart
 lib/src/api/messages_api.dart
 lib/src/api/notifications_api.dart
 lib/src/api/settings_api.dart
@@ -40,6 +41,11 @@ lib/src/model/conversation_worker.dart
 lib/src/model/current_user.dart
 lib/src/model/date.dart
 lib/src/model/field_error.dart
+lib/src/model/hours_entry.dart
+lib/src/model/hours_entry_page.dart
+lib/src/model/hours_request.dart
+lib/src/model/hours_shift.dart
+lib/src/model/hours_status.dart
 lib/src/model/location.dart
 lib/src/model/login_request.dart
 lib/src/model/message.dart
@@ -73,6 +79,7 @@ lib/src/model/signup_info.dart
 lib/src/model/system_event.dart
 lib/src/model/token_response.dart
 lib/src/model/unread_count.dart
+lib/src/model/worked_hours.dart
 lib/src/model/worker.dart
 lib/src/model/worker_page.dart
 lib/src/model/worker_profile.dart

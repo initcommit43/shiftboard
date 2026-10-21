@@ -3,6 +3,7 @@
 export * from './AssignmentsApi';
 export * from './AuthApi';
 export * from './ClientsApi';
+export * from './HoursApi';
 export * from './MessagesApi';
 export * from './NotificationsApi';
 export * from './SettingsApi';

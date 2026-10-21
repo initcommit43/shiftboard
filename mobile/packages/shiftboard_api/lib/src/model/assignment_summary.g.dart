@@ -17,6 +17,14 @@ class _$AssignmentSummary extends AssignmentSummary {
   final DateTime? cancellableUntil;
   @override
   final CancelledBy? cancelledBy;
+  @override
+  final DateTime? checkInFrom;
+  @override
+  final DateTime? checkedInAt;
+  @override
+  final DateTime? checkedOutAt;
+  @override
+  final bool? hoursApproved;
 
   factory _$AssignmentSummary(
           [void Function(AssignmentSummaryBuilder)? updates]) =>
@@ -27,7 +35,11 @@ class _$AssignmentSummary extends AssignmentSummary {
       required this.status,
       required this.claimedAt,
       this.cancellableUntil,
-      this.cancelledBy})
+      this.cancelledBy,
+      this.checkInFrom,
+      this.checkedInAt,
+      this.checkedOutAt,
+      this.hoursApproved})
       : super._();
   @override
   AssignmentSummary rebuild(void Function(AssignmentSummaryBuilder) updates) =>
@@ -45,7 +57,11 @@ class _$AssignmentSummary extends AssignmentSummary {
         status == other.status &&
         claimedAt == other.claimedAt &&
         cancellableUntil == other.cancellableUntil &&
-        cancelledBy == other.cancelledBy;
+        cancelledBy == other.cancelledBy &&
+        checkInFrom == other.checkInFrom &&
+        checkedInAt == other.checkedInAt &&
+        checkedOutAt == other.checkedOutAt &&
+        hoursApproved == other.hoursApproved;
   }
 
   @override
@@ -56,6 +72,10 @@ class _$AssignmentSummary extends AssignmentSummary {
     _$hash = $jc(_$hash, claimedAt.hashCode);
     _$hash = $jc(_$hash, cancellableUntil.hashCode);
     _$hash = $jc(_$hash, cancelledBy.hashCode);
+    _$hash = $jc(_$hash, checkInFrom.hashCode);
+    _$hash = $jc(_$hash, checkedInAt.hashCode);
+    _$hash = $jc(_$hash, checkedOutAt.hashCode);
+    _$hash = $jc(_$hash, hoursApproved.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -67,7 +87,11 @@ class _$AssignmentSummary extends AssignmentSummary {
           ..add('status', status)
           ..add('claimedAt', claimedAt)
           ..add('cancellableUntil', cancellableUntil)
-          ..add('cancelledBy', cancelledBy))
+          ..add('cancelledBy', cancelledBy)
+          ..add('checkInFrom', checkInFrom)
+          ..add('checkedInAt', checkedInAt)
+          ..add('checkedOutAt', checkedOutAt)
+          ..add('hoursApproved', hoursApproved))
         .toString();
   }
 }
@@ -98,6 +122,24 @@ class AssignmentSummaryBuilder
   set cancelledBy(CancelledBy? cancelledBy) =>
       _$this._cancelledBy = cancelledBy;
 
+  DateTime? _checkInFrom;
+  DateTime? get checkInFrom => _$this._checkInFrom;
+  set checkInFrom(DateTime? checkInFrom) => _$this._checkInFrom = checkInFrom;
+
+  DateTime? _checkedInAt;
+  DateTime? get checkedInAt => _$this._checkedInAt;
+  set checkedInAt(DateTime? checkedInAt) => _$this._checkedInAt = checkedInAt;
+
+  DateTime? _checkedOutAt;
+  DateTime? get checkedOutAt => _$this._checkedOutAt;
+  set checkedOutAt(DateTime? checkedOutAt) =>
+      _$this._checkedOutAt = checkedOutAt;
+
+  bool? _hoursApproved;
+  bool? get hoursApproved => _$this._hoursApproved;
+  set hoursApproved(bool? hoursApproved) =>
+      _$this._hoursApproved = hoursApproved;
+
   AssignmentSummaryBuilder() {
     AssignmentSummary._defaults(this);
   }
@@ -110,6 +152,10 @@ class AssignmentSummaryBuilder
       _claimedAt = $v.claimedAt;
       _cancellableUntil = $v.cancellableUntil;
       _cancelledBy = $v.cancelledBy;
+      _checkInFrom = $v.checkInFrom;
+      _checkedInAt = $v.checkedInAt;
+      _checkedOutAt = $v.checkedOutAt;
+      _hoursApproved = $v.hoursApproved;
       _$v = null;
     }
     return this;
@@ -139,6 +185,10 @@ class AssignmentSummaryBuilder
               claimedAt, r'AssignmentSummary', 'claimedAt'),
           cancellableUntil: cancellableUntil,
           cancelledBy: cancelledBy,
+          checkInFrom: checkInFrom,
+          checkedInAt: checkedInAt,
+          checkedOutAt: checkedOutAt,
+          hoursApproved: hoursApproved,
         );
     replace(_$result);
     return _$result;

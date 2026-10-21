@@ -25,6 +25,11 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..add(ConversationWorker.serializer)
       ..add(CurrentUser.serializer)
       ..add(FieldError.serializer)
+      ..add(HoursEntry.serializer)
+      ..add(HoursEntryPage.serializer)
+      ..add(HoursRequest.serializer)
+      ..add(HoursShift.serializer)
+      ..add(HoursStatus.serializer)
       ..add(Location.serializer)
       ..add(LoginRequest.serializer)
       ..add(Message.serializer)
@@ -58,6 +63,7 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..add(SystemEvent.serializer)
       ..add(TokenResponse.serializer)
       ..add(UnreadCount.serializer)
+      ..add(WorkedHours.serializer)
       ..add(Worker.serializer)
       ..add(WorkerPage.serializer)
       ..add(WorkerProfile.serializer)
@@ -74,6 +80,9 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(FieldError)]),
           () => ListBuilder<FieldError>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(HoursEntry)]),
+          () => ListBuilder<HoursEntry>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(Location)]),
           () => ListBuilder<Location>())
