@@ -17,10 +17,13 @@ class FeaturesConverter implements AttributeConverter<AgencyFeatures, String> {
 
     private static final String CONTACT_BUTTON = "contactButton";
 
+    private static final String CHECK_IN = "checkIn";
+
     @Override
     public String convertToDatabaseColumn(AgencyFeatures features) {
         var json = JSON.createObjectNode();
         json.put(CONTACT_BUTTON, features.contactButton());
+        json.put(CHECK_IN, features.checkIn());
         return JSON.writeValueAsString(json);
     }
 
@@ -31,6 +34,8 @@ class FeaturesConverter implements AttributeConverter<AgencyFeatures, String> {
             return defaults;
         }
         var json = (ObjectNode) JSON.readTree(column);
-        return new AgencyFeatures(json.path(CONTACT_BUTTON).asBoolean(defaults.contactButton()));
+        return new AgencyFeatures(
+                json.path(CONTACT_BUTTON).asBoolean(defaults.contactButton()),
+                json.path(CHECK_IN).asBoolean(defaults.checkIn()));
     }
 }

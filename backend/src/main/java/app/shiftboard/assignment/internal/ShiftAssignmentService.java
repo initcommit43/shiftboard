@@ -10,8 +10,10 @@ import app.shiftboard.assignment.AssignmentCancelled;
 import app.shiftboard.assignment.AssignmentConfirmed;
 import app.shiftboard.assignment.AssignmentRejected;
 import app.shiftboard.assignment.internal.ShiftAssignmentController.AssignedWorker;
+import app.shiftboard.assignment.internal.ShiftAssignmentController.HoursResponse;
 import app.shiftboard.assignment.internal.ShiftAssignmentController.ShiftAssignmentPage;
 import app.shiftboard.assignment.internal.ShiftAssignmentController.ShiftAssignmentResponse;
+import app.shiftboard.shift.ShiftDetails;
 import app.shiftboard.shift.Shifts;
 import app.shiftboard.system.ApiException;
 import app.shiftboard.system.ConflictRetry;
@@ -60,7 +62,8 @@ class ShiftAssignmentService {
                 ? assignments.findByShiftId(shiftId, pageable)
                 : assignments.findByShiftIdAndStatus(shiftId, status, pageable);
         return new ShiftAssignmentPage(
-                responses(result.getContent()), page, size, result.getTotalElements(), result.getTotalPages());
+                responses(shiftId, result.getContent()), page, size, result.getTotalElements(),
+                result.getTotalPages());
     }
 
     ShiftAssignmentResponse approve(UUID shiftId, UUID assignmentId) {
@@ -95,6 +98,15 @@ class ShiftAssignmentService {
         }), ConflictRetry::busy);
     }
 
+    /** Saves and approves the hours a worker worked; saving again replaces them (ADR 0028). */
+    ShiftAssignmentResponse approveHours(
+            UUID shiftId, UUID assignmentId, Instant startedAt, Instant endedAt, int breakMinutes, UUID approvedBy) {
+        return change(shiftId, assignmentId, assignment -> {
+            assignment.approveHours(startedAt, endedAt, breakMinutes, approvedBy, Instant.now());
+            return assignment;
+        });
+    }
+
     ShiftAssignmentResponse markNoShow(UUID shiftId, UUID assignmentId) {
         return change(shiftId, assignmentId, assignment -> {
             assignment.markNoShow(Instant.now());
@@ -110,7 +122,7 @@ class ShiftAssignmentService {
             var assignment = assignments.findForUpdate(assignmentId, shiftId)
                     .orElseThrow(() -> new ApiException(
                             HttpStatus.NOT_FOUND, "assignment_not_found", "The shift has no claim with this id."));
-            return responses(List.of(assignments.saveAndFlush(change.apply(assignment)))).getFirst();
+            return responses(shiftId, List.of(assignments.saveAndFlush(change.apply(assignment)))).getFirst();
         });
     }
 
@@ -121,8 +133,12 @@ class ShiftAssignmentService {
     }
 
     // Names and phones come from the worker module in one call, whatever the number of claims.
-    private List<ShiftAssignmentResponse> responses(List<Assignment> page) {
+    // The hourly rate for the gross pay is only looked up when someone has approved hours.
+    private List<ShiftAssignmentResponse> responses(UUID shiftId, List<Assignment> page) {
         var contacts = workers.contacts(page.stream().map(Assignment::getWorkerId).distinct().toList());
+        var hourlyRateCents = page.stream().anyMatch(assignment -> assignment.hours().isPresent())
+                ? shifts.find(shiftId).map(ShiftDetails::hourlyRateCents).orElse(0)
+                : 0;
         return page.stream()
                 .map(assignment -> {
                     var worker = contacts.get(assignment.getWorkerId());
@@ -133,7 +149,10 @@ class ShiftAssignmentService {
                             assignment.getClaimedAt(),
                             assignment.getDecidedAt(),
                             assignment.getCancelledBy(),
-                            assignment.getReason());
+                            assignment.getReason(),
+                            assignment.getCheckedInAt(),
+                            assignment.getCheckedOutAt(),
+                            assignment.hours().map(hours -> HoursResponse.of(hours, hourlyRateCents)).orElse(null));
                 })
                 .toList();
     }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -84,9 +85,9 @@ class WorkerShiftService {
                 .findByWorkerIdAndShiftIdIn(workerId, result.getContent().stream().map(ShiftDetails::id).toList())
                 .stream()
                 .collect(Collectors.toMap(Assignment::getShiftId, Function.identity()));
-        var deadline = cancellationDeadline();
+        var terms = terms();
         return new WorkerShiftPage(
-                result.getContent().stream().map(shift -> response(shift, own.get(shift.id()), deadline)).toList(),
+                result.getContent().stream().map(shift -> response(shift, own.get(shift.id()), terms)).toList(),
                 page, size, result.getTotalElements(), result.getTotalPages());
     }
 
@@ -94,8 +95,7 @@ class WorkerShiftService {
     WorkerShiftResponse get(UUID accountId, UUID shiftId) {
         var workerId = activeWorker(accountId);
         var shift = shifts.find(shiftId).orElseThrow(WorkerShiftService::shiftNotFound);
-        return response(
-                shift, assignments.findByShiftIdAndWorkerId(shiftId, workerId).orElse(null), cancellationDeadline());
+        return response(shift, assignments.findByShiftIdAndWorkerId(shiftId, workerId).orElse(null), terms());
     }
 
     /** Every shift the worker has claimed, whatever became of the claim. */
@@ -105,10 +105,10 @@ class WorkerShiftService {
         var result = assignments.findByWorkerId(workerId, PageRequest.of(page, size, EARLIEST_START_FIRST));
         Map<UUID, ShiftDetails> claimed =
                 shifts.findAll(result.getContent().stream().map(Assignment::getShiftId).toList());
-        var deadline = cancellationDeadline();
+        var terms = terms();
         List<WorkerShiftResponse> content = result.getContent().stream()
                 .map(assignment -> response(
-                        Objects.requireNonNull(claimed.get(assignment.getShiftId())), assignment, deadline))
+                        Objects.requireNonNull(claimed.get(assignment.getShiftId())), assignment, terms))
                 .toList();
         return new WorkerShiftPage(content, page, size, result.getTotalElements(), result.getTotalPages());
     }
@@ -142,8 +142,7 @@ class WorkerShiftService {
                 throw shiftNotFound();
             }
             var assignment = assignments.findForUpdateByShiftIdAndWorkerId(shiftId, workerId)
-                    .orElseThrow(() -> new ApiException(
-                            HttpStatus.NOT_FOUND, "assignment_not_found", "The worker has not claimed this shift."));
+                    .orElseThrow(WorkerShiftService::assignmentNotFound);
             assignment.cancelByWorker(Instant.now(), cancellationDeadline());
             assignments.saveAndFlush(assignment);
             shifts.release(shiftId);
@@ -155,8 +154,54 @@ class WorkerShiftService {
         return get(accountId, shiftId);
     }
 
+    /** The worker arrived at the shift; only when the agency uses check-in (ADR 0028). */
+    WorkerShiftResponse checkIn(UUID accountId, UUID shiftId) {
+        return changeOwn(accountId, shiftId, assignment -> assignment.checkIn(Instant.now()));
+    }
+
+    /** The worker left the shift; only when the agency uses check-in (ADR 0028). */
+    WorkerShiftResponse checkOut(UUID accountId, UUID shiftId) {
+        return changeOwn(accountId, shiftId, assignment -> assignment.checkOut(Instant.now()));
+    }
+
+    /** Applies a change of check-in or check-out to the worker's locked assignment. */
+    private WorkerShiftResponse changeOwn(UUID accountId, UUID shiftId, Consumer<Assignment> change) {
+        var workerId = activeWorker(accountId);
+        if (!agencies.features().checkIn()) {
+            throw new ApiException(
+                    HttpStatus.CONFLICT, "check_in_disabled", "The agency does not use check-in in the app.");
+        }
+        transactions.executeWithoutResult(_ -> {
+            if (shifts.find(shiftId).isEmpty()) {
+                throw shiftNotFound();
+            }
+            var assignment = assignments.findForUpdateByShiftIdAndWorkerId(shiftId, workerId)
+                    .orElseThrow(WorkerShiftService::assignmentNotFound);
+            change.accept(assignment);
+            assignments.saveAndFlush(assignment);
+        });
+        return get(accountId, shiftId);
+    }
+
+    private Terms terms() {
+        return new Terms(agencies.settings().cancellationDeadline(), agencies.features().checkIn());
+    }
+
     private Duration cancellationDeadline() {
         return agencies.settings().cancellationDeadline();
+    }
+
+    private static ApiException assignmentNotFound() {
+        return new ApiException(HttpStatus.NOT_FOUND, "assignment_not_found", "The worker has not claimed this shift.");
+    }
+
+    /**
+     * What the agency's settings and features mean for the worker's claims.
+     *
+     * @param deadline how long before the start a worker can drop out
+     * @param checkIn  whether the agency uses check-in in the app
+     */
+    private record Terms(Duration deadline, boolean checkIn) {
     }
 
     private static ApiException shiftNotFound() {
@@ -172,7 +217,7 @@ class WorkerShiftService {
                 .id();
     }
 
-    private static WorkerShiftResponse response(ShiftDetails shift, Assignment assignment, Duration deadline) {
+    private static WorkerShiftResponse response(ShiftDetails shift, Assignment assignment, Terms terms) {
         return new WorkerShiftResponse(
                 shift.id(),
                 shift.title(),
@@ -194,7 +239,11 @@ class WorkerShiftService {
                                 assignment.getId(),
                                 assignment.getStatus(),
                                 assignment.getClaimedAt(),
-                                assignment.cancellableUntilIfHolding(deadline).orElse(null),
-                                assignment.getCancelledBy()));
+                                assignment.cancellableUntilIfHolding(terms.deadline()).orElse(null),
+                                assignment.getCancelledBy(),
+                                terms.checkIn() && assignment.worked() ? assignment.checkInFrom() : null,
+                                assignment.getCheckedInAt(),
+                                assignment.getCheckedOutAt(),
+                                assignment.hours().isPresent()));
     }
 }

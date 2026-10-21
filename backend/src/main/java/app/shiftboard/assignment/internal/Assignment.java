@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import app.shiftboard.system.InvalidFieldException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -23,14 +24,24 @@ import org.hibernate.annotations.UuidGenerator;
  *   <li>Pending or confirmed, it is {@code CANCELLED} when the worker drops out, the agency
  *       removes them or calls off the shift.
  *   <li>When the shift has taken place, a confirmed claim is {@code COMPLETED} and one nobody
- *       decided on is {@code REJECTED}. A completed one can be marked {@code NO_SHOW}.
+ *       decided on is {@code REJECTED}. A completed one can be marked {@code NO_SHOW}, unless
+ *       the worker checked in or has approved hours.
  * </ul>
  *
  * Pending and confirmed assignments hold a slot of their shift; leaving those statuses frees it.
+ *
+ * <p>A worker with a confirmed spot checks in and out in the app, and the agency approves the
+ * hours they worked (ADR 0028).
  */
 @Entity
 @Table(name = "assignment")
 class Assignment {
+
+    /** How long before the booked start a worker can check in. */
+    static final Duration CHECK_IN_EARLY = Duration.ofMinutes(30);
+
+    /** The longest stretch of approved hours. */
+    private static final Duration LONGEST_WORK = Duration.ofHours(24);
 
     @Id
     @UuidGenerator(style = UuidGenerator.Style.VERSION_7)
@@ -63,6 +74,21 @@ class Assignment {
 
     /** Why the agency removed the worker; for the agency only. */
     private String reason;
+
+    private Instant checkedInAt;
+
+    private Instant checkedOutAt;
+
+    private Instant workedStartedAt;
+
+    private Instant workedEndedAt;
+
+    private Integer breakMinutes;
+
+    private Instant hoursApprovedAt;
+
+    /** The account of the dispatcher or admin who last saved the hours. */
+    private UUID hoursApprovedBy;
 
     @CreationTimestamp
     private Instant createdAt;
@@ -153,8 +179,93 @@ class Assignment {
         if (status != AssignmentStatus.COMPLETED) {
             throw AssignmentConflictException.notCompleted();
         }
+        if (checkedInAt != null || hoursApprovedAt != null) {
+            throw AssignmentConflictException.workerAttended();
+        }
         status = AssignmentStatus.NO_SHOW;
         decidedAt = now;
+    }
+
+    /** The worker arrived: once, with a confirmed spot, from shortly before the start until the end. */
+    void checkIn(Instant now) {
+        if (checkedInAt != null) {
+            throw AssignmentConflictException.alreadyCheckedIn();
+        }
+        if (status != AssignmentStatus.CONFIRMED) {
+            throw AssignmentConflictException.notConfirmed();
+        }
+        if (now.isBefore(checkInFrom()) || !now.isBefore(endsAt)) {
+            throw AssignmentConflictException.checkInNotOpen();
+        }
+        checkedInAt = now;
+    }
+
+    /**
+     * The worker left: once after checking in, also after the planned end, until the agency
+     * approved the hours.
+     */
+    void checkOut(Instant now) {
+        if (!worked()) {
+            throw AssignmentConflictException.notConfirmed();
+        }
+        if (checkedInAt == null) {
+            throw AssignmentConflictException.notCheckedIn();
+        }
+        if (checkedOutAt != null) {
+            throw AssignmentConflictException.alreadyCheckedOut();
+        }
+        if (hoursApprovedAt != null) {
+            throw AssignmentConflictException.hoursApproved();
+        }
+        checkedOutAt = now;
+    }
+
+    /**
+     * The agency approves the hours of a worker who held a confirmed spot, once the shift has
+     * started. Saving again replaces them.
+     */
+    void approveHours(Instant startedAt, Instant endedAt, int breakMinutes, UUID approvedBy, Instant now) {
+        if (!worked()) {
+            throw AssignmentConflictException.notWorked();
+        }
+        if (now.isBefore(startsAt)) {
+            throw AssignmentConflictException.shiftNotStarted();
+        }
+        if (!endedAt.isAfter(startedAt)) {
+            throw new InvalidFieldException("endedAt", "before_start");
+        }
+        var length = Duration.between(startedAt, endedAt);
+        if (length.compareTo(LONGEST_WORK) > 0) {
+            throw new InvalidFieldException("endedAt", "too_long");
+        }
+        if (breakMinutes < 0) {
+            throw new InvalidFieldException("breakMinutes", "out_of_range");
+        }
+        if (Duration.ofMinutes(breakMinutes).compareTo(length) >= 0) {
+            throw new InvalidFieldException("breakMinutes", "too_long");
+        }
+        workedStartedAt = startedAt;
+        workedEndedAt = endedAt;
+        this.breakMinutes = breakMinutes;
+        hoursApprovedBy = approvedBy;
+        hoursApprovedAt = now;
+    }
+
+    /** Whether the worker holds or held a confirmed spot: they check in and out and get hours. */
+    boolean worked() {
+        return AssignmentStatus.WORKED.contains(status);
+    }
+
+    /** From when the worker can check in; possible until the booked end. */
+    Instant checkInFrom() {
+        return startsAt.minus(CHECK_IN_EARLY);
+    }
+
+    /** The approved hours; empty until the agency approved them. */
+    Optional<WorkedHours> hours() {
+        return hoursApprovedAt == null
+                ? Optional.empty()
+                : Optional.of(new WorkedHours(workedStartedAt, workedEndedAt, breakMinutes, hoursApprovedAt));
     }
 
     boolean holdsSlot() {
@@ -227,5 +338,13 @@ class Assignment {
 
     String getReason() {
         return reason;
+    }
+
+    Instant getCheckedInAt() {
+        return checkedInAt;
+    }
+
+    Instant getCheckedOutAt() {
+        return checkedOutAt;
     }
 }

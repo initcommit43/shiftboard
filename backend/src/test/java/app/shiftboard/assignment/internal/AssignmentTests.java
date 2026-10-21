@@ -8,6 +8,7 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import app.shiftboard.system.InvalidFieldException;
 import org.junit.jupiter.api.Test;
 
 class AssignmentTests {
@@ -17,6 +18,10 @@ class AssignmentTests {
     private static final Instant BEFORE = START.minus(Duration.ofDays(3));
 
     private static final Duration DEADLINE = Duration.ofHours(24);
+
+    private static final Instant END = START.plus(Duration.ofHours(8));
+
+    private static final UUID APPROVER = UUID.randomUUID();
 
     @Test
     void aNewClaimIsPendingAndBooksTheTimeOfTheShift() {
@@ -149,6 +154,133 @@ class AssignmentTests {
         assertConflict("assignment_not_completed", assignment, noShow -> noShow.markNoShow(BEFORE));
     }
 
+    @Test
+    void aConfirmedWorkerChecksInOnceFromHalfAnHourBeforeTheStartUntilTheEnd() {
+        var assignment = confirmed();
+
+        assertThat(assignment.checkInFrom()).isEqualTo(START.minus(Duration.ofMinutes(30)));
+        assertConflict("check_in_not_open", assignment, a -> a.checkIn(START.minus(Duration.ofMinutes(31))));
+        assertConflict("check_in_not_open", assignment, a -> a.checkIn(END));
+
+        assignment.checkIn(START.minus(Duration.ofMinutes(30)));
+
+        assertThat(assignment.getCheckedInAt()).isEqualTo(START.minus(Duration.ofMinutes(30)));
+        assertConflict("already_checked_in", assignment, a -> a.checkIn(START));
+
+        var late = confirmed();
+        late.checkIn(END.minusSeconds(1));
+        assertThat(late.getCheckedInAt()).isEqualTo(END.minusSeconds(1));
+    }
+
+    @Test
+    void onlyAConfirmedWorkerChecksIn() {
+        assertConflict("assignment_not_confirmed", pending(), a -> a.checkIn(START));
+
+        var removed = confirmed();
+        removed.remove("Krank gemeldet", BEFORE);
+        assertConflict("assignment_not_confirmed", removed, a -> a.checkIn(START));
+    }
+
+    @Test
+    void aWorkerChecksOutOnceAfterCheckingInAlsoAfterTheShiftCompleted() {
+        var assignment = confirmed();
+        assertConflict("not_checked_in", assignment, a -> a.checkOut(START));
+
+        assignment.checkIn(START);
+        assignment.completeWithShift(END.plusSeconds(60));
+        assignment.checkOut(END.plus(Duration.ofMinutes(20)));
+
+        assertThat(assignment.getStatus()).isEqualTo(AssignmentStatus.COMPLETED);
+        assertThat(assignment.getCheckedOutAt()).isEqualTo(END.plus(Duration.ofMinutes(20)));
+        assertConflict("already_checked_out", assignment, a -> a.checkOut(END.plus(Duration.ofHours(1))));
+    }
+
+    @Test
+    void noCheckOutOnceTheHoursAreApprovedOrTheWorkerWasRemoved() {
+        var approved = confirmed();
+        approved.checkIn(START);
+        approved.approveHours(START, END, 30, APPROVER, END);
+        assertConflict("hours_approved", approved, a -> a.checkOut(END));
+
+        var removed = confirmed();
+        removed.checkIn(START);
+        removed.remove("Nach Hause geschickt", START.plus(Duration.ofHours(1)));
+        assertConflict("assignment_not_confirmed", removed, a -> a.checkOut(START.plus(Duration.ofHours(2))));
+    }
+
+    @Test
+    void theAgencyApprovesTheHoursOfAWorkerWithAConfirmedSpotOnceTheShiftStarted() {
+        var assignment = confirmed();
+        assertThat(assignment.hours()).isEmpty();
+        assertConflict("shift_not_started", assignment, a -> a.approveHours(START, END, 30, APPROVER, BEFORE));
+
+        assignment.approveHours(START.plus(Duration.ofMinutes(5)), END, 30, APPROVER, START);
+
+        var hours = assignment.hours().orElseThrow();
+        assertThat(hours.startedAt()).isEqualTo(START.plus(Duration.ofMinutes(5)));
+        assertThat(hours.endedAt()).isEqualTo(END);
+        assertThat(hours.breakMinutes()).isEqualTo(30);
+        assertThat(hours.workedMinutes()).isEqualTo(8 * 60 - 5 - 30);
+        assertThat(hours.approvedAt()).isEqualTo(START);
+
+        // Saving again replaces the hours, also after the shift completed.
+        assignment.completeWithShift(END);
+        assignment.approveHours(START, END, 0, APPROVER, END.plusSeconds(60));
+        assertThat(assignment.hours().orElseThrow().workedMinutes()).isEqualTo(8 * 60);
+        assertThat(assignment.hours().orElseThrow().approvedAt()).isEqualTo(END.plusSeconds(60));
+    }
+
+    @Test
+    void onlyAWorkerWhoHeldAConfirmedSpotGetsHours() {
+        assertConflict("assignment_not_worked", pending(), a -> a.approveHours(START, END, 0, APPROVER, END));
+
+        var noShow = confirmed();
+        noShow.completeWithShift(END);
+        noShow.markNoShow(END);
+        assertConflict("assignment_not_worked", noShow, a -> a.approveHours(START, END, 0, APPROVER, END));
+    }
+
+    @Test
+    void hoursEndAfterTheyStartLastAtMostADayAndTheBreakIsShorter() {
+        var assignment = confirmed();
+
+        assertInvalid("endedAt", "before_start", () -> assignment.approveHours(END, START, 0, APPROVER, END));
+        assertInvalid("endedAt", "before_start", () -> assignment.approveHours(START, START, 0, APPROVER, END));
+        assertInvalid("endedAt", "too_long", () -> assignment.approveHours(
+                START, START.plus(Duration.ofHours(24)).plusSeconds(60), 0, APPROVER, END));
+        assertInvalid("breakMinutes", "too_long", () -> assignment.approveHours(START, END, 8 * 60, APPROVER, END));
+        assertInvalid("breakMinutes", "out_of_range", () -> assignment.approveHours(START, END, -1, APPROVER, END));
+        assertThat(assignment.hours()).isEmpty();
+
+        assignment.approveHours(START, START.plus(Duration.ofHours(24)), 8 * 60 - 1, APPROVER, END);
+        assertThat(assignment.hours()).isPresent();
+    }
+
+    @Test
+    void grossPayIsTheWorkedMinutesTimesTheRateRoundedHalfUp() {
+        var hours = new WorkedHours(START, START.plus(Duration.ofMinutes(480)), 30, END);
+
+        assertThat(hours.workedMinutes()).isEqualTo(450);
+        assertThat(hours.grossCents(1650)).isEqualTo(12_375);
+        // 1 minute at 16,50 € is 27.5 cents.
+        assertThat(new WorkedHours(START, START.plus(Duration.ofMinutes(1)), 0, END).grossCents(1650)).isEqualTo(28);
+        // 1 minute at 16,49 € is 27.48 cents.
+        assertThat(new WorkedHours(START, START.plus(Duration.ofMinutes(1)), 0, END).grossCents(1649)).isEqualTo(27);
+    }
+
+    @Test
+    void aWorkerWhoCheckedInOrHasHoursIsNoNoShow() {
+        var checkedIn = confirmed();
+        checkedIn.checkIn(START);
+        checkedIn.completeWithShift(END);
+        assertConflict("worker_attended", checkedIn, a -> a.markNoShow(END));
+
+        var withHours = confirmed();
+        withHours.approveHours(START, END, 30, APPROVER, END);
+        withHours.completeWithShift(END);
+        assertConflict("worker_attended", withHours, a -> a.markNoShow(END));
+    }
+
     private static Assignment pending() {
         return Assignment.claim(
                 UUID.randomUUID(), UUID.randomUUID(), START, START.plus(Duration.ofHours(8)), BEFORE, false);
@@ -158,6 +290,15 @@ class AssignmentTests {
         var assignment = pending();
         assignment.approve(BEFORE);
         return assignment;
+    }
+
+    private static void assertInvalid(String field, String code, Runnable change) {
+        assertThatExceptionOfType(InvalidFieldException.class)
+                .isThrownBy(change::run)
+                .satisfies(invalid -> {
+                    assertThat(invalid.getField()).isEqualTo(field);
+                    assertThat(invalid.getCode()).isEqualTo(code);
+                });
     }
 
     private static void assertConflict(String code, Assignment assignment, Consumer<Assignment> change) {
