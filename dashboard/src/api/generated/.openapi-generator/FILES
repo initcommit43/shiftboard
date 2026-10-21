@@ -5,6 +5,7 @@ apis/ClientsApi.ts
 apis/MessagesApi.ts
 apis/NotificationsApi.ts
 apis/SettingsApi.ts
+apis/ShiftTemplatesApi.ts
 apis/ShiftsApi.ts
 apis/SignupApi.ts
 apis/SystemApi.ts
@@ -55,6 +56,9 @@ models/ShiftPage.ts
 models/ShiftPeriod.ts
 models/ShiftRequest.ts
 models/ShiftStatus.ts
+models/ShiftTemplate.ts
+models/ShiftTemplatePage.ts
+models/ShiftTemplateRequest.ts
 models/SignupInfo.ts
 models/SystemEvent.ts
 models/TokenResponse.ts

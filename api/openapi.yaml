@@ -38,6 +38,8 @@ tags:
     description: The agency's customers, their locations and the qualifications a shift can ask for
   - name: shifts
     description: Shifts the agency creates and publishes
+  - name: shift-templates
+    description: Named shift templates the agency starts new shifts from
   - name: assignments
     description: The claims on a shift and the agency's decisions on them
   - name: settings
@@ -1005,6 +1007,75 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /shift-templates:
+    get:
+      operationId: listShiftTemplates
+      tags: [shift-templates]
+      summary: List the agency's shift templates
+      description: |
+        Every template of the agency, sorted by name. Templates are shared:
+        every dispatcher and admin sees all of them. Dispatchers and admins
+        only.
+
+        Error codes: `forbidden` (403).
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of templates.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShiftTemplatePage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+    post:
+      operationId: createShiftTemplate
+      tags: [shift-templates]
+      summary: Save a shift template
+      description: |
+        Saves everything a new shift needs except its date. Dispatchers and
+        admins only.
+
+        Field error codes: `required`, `invalid_format` (`startTime` is not
+        `hh:mm`), `invalid_length`, `out_of_range` (`hourlyRateCents` below 1,
+        `slots` below 1 or above 500, `durationMinutes` below 1 or above 1439)
+        and `not_found` (`clientId` is not a client of the agency,
+        `locationId` is not a location of that client, or `qualificationIds`
+        contains an unknown qualification).
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403), `template_name_taken` (409, the agency has a template with
+        this name already, ignoring case).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShiftTemplateRequest"
+      responses:
+        "201":
+          description: The saved template.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShiftTemplate"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
   /worker/shifts:
     get:
       operationId: listWorkerShifts
@@ -1895,6 +1966,147 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Shift"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+
+    ShiftTemplateRequest:
+      type: object
+      required: [name, clientId, locationId, title, startTime, durationMinutes, hourlyRateCents, slots]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+          description: Unique within the agency, ignoring case.
+          examples: [Lager Frühschicht]
+        clientId:
+          type: string
+          format: uuid
+        locationId:
+          type: string
+          format: uuid
+          description: A location of the client.
+        title:
+          type: string
+          minLength: 1
+          maxLength: 120
+          examples: [Lagerunterstützung]
+        description:
+          type: string
+          maxLength: 2000
+        startTime:
+          type: string
+          pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$"
+          description: |
+            Local time of day the shift starts, `hh:mm`. Clients turn it into
+            a point in time on the date the dispatcher picks.
+          examples: ["07:00"]
+        durationMinutes:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 1439
+          description: How long the shift runs. A shift that runs past midnight ends on the next day.
+          examples: [480]
+        endIsEstimate:
+          type: boolean
+          default: false
+        hourlyRateCents:
+          type: integer
+          format: int32
+          minimum: 1
+          description: Gross pay per hour in euro cents.
+        slots:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 500
+        qualificationIds:
+          type: array
+          description: Empty or absent means none.
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+
+    ShiftTemplate:
+      type: object
+      description: |
+        A shift without a date. Client, location and qualifications are ids;
+        one that no longer exists is left out of the form a template fills in.
+      required:
+        - id
+        - name
+        - clientId
+        - locationId
+        - title
+        - startTime
+        - durationMinutes
+        - endIsEstimate
+        - hourlyRateCents
+        - slots
+        - qualificationIds
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        clientId:
+          type: string
+          format: uuid
+        locationId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        startTime:
+          type: string
+          description: Local time of day, `hh:mm`.
+          examples: ["07:00"]
+        durationMinutes:
+          type: integer
+          format: int32
+        endIsEstimate:
+          type: boolean
+        hourlyRateCents:
+          type: integer
+          format: int32
+          description: Gross pay per hour in euro cents.
+        slots:
+          type: integer
+          format: int32
+        qualificationIds:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+            format: uuid
+        createdAt:
+          type: string
+          format: date-time
+
+    ShiftTemplatePage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ShiftTemplate"
         page:
           type: integer
           format: int32

@@ -57,6 +57,9 @@ import 'package:shiftboard_api/src/model/shift_page.dart';
 import 'package:shiftboard_api/src/model/shift_period.dart';
 import 'package:shiftboard_api/src/model/shift_request.dart';
 import 'package:shiftboard_api/src/model/shift_status.dart';
+import 'package:shiftboard_api/src/model/shift_template.dart';
+import 'package:shiftboard_api/src/model/shift_template_page.dart';
+import 'package:shiftboard_api/src/model/shift_template_request.dart';
 import 'package:shiftboard_api/src/model/signup_info.dart';
 import 'package:shiftboard_api/src/model/system_event.dart';
 import 'package:shiftboard_api/src/model/token_response.dart';
@@ -115,6 +118,9 @@ part 'serializers.g.dart';
   ShiftPeriod,
   ShiftRequest,
   ShiftStatus,
+  ShiftTemplate,
+  ShiftTemplatePage,
+  ShiftTemplateRequest,
   SignupInfo,
   SystemEvent,
   TokenResponse,
@@ -171,6 +177,10 @@ Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Conversation)]),
         () => ListBuilder<Conversation>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(ShiftTemplate)]),
+        () => ListBuilder<ShiftTemplate>(),
       )
       ..add(const OneOfSerializer())
       ..add(const AnyOfSerializer())
