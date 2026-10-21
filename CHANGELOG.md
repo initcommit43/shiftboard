@@ -2,6 +2,17 @@
 
 Notable changes per slice. One version tag per completed slice during the MVP.
 
+## v0.6.0 (2026-10-21): slice 5, check-in/out and payroll export
+
+### Added
+
+- Workers check in and out of a confirmed shift in the app, from 30 minutes before the start; only the times are stored, no location. Check-out stays possible after the planned end until the agency approves the hours (ADR 0028).
+- Admins switch check-in in the app on or off under "Zusatzfunktionen"; it is off by default.
+- Dispatchers approve each worker's hours on the shift detail page. The form suggests the check-in times or the planned times and a 30-minute break over six hours, and shows hours and gross pay. Approved hours can be changed again.
+- A "Stunden" page lists the hours of a period, open ones first, and exports the approved ones as a CSV file for payroll that opens correctly in Excel for German and Austrian users.
+- A worker who checked in or has approved hours can't be marked as a no-show.
+- Demo data has check-in times, open and approved hours, and a shift that starts right after seeding to try check-in.
+
 ## v0.5.0 (2026-10-21): slice 4, duplicate shifts, shift templates and editing shifts
 
 ### Added
