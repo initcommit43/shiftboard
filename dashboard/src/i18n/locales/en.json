@@ -7,6 +7,7 @@
     "nav": {
       "shifts": "Shifts",
       "templates": "Templates",
+      "hours": "Hours",
       "signups": "Signups",
       "messages": "Messages",
       "settings": "Settings",
@@ -302,7 +303,61 @@
         "unknown": "This value was not accepted."
       }
     },
-    "approved": "Hours of {{name}} approved"
+    "approved": "Hours of {{name}} approved",
+    "page": {
+      "title": "Hours",
+      "description": "The hours of all shifts that start in the period. Approve open hours on the shift.",
+      "from": "From",
+      "to": "To",
+      "loading": "Loading hours …",
+      "columns": {
+        "worker": "Worker",
+        "shift": "Shift",
+        "date": "Date",
+        "time": "Time",
+        "break": "Break",
+        "hours": "Hours",
+        "gross": "Gross",
+        "status": "Status"
+      },
+      "planned": "Planned {{time}}",
+      "breakMinutes": "{{minutes}} min",
+      "recordNamed": "Record hours of {{name}} on {{title}}",
+      "open_one": "{{count}} entry is still open and not in the CSV file. Approve the hours on the shift first.",
+      "open_other": "{{count}} entries are still open and not in the CSV file. Approve the hours on the shift first.",
+      "count_one": "{{count}} entry, {{approved}} approved",
+      "count_other": "{{count}} entries, {{approved}} of them approved",
+      "empty": {
+        "title": "No hours in this period",
+        "description": "Everyone who held a confirmed spot on a shift that started in the period shows up here."
+      },
+      "invalidPeriod": {
+        "title": "Not a valid period",
+        "description": "Pick a start and an end. The end can't be before the start."
+      },
+      "error": {
+        "title": "The hours could not be loaded",
+        "description": "Please try again. If the problem persists, reload the page."
+      }
+    },
+    "export": {
+      "action": "Export CSV",
+      "fileName": "hours-{{from}}-to-{{to}}.csv",
+      "columns": {
+        "lastName": "Last name",
+        "firstName": "First name",
+        "date": "Date",
+        "client": "Client",
+        "location": "Location",
+        "shift": "Shift",
+        "start": "Start",
+        "end": "End",
+        "break": "Break (min)",
+        "hours": "Hours",
+        "hourlyRate": "Hourly rate",
+        "gross": "Gross"
+      }
+    }
   },
   "shiftDetail": {
     "back": "All shifts",

@@ -264,6 +264,7 @@ export function installFakeApi() {
   let accessToken: string | null = null
   let refreshToken: string | null = null
   const overrides = new Map<string, Reply[]>()
+  const queries: { route: string; query: URLSearchParams }[] = []
 
   const api = {
     calls: [] as Call[],
@@ -304,6 +305,10 @@ export function installFakeApi() {
     } as Record<string, Message[]>,
     user: dispatcher,
 
+    /** The query parameters of each request to a route, oldest first. */
+    queries(route: string) {
+      return queries.filter((it) => it.route === route).map((it) => it.query)
+    },
     /** Number of requests to a route such as `POST /auth/refresh`. */
     count(route: string) {
       return api.calls.filter((call) => call.route === route).length
@@ -799,6 +804,7 @@ export function installFakeApi() {
       const route = `${init?.method ?? 'GET'} ${url.pathname.replace('/api/v1', '')}`
       const body: unknown = typeof init?.body === 'string' ? JSON.parse(init.body) : undefined
       api.calls.push({ route, body })
+      queries.push({ route, query: url.searchParams })
 
       const override = overrides.get(route)?.shift()
       if (override instanceof Error) {
