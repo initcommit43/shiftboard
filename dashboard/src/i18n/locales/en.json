@@ -359,6 +359,8 @@
       "title": "Optional features",
       "contactButton": "Show WhatsApp contact",
       "contactButtonHint": "Workers see a button on every shift that opens WhatsApp with the contact person. For agencies that prefer that.",
+      "checkIn": "Check in in the app",
+      "checkInHint": "Workers check in and out of their shifts in the app. Without it, hours are approved from the planned times.",
       "save": "Save optional features",
       "saved": "The optional features are saved"
     }

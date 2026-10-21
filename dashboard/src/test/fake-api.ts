@@ -288,7 +288,7 @@ export function installFakeApi() {
       ],
     } as Record<string, ShiftAssignment[]>,
     settings: { autoConfirm: false, cancellationDeadlineHours: 24 } as AgencySettings,
-    features: { contactButton: false } as AgencyFeatures,
+    features: { contactButton: false, checkIn: false } as AgencyFeatures,
     conversations: [lenaConversation, jakobConversation],
     /** The messages per conversation id, newest first as the API sends them. */
     messages: {
