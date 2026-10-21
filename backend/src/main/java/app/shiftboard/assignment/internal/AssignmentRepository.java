@@ -48,6 +48,32 @@ interface AssignmentRepository extends Repository<Assignment, UUID> {
     @Query("select a from Assignment a where a.shiftId = :shiftId and a.status in :statuses order by a.id")
     List<Assignment> findForUpdateByShiftIdAndStatusIn(UUID shiftId, Collection<AssignmentStatus> statuses);
 
+    // The hours of a period: the claims of workers with a confirmed spot on shifts that have
+    // started, by booked start (ADR 0028).
+
+    @Query("""
+            select a from Assignment a
+            where a.status in :statuses and a.startsAt >= :from and a.startsAt < :to and a.startsAt <= :now
+            """)
+    Page<Assignment> findWorked(
+            Collection<AssignmentStatus> statuses, Instant from, Instant to, Instant now, Pageable pageable);
+
+    @Query("""
+            select a from Assignment a
+            where a.status in :statuses and a.startsAt >= :from and a.startsAt < :to and a.startsAt <= :now
+              and a.hoursApprovedAt is null
+            """)
+    Page<Assignment> findWorkedWithoutHours(
+            Collection<AssignmentStatus> statuses, Instant from, Instant to, Instant now, Pageable pageable);
+
+    @Query("""
+            select a from Assignment a
+            where a.status in :statuses and a.startsAt >= :from and a.startsAt < :to and a.startsAt <= :now
+              and a.hoursApprovedAt is not null
+            """)
+    Page<Assignment> findWorkedWithHours(
+            Collection<AssignmentStatus> statuses, Instant from, Instant to, Instant now, Pageable pageable);
+
     /** Whether the worker is booked, in one of the given statuses, for any time between start and end. */
     @Query("""
             select count(a) > 0 from Assignment a

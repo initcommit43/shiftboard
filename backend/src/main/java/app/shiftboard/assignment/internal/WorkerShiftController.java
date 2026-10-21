@@ -58,6 +58,16 @@ class WorkerShiftController {
         return workerShiftService.cancel(accountId(accessToken), shiftId);
     }
 
+    @PostMapping("/shifts/{shiftId}/check-in")
+    WorkerShiftResponse checkIn(@AuthenticationPrincipal Jwt accessToken, @PathVariable UUID shiftId) {
+        return workerShiftService.checkIn(accountId(accessToken), shiftId);
+    }
+
+    @PostMapping("/shifts/{shiftId}/check-out")
+    WorkerShiftResponse checkOut(@AuthenticationPrincipal Jwt accessToken, @PathVariable UUID shiftId) {
+        return workerShiftService.checkOut(accountId(accessToken), shiftId);
+    }
+
     @GetMapping("/my-shifts")
     WorkerShiftPage listClaimed(
             @AuthenticationPrincipal Jwt accessToken,
@@ -79,13 +89,20 @@ class WorkerShiftController {
     /**
      * @param cancellableUntil until when the worker can drop out in the app; only while pending or confirmed
      * @param cancelledBy      who cancelled; only when cancelled
+     * @param checkInFrom      from when the worker can check in; only when the agency uses check-in
+     *                         and the spot is confirmed or completed
+     * @param hoursApproved    the agency approved the hours, so checking out is no longer possible
      */
     record AssignmentSummary(
             UUID id,
             AssignmentStatus status,
             Instant claimedAt,
             @JsonInclude(JsonInclude.Include.NON_NULL) Instant cancellableUntil,
-            @JsonInclude(JsonInclude.Include.NON_NULL) CancelledBy cancelledBy) {
+            @JsonInclude(JsonInclude.Include.NON_NULL) CancelledBy cancelledBy,
+            @JsonInclude(JsonInclude.Include.NON_NULL) Instant checkInFrom,
+            @JsonInclude(JsonInclude.Include.NON_NULL) Instant checkedInAt,
+            @JsonInclude(JsonInclude.Include.NON_NULL) Instant checkedOutAt,
+            boolean hoursApproved) {
     }
 
     /**

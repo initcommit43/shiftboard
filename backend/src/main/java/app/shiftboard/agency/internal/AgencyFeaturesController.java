@@ -30,9 +30,10 @@ class AgencyFeaturesController {
 
     @PutMapping
     AgencyFeatures change(@Valid @RequestBody FeaturesRequest request) {
-        return agencyService.changeFeatures(new AgencyFeatures(request.contactButton()));
+        return agencyService.changeFeatures(request.contactButton(), request.checkIn());
     }
 
-    record FeaturesRequest(@NotNull Boolean contactButton) {
+    /** @param checkIn optional, so that dashboards from before it existed keep working */
+    record FeaturesRequest(@NotNull Boolean contactButton, Boolean checkIn) {
     }
 }
