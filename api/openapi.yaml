@@ -1112,7 +1112,7 @@ paths:
       description: |
         One entry per worker who held a confirmed spot on a shift that has
         started, for shifts starting in `[from, to)`, sorted by shift start,
-        then by the worker's last name. An entry is `OPEN` until the agency
+        earliest first. An entry is `OPEN` until the agency
         approved its hours. Feeds the payroll export, which the dashboard
         builds. Dispatchers and admins only.
 
@@ -1476,7 +1476,8 @@ paths:
 
         Error codes: `forbidden` (403), `worker_not_active` (403),
         `shift_not_found` (404), `assignment_not_found` (404), and with 409:
-        `check_in_disabled`, `not_checked_in`, `already_checked_out` and
+        `check_in_disabled`, `assignment_not_confirmed` (the worker no longer
+        holds the spot), `not_checked_in`, `already_checked_out` and
         `hours_approved`.
       responses:
         "200":

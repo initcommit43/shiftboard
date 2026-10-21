@@ -223,7 +223,7 @@ class HoursApi {
   }
 
   /// Check out when leaving
-  /// Records the time the worker left. Possible once after checking in, also after the planned end, until the agency approved the hours. Active workers only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;worker_not_active&#x60; (403), &#x60;shift_not_found&#x60; (404), &#x60;assignment_not_found&#x60; (404), and with 409: &#x60;check_in_disabled&#x60;, &#x60;not_checked_in&#x60;, &#x60;already_checked_out&#x60; and &#x60;hours_approved&#x60;.
+  /// Records the time the worker left. Possible once after checking in, also after the planned end, until the agency approved the hours. Active workers only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;worker_not_active&#x60; (403), &#x60;shift_not_found&#x60; (404), &#x60;assignment_not_found&#x60; (404), and with 409: &#x60;check_in_disabled&#x60;, &#x60;assignment_not_confirmed&#x60; (the worker no longer holds the spot), &#x60;not_checked_in&#x60;, &#x60;already_checked_out&#x60; and &#x60;hours_approved&#x60;.
   ///
   /// Parameters:
   /// * [shiftId]
@@ -308,7 +308,7 @@ class HoursApi {
   }
 
   /// List the hours of a period
-  /// One entry per worker who held a confirmed spot on a shift that has started, for shifts starting in &#x60;[from, to)&#x60;, sorted by shift start, then by the worker&#39;s last name. An entry is &#x60;OPEN&#x60; until the agency approved its hours. Feeds the payroll export, which the dashboard builds. Dispatchers and admins only.  Error codes: &#x60;validation_failed&#x60; (400, &#x60;to&#x60; is not after &#x60;from&#x60;), &#x60;forbidden&#x60; (403).
+  /// One entry per worker who held a confirmed spot on a shift that has started, for shifts starting in &#x60;[from, to)&#x60;, sorted by shift start, earliest first. An entry is &#x60;OPEN&#x60; until the agency approved its hours. Feeds the payroll export, which the dashboard builds. Dispatchers and admins only.  Error codes: &#x60;validation_failed&#x60; (400, &#x60;to&#x60; is not after &#x60;from&#x60;), &#x60;forbidden&#x60; (403).
   ///
   /// Parameters:
   /// * [from] - Shifts starting at or after this time.

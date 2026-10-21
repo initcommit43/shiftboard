@@ -265,7 +265,7 @@ export class HoursApi extends runtime.BaseAPI {
     }
 
     /**
-     * Records the time the worker left. Possible once after checking in, also after the planned end, until the agency approved the hours. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403), `shift_not_found` (404), `assignment_not_found` (404), and with 409: `check_in_disabled`, `not_checked_in`, `already_checked_out` and `hours_approved`. 
+     * Records the time the worker left. Possible once after checking in, also after the planned end, until the agency approved the hours. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403), `shift_not_found` (404), `assignment_not_found` (404), and with 409: `check_in_disabled`, `assignment_not_confirmed` (the worker no longer holds the spot), `not_checked_in`, `already_checked_out` and `hours_approved`. 
      * Check out when leaving
      */
     async checkOutRaw(requestParameters: CheckOutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WorkerShift>> {
@@ -276,7 +276,7 @@ export class HoursApi extends runtime.BaseAPI {
     }
 
     /**
-     * Records the time the worker left. Possible once after checking in, also after the planned end, until the agency approved the hours. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403), `shift_not_found` (404), `assignment_not_found` (404), and with 409: `check_in_disabled`, `not_checked_in`, `already_checked_out` and `hours_approved`. 
+     * Records the time the worker left. Possible once after checking in, also after the planned end, until the agency approved the hours. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403), `shift_not_found` (404), `assignment_not_found` (404), and with 409: `check_in_disabled`, `assignment_not_confirmed` (the worker no longer holds the spot), `not_checked_in`, `already_checked_out` and `hours_approved`. 
      * Check out when leaving
      */
     async checkOut(requestParameters: CheckOutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WorkerShift> {
@@ -346,7 +346,7 @@ export class HoursApi extends runtime.BaseAPI {
     }
 
     /**
-     * One entry per worker who held a confirmed spot on a shift that has started, for shifts starting in `[from, to)`, sorted by shift start, then by the worker\'s last name. An entry is `OPEN` until the agency approved its hours. Feeds the payroll export, which the dashboard builds. Dispatchers and admins only.  Error codes: `validation_failed` (400, `to` is not after `from`), `forbidden` (403). 
+     * One entry per worker who held a confirmed spot on a shift that has started, for shifts starting in `[from, to)`, sorted by shift start, earliest first. An entry is `OPEN` until the agency approved its hours. Feeds the payroll export, which the dashboard builds. Dispatchers and admins only.  Error codes: `validation_failed` (400, `to` is not after `from`), `forbidden` (403). 
      * List the hours of a period
      */
     async listHoursRaw(requestParameters: ListHoursRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<HoursEntryPage>> {
@@ -357,7 +357,7 @@ export class HoursApi extends runtime.BaseAPI {
     }
 
     /**
-     * One entry per worker who held a confirmed spot on a shift that has started, for shifts starting in `[from, to)`, sorted by shift start, then by the worker\'s last name. An entry is `OPEN` until the agency approved its hours. Feeds the payroll export, which the dashboard builds. Dispatchers and admins only.  Error codes: `validation_failed` (400, `to` is not after `from`), `forbidden` (403). 
+     * One entry per worker who held a confirmed spot on a shift that has started, for shifts starting in `[from, to)`, sorted by shift start, earliest first. An entry is `OPEN` until the agency approved its hours. Feeds the payroll export, which the dashboard builds. Dispatchers and admins only.  Error codes: `validation_failed` (400, `to` is not after `from`), `forbidden` (403). 
      * List the hours of a period
      */
     async listHours(requestParameters: ListHoursRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<HoursEntryPage> {
