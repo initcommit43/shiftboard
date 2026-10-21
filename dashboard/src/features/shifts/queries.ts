@@ -2,9 +2,15 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
-import { assignmentsApi, clientsApi, shiftsApi } from '@/api/client'
+import { assignmentsApi, clientsApi, shiftsApi, shiftTemplatesApi } from '@/api/client'
 import { errorMessage } from '@/api/errors'
-import type { Shift, ShiftAssignment, ShiftPeriod, ShiftRequest } from '@/api/generated'
+import type {
+  Shift,
+  ShiftAssignment,
+  ShiftPeriod,
+  ShiftRequest,
+  ShiftTemplateRequest,
+} from '@/api/generated'
 
 export const PAGE_SIZE = 20
 
@@ -57,6 +63,38 @@ export function useShiftFormOptions() {
         clientsApi.listQualifications({ size: OPTIONS_SIZE }, { signal }),
       ])
       return { clients: clients.content, qualifications: qualifications.content }
+    },
+  })
+}
+
+/** The picker offers every template at once; the API caps a page at 100. */
+const TEMPLATES_SIZE = 100
+
+export const templateKeys = {
+  all: ['shift-templates'] as const,
+}
+
+/** The agency's templates, sorted by name. */
+export function useShiftTemplates() {
+  return useQuery({
+    queryKey: templateKeys.all,
+    queryFn: ({ signal }) =>
+      shiftTemplatesApi.listShiftTemplates({ size: TEMPLATES_SIZE }, { signal }),
+  })
+}
+
+export function useCreateShiftTemplate() {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (shiftTemplateRequest: ShiftTemplateRequest) =>
+      shiftTemplatesApi.createShiftTemplate({ shiftTemplateRequest }),
+    onSuccess: (template) => {
+      toast.success(t('templates.saved.title', { name: template.name }), {
+        description: t('templates.saved.description'),
+      })
+      return queryClient.invalidateQueries({ queryKey: templateKeys.all })
     },
   })
 }
