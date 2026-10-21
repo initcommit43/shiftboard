@@ -524,14 +524,6 @@
   "@myShiftsBrowse": {
     "description": "Button on the empty list of the worker's own shifts that switches to the open shifts."
   },
-  "comingSoonTitle": "Kommt bald",
-  "@comingSoonTitle": {
-    "description": "Title of a tab that is not built yet."
-  },
-  "comingSoonMessage": "Dieser Bereich ist noch in Arbeit.",
-  "@comingSoonMessage": {
-    "description": "Text below the title of a tab that is not built yet."
-  },
   "claimAction": "Schicht anfragen",
   "@claimAction": {
     "description": "Button on a shift's detail that opens the claim confirmation."
@@ -755,5 +747,33 @@
   "chatEventShiftCancelled": "Die Schicht wurde abgesagt.",
   "@chatEventShiftCancelled": {
     "description": "System message."
+  },
+  "profileNotifications": "Benachrichtigungen",
+  "@profileNotifications": {
+    "description": "Section title in the profile."
+  },
+  "profilePauseNewShifts": "Neue Schichten pausieren",
+  "@profilePauseNewShifts": {
+    "description": "Switch that pauses new-shift notifications."
+  },
+  "profilePauseNewShiftsHint": "Bestätigungen, Absagen und Nachrichten bekommst du weiterhin.",
+  "@profilePauseNewShiftsHint": {
+    "description": "Below the pause switch."
+  },
+  "profileNotificationsError": "Die Einstellung konnte nicht geladen werden.",
+  "@profileNotificationsError": {
+    "description": "The notification setting failed to load."
+  },
+  "profilePushUnavailable": "Push-Benachrichtigungen sind in dieser Version der App noch nicht eingerichtet.",
+  "@profilePushUnavailable": {
+    "description": "Shown while the build has no Firebase project."
+  },
+  "shiftWhatsApp": "WhatsApp",
+  "@shiftWhatsApp": {
+    "description": "Button that opens WhatsApp with the contact person."
+  },
+  "shiftWhatsAppFailed": "WhatsApp konnte nicht geöffnet werden.",
+  "@shiftWhatsAppFailed": {
+    "description": "Snackbar when WhatsApp could not be opened."
   }
 }

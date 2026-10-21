@@ -5,12 +5,19 @@ import {
   AgencySettingsToJSON,
   AssignmentStatus,
   CancelledBy,
+  type AgencyFeatures,
+  AgencyFeaturesToJSON,
   type Client,
   ClientToJSON,
   type CurrentUser,
   CurrentUserToJSON,
   type FieldError,
+  type Conversation,
+  ConversationToJSON,
   type Location,
+  type Message,
+  MessageToJSON,
+  MessageType,
   type Qualification,
   QualificationToJSON,
   type Shift,
@@ -165,6 +172,30 @@ export const lastWeek = shift(4, {
   takenSlots: 1,
 })
 
+export function message(number: number, values: Partial<Message> & Pick<Message, 'body'>): Message {
+  return {
+    id: `0199c3a0-0000-7000-8000-0000000006${String(number).padStart(2, '0')}`,
+    type: MessageType.TEXT,
+    fromWorker: true,
+    createdAt: new Date(2026, 9, 12, 9, number),
+    ...values,
+  }
+}
+
+export const lenaConversation: Conversation = {
+  id: '0199c3a0-0000-7000-8000-000000000701',
+  worker: { id: lena.id, firstName: lena.firstName, lastName: lena.lastName },
+  lastMessage: message(3, { body: 'Gibt es einen Parkplatz?' }),
+  unreadCount: 1,
+}
+
+export const jakobConversation: Conversation = {
+  id: '0199c3a0-0000-7000-8000-000000000702',
+  worker: { id: jakob.id, firstName: jakob.firstName, lastName: jakob.lastName },
+  lastMessage: message(2, { body: 'Danke!', fromWorker: false, senderName: 'Anna Berger' }),
+  unreadCount: 0,
+}
+
 interface Call {
   route: string
   body: unknown
@@ -223,6 +254,17 @@ export function installFakeApi() {
       ],
     } as Record<string, ShiftAssignment[]>,
     settings: { autoConfirm: false, cancellationDeadlineHours: 24 } as AgencySettings,
+    features: { contactButton: false } as AgencyFeatures,
+    conversations: [lenaConversation, jakobConversation],
+    /** The messages per conversation id, newest first as the API sends them. */
+    messages: {
+      [lenaConversation.id]: [
+        message(3, { body: 'Gibt es einen Parkplatz?', shift: { id: warehouse.id, title: warehouse.title, startsAt: warehouse.startsAt } }),
+        message(2, { body: '', type: MessageType.SYSTEM, event: 'CLAIM_CONFIRMED', fromWorker: false }),
+        message(1, { body: 'Bitte Sicherheitsschuhe mitbringen.', type: MessageType.BROADCAST, fromWorker: false, senderName: 'Anna Berger' }),
+      ],
+      [jakobConversation.id]: [jakobConversation.lastMessage],
+    } as Record<string, Message[]>,
     user: dispatcher,
 
     /** Number of requests to a route such as `POST /auth/refresh`. */
@@ -418,6 +460,48 @@ export function installFakeApi() {
     if (route === 'GET /shifts') {
       const past = url.searchParams.get('period') === 'PAST'
       return page(url, past ? api.pastShifts : api.shifts, ShiftToJSON)
+    }
+    if (route === 'GET /agency/features') {
+      return json(AgencyFeaturesToJSON(api.features))
+    }
+    if (route === 'PUT /agency/features') {
+      if (api.user.role !== 'ADMIN') {
+        return problem(403, 'forbidden')
+      }
+      api.features = body as AgencyFeatures
+      return json(AgencyFeaturesToJSON(api.features))
+    }
+    if (route === 'GET /conversations') {
+      return page(url, api.conversations, ConversationToJSON)
+    }
+    if (route === 'GET /conversations/unread-count') {
+      return json({ unreadCount: api.conversations.reduce((sum, it) => sum + it.unreadCount, 0) })
+    }
+    const conversationRoute = /^(GET|POST) \/conversations\/([^/]+)\/messages$/.exec(route)
+    if (conversationRoute) {
+      const id = conversationRoute[2] ?? ''
+      const thread = api.messages[id]
+      if (!thread) {
+        return problem(404, 'conversation_not_found')
+      }
+      if (conversationRoute[1] === 'GET') {
+        api.conversations = api.conversations.map((it) => (it.id === id ? { ...it, unreadCount: 0 } : it))
+        return page(url, thread, MessageToJSON)
+      }
+      const sent = message(thread.length + 10, {
+        body: (body as Record<string, string>)['body'] ?? '',
+        fromWorker: false,
+        senderName: 'Anna Berger',
+      })
+      api.messages[id] = [sent, ...thread]
+      return json(MessageToJSON(sent), 201)
+    }
+    const broadcastRoute = /^POST \/shifts\/([^/]+)\/broadcast$/.exec(route)
+    if (broadcastRoute) {
+      const confirmed = (api.assignments[broadcastRoute[1] ?? ''] ?? []).filter(
+        (it) => it.status === AssignmentStatus.CONFIRMED,
+      ).length
+      return confirmed === 0 ? problem(409, 'no_recipients') : json({ recipients: confirmed }, 201)
     }
     if (route === 'GET /agency/settings') {
       return json(AgencySettingsToJSON(api.settings))
