@@ -253,6 +253,14 @@ function parseRate(text: string) {
 
 /** Start and end as points in time, in the time zone of the browser. */
 export function shiftTimes({ date, startTime, endTime }: ShiftDraft) {
+  return localTimes(date, startTime, endTime)
+}
+
+/**
+ * A day (`yyyy-mm-dd`) with a start and end time (`hh:mm`) as points in time, in the time
+ * zone of the browser. An end before the start is on the next day.
+ */
+export function localTimes(date: string, startTime: string, endTime: string) {
   if (!date || !startTime || !endTime) {
     return null
   }

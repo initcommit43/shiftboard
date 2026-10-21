@@ -242,7 +242,67 @@
     "template_name_taken": "A template with this name already exists.",
     "template_not_found": "This template no longer exists. The list has been updated.",
     "shift_not_editable": "This shift has started or is cancelled. It can no longer be edited.",
-    "shift_overlap": "At the new time, someone with a spot would already have another shift. Pick another time or remove them first."
+    "shift_overlap": "At the new time, someone with a spot would already have another shift. Pick another time or remove them first.",
+    "shift_not_started": "The shift has not started yet. Hours can be recorded once it has.",
+    "assignment_not_worked": "This person no longer holds a confirmed spot. The list has been updated.",
+    "worker_attended": "This person was there: they checked in or have approved hours. They can't be marked as a no-show."
+  },
+  "hours": {
+    "amount": "{{hours}} h",
+    "status": {
+      "OPEN": "Open",
+      "APPROVED": "Approved"
+    },
+    "columns": {
+      "name": "Name",
+      "planned": "Planned",
+      "checkedIn": "Checked in",
+      "checkedOut": "Checked out",
+      "hours": "Hours"
+    },
+    "section": {
+      "title": "Hours",
+      "description": "Everyone who held a confirmed spot. Saved hours are approved for payroll.",
+      "empty": "Nobody held a confirmed spot, so there are no hours.",
+      "notCheckedIn": "Not checked in",
+      "notCheckedOut": "Not checked out",
+      "approved": "{{hours}} · {{gross}} ({{time}}, {{break}} min break)"
+    },
+    "approve": {
+      "action": "Record hours",
+      "actionNamed": "Record hours of {{name}}",
+      "change": "Change hours",
+      "changeNamed": "Change hours of {{name}}"
+    },
+    "dialog": {
+      "title": "Hours of {{name}}",
+      "description": "Saving approves the hours for payroll. You can still change them afterwards.",
+      "fields": {
+        "date": "Date",
+        "startTime": "Start",
+        "endTime": "End",
+        "breakMinutes": "Break in minutes"
+      },
+      "planned": "Planned {{time}}",
+      "checkedIn": "Checked in {{time}}",
+      "checkedOut": "Checked out {{time}}",
+      "endsNextDay": "Ends the next day",
+      "breakHint": "Unpaid. For more than six hours of work, 30 minutes are suggested.",
+      "worked": "Time worked",
+      "gross": "Gross at {{rate}} per hour",
+      "cancel": "Cancel",
+      "save": "Approve hours",
+      "errors": {
+        "required": "Please fill this in.",
+        "invalid_format": "Please enter whole minutes.",
+        "before_start": "The end has to be after the start.",
+        "hours_too_long": "At most 24 hours.",
+        "break_too_long": "The break must be shorter than the time worked.",
+        "break_out_of_range": "Between 0 and 1440 minutes.",
+        "unknown": "This value was not accepted."
+      }
+    },
+    "approved": "Hours of {{name}} approved"
   },
   "shiftDetail": {
     "back": "All shifts",

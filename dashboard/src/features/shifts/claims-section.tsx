@@ -236,6 +236,8 @@ function TeamRow({ shiftId, assignment }: { shiftId: string; assignment: ShiftAs
   const noShow = useAssignmentDecision(shiftId, 'noShow')
   const dateTime = useDateTime()
   const name = workerName(assignment)
+  // Who checked in or has approved hours was there and can't be a no-show (ADR 0028).
+  const attended = assignment.checkedInAt !== undefined || assignment.hours !== undefined
 
   return (
     <TableRow>
@@ -259,7 +261,7 @@ function TeamRow({ shiftId, assignment }: { shiftId: string; assignment: ShiftAs
           {assignment.status === AssignmentStatus.CONFIRMED && (
             <RemoveWorker shiftId={shiftId} assignment={assignment} />
           )}
-          {assignment.status === AssignmentStatus.COMPLETED && (
+          {assignment.status === AssignmentStatus.COMPLETED && !attended && (
             <Button
               variant="outline"
               size="sm"

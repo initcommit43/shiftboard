@@ -12,6 +12,9 @@ import {
   type CurrentUser,
   CurrentUserToJSON,
   type FieldError,
+  type HoursEntry,
+  HoursEntryToJSON,
+  HoursStatus,
   type Conversation,
   ConversationToJSON,
   type Location,
@@ -533,6 +536,9 @@ export function installFakeApi() {
       if (claim.status !== AssignmentStatus.COMPLETED) {
         return problem(409, 'assignment_not_completed')
       }
+      if (claim.checkedInAt || claim.hours) {
+        return problem(409, 'worker_attended')
+      }
       next = { ...claim, status: AssignmentStatus.NO_SHOW }
     } else {
       return problem(404, 'not_found')
@@ -543,6 +549,92 @@ export function installFakeApi() {
       replaceShift({ ...found, takenSlots: found.takenSlots - 1 })
     }
     return json(ShiftAssignmentToJSON(next))
+  }
+
+  function hasWorked(claim: ShiftAssignment) {
+    return claim.status === AssignmentStatus.CONFIRMED || claim.status === AssignmentStatus.COMPLETED
+  }
+
+  function approveHours(shiftId: string, assignmentId: string, body: Record<string, unknown>) {
+    const found = allShifts().find((it) => it.id === shiftId)
+    if (!found) {
+      return problem(404, 'shift_not_found')
+    }
+    const claims = api.assignments[shiftId] ?? []
+    const claim = claims.find((it) => it.id === assignmentId)
+    if (!claim) {
+      return problem(404, 'assignment_not_found')
+    }
+    if (found.startsAt.getTime() > Date.now()) {
+      return problem(409, 'shift_not_started')
+    }
+    if (!hasWorked(claim)) {
+      return problem(409, 'assignment_not_worked')
+    }
+    const startedAt = new Date(body['startedAt'] as string)
+    const endedAt = new Date(body['endedAt'] as string)
+    const breakMinutes = body['breakMinutes'] as number
+    const minutes = (endedAt.getTime() - startedAt.getTime()) / 60000
+    if (minutes <= 0) {
+      return problem(400, 'validation_failed', [{ field: 'endedAt', code: 'before_start' }])
+    }
+    if (minutes > 24 * 60) {
+      return problem(400, 'validation_failed', [{ field: 'endedAt', code: 'too_long' }])
+    }
+    if (breakMinutes >= minutes) {
+      return problem(400, 'validation_failed', [{ field: 'breakMinutes', code: 'too_long' }])
+    }
+    const workedMinutes = minutes - breakMinutes
+    const next: ShiftAssignment = {
+      ...claim,
+      hours: {
+        startedAt,
+        endedAt,
+        breakMinutes,
+        workedMinutes,
+        grossCents: Math.round((workedMinutes * found.hourlyRateCents) / 60),
+        approvedAt: new Date(2026, 9, 20, 10, 0),
+      },
+    }
+    api.assignments[shiftId] = claims.map((it) => (it === claim ? next : it))
+    return json(ShiftAssignmentToJSON(next))
+  }
+
+  /** One entry per worker who held a confirmed spot on a started shift starting in [from, to). */
+  function listHours(url: URL) {
+    const from = new Date(url.searchParams.get('from') ?? '').getTime()
+    const to = new Date(url.searchParams.get('to') ?? '').getTime()
+    if (!(to > from)) {
+      return problem(400, 'validation_failed', [{ field: 'to', code: 'before_start' }])
+    }
+    const entries: HoursEntry[] = allShifts()
+      .filter(
+        (it) =>
+          it.startsAt.getTime() >= from &&
+          it.startsAt.getTime() < to &&
+          it.startsAt.getTime() <= Date.now(),
+      )
+      .sort((a, b) => a.startsAt.getTime() - b.startsAt.getTime())
+      .flatMap((it) =>
+        (api.assignments[it.id] ?? []).filter(hasWorked).map((claim) => ({
+          assignmentId: claim.id,
+          status: claim.hours ? HoursStatus.APPROVED : HoursStatus.OPEN,
+          shift: {
+            id: it.id,
+            title: it.title,
+            startsAt: it.startsAt,
+            endsAt: it.endsAt,
+            hourlyRateCents: it.hourlyRateCents,
+            client: it.client,
+            location: it.location,
+          },
+          worker: claim.worker,
+          ...(claim.checkedInAt && { checkedInAt: claim.checkedInAt }),
+          ...(claim.checkedOutAt && { checkedOutAt: claim.checkedOutAt }),
+          ...(claim.hours && { hours: claim.hours }),
+        })),
+      )
+    return page(url, entries, HoursEntryToJSON)
   }
 
   function respond(route: string, url: URL, body: unknown, authorization: string | null) {
@@ -655,6 +747,13 @@ export function installFakeApi() {
       }
       api.settings = body as AgencySettings
       return json(AgencySettingsToJSON(api.settings))
+    }
+    if (route === 'GET /hours') {
+      return listHours(url)
+    }
+    const hoursRoute = /^PUT \/shifts\/([^/]+)\/assignments\/([^/]+)\/hours$/.exec(route)
+    if (hoursRoute) {
+      return approveHours(hoursRoute[1] ?? '', hoursRoute[2] ?? '', body as Record<string, unknown>)
     }
     const shiftUpdate = /^PUT \/shifts\/([^/]+)$/.exec(route)
     if (shiftUpdate) {
