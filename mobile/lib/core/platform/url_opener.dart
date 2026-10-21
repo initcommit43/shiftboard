@@ -27,6 +27,10 @@ Uri mapsUri(String address) => defaultTargetPlatform == TargetPlatform.iOS
         'query': address,
       });
 
+/// A WhatsApp chat with [phone]: the international number in digits only.
+Uri whatsAppUri(String phone) =>
+    Uri.https('wa.me', '/${phone.replaceAll(RegExp(r'\D'), '')}');
+
 /// A call to [phone], without the spaces people write numbers with.
 Uri phoneUri(String phone) =>
     Uri(scheme: 'tel', path: phone.replaceAll(RegExp(r'[^\d+]'), ''));

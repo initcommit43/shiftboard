@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import app.shiftboard.identity.TokenPair;
+import app.shiftboard.notification.internal.RecordingPushSender;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +23,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
-@Import({TestcontainersConfiguration.class, TestData.class, RecordedEvents.class})
+@Import({TestcontainersConfiguration.class, TestData.class, RecordedEvents.class, RecordingPushSender.class})
 @ActiveProfiles("test")
 public abstract class IntegrationTest {
 
