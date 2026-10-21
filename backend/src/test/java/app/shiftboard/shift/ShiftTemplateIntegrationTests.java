@@ -15,6 +15,7 @@ import app.shiftboard.identity.Role;
 import app.shiftboard.identity.TokenPair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
 class ShiftTemplateIntegrationTests extends IntegrationTest {
@@ -203,11 +204,109 @@ class ShiftTemplateIntegrationTests extends IntegrationTest {
     }
 
     @Test
+    void anyDispatcherCanChangeEveryFieldIncludingTheName() {
+        var id = create(dispatcher, "Frühschicht");
+        var colleague = login(data.account(agency, Role.DISPATCHER), DASHBOARD);
+        var lager = data.qualification(agency, "Lager");
+        var secondClient = data.client(agency, "Hotel Lindenhof");
+        var secondLocation = data.location(agency, secondClient, "Haupthaus", "Lindenweg 3, 5020 Salzburg");
+        var request = templateRequest("  Bankett Abend ");
+        request.put("clientId", secondClient);
+        request.put("locationId", secondLocation);
+        request.put("title", "Service");
+        request.put("description", "Schwarze Hose");
+        request.put("startTime", "18:30");
+        request.put("durationMinutes", 360);
+        request.put("endIsEstimate", true);
+        request.put("hourlyRateCents", 1800);
+        request.put("slots", 8);
+        request.put("qualificationIds", List.of(lager));
+
+        put("/api/v1/shift-templates/" + id, colleague, request)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(id.toString())
+                .jsonPath("$.name").isEqualTo("Bankett Abend")
+                .jsonPath("$.clientId").isEqualTo(secondClient.toString())
+                .jsonPath("$.locationId").isEqualTo(secondLocation.toString())
+                .jsonPath("$.title").isEqualTo("Service")
+                .jsonPath("$.description").isEqualTo("Schwarze Hose")
+                .jsonPath("$.startTime").isEqualTo("18:30")
+                .jsonPath("$.durationMinutes").isEqualTo(360)
+                .jsonPath("$.endIsEstimate").isEqualTo(true)
+                .jsonPath("$.hourlyRateCents").isEqualTo(1800)
+                .jsonPath("$.slots").isEqualTo(8)
+                .jsonPath("$.qualificationIds").isEqualTo(List.of(lager.toString()));
+
+        get("/api/v1/shift-templates", dispatcher)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[*].name").isEqualTo(List.of("Bankett Abend"));
+    }
+
+    @Test
+    void aTemplateMayKeepItsNameInAnotherCaseButNotTakeAnotherOne() {
+        var id = create(dispatcher, "Frühschicht");
+        create(dispatcher, "Spätschicht");
+
+        put("/api/v1/shift-templates/" + id, dispatcher, templateRequest("FRÜHSCHICHT"))
+                .expectStatus().isOk()
+                .expectBody().jsonPath("$.name").isEqualTo("FRÜHSCHICHT");
+
+        expectProblem(put("/api/v1/shift-templates/" + id, dispatcher, templateRequest("spätschicht")), 409,
+                "template_name_taken");
+    }
+
+    @Test
+    void aChangeIsCheckedLikeANewTemplate() {
+        var id = create(dispatcher, "Frühschicht");
+        var otherClient = data.client(data.agency("Alpen Events"), "Gipfelarena");
+
+        var request = templateRequest("Frühschicht");
+        request.put("startTime", "7:00");
+        expectFieldError(put("/api/v1/shift-templates/" + id, dispatcher, request), "startTime", "invalid_format");
+
+        request = templateRequest("Frühschicht");
+        request.put("clientId", otherClient);
+        expectFieldError(put("/api/v1/shift-templates/" + id, dispatcher, request), "clientId", "not_found");
+    }
+
+    @Test
+    void deletingRemovesTheTemplateForEveryone() {
+        var id = create(dispatcher, "Frühschicht");
+        create(dispatcher, "Spätschicht");
+        var colleague = login(data.account(agency, Role.DISPATCHER), DASHBOARD);
+
+        delete("/api/v1/shift-templates/" + id, colleague).expectStatus().isNoContent();
+
+        get("/api/v1/shift-templates", dispatcher)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[*].name").isEqualTo(List.of("Spätschicht"));
+        expectProblem(delete("/api/v1/shift-templates/" + id, dispatcher), 404, "template_not_found");
+    }
+
+    @Test
+    void anotherAgencyCannotChangeOrDeleteTheTemplates() {
+        var id = create(dispatcher, "Frühschicht");
+        var otherAgency = data.agency("Alpen Events");
+        var otherDispatcher = login(data.account(otherAgency, Role.DISPATCHER), DASHBOARD);
+
+        expectProblem(put("/api/v1/shift-templates/" + id, otherDispatcher, templateRequest("Andere")), 404,
+                "template_not_found");
+        expectProblem(delete("/api/v1/shift-templates/" + id, otherDispatcher), 404, "template_not_found");
+        assertThat(templateCount(agency)).isEqualTo(1);
+    }
+
+    @Test
     void workersHaveNoAccess() {
         var worker = signUp(agency.signupCode(), TestData.email());
+        var id = create(dispatcher, "Frühschicht");
 
         expectProblem(get("/api/v1/shift-templates", worker), 403, "forbidden");
         expectProblem(post("/api/v1/shift-templates", worker, templateRequest("Frühschicht")), 403, "forbidden");
+        expectProblem(put("/api/v1/shift-templates/" + id, worker, templateRequest("Frühschicht")), 403, "forbidden");
+        expectProblem(delete("/api/v1/shift-templates/" + id, worker), 403, "forbidden");
     }
 
     private Map<String, Object> templateRequest(String name) {
@@ -223,8 +322,25 @@ class ShiftTemplateIntegrationTests extends IntegrationTest {
         return request;
     }
 
-    private void create(TokenPair tokens, String name) {
-        post("/api/v1/shift-templates", tokens, templateRequest(name)).expectStatus().isCreated();
+    private UUID create(TokenPair tokens, String name) {
+        var created = post("/api/v1/shift-templates", tokens, templateRequest(name))
+                .expectStatus().isCreated()
+                .expectBody(Map.class).returnResult().getResponseBody();
+        return UUID.fromString((String) created.get("id"));
+    }
+
+    private RestTestClient.ResponseSpec put(String uri, TokenPair tokens, Map<String, Object> body) {
+        return client.put().uri(uri)
+                .headers(headers -> headers.setBearerAuth(tokens.accessToken()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(body)
+                .exchange();
+    }
+
+    private RestTestClient.ResponseSpec delete(String uri, TokenPair tokens) {
+        return client.delete().uri(uri)
+                .headers(headers -> headers.setBearerAuth(tokens.accessToken()))
+                .exchange();
     }
 
     private int templateCount(TestData.Agency of) {
