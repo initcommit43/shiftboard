@@ -1076,6 +1076,68 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /shift-templates/{templateId}:
+    parameters:
+      - $ref: "#/components/parameters/TemplateId"
+    put:
+      operationId: updateShiftTemplate
+      tags: [shift-templates]
+      summary: Change a shift template
+      description: |
+        Replaces every field of the template, its name included. Shifts
+        already created from it do not change. Dispatchers and admins only.
+
+        Field error codes: the same as when saving a template.
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403), `template_not_found` (404), `template_name_taken` (409,
+        another template of the agency has this name, ignoring case).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShiftTemplateRequest"
+      responses:
+        "200":
+          description: The changed template.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShiftTemplate"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+    delete:
+      operationId: deleteShiftTemplate
+      tags: [shift-templates]
+      summary: Delete a shift template
+      description: |
+        Shifts already created from the template do not change.
+        Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `template_not_found` (404).
+      responses:
+        "204":
+          description: The template is gone.
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
   /worker/shifts:
     get:
       operationId: listWorkerShifts
@@ -1477,6 +1539,13 @@ components:
         format: uuid
     AssignmentId:
       name: assignmentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    TemplateId:
+      name: templateId
       in: path
       required: true
       schema:
