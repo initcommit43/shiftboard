@@ -58,7 +58,7 @@ class SecurityConfiguration {
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/api/v1/ping", "/api/v1/signup/**", "/api/v1/auth/**", "/actuator/health")
                         .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/agency/settings")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/agency/**")
                         .hasAnyRole(Role.DISPATCHER.name(), Role.ADMIN.name())
                         .requestMatchers("/api/v1/agency/**")
                         .hasRole(Role.ADMIN.name())
@@ -67,7 +67,8 @@ class SecurityConfiguration {
                                 "/api/v1/conversations/**",
                                 "/api/v1/clients/**",
                                 "/api/v1/qualifications/**",
-                                "/api/v1/shifts/**")
+                                "/api/v1/shifts/**",
+                                "/api/v1/shift-templates/**")
                         .hasAnyRole(Role.DISPATCHER.name(), Role.ADMIN.name())
                         .requestMatchers("/api/v1/worker/**")
                         .hasRole(Role.WORKER.name())
