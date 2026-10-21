@@ -33,6 +33,8 @@ dependencies {
     implementation("org.springframework.modulith:spring-modulith-starter-jpa")
     implementation("net.javacrumbs.shedlock:shedlock-spring:7.10.1")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:7.10.1")
+    // Service account tokens for the Firebase Cloud Messaging HTTP v1 API
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.54.0")
 
     // Argon2 for password hashing
     runtimeOnly("org.bouncycastle:bcprov-jdk18on:1.86")
