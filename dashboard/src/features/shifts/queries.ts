@@ -2,9 +2,16 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
-import { assignmentsApi, clientsApi, shiftsApi } from '@/api/client'
+import { assignmentsApi, clientsApi, shiftsApi, shiftTemplatesApi } from '@/api/client'
 import { errorMessage } from '@/api/errors'
-import type { Shift, ShiftAssignment, ShiftPeriod, ShiftRequest } from '@/api/generated'
+import type {
+  Shift,
+  ShiftAssignment,
+  ShiftPeriod,
+  ShiftRequest,
+  ShiftTemplate,
+  ShiftTemplateRequest,
+} from '@/api/generated'
 
 export const PAGE_SIZE = 20
 
@@ -58,6 +65,70 @@ export function useShiftFormOptions() {
       ])
       return { clients: clients.content, qualifications: qualifications.content }
     },
+  })
+}
+
+/** The picker offers every template at once; the API caps a page at 100. */
+const TEMPLATES_SIZE = 100
+
+export const templateKeys = {
+  all: ['shift-templates'] as const,
+}
+
+/** The agency's templates, sorted by name. */
+export function useShiftTemplates() {
+  return useQuery({
+    queryKey: templateKeys.all,
+    queryFn: ({ signal }) =>
+      shiftTemplatesApi.listShiftTemplates({ size: TEMPLATES_SIZE }, { signal }),
+  })
+}
+
+export function useCreateShiftTemplate() {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (shiftTemplateRequest: ShiftTemplateRequest) =>
+      shiftTemplatesApi.createShiftTemplate({ shiftTemplateRequest }),
+    onSuccess: (template) => {
+      toast.success(t('templates.saved.title', { name: template.name }), {
+        description: t('templates.saved.description'),
+      })
+      return queryClient.invalidateQueries({ queryKey: templateKeys.all })
+    },
+  })
+}
+
+export function useUpdateShiftTemplate(templateId: string) {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (shiftTemplateRequest: ShiftTemplateRequest) =>
+      shiftTemplatesApi.updateShiftTemplate({ templateId, shiftTemplateRequest }),
+    onSuccess: (template) => {
+      toast.success(t('templates.updated', { name: template.name }))
+      return queryClient.invalidateQueries({ queryKey: templateKeys.all })
+    },
+  })
+}
+
+export function useDeleteShiftTemplate() {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (template: ShiftTemplate) =>
+      shiftTemplatesApi.deleteShiftTemplate({ templateId: template.id }),
+    onSuccess: (_data, template) => {
+      toast.success(t('templates.deleted', { name: template.name }))
+    },
+    onError: (error) => {
+      toast.error(errorMessage(t, error))
+    },
+    // Also after an error: a colleague may have deleted it already.
+    onSettled: () => queryClient.invalidateQueries({ queryKey: templateKeys.all }),
   })
 }
 

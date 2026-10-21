@@ -6,11 +6,14 @@
     "navigation": "Main navigation",
     "nav": {
       "shifts": "Shifts",
+      "templates": "Templates",
       "signups": "Signups",
       "messages": "Messages",
       "settings": "Settings",
       "pendingSignups_one": "{{count}} pending signup",
-      "pendingSignups_other": "{{count}} pending signups"
+      "pendingSignups_other": "{{count}} pending signups",
+      "unreadMessages_one": "{{count}} unread message",
+      "unreadMessages_other": "{{count}} unread messages"
     },
     "theme": {
       "toLight": "Switch to light theme",
@@ -141,7 +144,12 @@
         "rate_out_of_range": "The hourly rate has to be above €0.",
         "slots_out_of_range": "Between 1 and 500 spots.",
         "unknown": "This entry was not accepted."
-      }
+      },
+      "duplicate": {
+        "title": "Duplicate shift",
+        "description": "Everything is copied except the date. Pick one, then publish or save as a draft."
+      },
+      "missing": "No longer available, so left empty: {{fields}}. Please choose again."
     },
     "descriptionPast": "Shifts that are over: who worked and who did not turn up.",
     "periods": {
@@ -204,10 +212,6 @@
     "previous": "Previous",
     "next": "Next"
   },
-  "comingSoon": {
-    "title": "Coming soon",
-    "description": "We are still working on this area."
-  },
   "notFound": {
     "title": "Page not found",
     "description": "This address does not exist or no longer exists.",
@@ -231,7 +235,11 @@
     "assignment_not_active": "This person no longer has a spot. The list has been updated.",
     "assignment_not_completed": "Only someone who worked can be marked as a no-show.",
     "shift_not_cancellable": "This shift is already over or cancelled.",
-    "concurrent_change": "The shift was changed at the same moment. Please try again."
+    "concurrent_change": "The shift was changed at the same moment. Please try again.",
+    "conversation_not_found": "This conversation no longer exists.",
+    "no_recipients": "Nobody is confirmed for this shift yet.",
+    "template_name_taken": "A template with this name already exists.",
+    "template_not_found": "This template no longer exists. The list has been updated."
   },
   "shiftDetail": {
     "back": "All shifts",
@@ -310,7 +318,8 @@
       "reasonRequired": "Please give a reason.",
       "keep": "Back",
       "confirm": "Remove"
-    }
+    },
+    "duplicate": "Duplicate"
   },
   "settings": {
     "title": "Settings",
@@ -328,6 +337,137 @@
       "title": "The settings could not be loaded",
       "description": "Please try again. If the problem persists, reload the page.",
       "retry": "Try again"
+    },
+    "features": {
+      "title": "Optional features",
+      "contactButton": "Show WhatsApp contact",
+      "contactButtonHint": "Workers see a button on every shift that opens WhatsApp with the contact person. For agencies that prefer that.",
+      "save": "Save optional features",
+      "saved": "The optional features are saved"
+    }
+  },
+  "messages": {
+    "title": "Messages",
+    "description": "All conversations with workers. Anyone on the team can answer.",
+    "conversations": "Conversations",
+    "conversation": "Conversation",
+    "thread": "Message history",
+    "loading": "Loading conversations …",
+    "loadingConversation": "Loading messages …",
+    "conversationError": "The messages could not be loaded.",
+    "unread_one": "{{count}} unread message",
+    "unread_other": "{{count}} unread messages",
+    "you": "You: {{text}}",
+    "broadcast": "To everyone confirmed",
+    "sentBy": "{{name}}, {{time}}",
+    "reply": "Reply",
+    "replyPlaceholder": "Write a reply …",
+    "send": "Send",
+    "choose": {
+      "title": "Choose a conversation",
+      "description": "All conversations are on the left, the newest first."
+    },
+    "empty": {
+      "title": "No messages yet",
+      "description": "Once workers write in the app, their conversations appear here."
+    },
+    "error": {
+      "title": "Messages could not be loaded",
+      "description": "Please try again. If the problem persists, reload the page.",
+      "retry": "Try again"
+    },
+    "events": {
+      "CLAIM_CONFIRMED": "Request confirmed",
+      "CLAIM_REJECTED": "Request rejected",
+      "CLAIM_CANCELLED_BY_WORKER": "Dropped out",
+      "REMOVED_BY_AGENCY": "Removed from the shift",
+      "SHIFT_CANCELLED": "Shift cancelled"
+    }
+  },
+  "broadcast": {
+    "action": "Message confirmed workers",
+    "title": "Message everyone confirmed",
+    "description_one": "The confirmed person gets the message in their conversation, linked to the shift.",
+    "description_other": "All {{count}} confirmed people get the message in their conversation, linked to the shift.",
+    "message": "Message",
+    "placeholder": "e.g. Please bring safety shoes, we meet at gate 5 today.",
+    "cancel": "Cancel",
+    "send": "Send",
+    "sent_one": "Message sent to {{count}} person",
+    "sent_other": "Message sent to {{count}} people"
+  },
+  "templates": {
+    "save": {
+      "action": "Save as template",
+      "title": "Save as template",
+      "description": "Everything except the date is saved. Everyone at your agency can start new shifts from it.",
+      "name": "Template name",
+      "nameHint": "For example client and shift, so it is easy to find.",
+      "cancel": "Cancel",
+      "confirm": "Save template",
+      "errors": {
+        "required": "Please enter a name.",
+        "taken": "A template with this name already exists."
+      }
+    },
+    "saved": {
+      "title": "Template “{{name}}” saved",
+      "description": "You'll find it when you create a new shift."
+    },
+    "use": {
+      "label": "Use a template",
+      "none": "No template",
+      "loading": "Loading templates …",
+      "hint": "Fills in the form; you only pick the date.",
+      "empty": "No templates yet. Save a shift with “Save as template” and it shows up here.",
+      "error": "The templates could not be loaded."
+    },
+    "updated": "Template “{{name}}” saved",
+    "deleted": "Template “{{name}}” deleted",
+    "list": {
+      "title": "Templates",
+      "description": "Shifts that come up again and again. Everyone at your agency can use and change them.",
+      "loading": "Loading templates …",
+      "count_one": "{{count}} template",
+      "count_other": "{{count}} templates",
+      "columns": {
+        "name": "Template",
+        "rate": "Hourly rate",
+        "slots": "Spots"
+      },
+      "nextDay": "{{time}} (next day)",
+      "gone": "No longer available",
+      "empty": {
+        "title": "No templates yet",
+        "description": "Create a new shift and save it with “Save as template”. It then shows up here.",
+        "action": "New shift"
+      },
+      "error": {
+        "title": "The templates could not be loaded",
+        "description": "Please try again. If the problem persists, reload the page."
+      }
+    },
+    "edit": {
+      "action": "Edit",
+      "actionNamed": "Edit template “{{name}}”",
+      "title": "Edit template",
+      "description": "Shifts already created from this template do not change.",
+      "section": "Template",
+      "save": "Save template",
+      "endsNextDay": "Ends the next day.",
+      "notFound": {
+        "title": "This template no longer exists",
+        "description": "It may have been deleted in the meantime.",
+        "back": "Back to templates"
+      }
+    },
+    "delete": {
+      "action": "Delete",
+      "actionNamed": "Delete template “{{name}}”",
+      "title": "Delete template “{{name}}”?",
+      "description": "The template is then gone for everyone at your agency. Shifts already created from it stay as they are.",
+      "keep": "Keep",
+      "confirm": "Delete template"
     }
   }
 }

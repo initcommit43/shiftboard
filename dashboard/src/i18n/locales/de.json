@@ -6,11 +6,14 @@
     "navigation": "Hauptnavigation",
     "nav": {
       "shifts": "Schichten",
+      "templates": "Vorlagen",
       "signups": "Anmeldungen",
       "messages": "Nachrichten",
       "settings": "Einstellungen",
       "pendingSignups_one": "{{count}} offene Anmeldung",
-      "pendingSignups_other": "{{count}} offene Anmeldungen"
+      "pendingSignups_other": "{{count}} offene Anmeldungen",
+      "unreadMessages_one": "{{count}} ungelesene Nachricht",
+      "unreadMessages_other": "{{count}} ungelesene Nachrichten"
     },
     "theme": {
       "toLight": "Zum hellen Design wechseln",
@@ -141,7 +144,12 @@
         "rate_out_of_range": "Der Stundenlohn muss über 0 € liegen.",
         "slots_out_of_range": "Zwischen 1 und 500 Plätze.",
         "unknown": "Diese Angabe wurde nicht angenommen."
-      }
+      },
+      "duplicate": {
+        "title": "Schicht duplizieren",
+        "description": "Alles ist übernommen außer dem Datum. Wähle es aus, dann veröffentlichen oder als Entwurf speichern."
+      },
+      "missing": "Nicht mehr vorhanden und daher leer: {{fields}}. Bitte neu auswählen."
     },
     "descriptionPast": "Schichten, die vorbei sind: wer gearbeitet hat und wer nicht erschienen ist.",
     "periods": {
@@ -204,10 +212,6 @@
     "previous": "Zurück",
     "next": "Weiter"
   },
-  "comingSoon": {
-    "title": "Kommt bald",
-    "description": "An diesem Bereich arbeiten wir noch."
-  },
   "notFound": {
     "title": "Seite nicht gefunden",
     "description": "Diese Adresse gibt es nicht oder nicht mehr.",
@@ -231,7 +235,11 @@
     "assignment_not_active": "Diese Person hat keinen Platz mehr. Die Liste wurde aktualisiert.",
     "assignment_not_completed": "Nur wer gearbeitet hat, kann als nicht erschienen markiert werden.",
     "shift_not_cancellable": "Diese Schicht ist schon vorbei oder abgesagt.",
-    "concurrent_change": "Die Schicht wurde gerade gleichzeitig geändert. Bitte versuche es noch einmal."
+    "concurrent_change": "Die Schicht wurde gerade gleichzeitig geändert. Bitte versuche es noch einmal.",
+    "conversation_not_found": "Diese Unterhaltung gibt es nicht mehr.",
+    "no_recipients": "Für diese Schicht ist noch niemand bestätigt.",
+    "template_name_taken": "Eine Vorlage mit diesem Namen gibt es schon.",
+    "template_not_found": "Diese Vorlage gibt es nicht mehr. Die Liste wurde aktualisiert."
   },
   "shiftDetail": {
     "back": "Alle Schichten",
@@ -310,7 +318,8 @@
       "reasonRequired": "Bitte gib einen Grund an.",
       "keep": "Abbrechen",
       "confirm": "Entfernen"
-    }
+    },
+    "duplicate": "Duplizieren"
   },
   "settings": {
     "title": "Einstellungen",
@@ -328,6 +337,137 @@
       "title": "Die Einstellungen konnten nicht geladen werden",
       "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu.",
       "retry": "Erneut versuchen"
+    },
+    "features": {
+      "title": "Zusatzfunktionen",
+      "contactButton": "WhatsApp-Kontakt anzeigen",
+      "contactButtonHint": "Mitarbeiter:innen sehen bei jeder Schicht einen Button, der WhatsApp mit der Ansprechperson öffnet. Für Agenturen, die lieber so kommunizieren.",
+      "save": "Zusatzfunktionen speichern",
+      "saved": "Die Zusatzfunktionen sind gespeichert"
+    }
+  },
+  "messages": {
+    "title": "Nachrichten",
+    "description": "Alle Unterhaltungen mit Mitarbeiter:innen. Jede:r im Team kann antworten.",
+    "conversations": "Unterhaltungen",
+    "conversation": "Unterhaltung",
+    "thread": "Nachrichtenverlauf",
+    "loading": "Unterhaltungen werden geladen …",
+    "loadingConversation": "Nachrichten werden geladen …",
+    "conversationError": "Die Nachrichten konnten nicht geladen werden.",
+    "unread_one": "{{count}} ungelesene Nachricht",
+    "unread_other": "{{count}} ungelesene Nachrichten",
+    "you": "Ihr: {{text}}",
+    "broadcast": "An alle Bestätigten",
+    "sentBy": "{{name}}, {{time}}",
+    "reply": "Antwort",
+    "replyPlaceholder": "Antwort schreiben …",
+    "send": "Senden",
+    "choose": {
+      "title": "Wähle eine Unterhaltung",
+      "description": "Links stehen alle Unterhaltungen, die neueste zuerst."
+    },
+    "empty": {
+      "title": "Noch keine Nachrichten",
+      "description": "Sobald Mitarbeiter:innen in der App schreiben, erscheinen ihre Unterhaltungen hier."
+    },
+    "error": {
+      "title": "Nachrichten konnten nicht geladen werden",
+      "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu.",
+      "retry": "Erneut versuchen"
+    },
+    "events": {
+      "CLAIM_CONFIRMED": "Anfrage bestätigt",
+      "CLAIM_REJECTED": "Anfrage abgelehnt",
+      "CLAIM_CANCELLED_BY_WORKER": "Selbst abgesagt",
+      "REMOVED_BY_AGENCY": "Aus der Schicht entfernt",
+      "SHIFT_CANCELLED": "Schicht abgesagt"
+    }
+  },
+  "broadcast": {
+    "action": "Nachricht an Bestätigte",
+    "title": "Nachricht an alle Bestätigten",
+    "description_one": "Die bestätigte Person bekommt die Nachricht in ihrer Unterhaltung, mit der Schicht verknüpft.",
+    "description_other": "Alle {{count}} bestätigten Personen bekommen die Nachricht in ihrer Unterhaltung, mit der Schicht verknüpft.",
+    "message": "Nachricht",
+    "placeholder": "z. B. Bitte Sicherheitsschuhe mitbringen, Treffpunkt ist heute Tor 5.",
+    "cancel": "Abbrechen",
+    "send": "Senden",
+    "sent_one": "Nachricht an {{count}} Person gesendet",
+    "sent_other": "Nachricht an {{count}} Personen gesendet"
+  },
+  "templates": {
+    "save": {
+      "action": "Als Vorlage speichern",
+      "title": "Als Vorlage speichern",
+      "description": "Alles außer dem Datum wird gespeichert. Alle in eurer Agentur können die Vorlage für neue Schichten verwenden.",
+      "name": "Name der Vorlage",
+      "nameHint": "Zum Beispiel Kunde und Schicht, damit sie leicht zu finden ist.",
+      "cancel": "Abbrechen",
+      "confirm": "Vorlage speichern",
+      "errors": {
+        "required": "Bitte gib einen Namen ein.",
+        "taken": "Eine Vorlage mit diesem Namen gibt es schon."
+      }
+    },
+    "saved": {
+      "title": "Vorlage „{{name}}“ gespeichert",
+      "description": "Du findest sie beim Anlegen einer neuen Schicht."
+    },
+    "use": {
+      "label": "Vorlage verwenden",
+      "none": "Ohne Vorlage",
+      "loading": "Vorlagen werden geladen …",
+      "hint": "Füllt das Formular aus, du wählst nur noch das Datum.",
+      "empty": "Noch keine Vorlagen. Speichere eine Schicht mit „Als Vorlage speichern“, dann erscheint sie hier.",
+      "error": "Die Vorlagen konnten nicht geladen werden."
+    },
+    "updated": "Vorlage „{{name}}“ gespeichert",
+    "deleted": "Vorlage „{{name}}“ gelöscht",
+    "list": {
+      "title": "Vorlagen",
+      "description": "Schichten, die immer wieder vorkommen. Alle in eurer Agentur können sie verwenden und ändern.",
+      "loading": "Vorlagen werden geladen …",
+      "count_one": "{{count}} Vorlage",
+      "count_other": "{{count}} Vorlagen",
+      "columns": {
+        "name": "Vorlage",
+        "rate": "Stundenlohn",
+        "slots": "Plätze"
+      },
+      "nextDay": "{{time}} (Folgetag)",
+      "gone": "Nicht mehr vorhanden",
+      "empty": {
+        "title": "Noch keine Vorlagen",
+        "description": "Leg eine neue Schicht an und speichere sie mit „Als Vorlage speichern“. Dann erscheint sie hier.",
+        "action": "Neue Schicht"
+      },
+      "error": {
+        "title": "Die Vorlagen konnten nicht geladen werden",
+        "description": "Bitte versuch es noch einmal. Wenn das Problem bleibt, lade die Seite neu."
+      }
+    },
+    "edit": {
+      "action": "Bearbeiten",
+      "actionNamed": "Vorlage „{{name}}“ bearbeiten",
+      "title": "Vorlage bearbeiten",
+      "description": "Schichten, die schon aus der Vorlage angelegt wurden, ändern sich nicht.",
+      "section": "Vorlage",
+      "save": "Vorlage speichern",
+      "endsNextDay": "Endet am Folgetag.",
+      "notFound": {
+        "title": "Diese Vorlage gibt es nicht mehr",
+        "description": "Vielleicht wurde sie in der Zwischenzeit gelöscht.",
+        "back": "Zu den Vorlagen"
+      }
+    },
+    "delete": {
+      "action": "Löschen",
+      "actionNamed": "Vorlage „{{name}}“ löschen",
+      "title": "Vorlage „{{name}}“ löschen?",
+      "description": "Die Vorlage ist dann für alle in eurer Agentur weg. Schichten, die schon aus ihr angelegt wurden, bleiben, wie sie sind.",
+      "keep": "Behalten",
+      "confirm": "Vorlage löschen"
     }
   }
 }

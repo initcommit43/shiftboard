@@ -319,7 +319,10 @@ class _Details extends ConsumerWidget {
       color: colors.inkSecondary,
     );
     final contactPhone = shift.contact.phone;
-    final agency = ref.watch(currentUserProvider)?.agency.name ?? '';
+    final agencySummary = ref.watch(currentUserProvider)?.agency;
+    final agency = agencySummary?.name ?? '';
+    // Agencies that prefer WhatsApp switch this on (S3-6).
+    final whatsApp = agencySummary?.features?.contactButton ?? false;
     final note = _claimNote(
       shift,
       l10n,
@@ -455,6 +458,19 @@ class _Details extends ConsumerWidget {
               variant: AppButtonVariant.outline,
               onPressed: () => _writeAbout(context, shift),
             ),
+            if (contactPhone != null && whatsApp) ...[
+              const SizedBox(height: AppSpacing.sm),
+              AppButton(
+                label: l10n.shiftWhatsApp,
+                variant: AppButtonVariant.outline,
+                onPressed: () => _open(
+                  context,
+                  ref,
+                  whatsAppUri(contactPhone),
+                  l10n.shiftWhatsAppFailed,
+                ),
+              ),
+            ],
             if (contactPhone != null) ...[
               const SizedBox(height: AppSpacing.sm),
               AppButton(

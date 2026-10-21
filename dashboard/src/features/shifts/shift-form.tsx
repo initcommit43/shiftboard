@@ -1,4 +1,4 @@
-import { CircleAlert, LoaderCircle } from 'lucide-react'
+import { CircleAlert, Info, LoaderCircle } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
@@ -15,21 +15,31 @@ import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 
 import { formatShiftDate } from './format'
-import { useCreateShift } from './queries'
+import { useCreateShift, useUpdateShiftTemplate } from './queries'
+import { SaveAsTemplate } from './save-as-template'
 import {
   DRAFT_FIELDS,
   type DraftErrors,
   type DraftField,
   emptyDraft,
+  type MissingField,
   serverErrors,
   type ShiftDraft,
   shiftTimes,
   soleLocationId,
+  TEMPLATE_REQUEST_FIELDS,
   toShiftRequest,
+  toTemplateRequest,
   validate,
+  validateTemplate,
 } from './shift-draft'
 
 const fieldId = (field: DraftField) => `shift-${field}`
+
+const TEMPLATE_NAME_ID = 'template-name'
+const TEMPLATE_NAME_MAX = 80
+
+type NameError = 'required' | 'taken'
 
 function focusFirstError(errors: DraftErrors) {
   const field = DRAFT_FIELDS.find((it) => errors[it])
@@ -47,18 +57,30 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
+/**
+ * The form for a new shift. With `template` it edits that template instead: it asks for the
+ * template's name, has no date, and saves the template.
+ */
 export function ShiftForm({
   clients,
   qualifications,
+  initial,
+  template,
 }: {
   clients: Client[]
   qualifications: Qualification[]
+  /** A draft filled in from a shift or template, with what of it no longer exists. */
+  initial?: { draft: ShiftDraft; missing: MissingField[] }
+  template?: { id: string; name: string }
 }) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const create = useCreateShift()
-  const [draft, setDraft] = useState(() => emptyDraft(clients))
+  const update = useUpdateShiftTemplate(template?.id ?? '')
+  const [draft, setDraft] = useState(() => initial?.draft ?? emptyDraft(clients))
   const [errors, setErrors] = useState<DraftErrors>({})
+  const [name, setName] = useState(template?.name ?? '')
+  const [nameError, setNameError] = useState<NameError | null>(null)
 
   const locations = clients.find((client) => client.id === draft.clientId)?.locations ?? []
   const times = shiftTimes(draft)
@@ -90,6 +112,45 @@ export function ShiftForm({
         }
       },
     })
+  }
+
+  function submitTemplate() {
+    const trimmed = name.trim()
+    const found = validateTemplate(draft)
+    setNameError(trimmed ? null : 'required')
+    setErrors(found)
+    if (!trimmed) {
+      document.getElementById(TEMPLATE_NAME_ID)?.focus()
+      return
+    }
+    if (Object.keys(found).length > 0) {
+      focusFirstError(found)
+      return
+    }
+    update.mutate(
+      { ...toTemplateRequest(draft), name: trimmed },
+      {
+        onSuccess: () => {
+          void navigate('/templates')
+        },
+        onError: (error) => {
+          if (!(error instanceof ApiError)) {
+            return
+          }
+          if (
+            error.code === 'template_name_taken' ||
+            error.fieldErrors.some((it) => it.field === 'name')
+          ) {
+            setNameError(error.code === 'template_name_taken' ? 'taken' : 'required')
+            document.getElementById(TEMPLATE_NAME_ID)?.focus()
+            return
+          }
+          const rejected = serverErrors(error.fieldErrors, TEMPLATE_REQUEST_FIELDS)
+          setErrors(rejected)
+          focusFirstError(rejected)
+        },
+      },
+    )
   }
 
   /** Label, control and error message of one field, wired up for assistive technology. */
@@ -128,6 +189,8 @@ export function ShiftForm({
 
   const publishing = create.isPending && create.variables.publish === true
   const savingDraft = create.isPending && !publishing
+  // A taken name is shown at the name field, and only there.
+  const failed = template ? update.isError && nameError !== 'taken' : create.isError
 
   return (
     <form
@@ -135,14 +198,59 @@ export function ShiftForm({
       className="flex max-w-[50rem] flex-col gap-6"
       onSubmit={(event) => {
         event.preventDefault()
-        submit(true)
+        if (template) {
+          submitTemplate()
+        } else {
+          submit(true)
+        }
       }}
     >
-      {create.isError && (
+      {initial && initial.missing.length > 0 && (
+        <Alert>
+          <Info aria-hidden />
+          <AlertTitle>
+            {t('shifts.form.missing', {
+              fields: new Intl.ListFormat(i18n.language).format(
+                initial.missing.map((name) => t(`shifts.form.fields.${name}`)),
+              ),
+            })}
+          </AlertTitle>
+        </Alert>
+      )}
+
+      {failed && (
         <Alert variant="destructive">
           <CircleAlert aria-hidden />
-          <AlertTitle>{errorMessage(t, create.error)}</AlertTitle>
+          <AlertTitle>{errorMessage(t, template ? update.error : create.error)}</AlertTitle>
         </Alert>
+      )}
+
+      {template && (
+        <Section title={t('templates.edit.section')}>
+          <div className="flex flex-col gap-2 sm:col-span-6">
+            <Label htmlFor={TEMPLATE_NAME_ID}>{t('templates.save.name')}</Label>
+            <Input
+              id={TEMPLATE_NAME_ID}
+              maxLength={TEMPLATE_NAME_MAX}
+              value={name}
+              aria-invalid={nameError !== null}
+              aria-describedby={`${TEMPLATE_NAME_ID}-${nameError ? 'error' : 'hint'}`}
+              onChange={(event) => {
+                setName(event.target.value)
+                setNameError(null)
+              }}
+            />
+            {nameError ? (
+              <p id={`${TEMPLATE_NAME_ID}-error`} className="type-body-sm text-danger-text">
+                {t(`templates.save.errors.${nameError}`)}
+              </p>
+            ) : (
+              <p id={`${TEMPLATE_NAME_ID}-hint`} className="type-body-sm text-ink-secondary">
+                {t('templates.save.nameHint')}
+              </p>
+            )}
+          </div>
+        </Section>
       )}
 
       <Section title={t('shifts.form.sections.assignment')}>
@@ -214,17 +322,19 @@ export function ShiftForm({
       </Section>
 
       <Section title={t('shifts.form.sections.time')}>
-        {field('date', 'sm:col-span-2', (props) => (
-          <Input
-            {...props}
-            type="date"
-            value={draft.date}
-            onChange={(event) => {
-              change({ date: event.target.value })
-            }}
-          />
-        ))}
-        {field('startTime', 'sm:col-span-2', (props) => (
+        {/* A template has no date. */}
+        {!template &&
+          field('date', 'sm:col-span-2', (props) => (
+            <Input
+              {...props}
+              type="date"
+              value={draft.date}
+              onChange={(event) => {
+                change({ date: event.target.value })
+              }}
+            />
+          ))}
+        {field('startTime', template ? 'sm:col-span-3' : 'sm:col-span-2', (props) => (
           <Input
             {...props}
             type="time"
@@ -236,7 +346,7 @@ export function ShiftForm({
         ))}
         {field(
           'endTime',
-          'sm:col-span-2',
+          template ? 'sm:col-span-3' : 'sm:col-span-2',
           (props) => (
             <Input
               {...props}
@@ -247,11 +357,15 @@ export function ShiftForm({
               }}
             />
           ),
-          times?.endsNextDay
-            ? t('shifts.form.endsNextDay', {
-                date: formatShiftDate(times.endsAt, i18n.language),
-              })
-            : undefined,
+          template
+            ? draft.startTime && draft.endTime && draft.endTime < draft.startTime
+              ? t('templates.edit.endsNextDay')
+              : undefined
+            : times?.endsNextDay
+              ? t('shifts.form.endsNextDay', {
+                  date: formatShiftDate(times.endsAt, i18n.language),
+                })
+              : undefined,
         )}
         <Label className="text-ink sm:col-span-6">
           <input
@@ -336,26 +450,55 @@ export function ShiftForm({
         )}
       </Section>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" disabled={create.isPending}>
-          {publishing && <LoaderCircle aria-hidden className="animate-spin" />}
-          {t('shifts.form.publish')}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          disabled={create.isPending}
-          onClick={() => {
-            submit(false)
-          }}
-        >
-          {savingDraft && <LoaderCircle aria-hidden className="animate-spin" />}
-          {t('shifts.form.saveDraft')}
-        </Button>
-        <Button asChild variant="ghost">
-          <Link to="/shifts">{t('shifts.form.cancel')}</Link>
-        </Button>
-      </div>
+      {template ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="submit" disabled={update.isPending}>
+            {update.isPending && <LoaderCircle aria-hidden className="animate-spin" />}
+            {t('templates.edit.save')}
+          </Button>
+          <Button asChild variant="ghost">
+            <Link to="/templates">{t('shifts.form.cancel')}</Link>
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="submit" disabled={create.isPending}>
+            {publishing && <LoaderCircle aria-hidden className="animate-spin" />}
+            {t('shifts.form.publish')}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={create.isPending}
+            onClick={() => {
+              submit(false)
+            }}
+          >
+            {savingDraft && <LoaderCircle aria-hidden className="animate-spin" />}
+            {t('shifts.form.saveDraft')}
+          </Button>
+          <SaveAsTemplate
+            defaultName={draft.title.trim()}
+            prepare={() => {
+              const found = validateTemplate(draft)
+              setErrors(found)
+              if (Object.keys(found).length > 0) {
+                focusFirstError(found)
+                return null
+              }
+              return toTemplateRequest(draft)
+            }}
+            onFieldErrors={(fieldErrors) => {
+              const rejected = serverErrors(fieldErrors, TEMPLATE_REQUEST_FIELDS)
+              setErrors(rejected)
+              focusFirstError(rejected)
+            }}
+          />
+          <Button asChild variant="ghost">
+            <Link to="/shifts">{t('shifts.form.cancel')}</Link>
+          </Button>
+        </div>
+      )}
     </form>
   )
 }

@@ -1,4 +1,5 @@
 import {
+  Bookmark,
   Calendar,
   type LucideIcon,
   MessageSquare,
@@ -15,6 +16,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { Badge } from '@/components/ui/badge'
 import { useCurrentUser, useSessionExpiry } from '@/features/auth/use-session'
 import { UserMenu } from '@/features/auth/user-menu'
+import { useUnreadMessageCount } from '@/features/messages/queries'
 import { usePendingSignupCount } from '@/features/signups/queries'
 import { initials } from '@/lib/initials'
 import { cn } from '@/lib/utils'
@@ -62,6 +64,21 @@ function PendingSignupsBadge() {
   )
 }
 
+function UnreadMessagesBadge() {
+  const { t } = useTranslation()
+  const count = useUnreadMessageCount()
+
+  if (!count) {
+    return null
+  }
+  return (
+    <Badge variant="feature">
+      <span aria-hidden>{count}</span>
+      <span className="sr-only">{t('shell.nav.unreadMessages', { count })}</span>
+    </Badge>
+  )
+}
+
 export function AppShell() {
   const { t } = useTranslation()
   const { agency } = useCurrentUser()
@@ -76,10 +93,13 @@ export function AppShell() {
         </div>
         <nav aria-label={t('shell.navigation')} className="flex flex-col gap-1">
           <NavItem to="/shifts" icon={Calendar} label={t('shell.nav.shifts')} />
+          <NavItem to="/templates" icon={Bookmark} label={t('shell.nav.templates')} />
           <NavItem to="/signups" icon={UserPlus} label={t('shell.nav.signups')}>
             <PendingSignupsBadge />
           </NavItem>
-          <NavItem to="/messages" icon={MessageSquare} label={t('shell.nav.messages')} />
+          <NavItem to="/messages" icon={MessageSquare} label={t('shell.nav.messages')}>
+            <UnreadMessagesBadge />
+          </NavItem>
           <NavItem to="/settings" icon={SlidersHorizontal} label={t('shell.nav.settings')} />
         </nav>
       </aside>
