@@ -4,6 +4,7 @@ import { redirectSignedIn, requireSession } from '@/features/auth/guards'
 import { LoginPage } from '@/features/auth/login-page'
 import { SessionLoading } from '@/features/auth/session-loading'
 import { APP_ROUTE_ID } from '@/features/auth/use-session'
+import { MessagesPage } from '@/features/messages/messages-page'
 import { SettingsPage } from '@/features/settings/settings-page'
 import { NewShiftPage } from '@/features/shifts/new-shift-page'
 import { ShiftDetailPage } from '@/features/shifts/shift-detail-page'
@@ -11,7 +12,6 @@ import { ShiftsPage } from '@/features/shifts/shifts-page'
 import { SignupsPage } from '@/features/signups/signups-page'
 
 import { AppShell } from './app-shell'
-import { ComingSoonPage } from './coming-soon-page'
 import { NotFoundPage } from './not-found-page'
 
 // All routes live here. Everything below the AppShell route needs a signed-in
@@ -31,7 +31,8 @@ export const routes: RouteObject[] = [
           { path: 'shifts/new', element: <NewShiftPage /> },
           { path: 'shifts/:shiftId', element: <ShiftDetailPage /> },
           { path: 'signups', element: <SignupsPage /> },
-          { path: 'messages', element: <ComingSoonPage area="messages" /> },
+          { path: 'messages', element: <MessagesPage /> },
+          { path: 'messages/:conversationId', element: <MessagesPage /> },
           { path: 'settings', element: <SettingsPage /> },
           { path: '*', element: <NotFoundPage /> },
         ],
