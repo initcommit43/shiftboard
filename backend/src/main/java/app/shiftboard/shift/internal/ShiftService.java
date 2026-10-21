@@ -15,11 +15,13 @@ import app.shiftboard.client.Clients;
 import app.shiftboard.identity.UserAccounts;
 import app.shiftboard.agency.TenantContext;
 import app.shiftboard.shift.ShiftCancelled;
+import app.shiftboard.shift.ShiftChanged;
 import app.shiftboard.shift.ShiftCompleted;
 import app.shiftboard.shift.ShiftDetails;
 import app.shiftboard.shift.ShiftPublished;
 import app.shiftboard.shift.Shifts;
 import app.shiftboard.shift.internal.ShiftController.ClientSummary;
+import app.shiftboard.shift.internal.ShiftController.ShiftChangeRequest;
 import app.shiftboard.shift.internal.ShiftController.ShiftPage;
 import app.shiftboard.shift.internal.ShiftController.ShiftPeriod;
 import app.shiftboard.shift.internal.ShiftController.ShiftRequest;
@@ -101,6 +103,40 @@ class ShiftService implements Shifts {
             var cancelled = shifts.saveAndFlush(shift);
             events.publishEvent(new ShiftCancelled(TenantContext.require(), shiftId));
             return responses(List.of(cancelled)).getFirst();
+        }), ConflictRetry::busy);
+    }
+
+    /**
+     * Changes the shift. The listeners of {@link ShiftChanged} move the booked time of its claims
+     * in the same transaction and may reject the change. Each attempt is a transaction of its own,
+     * so that a concurrent claim that was faster is seen by the next one.
+     */
+    ShiftResponse update(UUID shiftId, ShiftChangeRequest request) {
+        var qualificationIds = request.qualificationIds() == null ? Set.<UUID>of() : request.qualificationIds();
+        return ConflictRetry.run(() -> transactions.execute(_ -> {
+            var shift = shifts.findById(shiftId).orElseThrow(ShiftService::notFound);
+            references.check(request.clientId(), request.locationId(), qualificationIds);
+            var changes = shift.update(
+                    request.clientId(),
+                    request.locationId(),
+                    request.title().strip(),
+                    request.description() == null || request.description().isBlank()
+                            ? null : request.description().strip(),
+                    request.startsAt(),
+                    request.endsAt(),
+                    Boolean.TRUE.equals(request.endIsEstimate()),
+                    BigDecimal.valueOf(request.hourlyRateCents(), 2),
+                    request.slots(),
+                    qualificationIds,
+                    Instant.now());
+            var updated = shifts.saveAndFlush(shift);
+            // A draft has no claims, and a change nobody on the shift notices needs no notice.
+            if (updated.getStatus() == ShiftStatus.PUBLISHED && !changes.isEmpty()) {
+                events.publishEvent(new ShiftChanged(
+                        TenantContext.require(), shiftId, UUID.randomUUID(), changes, updated.getStartsAt(),
+                        updated.getEndsAt()));
+            }
+            return responses(List.of(updated)).getFirst();
         }), ConflictRetry::busy);
     }
 

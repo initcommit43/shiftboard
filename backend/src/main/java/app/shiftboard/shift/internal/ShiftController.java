@@ -20,6 +20,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -60,6 +61,11 @@ class ShiftController {
         return shiftService.create(request, UUID.fromString(accessToken.getSubject()));
     }
 
+    @PutMapping("/{shiftId}")
+    ShiftResponse update(@PathVariable UUID shiftId, @Valid @RequestBody ShiftChangeRequest request) {
+        return shiftService.update(shiftId, request);
+    }
+
     @PostMapping("/{shiftId}/publish")
     ShiftResponse publish(@PathVariable UUID shiftId) {
         return shiftService.publish(shiftId);
@@ -90,6 +96,20 @@ class ShiftController {
             @NotNull @Min(1) @Max(Shift.MAX_SLOTS) Integer slots,
             Set<UUID> qualificationIds,
             Boolean publish) {
+    }
+
+    /** Every field of a shift, as when creating one; the status does not change. */
+    record ShiftChangeRequest(
+            @NotNull UUID clientId,
+            @NotNull UUID locationId,
+            @NotBlank @Size(max = 120) String title,
+            @Size(max = 2000) String description,
+            @NotNull Instant startsAt,
+            @NotNull Instant endsAt,
+            Boolean endIsEstimate,
+            @NotNull @Min(1) Integer hourlyRateCents,
+            @NotNull @Min(1) @Max(Shift.MAX_SLOTS) Integer slots,
+            Set<UUID> qualificationIds) {
     }
 
     record ClientSummary(UUID id, String name) {

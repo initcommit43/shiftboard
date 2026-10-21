@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
+import app.shiftboard.shift.ShiftChanged.Change;
 import app.shiftboard.system.InvalidFieldException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -145,6 +146,105 @@ class ShiftTests {
 
         assertThat(shift.getStatus()).isEqualTo(ShiftStatus.COMPLETED);
         assertNotClaimable("shift_not_open", shift, START.minus(Duration.ofDays(1)));
+    }
+
+    @Test
+    void anUpdateReplacesEveryFieldAndNamesWhatWorkersSeeChanged() {
+        var shift = shift(START.plus(Duration.ofHours(8)), "16.50", 5, Set.of());
+        shift.publish();
+        shift.claim(START.minus(Duration.ofDays(1)));
+        var client = UUID.randomUUID();
+        var location = UUID.randomUUID();
+        var qualification = UUID.randomUUID();
+        var start = START.plus(Duration.ofHours(1));
+
+        var changes = shift.update(
+                client, location, "Kommissionierung", "Tor 3", start, start.plus(Duration.ofHours(6)), true,
+                new BigDecimal("17.00"), 4, Set.of(qualification), START.minus(Duration.ofDays(1)));
+
+        assertThat(changes).containsExactlyInAnyOrder(Change.values());
+        assertThat(shift.getClientId()).isEqualTo(client);
+        assertThat(shift.getLocationId()).isEqualTo(location);
+        assertThat(shift.getTitle()).isEqualTo("Kommissionierung");
+        assertThat(shift.getDescription()).isEqualTo("Tor 3");
+        assertThat(shift.getStartsAt()).isEqualTo(start);
+        assertThat(shift.getEndsAt()).isEqualTo(start.plus(Duration.ofHours(6)));
+        assertThat(shift.isEndIsEstimate()).isTrue();
+        assertThat(shift.getHourlyRate()).isEqualByComparingTo("17.00");
+        assertThat(shift.getSlots()).isEqualTo(4);
+        assertThat(shift.getQualificationIds()).containsExactly(qualification);
+        assertThat(shift.getStatus()).isEqualTo(ShiftStatus.PUBLISHED);
+        assertThat(shift.getTakenSlots()).isEqualTo(1);
+    }
+
+    @Test
+    void onlyTheChangedFieldsAreNamedAndSpotsAreNoneOfThem() {
+        var end = START.plus(Duration.ofHours(8));
+        var shift = shift(end, "16.50", 5, Set.of());
+        var before = START.minus(Duration.ofDays(1));
+
+        assertThat(update(shift, START, end, "16.50", 5, before)).isEmpty();
+        assertThat(update(shift, START, end, "16.50", 8, before)).isEmpty();
+        assertThat(update(shift, START, end, "16.5", 8, before)).isEmpty();
+        assertThat(update(shift, START, end.plusSeconds(1800), "16.50", 8, before)).containsExactly(Change.TIME);
+        assertThat(update(shift, START, end.plusSeconds(1800), "18.00", 8, before)).containsExactly(Change.PAY);
+    }
+
+    @Test
+    void aPublishedShiftCanBeEditedUntilItStartsAndADraftAnyTime() {
+        var end = START.plus(Duration.ofHours(8));
+        var draft = shift(end, "16.50", 2, Set.of());
+        var published = shift(end, "16.50", 2, Set.of());
+        published.publish();
+
+        update(draft, START, end, "18.00", 2, end.plus(Duration.ofDays(1)));
+        update(published, START, end, "18.00", 2, START.minusSeconds(1));
+
+        assertThat(draft.getHourlyRate()).isEqualByComparingTo("18.00");
+        assertThat(published.getHourlyRate()).isEqualByComparingTo("18.00");
+        assertThatExceptionOfType(ShiftNotEditableException.class)
+                .isThrownBy(() -> update(published, START, end, "19.00", 2, START));
+
+        var cancelled = shift(end, "16.50", 2, Set.of());
+        cancelled.cancel(START.minus(Duration.ofDays(1)));
+        assertThatExceptionOfType(ShiftNotEditableException.class)
+                .isThrownBy(() -> update(cancelled, START, end, "19.00", 2, START.minus(Duration.ofDays(1))));
+    }
+
+    @Test
+    void spotsCannotDropBelowTheSpotsTaken() {
+        var end = START.plus(Duration.ofHours(8));
+        var shift = shift(end, "16.50", 3, Set.of());
+        shift.publish();
+        var before = START.minus(Duration.ofDays(1));
+        shift.claim(before);
+        shift.claim(before);
+
+        assertRejected("slots", "below_taken", () -> update(shift, START, end, "16.50", 1, before));
+        update(shift, START, end, "16.50", 2, before);
+
+        assertThat(shift.getSlots()).isEqualTo(2);
+        assertNotClaimable("shift_full", shift, before);
+    }
+
+    @Test
+    void anUpdateChecksTheSameTermsAsANewShift() {
+        var end = START.plus(Duration.ofHours(8));
+        var shift = shift(end, "16.50", 3, Set.of());
+        var before = START.minus(Duration.ofDays(1));
+
+        assertRejected("endsAt", "before_start", () -> update(shift, START, START, "16.50", 3, before));
+        assertRejected("hourlyRateCents", "out_of_range", () -> update(shift, START, end, "0", 3, before));
+        assertRejected("slots", "out_of_range", () -> update(shift, START, end, "16.50", 501, before));
+        assertThat(shift.getEndsAt()).isEqualTo(end);
+    }
+
+    private static Set<Change> update(
+            Shift shift, Instant startsAt, Instant endsAt, String hourlyRate, int slots, Instant now) {
+        return shift.update(
+                shift.getClientId(), shift.getLocationId(), shift.getTitle(), shift.getDescription(), startsAt,
+                endsAt, shift.isEndIsEstimate(), new BigDecimal(hourlyRate), slots, Set.copyOf(shift.getQualificationIds()),
+                now);
     }
 
     private static void assertNotClaimable(String code, Shift shift, Instant now) {
