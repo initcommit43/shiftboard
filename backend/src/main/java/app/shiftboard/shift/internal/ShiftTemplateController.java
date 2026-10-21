@@ -15,8 +15,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -51,6 +54,17 @@ class ShiftTemplateController {
     @ResponseStatus(HttpStatus.CREATED)
     ShiftTemplateResponse create(@Valid @RequestBody ShiftTemplateRequest request) {
         return templateService.create(request);
+    }
+
+    @PutMapping("/{templateId}")
+    ShiftTemplateResponse update(@PathVariable UUID templateId, @Valid @RequestBody ShiftTemplateRequest request) {
+        return templateService.update(templateId, request);
+    }
+
+    @DeleteMapping("/{templateId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    void delete(@PathVariable UUID templateId) {
+        templateService.delete(templateId);
     }
 
     /**
