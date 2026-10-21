@@ -1,4 +1,4 @@
-import { CircleAlert, LoaderCircle } from 'lucide-react'
+import { CircleAlert, Info, LoaderCircle } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
@@ -21,6 +21,7 @@ import {
   type DraftErrors,
   type DraftField,
   emptyDraft,
+  type MissingField,
   serverErrors,
   type ShiftDraft,
   shiftTimes,
@@ -50,14 +51,17 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 export function ShiftForm({
   clients,
   qualifications,
+  initial,
 }: {
   clients: Client[]
   qualifications: Qualification[]
+  /** A draft filled in from a shift or template, with what of it no longer exists. */
+  initial?: { draft: ShiftDraft; missing: MissingField[] }
 }) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const create = useCreateShift()
-  const [draft, setDraft] = useState(() => emptyDraft(clients))
+  const [draft, setDraft] = useState(() => initial?.draft ?? emptyDraft(clients))
   const [errors, setErrors] = useState<DraftErrors>({})
 
   const locations = clients.find((client) => client.id === draft.clientId)?.locations ?? []
@@ -138,6 +142,19 @@ export function ShiftForm({
         submit(true)
       }}
     >
+      {initial && initial.missing.length > 0 && (
+        <Alert>
+          <Info aria-hidden />
+          <AlertTitle>
+            {t('shifts.form.missing', {
+              fields: new Intl.ListFormat(i18n.language).format(
+                initial.missing.map((name) => t(`shifts.form.fields.${name}`)),
+              ),
+            })}
+          </AlertTitle>
+        </Alert>
+      )}
+
       {create.isError && (
         <Alert variant="destructive">
           <CircleAlert aria-hidden />

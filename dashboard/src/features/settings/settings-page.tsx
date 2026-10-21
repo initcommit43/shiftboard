@@ -14,6 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCurrentUser } from '@/features/auth/use-session'
 
+import { FeaturesForm } from './features-form'
 import { useAgencySettings, useSaveAgencySettings } from './queries'
 
 const MAX_DEADLINE_HOURS = 336
@@ -25,6 +26,7 @@ export function SettingsPage() {
     <div className="space-y-8">
       <PageHeader title={t('settings.title')} description={t('settings.description')} />
       <Settings />
+      <FeaturesForm />
     </div>
   )
 }
