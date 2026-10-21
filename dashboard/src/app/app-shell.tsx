@@ -1,6 +1,7 @@
 import {
   Bookmark,
   Calendar,
+  Clock,
   type LucideIcon,
   MessageSquare,
   SlidersHorizontal,
@@ -94,6 +95,7 @@ export function AppShell() {
         <nav aria-label={t('shell.navigation')} className="flex flex-col gap-1">
           <NavItem to="/shifts" icon={Calendar} label={t('shell.nav.shifts')} />
           <NavItem to="/templates" icon={Bookmark} label={t('shell.nav.templates')} />
+          <NavItem to="/hours" icon={Clock} label={t('shell.nav.hours')} />
           <NavItem to="/signups" icon={UserPlus} label={t('shell.nav.signups')}>
             <PendingSignupsBadge />
           </NavItem>

@@ -7,6 +7,7 @@
     "nav": {
       "shifts": "Schichten",
       "templates": "Vorlagen",
+      "hours": "Stunden",
       "signups": "Anmeldungen",
       "messages": "Nachrichten",
       "settings": "Einstellungen",
@@ -302,7 +303,61 @@
         "unknown": "Diese Angabe wurde nicht angenommen."
       }
     },
-    "approved": "Stunden von {{name}} freigegeben"
+    "approved": "Stunden von {{name}} freigegeben",
+    "page": {
+      "title": "Stunden",
+      "description": "Die Stunden aller Schichten, die im Zeitraum beginnen. Offene Stunden gebt ihr bei der Schicht frei.",
+      "from": "Von",
+      "to": "Bis",
+      "loading": "Stunden werden geladen …",
+      "columns": {
+        "worker": "Mitarbeiter:in",
+        "shift": "Schicht",
+        "date": "Datum",
+        "time": "Zeit",
+        "break": "Pause",
+        "hours": "Stunden",
+        "gross": "Brutto",
+        "status": "Status"
+      },
+      "planned": "Geplant {{time}}",
+      "breakMinutes": "{{minutes}} Min.",
+      "recordNamed": "Stunden von {{name}} bei {{title}} erfassen",
+      "open_one": "{{count}} Eintrag ist noch offen und nicht in der CSV-Datei. Gebt die Stunden zuerst bei der Schicht frei.",
+      "open_other": "{{count}} Einträge sind noch offen und nicht in der CSV-Datei. Gebt die Stunden zuerst bei der Schicht frei.",
+      "count_one": "{{count}} Eintrag, {{approved}} freigegeben",
+      "count_other": "{{count}} Einträge, davon {{approved}} freigegeben",
+      "empty": {
+        "title": "Keine Stunden in diesem Zeitraum",
+        "description": "Hier erscheinen alle, die einen bestätigten Platz bei einer Schicht hatten, die im Zeitraum begonnen hat."
+      },
+      "invalidPeriod": {
+        "title": "Kein gültiger Zeitraum",
+        "description": "Wähle einen Beginn und ein Ende. Das Ende darf nicht vor dem Beginn liegen."
+      },
+      "error": {
+        "title": "Die Stunden konnten nicht geladen werden",
+        "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu."
+      }
+    },
+    "export": {
+      "action": "CSV exportieren",
+      "fileName": "stunden-{{from}}-bis-{{to}}.csv",
+      "columns": {
+        "lastName": "Nachname",
+        "firstName": "Vorname",
+        "date": "Datum",
+        "client": "Kunde",
+        "location": "Einsatzort",
+        "shift": "Schicht",
+        "start": "Beginn",
+        "end": "Ende",
+        "break": "Pause (Min.)",
+        "hours": "Stunden",
+        "hourlyRate": "Stundenlohn",
+        "gross": "Brutto"
+      }
+    }
   },
   "shiftDetail": {
     "back": "Alle Schichten",
