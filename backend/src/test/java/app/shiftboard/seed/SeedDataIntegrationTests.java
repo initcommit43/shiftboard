@@ -2,6 +2,8 @@ package app.shiftboard.seed;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,11 +53,11 @@ class SeedDataIntegrationTests {
                 Map.entry("worker_qualification", 15),
                 Map.entry("client", 4),
                 Map.entry("location", 5),
-                Map.entry("shift", 8),
-                Map.entry("shift_qualification", 8),
+                Map.entry("shift", 10),
+                Map.entry("shift_qualification", 9),
                 Map.entry("shift_template", 5),
                 Map.entry("shift_template_qualification", 5),
-                Map.entry("assignment", 7),
+                Map.entry("assignment", 10),
                 Map.entry("conversation", 2),
                 Map.entry("message", 3)));
         assertThat(workersOfDonauPersonalWith("ACTIVE")).isEqualTo(6);
@@ -118,13 +120,13 @@ class SeedDataIntegrationTests {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.content[*].title").isEqualTo(List.of(
-                        "Lagerunterstützung", "Service Hochzeit", "Barkeeper:in Hochzeit", "Staplerfahrer:in",
-                        "Auf- und Abbau Messe", "Service Firmenfeier"))
-                .jsonPath("$.content[0].client.name").isEqualTo("Nordlicht Logistik")
-                .jsonPath("$.content[0].location.name").isEqualTo("Zentrallager Linz")
-                .jsonPath("$.content[0].hourlyRateCents").isEqualTo(1650)
-                .jsonPath("$.content[3].qualifications[*].name").isEqualTo(List.of("Lager", "Staplerschein"))
-                .jsonPath("$.content[5].status").isEqualTo("DRAFT");
+                        "Service Tagung", "Lagerunterstützung", "Service Hochzeit", "Barkeeper:in Hochzeit",
+                        "Staplerfahrer:in", "Auf- und Abbau Messe", "Service Firmenfeier"))
+                .jsonPath("$.content[1].client.name").isEqualTo("Nordlicht Logistik")
+                .jsonPath("$.content[1].location.name").isEqualTo("Zentrallager Linz")
+                .jsonPath("$.content[1].hourlyRateCents").isEqualTo(1650)
+                .jsonPath("$.content[4].qualifications[*].name").isEqualTo(List.of("Lager", "Staplerschein"))
+                .jsonPath("$.content[6].status").isEqualTo("DRAFT");
 
         client.get().uri("/api/v1/clients")
                 .headers(headers -> headers.setBearerAuth(login("dispatcher.alpen@example.com", "DASHBOARD")))
@@ -133,6 +135,42 @@ class SeedDataIntegrationTests {
                 .expectBody()
                 .jsonPath("$.content[*].name").isEqualTo(List.of("Gipfelarena"))
                 .jsonPath("$.content[0].locations[*].name").isEqualTo(List.of("Haupteingang"));
+    }
+
+    @Test
+    void theSeededHoursAreReadyToApproveAndExport() {
+        var from = Instant.now().minus(Duration.ofDays(40));
+        var to = Instant.now().plus(Duration.ofDays(1));
+        client.get().uri("/api/v1/hours?from={from}&to={to}", from, to)
+                .headers(headers -> headers.setBearerAuth(login("dispatcher1.donau@example.com", "DASHBOARD")))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.totalElements").isEqualTo(4)
+                .jsonPath("$.content[*].shift.title").isEqualTo(List.of(
+                        "Auf- und Abbau Messe", "Auf- und Abbau Messe", "Inventur", "Inventur"))
+                .jsonPath("$.content[*].status").isEqualTo(List.of("APPROVED", "APPROVED", "APPROVED", "OPEN"))
+                .jsonPath("$.content[2].worker.firstName").isEqualTo("Jakob")
+                .jsonPath("$.content[2].checkedInAt").isNotEmpty()
+                .jsonPath("$.content[2].hours.workedMinutes").isEqualTo(450)
+                .jsonPath("$.content[3].worker.firstName").isEqualTo("Paul")
+                .jsonPath("$.content[3].checkedOutAt").isNotEmpty()
+                .jsonPath("$.content[3].hours").doesNotExist();
+
+        // Lena can check in at the conference that starts shortly after seeding.
+        var lena = login("lena.hofer@example.com", "WORKER_APP");
+        client.get().uri("/api/v1/me")
+                .headers(headers -> headers.setBearerAuth(lena))
+                .exchange()
+                .expectBody().jsonPath("$.agency.features.checkIn").isEqualTo(true);
+        client.get().uri("/api/v1/worker/my-shifts")
+                .headers(headers -> headers.setBearerAuth(lena))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[0].title").isEqualTo("Service Tagung")
+                .jsonPath("$.content[0].assignment.status").isEqualTo("CONFIRMED")
+                .jsonPath("$.content[0].assignment.checkInFrom").isNotEmpty();
     }
 
     @Test

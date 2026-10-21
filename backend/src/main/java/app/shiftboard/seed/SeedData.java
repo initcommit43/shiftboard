@@ -18,8 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Two fictional agencies with their qualifications, settings, dashboard users, workers, clients,
- * locations, shifts, shift templates and a few claims. The rows are written with plain SQL, like a migration would, because nothing in the
- * application creates agencies, dashboard users or clients yet. Runs once: a database that has
+ * locations, shifts, shift templates, a few claims and the hours of past shifts. The rows are
+ * written with plain SQL, like a migration would, because nothing in the application creates
+ * agencies, dashboard users or clients yet. Runs once: a database that has
  * the demo agency is left alone.
  */
 @Component
@@ -54,6 +55,9 @@ class SeedData implements ApplicationRunner {
 
     private void seedDonauPersonal() {
         var agency = agency("Donau Personal", DONAU_SIGNUP_CODE);
+        // Workers check in and out in the app (ADR 0028).
+        jdbc.sql("update agency set features = '{\"contactButton\": false, \"checkIn\": true}' where id = ?")
+                .param(agency).update();
         var service = qualification(agency, "Service");
         var bar = qualification(agency, "Bar");
         var lager = qualification(agency, "Lager");
@@ -86,9 +90,15 @@ class SeedData implements ApplicationRunner {
                 "PUBLISHED");
         shift(agency, catering, hall, dispatcher, "Service Firmenfeier", null, 9, 17, 6, true, "15.50", 10, "DRAFT",
                 service);
-        // Took place three days ago, so that no-shows can be marked.
+        // Took place three days ago, so that no-shows can be marked and hours approved.
         var inventory = shift(agency, logistics, warehouse, dispatcher, "Inventur", null, -3, 7, 8, false, "16.50", 3,
                 "COMPLETED", lager);
+        // Took place about a month ago; its hours are approved, so the payroll export has rows.
+        var fair = shift(agency, catering, hall, dispatcher, "Auf- und Abbau Messe", null, -30, 8, 6, true, "14.50", 4,
+                "COMPLETED");
+        // Starts shortly after the data is seeded, so that check-in can be tried right away.
+        var conference = shiftInMinutes(agency, hotel, ballroom, dispatcher, "Service Tagung",
+                "Schwarze Hose, weißes Hemd. Treffpunkt an der Rezeption.", 20, 6, "15.00", 2, service);
 
         // Jobs that come up again and again, one of them overnight.
         template(agency, "Lager Frühschicht", logistics, warehouse, "Lagerunterstützung",
@@ -113,8 +123,9 @@ class SeedData implements ApplicationRunner {
         worker(agency, 10, "Nina", "Hauser", "2005-02-16", "PENDING", 1);
         worker(agency, 11, "David", "Pichler", "1997-10-21", "PENDING", 0, bar);
 
-        // Lena has a claim of her own, the warehouse shift has two spots taken (one confirmed) and the
-        // bar is full. Jakob and Paul worked the inventory.
+        // Lena has a claim of her own and a confirmed spot at the conference, the warehouse shift has
+        // two spots taken (one confirmed) and the bar is full. Jakob and Paul worked the inventory and
+        // the fair.
         claim(agency, weddingService, lena, "PENDING");
         claim(agency, warehouseHelp, jakob, "CONFIRMED");
         claim(agency, warehouseHelp, paul, "PENDING");
@@ -122,6 +133,17 @@ class SeedData implements ApplicationRunner {
         claim(agency, weddingBar, sophie, "PENDING");
         claim(agency, inventory, jakob, "COMPLETED");
         claim(agency, inventory, paul, "COMPLETED");
+        claim(agency, fair, jakob, "COMPLETED");
+        claim(agency, fair, paul, "COMPLETED");
+        claim(agency, conference, lena, "CONFIRMED");
+
+        // Both checked in at the inventory; Jakob's hours are approved, Paul's wait for a dispatcher.
+        // The fair was approved from the planned times.
+        checkInAndOut(inventory, jakob, -8, 8 * 60 + 6);
+        checkInAndOut(inventory, paul, -2, 8 * 60 + 20);
+        approveHours(inventory, jakob, 0, 8 * 60, 30, dispatcher);
+        approveHours(fair, jakob, 0, 6 * 60 + 15, 0, dispatcher);
+        approveHours(fair, paul, 0, 6 * 60, 0, dispatcher);
 
         // Lena asked about the wedding and has no answer yet; Jakob got his confirmation.
         var lenaChat = conversation(agency, lena);
@@ -243,6 +265,53 @@ class SeedData implements ApplicationRunner {
                     .params(shiftId, qualificationId).update();
         }
         return shiftId;
+    }
+
+    /** A published shift that starts {@code inMinutes} minutes from now, on the full minute. */
+    private UUID shiftInMinutes(
+            UUID agencyId, UUID clientId, UUID locationId, UUID contactUserId, String title, String description,
+            int inMinutes, int hours, String hourlyRate, int slots, UUID... qualificationIds) {
+        var shiftId = jdbc.sql("""
+                with start as (select date_trunc('minute', now()) + make_interval(mins => ?) as at)
+                insert into shift (
+                    id, agency_id, client_id, location_id, contact_user_id, title, description, starts_at, ends_at,
+                    end_is_estimate, hourly_rate, slots, status)
+                select uuidv7(), ?, ?, ?, ?, ?, ?, start.at, start.at + make_interval(hours => ?), false, ?, ?,
+                       'PUBLISHED'
+                from start
+                returning id
+                """)
+                .params(
+                        inMinutes, agencyId, clientId, locationId, contactUserId, title, description, hours,
+                        new BigDecimal(hourlyRate), slots)
+                .query(UUID.class).single();
+        for (var qualificationId : qualificationIds) {
+            jdbc.sql("insert into shift_qualification (shift_id, qualification_id) values (?, ?)")
+                    .params(shiftId, qualificationId).update();
+        }
+        return shiftId;
+    }
+
+    /** The worker checked in and out, the given minutes after the start of the shift. */
+    private void checkInAndOut(UUID shiftId, UUID workerId, int inMinutes, int outMinutes) {
+        jdbc.sql("""
+                update assignment set checked_in_at = starts_at + make_interval(mins => ?),
+                                      checked_out_at = starts_at + make_interval(mins => ?)
+                where shift_id = ? and worker_id = ?
+                """).params(inMinutes, outMinutes, shiftId, workerId).update();
+    }
+
+    /** A dispatcher approved the hours, from and to the given minutes after the start of the shift. */
+    private void approveHours(
+            UUID shiftId, UUID workerId, int fromMinutes, int toMinutes, int breakMinutes, UUID approvedBy) {
+        jdbc.sql("""
+                update assignment set worked_started_at = starts_at + make_interval(mins => ?),
+                                      worked_ended_at = starts_at + make_interval(mins => ?),
+                                      break_minutes = ?,
+                                      hours_approved_at = ends_at + interval '1 day',
+                                      hours_approved_by = ?
+                where shift_id = ? and worker_id = ?
+                """).params(fromMinutes, toMinutes, breakMinutes, approvedBy, shiftId, workerId).update();
     }
 
     /** A shift template starting at {@code startTime}, a local time of day as {@code hh:mm} (ADR 0025). */
