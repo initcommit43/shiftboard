@@ -33,16 +33,28 @@ final myShiftsProvider = FutureProvider.autoDispose<List<WorkerShift>>(
   retry: (retryCount, error) => null,
 );
 
-/// One shift of the agency with everything the worker sees of it.
-final workerShiftProvider = FutureProvider.autoDispose
-    .family<WorkerShift, String>(
-      (ref, shiftId) async {
-        final response = await ref
-            .watch(apiProvider)
-            .getWorkerShiftsApi()
-            .getWorkerShift(shiftId: shiftId);
-        return response.data!;
-      },
-      // The screen offers a manual retry.
+/// One shift of the agency with everything the worker sees of it. The
+/// screen offers a manual retry, so failed loads are not retried.
+final workerShiftProvider = AsyncNotifierProvider.autoDispose
+    .family<WorkerShiftNotifier, WorkerShift, String>(
+      WorkerShiftNotifier.new,
       retry: (retryCount, error) => null,
     );
+
+class WorkerShiftNotifier extends AsyncNotifier<WorkerShift> {
+  WorkerShiftNotifier(this.shiftId);
+
+  final String shiftId;
+
+  @override
+  Future<WorkerShift> build() async {
+    final response = await ref
+        .watch(apiProvider)
+        .getWorkerShiftsApi()
+        .getWorkerShift(shiftId: shiftId);
+    return response.data!;
+  }
+
+  /// Shows [shift] as an action returned it, without loading it again.
+  void show(WorkerShift shift) => state = AsyncData(shift);
+}

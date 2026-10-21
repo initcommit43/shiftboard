@@ -106,10 +106,12 @@ Map<String, Object?> tokenPair([String suffix = '1']) => {
 };
 
 /// The fictional worker Lena Hofer of the agency Donau Personal. With
-/// [contactButton] the agency shows the WhatsApp contact.
+/// [contactButton] the agency shows the WhatsApp contact, with [checkIn] its
+/// workers check in and out in the app.
 Map<String, Object?> currentUser(
   String workerStatus, {
   bool contactButton = false,
+  bool checkIn = false,
 }) => {
   'id': '0199c0de-0000-7000-8000-000000000001',
   'email': 'lena.hofer@example.com',
@@ -117,7 +119,7 @@ Map<String, Object?> currentUser(
   'agency': {
     'id': '0199c0de-0000-7000-8000-0000000000a1',
     'name': 'Donau Personal',
-    'features': {'contactButton': contactButton},
+    'features': {'contactButton': contactButton, 'checkIn': checkIn},
   },
   'worker': {
     'id': '0199c0de-0000-7000-8000-0000000000b1',
@@ -130,7 +132,7 @@ Map<String, Object?> currentUser(
 /// A published shift of Donau Personal, as the worker API returns it.
 ///
 /// [start] and [end] are local times, so that tests read the times the app
-/// shows.
+/// shows. [checkInFrom] is only set where the agency uses check-in.
 Map<String, Object?> workerShift({
   String id = '0199c0de-0000-7000-8000-0000000000c1',
   String title = 'Lagerunterstützung',
@@ -146,6 +148,10 @@ Map<String, Object?> workerShift({
   String? assignmentStatus,
   DateTime? cancellableUntil,
   String? cancelledBy,
+  DateTime? checkInFrom,
+  DateTime? checkedInAt,
+  DateTime? checkedOutAt,
+  bool? hoursApproved,
   String status = 'PUBLISHED',
 }) => {
   'id': id,
@@ -179,6 +185,10 @@ Map<String, Object?> workerShift({
       'claimedAt': '2026-10-14T08:00:00Z',
       'cancellableUntil': ?cancellableUntil?.toUtc().toIso8601String(),
       'cancelledBy': ?cancelledBy,
+      'checkInFrom': ?checkInFrom?.toUtc().toIso8601String(),
+      'checkedInAt': ?checkedInAt?.toUtc().toIso8601String(),
+      'checkedOutAt': ?checkedOutAt?.toUtc().toIso8601String(),
+      'hoursApproved': ?hoursApproved,
     },
 };
 

@@ -775,5 +775,153 @@
   "shiftWhatsAppFailed": "WhatsApp konnte nicht geöffnet werden.",
   "@shiftWhatsAppFailed": {
     "description": "Snackbar when WhatsApp could not be opened."
+  },
+  "checkInAction": "Einchecken",
+  "@checkInAction": {
+    "description": "Pinned button that records the worker's arrival."
+  },
+  "checkInSubmitting": "Wird eingecheckt …",
+  "@checkInSubmitting": {
+    "description": "The check-in button while the check-in is sent."
+  },
+  "checkInDone": "Du bist eingecheckt.",
+  "@checkInDone": {
+    "description": "Snackbar after checking in."
+  },
+  "checkInOpensAt": "Einchecken ab {time}",
+  "@checkInOpensAt": {
+    "description": "Check-in opens later today; in place of the check-in button or as a note.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "06:30"
+      }
+    }
+  },
+  "checkInOpensOn": "Einchecken ab {date}, {time}",
+  "@checkInOpensOn": {
+    "description": "Check-in opens on a later day.",
+    "placeholders": {
+      "date": {
+        "type": "String",
+        "example": "Sa., 17. Okt."
+      },
+      "time": {
+        "type": "String",
+        "example": "17:30"
+      }
+    }
+  },
+  "checkedInAt": "Eingecheckt um {time}",
+  "@checkedInAt": {
+    "description": "The worker's check-in time on the shift detail.",
+    "placeholders": {
+      "time": {
+        "type": "String",
+        "example": "07:58"
+      }
+    }
+  },
+  "checkedInBadge": "Eingecheckt",
+  "@checkedInBadge": {
+    "description": "Badge of a shift the worker is checked in to and not yet checked out of."
+  },
+  "checkOutHint": "Checke aus, wenn du gehst.",
+  "@checkOutHint": {
+    "description": "Below the check-in time while the worker is checked in."
+  },
+  "checkOutAction": "Auschecken",
+  "@checkOutAction": {
+    "description": "Pinned button that opens the check-out sheet."
+  },
+  "checkOutSheetTitle": "Jetzt auschecken?",
+  "@checkOutSheetTitle": {
+    "description": "Title of the sheet that confirms checking out."
+  },
+  "checkOutSheetMessage": "Die Uhrzeit wird jetzt festgehalten. In der App kannst du sie danach nicht mehr ändern.",
+  "@checkOutSheetMessage": {
+    "description": "Explains on the check-out sheet that checking out happens once."
+  },
+  "checkOutSubmit": "Auschecken",
+  "@checkOutSubmit": {
+    "description": "The check-out sheet's confirm button."
+  },
+  "checkOutSubmitting": "Wird ausgecheckt …",
+  "@checkOutSubmitting": {
+    "description": "The check-out sheet's button while the check-out is sent."
+  },
+  "checkOutKeep": "Noch nicht",
+  "@checkOutKeep": {
+    "description": "Button that closes the check-out sheet without checking out."
+  },
+  "checkOutDone": "Du bist ausgecheckt.",
+  "@checkOutDone": {
+    "description": "Snackbar after checking out."
+  },
+  "attendanceTitle": "Deine Zeiten",
+  "@attendanceTitle": {
+    "description": "Label above the worker's check-in and check-out times."
+  },
+  "attendanceFixed": "Ändern kannst du die Zeiten nicht. Wenn etwas nicht stimmt, korrigiert {agency} sie.",
+  "@attendanceFixed": {
+    "description": "Below the worker's recorded times.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "hoursApproved": "{agency} hat deine Stunden bestätigt.",
+  "@hoursApproved": {
+    "description": "The agency approved the worker's hours for the shift.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "checkInErrorDisabled": "Deine Agentur nutzt das Einchecken in der App nicht mehr.",
+  "@checkInErrorDisabled": {
+    "description": "Error: the agency switched check-in off."
+  },
+  "checkInErrorNotConfirmed": "Du hast für diese Schicht keinen bestätigten Platz mehr.",
+  "@checkInErrorNotConfirmed": {
+    "description": "Error: the worker's spot is no longer confirmed."
+  },
+  "checkInErrorNotOpen": "Einchecken geht ab 30 Minuten vor Beginn bis zum Ende der Schicht.",
+  "@checkInErrorNotOpen": {
+    "description": "Error: check-in is not open yet or any more."
+  },
+  "checkInErrorAlreadyIn": "Du bist schon eingecheckt.",
+  "@checkInErrorAlreadyIn": {
+    "description": "Error: the worker had already checked in."
+  },
+  "checkInErrorNotIn": "Du bist noch nicht eingecheckt.",
+  "@checkInErrorNotIn": {
+    "description": "Error: checking out without a check-in."
+  },
+  "checkInErrorAlreadyOut": "Du bist schon ausgecheckt.",
+  "@checkInErrorAlreadyOut": {
+    "description": "Error: the worker had already checked out."
+  },
+  "checkInErrorHoursApproved": "{agency} hat deine Stunden schon bestätigt. Auschecken geht nicht mehr.",
+  "@checkInErrorHoursApproved": {
+    "description": "Error: the hours were approved before the check-out.",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "checkInErrorNoSpot": "Du hast für diese Schicht keinen Platz.",
+  "@checkInErrorNoSpot": {
+    "description": "Error: the worker has not claimed the shift."
+  },
+  "checkInErrorShiftGone": "Diese Schicht gibt es nicht mehr.",
+  "@checkInErrorShiftGone": {
+    "description": "Error: the shift was not found."
   }
 }

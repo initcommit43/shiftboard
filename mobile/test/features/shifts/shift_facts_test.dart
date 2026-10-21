@@ -66,4 +66,90 @@ void main() {
 
     expect(overnight.estimatedEarningsCents, 12000);
   });
+
+  group('check-in', () {
+    final start = DateTime(2026, 10, 17, 7);
+    final end = DateTime(2026, 10, 17, 16);
+    final from = DateTime(2026, 10, 17, 6, 30);
+    final arrived = DateTime(2026, 10, 17, 6, 58);
+
+    WorkerShift claimed({
+      String status = 'CONFIRMED',
+      DateTime? checkInFrom,
+      DateTime? checkedInAt,
+      DateTime? checkedOutAt,
+      bool? hoursApproved,
+    }) => standardSerializers.deserializeWith(
+      WorkerShift.serializer,
+      workerShift(
+        start: start,
+        end: end,
+        assignmentStatus: status,
+        checkInFrom: checkInFrom,
+        checkedInAt: checkedInAt,
+        checkedOutAt: checkedOutAt,
+        hoursApproved: hoursApproved,
+      ),
+    )!;
+
+    test('has nothing to offer without checkInFrom', () {
+      expect(claimed().checkInAt(DateTime(2026, 10, 17, 7)), CheckIn.none);
+      expect(shift().checkInAt(DateTime(2026, 10, 17, 7)), CheckIn.none);
+    });
+
+    test('opens at checkInFrom and closes at the planned end', () {
+      final confirmed = claimed(checkInFrom: from);
+      expect(
+        confirmed.checkInAt(from.subtract(const Duration(minutes: 1))),
+        CheckIn.notYetOpen,
+      );
+      expect(confirmed.checkInAt(from), CheckIn.open);
+      expect(
+        confirmed.checkInAt(end.subtract(const Duration(minutes: 1))),
+        CheckIn.open,
+      );
+      expect(confirmed.checkInAt(end), CheckIn.none);
+    });
+
+    test('needs a confirmed spot to check in', () {
+      for (final status in ['PENDING', 'CANCELLED', 'COMPLETED', 'NO_SHOW']) {
+        expect(
+          claimed(status: status, checkInFrom: from).checkInAt(arrived),
+          CheckIn.none,
+          reason: status,
+        );
+      }
+    });
+
+    test('allows checking out until the hours are approved', () {
+      final late = DateTime(2026, 10, 18, 9);
+      for (final status in ['CONFIRMED', 'COMPLETED']) {
+        expect(
+          claimed(
+            status: status,
+            checkInFrom: from,
+            checkedInAt: arrived,
+          ).checkInAt(late),
+          CheckIn.checkedIn,
+        );
+      }
+      final approved = claimed(
+        status: 'COMPLETED',
+        checkInFrom: from,
+        checkedInAt: arrived,
+        hoursApproved: true,
+      );
+      expect(approved.checkInAt(late), CheckIn.checkedInApproved);
+      expect(approved.checkInAt(late).hasAction, isFalse);
+    });
+
+    test('is done once checked out', () {
+      final done = claimed(
+        checkInFrom: from,
+        checkedInAt: arrived,
+        checkedOutAt: DateTime(2026, 10, 17, 16, 4),
+      );
+      expect(done.checkInAt(DateTime(2026, 10, 17, 17)), CheckIn.checkedOut);
+    });
+  });
 }
