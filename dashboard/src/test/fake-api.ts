@@ -371,6 +371,48 @@ export function installFakeApi() {
     return json(ShiftToJSON(created), 201)
   }
 
+  function updateShift(shiftId: string, body: Record<string, unknown>) {
+    const found = api.shifts.find((it) => it.id === shiftId)
+    if (!found) {
+      return problem(404, 'shift_not_found')
+    }
+    if (found.status !== ShiftStatus.DRAFT && found.status !== ShiftStatus.PUBLISHED) {
+      return problem(409, 'shift_not_editable')
+    }
+    const client = api.clients.find((it) => it.id === body['clientId'])
+    const location = client?.locations.find((it) => it.id === body['locationId'])
+    if (!client || !location) {
+      return problem(400, 'validation_failed', [
+        { field: client ? 'locationId' : 'clientId', code: 'not_found' },
+      ])
+    }
+    if ((body['slots'] as number) < found.takenSlots) {
+      return problem(400, 'validation_failed', [{ field: 'slots', code: 'below_taken' }])
+    }
+    const updated: Shift = {
+      ...found,
+      title: body['title'] as string,
+      client: { id: client.id, name: client.name },
+      location,
+      startsAt: new Date(body['startsAt'] as string),
+      endsAt: new Date(body['endsAt'] as string),
+      endIsEstimate: body['endIsEstimate'] === true,
+      hourlyRateCents: body['hourlyRateCents'] as number,
+      slots: body['slots'] as number,
+      qualifications: api.qualifications.filter((it) =>
+        (body['qualificationIds'] as string[]).includes(it.id),
+      ),
+    }
+    // Absent removes the description.
+    if (typeof body['description'] === 'string') {
+      updated.description = body['description']
+    } else {
+      delete updated.description
+    }
+    api.shifts = api.shifts.map((it) => (it === found ? updated : it))
+    return json(ShiftToJSON(updated))
+  }
+
   // Ids of new templates follow the two the fake starts with.
   let templateNumber = 2
 
@@ -613,6 +655,10 @@ export function installFakeApi() {
       }
       api.settings = body as AgencySettings
       return json(AgencySettingsToJSON(api.settings))
+    }
+    const shiftUpdate = /^PUT \/shifts\/([^/]+)$/.exec(route)
+    if (shiftUpdate) {
+      return updateShift(shiftUpdate[1] ?? '', body as Record<string, unknown>)
     }
     const shiftRoute = /^(GET|POST) \/shifts\/([^/]+)(\/[a-z-]+)?(?:\/([^/]+)\/([a-z-]+))?$/.exec(route)
     if (shiftRoute && shiftRoute[3] !== '/publish') {

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
 
 import { ApiError, errorMessage } from '@/api/errors'
-import type { Client, Qualification } from '@/api/generated'
+import { type Client, type Qualification, type Shift, ShiftStatus } from '@/api/generated'
 import { Alert, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -15,7 +15,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 
 import { formatShiftDate } from './format'
-import { useCreateShift, useUpdateShiftTemplate } from './queries'
+import { useCreateShift, useUpdateShift, useUpdateShiftTemplate } from './queries'
 import { SaveAsTemplate } from './save-as-template'
 import {
   DRAFT_FIELDS,
@@ -28,6 +28,7 @@ import {
   shiftTimes,
   soleLocationId,
   TEMPLATE_REQUEST_FIELDS,
+  toChangeRequest,
   toShiftRequest,
   toTemplateRequest,
   validate,
@@ -59,24 +60,28 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 /**
  * The form for a new shift. With `template` it edits that template instead: it asks for the
- * template's name, has no date, and saves the template.
+ * template's name, has no date, and saves the template. With `editing` it saves the changes
+ * to that shift.
  */
 export function ShiftForm({
   clients,
   qualifications,
   initial,
   template,
+  editing,
 }: {
   clients: Client[]
   qualifications: Qualification[]
   /** A draft filled in from a shift or template, with what of it no longer exists. */
   initial?: { draft: ShiftDraft; missing: MissingField[] }
   template?: { id: string; name: string }
+  editing?: Shift
 }) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const create = useCreateShift()
   const update = useUpdateShiftTemplate(template?.id ?? '')
+  const save = useUpdateShift(editing?.id ?? '')
   const [draft, setDraft] = useState(() => initial?.draft ?? emptyDraft(clients))
   const [errors, setErrors] = useState<DraftErrors>({})
   const [name, setName] = useState(template?.name ?? '')
@@ -103,6 +108,27 @@ export function ShiftForm({
     create.mutate(toShiftRequest(draft, publish), {
       onSuccess: () => {
         void navigate('/shifts')
+      },
+      onError: (error) => {
+        if (error instanceof ApiError) {
+          const rejected = serverErrors(error.fieldErrors)
+          setErrors(rejected)
+          focusFirstError(rejected)
+        }
+      },
+    })
+  }
+
+  function submitChanges(shiftId: string) {
+    const found = validate(draft)
+    setErrors(found)
+    if (Object.keys(found).length > 0) {
+      focusFirstError(found)
+      return
+    }
+    save.mutate(toChangeRequest(draft), {
+      onSuccess: () => {
+        void navigate(`/shifts/${shiftId}`)
       },
       onError: (error) => {
         if (error instanceof ApiError) {
@@ -190,7 +216,12 @@ export function ShiftForm({
   const publishing = create.isPending && create.variables.publish === true
   const savingDraft = create.isPending && !publishing
   // A taken name is shown at the name field, and only there.
-  const failed = template ? update.isError && nameError !== 'taken' : create.isError
+  const failed = template
+    ? update.isError && nameError !== 'taken'
+    : editing
+      ? save.isError
+      : create.isError
+  const failure = template ? update.error : editing ? save.error : create.error
 
   return (
     <form
@@ -200,6 +231,8 @@ export function ShiftForm({
         event.preventDefault()
         if (template) {
           submitTemplate()
+        } else if (editing) {
+          submitChanges(editing.id)
         } else {
           submit(true)
         }
@@ -218,10 +251,17 @@ export function ShiftForm({
         </Alert>
       )}
 
+      {editing?.status === ShiftStatus.PUBLISHED && editing.takenSlots > 0 && (
+        <Alert>
+          <Info aria-hidden />
+          <AlertTitle>{t('shiftEdit.notice', { count: editing.takenSlots })}</AlertTitle>
+        </Alert>
+      )}
+
       {failed && (
         <Alert variant="destructive">
           <CircleAlert aria-hidden />
-          <AlertTitle>{errorMessage(t, template ? update.error : create.error)}</AlertTitle>
+          <AlertTitle>{errorMessage(t, failure)}</AlertTitle>
         </Alert>
       )}
 
@@ -458,6 +498,16 @@ export function ShiftForm({
           </Button>
           <Button asChild variant="ghost">
             <Link to="/templates">{t('shifts.form.cancel')}</Link>
+          </Button>
+        </div>
+      ) : editing ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <Button type="submit" disabled={save.isPending}>
+            {save.isPending && <LoaderCircle aria-hidden className="animate-spin" />}
+            {t('shiftEdit.save')}
+          </Button>
+          <Button asChild variant="ghost">
+            <Link to={`/shifts/${editing.id}`}>{t('shifts.form.cancel')}</Link>
           </Button>
         </div>
       ) : (

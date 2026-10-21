@@ -7,6 +7,7 @@ import { errorMessage } from '@/api/errors'
 import type {
   Shift,
   ShiftAssignment,
+  ShiftChangeRequest,
   ShiftPeriod,
   ShiftRequest,
   ShiftTemplate,
@@ -144,6 +145,20 @@ export function useCreateShift() {
           title: shift.title,
         }),
       )
+      return queryClient.invalidateQueries({ queryKey: shiftKeys.all })
+    },
+  })
+}
+
+export function useUpdateShift(shiftId: string) {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (shiftChangeRequest: ShiftChangeRequest) =>
+      shiftsApi.updateShift({ shiftId, shiftChangeRequest }),
+    onSuccess: (shift) => {
+      toast.success(t('shiftEdit.saved', { title: shift.title }))
       return queryClient.invalidateQueries({ queryKey: shiftKeys.all })
     },
   })

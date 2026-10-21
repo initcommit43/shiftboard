@@ -143,7 +143,8 @@
         "not_found": "This choice no longer exists. Reload the page.",
         "rate_out_of_range": "The hourly rate has to be above €0.",
         "slots_out_of_range": "Between 1 and 500 spots.",
-        "unknown": "This entry was not accepted."
+        "unknown": "This entry was not accepted.",
+        "below_taken": "Fewer spots than are taken. Reject or remove someone first."
       },
       "duplicate": {
         "title": "Duplicate shift",
@@ -239,7 +240,9 @@
     "conversation_not_found": "This conversation no longer exists.",
     "no_recipients": "Nobody is confirmed for this shift yet.",
     "template_name_taken": "A template with this name already exists.",
-    "template_not_found": "This template no longer exists. The list has been updated."
+    "template_not_found": "This template no longer exists. The list has been updated.",
+    "shift_not_editable": "This shift has started or is cancelled. It can no longer be edited.",
+    "shift_overlap": "At the new time, someone with a spot would already have another shift. Pick another time or remove them first."
   },
   "shiftDetail": {
     "back": "All shifts",
@@ -319,7 +322,21 @@
       "keep": "Back",
       "confirm": "Remove"
     },
-    "duplicate": "Duplicate"
+    "duplicate": "Duplicate",
+    "edit": "Edit"
+  },
+  "shiftEdit": {
+    "title": "Edit shift",
+    "description": "Everyone with a spot keeps it and is told what changed.",
+    "notice_one": "{{count}} person has a spot. They get a message with the changes when you save.",
+    "notice_other": "{{count}} people have a spot. They get a message with the changes when you save.",
+    "save": "Save changes",
+    "saved": "Changes to “{{title}}” saved",
+    "notEditable": {
+      "title": "This shift can no longer be edited",
+      "description": "It has started, or it is cancelled or completed.",
+      "back": "Back to the shift"
+    }
   },
   "settings": {
     "title": "Settings",

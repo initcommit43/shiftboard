@@ -6,6 +6,7 @@ import { SessionLoading } from '@/features/auth/session-loading'
 import { APP_ROUTE_ID } from '@/features/auth/use-session'
 import { MessagesPage } from '@/features/messages/messages-page'
 import { SettingsPage } from '@/features/settings/settings-page'
+import { EditShiftPage } from '@/features/shifts/edit-shift-page'
 import { NewShiftPage } from '@/features/shifts/new-shift-page'
 import { ShiftDetailPage } from '@/features/shifts/shift-detail-page'
 import { ShiftsPage } from '@/features/shifts/shifts-page'
@@ -32,6 +33,7 @@ export const routes: RouteObject[] = [
           { path: 'shifts', element: <ShiftsPage /> },
           { path: 'shifts/new', element: <NewShiftPage /> },
           { path: 'shifts/:shiftId', element: <ShiftDetailPage /> },
+          { path: 'shifts/:shiftId/edit', element: <EditShiftPage /> },
           { path: 'templates', element: <TemplatesPage /> },
           { path: 'templates/:templateId', element: <EditTemplatePage /> },
           { path: 'signups', element: <SignupsPage /> },
