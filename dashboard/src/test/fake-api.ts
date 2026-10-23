@@ -30,6 +30,8 @@ import {
   type ShiftTemplate,
   ShiftTemplateToJSON,
   ShiftToJSON,
+  type WaitlistEntry,
+  WaitlistEntryToJSON,
   type Worker,
   WorkerStatus,
   WorkerToJSON,
@@ -149,6 +151,7 @@ export const inventory = shift(3, {
   endsAt: new Date(2026, 9, 19, 12, 0),
   slots: 2,
   takenSlots: 2,
+  waitingCount: 2,
 })
 
 export const morningTemplate: ShiftTemplate = {
@@ -197,6 +200,20 @@ export function assignment(
     },
     claimedAt: new Date(2026, 9, 12, 10, number),
     ...values,
+  }
+}
+
+export function waitlistEntry(number: number, person: Worker, position: number): WaitlistEntry {
+  return {
+    id: `0199c3a0-0000-7000-8000-0000000008${String(number).padStart(2, '0')}`,
+    position,
+    worker: {
+      id: person.id,
+      firstName: person.firstName,
+      lastName: person.lastName,
+      phone: person.phone,
+    },
+    joinedAt: new Date(2026, 9, 13, 8, number),
   }
 }
 
@@ -292,6 +309,10 @@ export function installFakeApi() {
         assignment(4, jakob, { status: AssignmentStatus.COMPLETED, decidedAt: new Date(2026, 9, 8, 15, 1) }),
       ],
     } as Record<string, ShiftAssignment[]>,
+    /** The waitlist per shift id, in line order. */
+    waitlists: {
+      [inventory.id]: [waitlistEntry(1, lena, 1), waitlistEntry(2, mira, 2)],
+    } as Record<string, WaitlistEntry[]>,
     settings: { autoConfirm: false, cancellationDeadlineHours: 24, waitlist: false } as AgencySettings,
     features: { contactButton: false, checkIn: false } as AgencyFeatures,
     conversations: [lenaConversation, jakobConversation],
@@ -499,8 +520,9 @@ export function installFakeApi() {
       if (found.status !== ShiftStatus.DRAFT && found.status !== ShiftStatus.PUBLISHED) {
         return problem(409, 'shift_not_cancellable')
       }
-      const cancelled = { ...found, status: ShiftStatus.CANCELLED, takenSlots: 0 }
+      const cancelled = { ...found, status: ShiftStatus.CANCELLED, takenSlots: 0, waitingCount: 0 }
       replaceShift(cancelled)
+      api.waitlists[shiftId] = []
       api.assignments[shiftId] = claims.map((it) =>
         it.status === AssignmentStatus.PENDING || it.status === AssignmentStatus.CONFIRMED
           ? { ...it, status: AssignmentStatus.CANCELLED, cancelledBy: CancelledBy.AGENCY }
@@ -553,8 +575,57 @@ export function installFakeApi() {
     api.assignments[shiftId] = claims.map((it) => (it === claim ? next : it))
     if (freesSpot) {
       replaceShift({ ...found, takenSlots: found.takenSlots - 1 })
+      moveUp(shiftId)
     }
     return json(ShiftAssignmentToJSON(next))
+  }
+
+  // Ids of claims made by moving up follow the fixtures.
+  let movedUpNumber = 50
+
+  /**
+   * A freed spot goes to the first in line, as a request or confirmed right away (ADR 0029).
+   * The fake leaves out the cancellation deadline and overlaps.
+   */
+  function moveUp(shiftId: string) {
+    const [first, ...rest] = api.waitlists[shiftId] ?? []
+    const found = allShifts().find((it) => it.id === shiftId)
+    if (!first || !found) {
+      return
+    }
+    movedUpNumber += 1
+    const claim: ShiftAssignment = {
+      id: `0199c3a0-0000-7000-8000-0000000005${String(movedUpNumber)}`,
+      status: api.settings.autoConfirm ? AssignmentStatus.CONFIRMED : AssignmentStatus.PENDING,
+      worker: first.worker,
+      claimedAt: new Date(2026, 9, 13, 9, 0),
+    }
+    api.assignments[shiftId] = [...(api.assignments[shiftId] ?? []), claim]
+    api.waitlists[shiftId] = rest.map((it, index) => ({ ...it, position: index + 1 }))
+    replaceShift({ ...found, takenSlots: found.takenSlots + 1, waitingCount: found.waitingCount - 1 })
+  }
+
+  /** The line of a shift; taking someone off closes the gap and keeps the order of the others. */
+  function waitlistAction(url: URL, method: string, shiftId: string, entryId: string | undefined) {
+    const found = allShifts().find((it) => it.id === shiftId)
+    if (!found) {
+      return problem(404, 'shift_not_found')
+    }
+    const line = api.waitlists[shiftId] ?? []
+    if (method === 'GET' && entryId === undefined) {
+      return page(url, line, WaitlistEntryToJSON)
+    }
+    if (method !== 'DELETE' || entryId === undefined) {
+      return problem(404, 'not_found')
+    }
+    if (!line.some((it) => it.id === entryId)) {
+      return problem(404, 'waitlist_entry_not_found')
+    }
+    api.waitlists[shiftId] = line
+      .filter((it) => it.id !== entryId)
+      .map((it, index) => ({ ...it, position: index + 1 }))
+    replaceShift({ ...found, waitingCount: found.waitingCount - 1 })
+    return new Response(null, { status: 204 })
   }
 
   function hasWorked(claim: ShiftAssignment) {
@@ -760,6 +831,10 @@ export function installFakeApi() {
     const hoursRoute = /^PUT \/shifts\/([^/]+)\/assignments\/([^/]+)\/hours$/.exec(route)
     if (hoursRoute) {
       return approveHours(hoursRoute[1] ?? '', hoursRoute[2] ?? '', body as Record<string, unknown>)
+    }
+    const waitlistRoute = /^(GET|DELETE) \/shifts\/([^/]+)\/waitlist(?:\/([^/]+))?$/.exec(route)
+    if (waitlistRoute) {
+      return waitlistAction(url, waitlistRoute[1] ?? '', waitlistRoute[2] ?? '', waitlistRoute[3])
     }
     const shiftUpdate = /^PUT \/shifts\/([^/]+)$/.exec(route)
     if (shiftUpdate) {

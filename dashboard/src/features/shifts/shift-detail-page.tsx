@@ -18,6 +18,7 @@ import { formatShiftDate, formatShiftTime, STATUS_VARIANT } from './format'
 import { usePublishShift, useShift } from './queries'
 import { SaveAsTemplate } from './save-as-template'
 import { isEditable, shiftSource, sourceToTemplate } from './shift-draft'
+import { WaitlistSection } from './waitlist-section'
 
 export function ShiftDetailPage() {
   const { shiftId = '' } = useParams()
@@ -141,6 +142,8 @@ function ShiftDetail({ shift }: { shift: Shift }) {
       </Card>
 
       <ClaimsSection shift={shift} />
+
+      <WaitlistSection shift={shift} />
 
       <HoursSection shift={shift} />
     </>

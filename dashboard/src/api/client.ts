@@ -11,6 +11,7 @@ import {
   SettingsApi,
   ShiftsApi,
   ShiftTemplatesApi,
+  WaitlistApi,
   WorkersApi,
 } from './generated'
 import { clearTokens, getAccessToken, getRefreshToken, setTokens } from './tokens'
@@ -119,4 +120,5 @@ export const messagesApi = new MessagesApi(configuration)
 export const settingsApi = new SettingsApi(configuration)
 export const shiftsApi = new ShiftsApi(configuration)
 export const shiftTemplatesApi = new ShiftTemplatesApi(configuration)
+export const waitlistApi = new WaitlistApi(configuration)
 export const workersApi = new WorkersApi(configuration)

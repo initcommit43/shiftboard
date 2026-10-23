@@ -74,6 +74,8 @@
     },
     "spots": "{{taken}} von {{total}}",
     "full": "Voll",
+    "waiting_one": "{{count}} wartet",
+    "waiting_other": "{{count}} warten",
     "publish": "Veröffentlichen",
     "publishNamed": "{{title}} veröffentlichen",
     "count_one": "{{count}} anstehende Schicht",
@@ -246,7 +248,8 @@
     "shift_overlap": "Zur neuen Zeit hätte jemand mit Platz schon eine andere Schicht. Wähle eine andere Zeit oder nimm die Person zuerst heraus.",
     "shift_not_started": "Die Schicht hat noch nicht begonnen. Stunden lassen sich erst danach erfassen.",
     "assignment_not_worked": "Diese Person hat keinen bestätigten Platz mehr. Die Liste wurde aktualisiert.",
-    "worker_attended": "Diese Person war da: Sie hat eingecheckt oder hat freigegebene Stunden. Sie kann nicht als nicht erschienen markiert werden."
+    "worker_attended": "Diese Person war da: Sie hat eingecheckt oder hat freigegebene Stunden. Sie kann nicht als nicht erschienen markiert werden.",
+    "waitlist_entry_not_found": "Diese Person ist nicht mehr auf der Warteliste: Sie hat sich ausgetragen oder ist nachgerückt. Die Liste wurde aktualisiert."
   },
   "hours": {
     "amount": "{{hours}} Std.",
@@ -435,6 +438,29 @@
       "reasonRequired": "Bitte gib einen Grund an.",
       "keep": "Abbrechen",
       "confirm": "Entfernen"
+    },
+    "waitlist": {
+      "title": "Warteliste",
+      "description": "Wer sich zuerst einträgt, rückt zuerst nach. Wird vor der Absagefrist ein Platz frei, bekommt ihn die erste Person automatisch.",
+      "loading": "Warteliste wird geladen …",
+      "error": "Die Warteliste konnte nicht geladen werden.",
+      "empty": "Niemand wartet. Ist die Schicht voll, können sich Mitarbeiter:innen in der App eintragen.",
+      "columns": {
+        "position": "Platz",
+        "name": "Name",
+        "phone": "Telefon",
+        "joinedAt": "Eingetragen am"
+      },
+      "position": "{{position}}.",
+      "remove": {
+        "action": "Von Warteliste entfernen",
+        "actionNamed": "{{name}} von der Warteliste entfernen",
+        "title": "{{name}} von der Warteliste entfernen?",
+        "description": "{{name}} bekommt eine Nachricht. Alle anderen behalten ihren Platz in der Reihenfolge.",
+        "keep": "Abbrechen",
+        "confirm": "Entfernen"
+      },
+      "removed": "{{name}} ist nicht mehr auf der Warteliste"
     },
     "duplicate": "Duplizieren",
     "edit": "Bearbeiten"

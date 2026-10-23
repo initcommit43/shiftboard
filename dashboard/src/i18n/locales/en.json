@@ -74,6 +74,8 @@
     },
     "spots": "{{taken}} of {{total}}",
     "full": "Full",
+    "waiting_one": "{{count}} waiting",
+    "waiting_other": "{{count}} waiting",
     "publish": "Publish",
     "publishNamed": "Publish {{title}}",
     "count_one": "{{count}} upcoming shift",
@@ -246,7 +248,8 @@
     "shift_overlap": "At the new time, someone with a spot would already have another shift. Pick another time or remove them first.",
     "shift_not_started": "The shift has not started yet. Hours can be recorded once it has.",
     "assignment_not_worked": "This person no longer holds a confirmed spot. The list has been updated.",
-    "worker_attended": "This person was there: they checked in or have approved hours. They can't be marked as a no-show."
+    "worker_attended": "This person was there: they checked in or have approved hours. They can't be marked as a no-show.",
+    "waitlist_entry_not_found": "This person is no longer on the waitlist: they left or moved up. The list has been updated."
   },
   "hours": {
     "amount": "{{hours}} h",
@@ -435,6 +438,29 @@
       "reasonRequired": "Please give a reason.",
       "keep": "Back",
       "confirm": "Remove"
+    },
+    "waitlist": {
+      "title": "Waitlist",
+      "description": "First come, first served. When a spot frees up before the cancellation deadline, the first in line gets it automatically.",
+      "loading": "Loading waitlist …",
+      "error": "The waitlist could not be loaded.",
+      "empty": "Nobody is waiting. When the shift is full, workers can join the waitlist in the app.",
+      "columns": {
+        "position": "Place",
+        "name": "Name",
+        "phone": "Phone",
+        "joinedAt": "Joined"
+      },
+      "position": "{{position}}.",
+      "remove": {
+        "action": "Remove from waitlist",
+        "actionNamed": "Remove {{name}} from the waitlist",
+        "title": "Remove {{name}} from the waitlist?",
+        "description": "{{name}} gets a message. Everyone else keeps their place in line.",
+        "keep": "Back",
+        "confirm": "Remove"
+      },
+      "removed": "{{name}} is no longer on the waitlist"
     },
     "duplicate": "Duplicate",
     "edit": "Edit"
