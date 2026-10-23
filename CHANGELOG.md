@@ -2,6 +2,21 @@
 
 Notable changes per slice. One version tag per completed slice during the MVP.
 
+## v0.7.0 (2026-10-23): slice 6, waitlist
+
+### Added
+
+- Workers join the waitlist of a full shift in the app and see their place in line ("Warteliste · Platz 2"), also under "Meine". Leaving is possible until the start, and joining again puts them at the back.
+- When a spot frees up before the cancellation deadline, the first in line moves up automatically into a request, or is confirmed right away with auto-confirm, and gets a system message and a push. Anyone who is booked for an overlapping shift by then is skipped and told. After the deadline, everyone waiting gets a "Platz frei" push and the first to claim gets the spot (ADR 0029).
+- Dispatchers see a shift's waitlist in line order on its detail page and can take a worker off it; the shift list shows how many are waiting.
+- Admins switch the waitlist on or off in the workflow settings; it is off by default.
+- App versions without the waitlist keep working: it is exposed as its own field, not as a new claim status.
+- Demo data has a full shift with three workers waiting.
+
+### Fixed
+
+- Two dashboard tests that failed under load: the hours page test raced a router update, and toasts leaked from one test into the next.
+
 ## v0.6.0 (2026-10-21): slice 5, check-in/out and payroll export
 
 ### Added
