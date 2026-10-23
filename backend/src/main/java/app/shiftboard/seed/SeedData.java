@@ -18,10 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Two fictional agencies with their qualifications, settings, dashboard users, workers, clients,
- * locations, shifts, shift templates, a few claims and the hours of past shifts. The rows are
- * written with plain SQL, like a migration would, because nothing in the application creates
- * agencies, dashboard users or clients yet. Runs once: a database that has
- * the demo agency is left alone.
+ * locations, shifts, shift templates, a few claims, a waitlist and the hours of past shifts. The
+ * rows are written with plain SQL, like a migration would, because nothing in the application
+ * creates agencies, dashboard users or clients yet. Runs once: a database that has the demo agency
+ * is left alone.
  */
 @Component
 @Profile("local")
@@ -58,6 +58,11 @@ class SeedData implements ApplicationRunner {
         // Workers check in and out in the app (ADR 0028).
         jdbc.sql("update agency set features = '{\"contactButton\": false, \"checkIn\": true}' where id = ?")
                 .param(agency).update();
+        // Full shifts have a waitlist (ADR 0029); the other settings are the defaults.
+        jdbc.sql("""
+                update agency set settings = '{"autoConfirm": false, "cancellationDeadlineHours": 24, "waitlist": true}'
+                where id = ?
+                """).param(agency).update();
         var service = qualification(agency, "Service");
         var bar = qualification(agency, "Bar");
         var lager = qualification(agency, "Lager");
@@ -84,8 +89,9 @@ class SeedData implements ApplicationRunner {
                 service);
         var weddingBar = shift(agency, hotel, ballroom, dispatcher, "Barkeeper:in Hochzeit", null, 2, 17, 7, true,
                 "17.50", 2, "PUBLISHED", bar);
-        shift(agency, logistics, depot, dispatcher, "Staplerfahrer:in", "Staplerschein nicht vergessen.", 3, 7, 8,
-                false, "19.00", 2, "PUBLISHED", lager, staplerschein);
+        // Full, with a waitlist, and more than a day away: a worker who drops out hands the spot to the first in line.
+        var forklift = shift(agency, logistics, depot, dispatcher, "Staplerfahrer:in", "Staplerschein nicht vergessen.",
+                3, 7, 8, false, "19.00", 2, "PUBLISHED", lager, staplerschein);
         shift(agency, catering, hall, dispatcher, "Auf- und Abbau Messe", null, 5, 8, 6, true, "14.50", 8,
                 "PUBLISHED");
         shift(agency, catering, hall, dispatcher, "Service Firmenfeier", null, 9, 17, 6, true, "15.50", 10, "DRAFT",
@@ -113,7 +119,7 @@ class SeedData implements ApplicationRunner {
 
         var lena = worker(agency, 1,"Lena", "Hofer", "1996-03-14", "ACTIVE", 60, service, bar);
         var jakob = worker(agency, 2, "Jakob", "Steiner", "1988-11-02", "ACTIVE", 52, lager, staplerschein);
-        worker(agency, 3, "Mira", "Aigner", "2001-07-23", "ACTIVE", 45, service);
+        var mira = worker(agency, 3, "Mira", "Aigner", "2001-07-23", "ACTIVE", 45, service);
         var felix = worker(agency, 4, "Felix", "Brandner", "1993-01-30", "ACTIVE", 31, bar);
         var sophie = worker(agency, 5, "Sophie", "Lechner", "1999-09-08", "ACTIVE", 24, service, bar);
         var paul = worker(agency, 6, "Paul", "Winkler", "1985-05-19", "ACTIVE", 17, lager);
@@ -136,6 +142,14 @@ class SeedData implements ApplicationRunner {
         claim(agency, fair, jakob, "COMPLETED");
         claim(agency, fair, paul, "COMPLETED");
         claim(agency, conference, lena, "CONFIRMED");
+
+        // The forklift shift is full with Jakob and Paul confirmed; Lena, Mira and Sophie wait in that
+        // order. Lena moves up when Jakob or Paul drops out.
+        claim(agency, forklift, jakob, "CONFIRMED");
+        claim(agency, forklift, paul, "CONFIRMED");
+        waitlist(agency, forklift, lena, 3 * 60);
+        waitlist(agency, forklift, mira, 2 * 60);
+        waitlist(agency, forklift, sophie, 45);
 
         // Both checked in at the inventory; Jakob's hours are approved, Paul's wait for a dispatcher.
         // The fair was approved from the planned times.
@@ -348,6 +362,16 @@ class SeedData implements ApplicationRunner {
                 where s.id = ?
                 """).params(agencyId, workerId, status, status, shiftId).update();
         jdbc.sql("update shift set taken_slots = taken_slots + 1 where id = ?").param(shiftId).update();
+    }
+
+    /** A place on the waitlist of the shift, joined the given minutes ago; it holds no spot (ADR 0029). */
+    private void waitlist(UUID agencyId, UUID shiftId, UUID workerId, int joinedMinutesAgo) {
+        jdbc.sql("""
+                insert into assignment (id, agency_id, shift_id, worker_id, status, starts_at, ends_at, claimed_at)
+                select uuidv7(), ?, s.id, ?, 'WAITLISTED', s.starts_at, s.ends_at, now() - make_interval(mins => ?)
+                from shift s
+                where s.id = ?
+                """).params(agencyId, workerId, joinedMinutesAgo, shiftId).update();
     }
 
     private UUID worker(
