@@ -47,6 +47,9 @@ describe('upcoming shifts', () => {
 
     expect(row('Nachtinventur').getByText('2 von 2')).toBeInTheDocument()
     expect(row('Nachtinventur').getByText('Voll')).toBeInTheDocument()
+    // Who waits is counted next to the spots, only when someone does.
+    expect(row('Nachtinventur').getByText('2 warten')).toBeInTheDocument()
+    expect(warehouse.queryByText(/wartet?n?$/)).not.toBeInTheDocument()
 
     // The API sorts by start time; the list keeps that order.
     expect(

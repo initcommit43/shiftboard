@@ -2,7 +2,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
-import { assignmentsApi, clientsApi, shiftsApi, shiftTemplatesApi } from '@/api/client'
+import { assignmentsApi, clientsApi, shiftsApi, shiftTemplatesApi, waitlistApi } from '@/api/client'
 import { errorMessage } from '@/api/errors'
 import type {
   Shift,
@@ -12,6 +12,7 @@ import type {
   ShiftRequest,
   ShiftTemplate,
   ShiftTemplateRequest,
+  WaitlistEntry,
 } from '@/api/generated'
 
 export const PAGE_SIZE = 20
@@ -28,6 +29,7 @@ export const shiftKeys = {
   list: (period: ShiftPeriod, page: number) => ['shifts', 'list', period, page] as const,
   detail: (shiftId: string) => ['shifts', 'detail', shiftId] as const,
   assignments: (shiftId: string) => ['shifts', 'assignments', shiftId] as const,
+  waitlist: (shiftId: string) => ['shifts', 'waitlist', shiftId] as const,
   formOptions: ['shift-form-options'] as const,
 }
 
@@ -201,7 +203,8 @@ export function useCancelShift() {
   })
 }
 
-export function workerName(assignment: ShiftAssignment) {
+/** The name of the worker of a claim or a waitlist entry. */
+export function workerName(assignment: { worker: { firstName: string; lastName: string } }) {
   return `${assignment.worker.firstName} ${assignment.worker.lastName}`
 }
 
@@ -245,6 +248,37 @@ export function useRemoveAssignment(shiftId: string) {
     onSuccess: (_data, { assignment }) => {
       toast.success(t('shiftDetail.decided.remove', { name: workerName(assignment) }))
     },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: shiftKeys.all }),
+  })
+}
+
+/** The waitlist of a shift is shown at once; the API caps a page at 100. */
+const WAITLIST_SIZE = 100
+
+/** Who waits for a spot on the shift, in line order: the first moves up next. */
+export function useShiftWaitlist(shiftId: string) {
+  return useQuery({
+    queryKey: shiftKeys.waitlist(shiftId),
+    queryFn: ({ signal }) =>
+      waitlistApi.listShiftWaitlist({ shiftId, size: WAITLIST_SIZE }, { signal }),
+  })
+}
+
+/** Takes a worker off the waitlist; the others keep their order. Refreshes the line and the shift. */
+export function useRemoveFromWaitlist(shiftId: string) {
+  const { t } = useTranslation()
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (entry: WaitlistEntry) =>
+      waitlistApi.removeFromWaitlist({ shiftId, entryId: entry.id }),
+    onSuccess: (_data, entry) => {
+      toast.success(t('shiftDetail.waitlist.removed', { name: workerName(entry) }))
+    },
+    onError: (error) => {
+      toast.error(errorMessage(t, error))
+    },
+    // Also after an error: the worker may have left or moved up in the meantime.
     onSettled: () => queryClient.invalidateQueries({ queryKey: shiftKeys.all }),
   })
 }

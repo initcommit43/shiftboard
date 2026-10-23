@@ -78,6 +78,12 @@ function ShiftRow({ shift }: { shift: Shift }) {
           <span className="tabular-nums">
             {t('shifts.spots', { taken: shift.takenSlots, total: shift.slots })}
           </span>
+          {shift.waitingCount > 0 && (
+            <span className="text-ink-secondary tabular-nums">
+              <span aria-hidden>· </span>
+              {t('shifts.waiting', { count: shift.waitingCount })}
+            </span>
+          )}
           {full && <Badge variant="confirmed">{t('shifts.full')}</Badge>}
         </div>
       </TableCell>

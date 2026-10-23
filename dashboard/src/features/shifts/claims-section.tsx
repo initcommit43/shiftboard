@@ -23,6 +23,7 @@ import {
 import { initials } from '@/lib/initials'
 
 import { BroadcastToShift } from './broadcast-to-shift'
+import { useDateTime } from './format'
 import { useAssignmentDecision, useShiftAssignments, workerName } from './queries'
 import { RemoveWorker } from './remove-worker'
 
@@ -138,7 +139,7 @@ export function ClaimsSection({ shift }: { shift: Shift }) {
   )
 }
 
-function EmptyRow({ icon, text }: { icon: ReactNode; text: string }) {
+export function EmptyRow({ icon, text }: { icon: ReactNode; text: string }) {
   return (
     <div className="flex items-center gap-3 rounded-lg border bg-surface-card px-6 py-5 text-ink-secondary">
       <span aria-hidden className="[&>svg]:size-5">
@@ -149,7 +150,7 @@ function EmptyRow({ icon, text }: { icon: ReactNode; text: string }) {
   )
 }
 
-function WorkerCell({ assignment }: { assignment: ShiftAssignment }) {
+export function WorkerCell({ assignment }: { assignment: Parameters<typeof workerName>[0] }) {
   const name = workerName(assignment)
   return (
     <TableCell>
@@ -164,11 +165,6 @@ function WorkerCell({ assignment }: { assignment: ShiftAssignment }) {
       </div>
     </TableCell>
   )
-}
-
-function useDateTime() {
-  const { i18n } = useTranslation()
-  return new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short' })
 }
 
 function PendingRow({ shiftId, assignment }: { shiftId: string; assignment: ShiftAssignment }) {

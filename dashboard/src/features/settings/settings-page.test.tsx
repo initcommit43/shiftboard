@@ -17,12 +17,43 @@ describe('agency settings', () => {
     api.signIn()
   }
 
-  it('shows the defaults: approval required and 24 hours', async () => {
+  it('shows the defaults: approval required, 24 hours and no waitlist', async () => {
     signInAs('ADMIN')
     renderApp('/settings')
 
     expect(await screen.findByLabelText('Anfragen automatisch bestätigen')).not.toBeChecked()
     expect(screen.getByLabelText('Absagefrist in Stunden')).toHaveValue(24)
+    expect(screen.getByLabelText('Warteliste für volle Einsätze')).not.toBeChecked()
+  })
+
+  it('lets an admin switch on the waitlist and keeps the other settings', async () => {
+    const user = userEvent.setup()
+    signInAs('ADMIN')
+    api.settings = { autoConfirm: true, cancellationDeadlineHours: 12, waitlist: false }
+    renderApp('/settings')
+
+    const toggle = await screen.findByLabelText('Warteliste für volle Einsätze')
+    expect(toggle).toHaveAccessibleDescription(/wer schon wartet, bleibt auf der Liste/)
+    await user.click(toggle)
+    await user.click(screen.getByRole('button', { name: 'Speichern' }))
+
+    expect(await screen.findByText('Die Einstellungen sind gespeichert')).toBeInTheDocument()
+    expect(api.settings).toEqual({ autoConfirm: true, cancellationDeadlineHours: 12, waitlist: true })
+  })
+
+  it('lets an admin switch the waitlist off again', async () => {
+    const user = userEvent.setup()
+    signInAs('ADMIN')
+    api.settings = { autoConfirm: false, cancellationDeadlineHours: 24, waitlist: true }
+    renderApp('/settings')
+
+    const toggle = await screen.findByLabelText('Warteliste für volle Einsätze')
+    expect(toggle).toBeChecked()
+    await user.click(toggle)
+    await user.click(screen.getByRole('button', { name: 'Speichern' }))
+
+    expect(await screen.findByText('Die Einstellungen sind gespeichert')).toBeInTheDocument()
+    expect(api.settings).toEqual({ autoConfirm: false, cancellationDeadlineHours: 24, waitlist: false })
   })
 
   it('lets an admin switch on auto-confirm and change the deadline', async () => {
@@ -37,7 +68,7 @@ describe('agency settings', () => {
     await user.click(screen.getByRole('button', { name: 'Speichern' }))
 
     expect(await screen.findByText('Die Einstellungen sind gespeichert')).toBeInTheDocument()
-    expect(api.settings).toEqual({ autoConfirm: true, cancellationDeadlineHours: 48 })
+    expect(api.settings).toEqual({ autoConfirm: true, cancellationDeadlineHours: 48, waitlist: false })
   })
 
   it('checks the deadline before saving', async () => {
@@ -57,10 +88,14 @@ describe('agency settings', () => {
 
   it('shows dispatchers the settings without letting them change them', async () => {
     signInAs('DISPATCHER')
+    api.settings = { autoConfirm: false, cancellationDeadlineHours: 24, waitlist: true }
     renderApp('/settings')
 
     expect(await screen.findByText('Nur Admins können die Einstellungen ändern.')).toBeInTheDocument()
     expect(screen.getByLabelText('Anfragen automatisch bestätigen')).toBeDisabled()
+    const waitlist = screen.getByLabelText('Warteliste für volle Einsätze')
+    expect(waitlist).toBeChecked()
+    expect(waitlist).toBeDisabled()
     expect(screen.getByLabelText('Absagefrist in Stunden')).toBeDisabled()
     expect(screen.queryByRole('button', { name: 'Speichern' })).not.toBeInTheDocument()
   })

@@ -1,6 +1,13 @@
 import type { TFunction } from 'i18next'
+import { useTranslation } from 'react-i18next'
 
 import { ShiftStatus } from '@/api/generated'
+
+/** Date and time of an event on a shift, such as a claim or joining the waitlist. */
+export function useDateTime() {
+  const { i18n } = useTranslation()
+  return new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium', timeStyle: 'short' })
+}
 
 /** The badge each shift status is shown with. */
 export const STATUS_VARIANT = {
