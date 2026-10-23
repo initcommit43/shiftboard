@@ -72,4 +72,27 @@ class AssignmentConflictException extends ApiException {
         return new AssignmentConflictException(
                 "shift_not_started", "Hours can be approved once the shift has started.");
     }
+
+    static AssignmentConflictException waitlistDisabled() {
+        return new AssignmentConflictException(
+                "waitlist_disabled", "The agency does not use the waitlist.");
+    }
+
+    static AssignmentConflictException shiftNotFull() {
+        return new AssignmentConflictException(
+                "shift_not_full", "The shift has a free spot; claim it instead.");
+    }
+
+    static AssignmentConflictException shiftNotOpen() {
+        return new AssignmentConflictException("shift_not_open", "The shift is cancelled or completed.");
+    }
+
+    static AssignmentConflictException shiftStarted() {
+        return new AssignmentConflictException("shift_started", "The shift has already started.");
+    }
+
+    static AssignmentConflictException alreadyOnWaitlist() {
+        return new AssignmentConflictException(
+                "already_on_waitlist", "The worker is already on the waitlist of this shift.");
+    }
 }

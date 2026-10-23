@@ -3,6 +3,11 @@ package app.shiftboard.assignment.internal;
 import java.util.List;
 
 enum AssignmentStatus {
+    /**
+     * A place on the waitlist of a full shift (ADR 0029). Holds no slot and books no time. The
+     * API never shows it as a status: installed apps fail on values they do not know.
+     */
+    WAITLISTED,
     PENDING,
     CONFIRMED,
     REJECTED,

@@ -17,6 +17,7 @@ import app.shiftboard.shift.ShiftDetails;
 import app.shiftboard.shift.Shifts;
 import app.shiftboard.system.ApiException;
 import app.shiftboard.system.ConflictRetry;
+import app.shiftboard.system.InvalidFieldException;
 import app.shiftboard.worker.Workers;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
@@ -54,12 +55,16 @@ class ShiftAssignmentService {
         this.transactions = transactions;
     }
 
+    /** The claims only: the waitlist is not part of them, and its status is not one of the API's (ADR 0029). */
     @Transactional(readOnly = true)
     ShiftAssignmentPage list(UUID shiftId, AssignmentStatus status, int page, int size) {
+        if (status == AssignmentStatus.WAITLISTED) {
+            throw new InvalidFieldException("status", "invalid_format");
+        }
         requireShift(shiftId);
         var pageable = PageRequest.of(page, size, OLDEST_CLAIM_FIRST);
         var result = status == null
-                ? assignments.findByShiftId(shiftId, pageable)
+                ? assignments.findByShiftIdAndStatusNot(shiftId, AssignmentStatus.WAITLISTED, pageable)
                 : assignments.findByShiftIdAndStatus(shiftId, status, pageable);
         return new ShiftAssignmentPage(
                 responses(shiftId, result.getContent()), page, size, result.getTotalElements(),
@@ -114,12 +119,13 @@ class ShiftAssignmentService {
         });
     }
 
-    /** Applies the change to the locked assignment in a transaction of its own. */
+    /** Applies the change to the locked claim in a transaction of its own; a place on the waitlist is no claim. */
     private ShiftAssignmentResponse change(
             UUID shiftId, UUID assignmentId, Function<Assignment, Assignment> change) {
         return transactions.execute(_ -> {
             requireShift(shiftId);
             var assignment = assignments.findForUpdate(assignmentId, shiftId)
+                    .filter(found -> !found.waiting())
                     .orElseThrow(() -> new ApiException(
                             HttpStatus.NOT_FOUND, "assignment_not_found", "The shift has no claim with this id."));
             return responses(shiftId, List.of(assignments.saveAndFlush(change.apply(assignment)))).getFirst();

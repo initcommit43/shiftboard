@@ -12,6 +12,7 @@ import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -58,6 +59,17 @@ class WorkerShiftController {
         return workerShiftService.cancel(accountId(accessToken), shiftId);
     }
 
+    @PostMapping("/shifts/{shiftId}/waitlist")
+    @ResponseStatus(HttpStatus.CREATED)
+    WorkerShiftResponse joinWaitlist(@AuthenticationPrincipal Jwt accessToken, @PathVariable UUID shiftId) {
+        return workerShiftService.joinWaitlist(accountId(accessToken), shiftId);
+    }
+
+    @DeleteMapping("/shifts/{shiftId}/waitlist")
+    WorkerShiftResponse leaveWaitlist(@AuthenticationPrincipal Jwt accessToken, @PathVariable UUID shiftId) {
+        return workerShiftService.leaveWaitlist(accountId(accessToken), shiftId);
+    }
+
     @PostMapping("/shifts/{shiftId}/check-in")
     WorkerShiftResponse checkIn(@AuthenticationPrincipal Jwt accessToken, @PathVariable UUID shiftId) {
         return workerShiftService.checkIn(accountId(accessToken), shiftId);
@@ -68,12 +80,14 @@ class WorkerShiftController {
         return workerShiftService.checkOut(accountId(accessToken), shiftId);
     }
 
+    /** Leaves the waitlist out unless asked for, so that app versions that know no waitlist see none. */
     @GetMapping("/my-shifts")
     WorkerShiftPage listClaimed(
             @AuthenticationPrincipal Jwt accessToken,
+            @RequestParam(defaultValue = "false") boolean includeWaitlist,
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
-        return workerShiftService.listClaimed(accountId(accessToken), page, size);
+        return workerShiftService.listClaimed(accountId(accessToken), includeWaitlist, page, size);
     }
 
     private static UUID accountId(Jwt accessToken) {
@@ -106,7 +120,17 @@ class WorkerShiftController {
     }
 
     /**
-     * @param assignment the worker's own claim on the shift, absent if there is none
+     * @param position 1 moves up next
+     * @param joinedAt when the worker joined the waitlist
+     */
+    record WaitlistPlace(int position, Instant joinedAt) {
+    }
+
+    /**
+     * @param assignment      the worker's own claim on the shift, absent if there is none or the
+     *                        worker is on the waitlist
+     * @param waitlistEnabled the agency uses the waitlist
+     * @param waitlist        the worker's place on the waitlist, absent if they are not waiting
      */
     record WorkerShiftResponse(
             UUID id,
@@ -123,7 +147,9 @@ class WorkerShiftController {
             int takenSlots,
             List<QualificationSummary> qualifications,
             Contact contact,
-            @JsonInclude(JsonInclude.Include.NON_NULL) AssignmentSummary assignment) {
+            @JsonInclude(JsonInclude.Include.NON_NULL) AssignmentSummary assignment,
+            boolean waitlistEnabled,
+            @JsonInclude(JsonInclude.Include.NON_NULL) WaitlistPlace waitlist) {
     }
 
     record WorkerShiftPage(List<WorkerShiftResponse> content, int page, int size, long totalElements, int totalPages) {

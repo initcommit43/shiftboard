@@ -2,6 +2,7 @@ package app.shiftboard.assignment.internal;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -16,6 +17,7 @@ import app.shiftboard.assignment.AssignmentCancelled;
 import app.shiftboard.assignment.internal.WorkerShiftController.AssignmentSummary;
 import app.shiftboard.assignment.internal.WorkerShiftController.ClientSummary;
 import app.shiftboard.assignment.internal.WorkerShiftController.Contact;
+import app.shiftboard.assignment.internal.WorkerShiftController.WaitlistPlace;
 import app.shiftboard.assignment.internal.WorkerShiftController.WorkerShiftPage;
 import app.shiftboard.assignment.internal.WorkerShiftController.WorkerShiftResponse;
 import app.shiftboard.identity.WorkerProfileProvider;
@@ -24,6 +26,7 @@ import app.shiftboard.shift.Shifts;
 import app.shiftboard.system.ApiException;
 import app.shiftboard.system.ConflictRetry;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -33,7 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
- * The shifts of the agency as one worker sees them: each with the worker's own claim, if any.
+ * The shifts of the agency as one worker sees them: each with the worker's own claim, or their
+ * place on its waitlist, if any.
  */
 @Service
 class WorkerShiftService {
@@ -86,8 +90,11 @@ class WorkerShiftService {
                 .stream()
                 .collect(Collectors.toMap(Assignment::getShiftId, Function.identity()));
         var terms = terms();
+        var positions = positions(own.values());
         return new WorkerShiftPage(
-                result.getContent().stream().map(shift -> response(shift, own.get(shift.id()), terms)).toList(),
+                result.getContent().stream()
+                        .map(shift -> response(shift, own.get(shift.id()), positions, terms))
+                        .toList(),
                 page, size, result.getTotalElements(), result.getTotalPages());
     }
 
@@ -95,20 +102,28 @@ class WorkerShiftService {
     WorkerShiftResponse get(UUID accountId, UUID shiftId) {
         var workerId = activeWorker(accountId);
         var shift = shifts.find(shiftId).orElseThrow(WorkerShiftService::shiftNotFound);
-        return response(shift, assignments.findByShiftIdAndWorkerId(shiftId, workerId).orElse(null), terms());
+        var own = assignments.findByShiftIdAndWorkerId(shiftId, workerId);
+        return response(shift, own.orElse(null), positions(own.stream().toList()), terms());
     }
 
-    /** Every shift the worker has claimed, whatever became of the claim. */
+    /**
+     * Every shift the worker has claimed, whatever became of the claim, and with
+     * {@code includeWaitlist} the shifts they are waiting for.
+     */
     @Transactional(readOnly = true)
-    WorkerShiftPage listClaimed(UUID accountId, int page, int size) {
+    WorkerShiftPage listClaimed(UUID accountId, boolean includeWaitlist, int page, int size) {
         var workerId = activeWorker(accountId);
-        var result = assignments.findByWorkerId(workerId, PageRequest.of(page, size, EARLIEST_START_FIRST));
+        var pageable = PageRequest.of(page, size, EARLIEST_START_FIRST);
+        var result = includeWaitlist
+                ? assignments.findByWorkerId(workerId, pageable)
+                : assignments.findByWorkerIdAndStatusNot(workerId, AssignmentStatus.WAITLISTED, pageable);
         Map<UUID, ShiftDetails> claimed =
                 shifts.findAll(result.getContent().stream().map(Assignment::getShiftId).toList());
         var terms = terms();
+        var positions = positions(result.getContent());
         List<WorkerShiftResponse> content = result.getContent().stream()
                 .map(assignment -> response(
-                        Objects.requireNonNull(claimed.get(assignment.getShiftId())), assignment, terms))
+                        Objects.requireNonNull(claimed.get(assignment.getShiftId())), assignment, positions, terms))
                 .toList();
         return new WorkerShiftPage(content, page, size, result.getTotalElements(), result.getTotalPages());
     }
@@ -141,8 +156,7 @@ class WorkerShiftService {
             if (shifts.find(shiftId).isEmpty()) {
                 throw shiftNotFound();
             }
-            var assignment = assignments.findForUpdateByShiftIdAndWorkerId(shiftId, workerId)
-                    .orElseThrow(WorkerShiftService::assignmentNotFound);
+            var assignment = ownClaimForUpdate(shiftId, workerId);
             assignment.cancelByWorker(Instant.now(), cancellationDeadline());
             assignments.saveAndFlush(assignment);
             shifts.release(shiftId);
@@ -151,6 +165,51 @@ class WorkerShiftService {
                     AssignmentCancelled.Cause.WORKER));
             return assignment;
         }), ConflictRetry::busy);
+        return get(accountId, shiftId);
+    }
+
+    /**
+     * Puts the worker at the back of the waitlist of a full shift (ADR 0029). Not when they are on
+     * the shift already, in any status, or booked for a shift at the same time.
+     */
+    WorkerShiftResponse joinWaitlist(UUID accountId, UUID shiftId) {
+        var workerId = activeWorker(accountId);
+        transactions.executeWithoutResult(_ -> {
+            var shift = shifts.find(shiftId).orElseThrow(WorkerShiftService::shiftNotFound);
+            var existing = assignments.findStatus(shiftId, workerId);
+            if (existing.isPresent()) {
+                throw existing.get() == AssignmentStatus.WAITLISTED
+                        ? AssignmentConflictException.alreadyOnWaitlist()
+                        : ClaimService.alreadyClaimed();
+            }
+            var entry = Assignment.join(shift, workerId, agencies.settings().waitlist(), Instant.now());
+            if (assignments.isBooked(workerId, AssignmentStatus.HOLDING, shift.startsAt(), shift.endsAt())) {
+                throw ClaimService.overlap();
+            }
+            try {
+                assignments.saveAndFlush(entry);
+            } catch (DataIntegrityViolationException e) {
+                // The same worker joined at the same moment, from another device.
+                throw AssignmentConflictException.alreadyOnWaitlist();
+            }
+        });
+        return get(accountId, shiftId);
+    }
+
+    /** Takes the worker off the waitlist without a trace; they can join again at the back. */
+    WorkerShiftResponse leaveWaitlist(UUID accountId, UUID shiftId) {
+        var workerId = activeWorker(accountId);
+        transactions.executeWithoutResult(_ -> {
+            if (shifts.find(shiftId).isEmpty()) {
+                throw shiftNotFound();
+            }
+            var entry = assignments.findForUpdateByShiftIdAndWorkerId(shiftId, workerId)
+                    .filter(Assignment::waiting)
+                    .orElseThrow(() -> new ApiException(
+                            HttpStatus.NOT_FOUND, "not_on_waitlist", "The worker is not on the waitlist of this shift."));
+            entry.leave(Instant.now());
+            assignments.delete(entry);
+        });
         return get(accountId, shiftId);
     }
 
@@ -175,16 +234,32 @@ class WorkerShiftService {
             if (shifts.find(shiftId).isEmpty()) {
                 throw shiftNotFound();
             }
-            var assignment = assignments.findForUpdateByShiftIdAndWorkerId(shiftId, workerId)
-                    .orElseThrow(WorkerShiftService::assignmentNotFound);
+            var assignment = ownClaimForUpdate(shiftId, workerId);
             change.accept(assignment);
             assignments.saveAndFlush(assignment);
         });
         return get(accountId, shiftId);
     }
 
+    /** The worker's locked claim on the shift; a place on its waitlist is no claim. */
+    private Assignment ownClaimForUpdate(UUID shiftId, UUID workerId) {
+        return assignments.findForUpdateByShiftIdAndWorkerId(shiftId, workerId)
+                .filter(assignment -> !assignment.waiting())
+                .orElseThrow(WorkerShiftService::assignmentNotFound);
+    }
+
+    /** The place in line of each of the assignments that is on a waitlist, by assignment id. */
+    private Map<UUID, Integer> positions(Collection<Assignment> own) {
+        return own.stream()
+                .filter(Assignment::waiting)
+                .collect(Collectors.toMap(Assignment::getId, entry -> assignments
+                        .findIdsInLine(entry.getShiftId(), AssignmentStatus.WAITLISTED)
+                        .indexOf(entry.getId()) + 1));
+    }
+
     private Terms terms() {
-        return new Terms(agencies.settings().cancellationDeadline(), agencies.features().checkIn());
+        var settings = agencies.settings();
+        return new Terms(settings.cancellationDeadline(), agencies.features().checkIn(), settings.waitlist());
     }
 
     private Duration cancellationDeadline() {
@@ -200,8 +275,9 @@ class WorkerShiftService {
      *
      * @param deadline how long before the start a worker can drop out
      * @param checkIn  whether the agency uses check-in in the app
+     * @param waitlist whether the agency uses the waitlist
      */
-    private record Terms(Duration deadline, boolean checkIn) {
+    private record Terms(Duration deadline, boolean checkIn, boolean waitlist) {
     }
 
     private static ApiException shiftNotFound() {
@@ -217,7 +293,13 @@ class WorkerShiftService {
                 .id();
     }
 
-    private static WorkerShiftResponse response(ShiftDetails shift, Assignment assignment, Terms terms) {
+    /**
+     * @param assignment the worker's own claim or place on the waitlist; {@code null} if neither
+     * @param positions  the places in line by assignment id
+     */
+    private static WorkerShiftResponse response(
+            ShiftDetails shift, Assignment assignment, Map<UUID, Integer> positions, Terms terms) {
+        var waiting = assignment != null && assignment.waiting();
         return new WorkerShiftResponse(
                 shift.id(),
                 shift.title(),
@@ -233,7 +315,7 @@ class WorkerShiftService {
                 shift.takenSlots(),
                 shift.qualifications(),
                 new Contact(shift.contact().name(), shift.contact().phone()),
-                assignment == null
+                assignment == null || waiting
                         ? null
                         : new AssignmentSummary(
                                 assignment.getId(),
@@ -244,6 +326,8 @@ class WorkerShiftService {
                                 terms.checkIn() && assignment.worked() ? assignment.checkInFrom() : null,
                                 assignment.getCheckedInAt(),
                                 assignment.getCheckedOutAt(),
-                                assignment.hours().isPresent()));
+                                assignment.hours().isPresent()),
+                terms.waitlist(),
+                waiting ? new WaitlistPlace(positions.get(assignment.getId()), assignment.getClaimedAt()) : null);
     }
 }

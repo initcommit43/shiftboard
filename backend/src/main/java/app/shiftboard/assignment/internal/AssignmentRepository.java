@@ -18,13 +18,21 @@ interface AssignmentRepository extends Repository<Assignment, UUID> {
     /** Writes the claim right away, so that a constraint it breaks is reported inside the claim. */
     Assignment saveAndFlush(Assignment assignment);
 
-    boolean existsByShiftIdAndWorkerId(UUID shiftId, UUID workerId);
+    /** Only for places on the waitlist: a claim is never deleted. */
+    void delete(Assignment assignment);
 
     Optional<Assignment> findByShiftIdAndWorkerId(UUID shiftId, UUID workerId);
+
+    @Query("select a.status from Assignment a where a.shiftId = :shiftId and a.workerId = :workerId")
+    Optional<AssignmentStatus> findStatus(UUID shiftId, UUID workerId);
 
     List<Assignment> findByWorkerIdAndShiftIdIn(UUID workerId, Collection<UUID> shiftIds);
 
     Page<Assignment> findByWorkerId(UUID workerId, Pageable pageable);
+
+    Page<Assignment> findByWorkerIdAndStatusNot(UUID workerId, AssignmentStatus status, Pageable pageable);
+
+    Page<Assignment> findByShiftIdAndStatusNot(UUID shiftId, AssignmentStatus status, Pageable pageable);
 
     Page<Assignment> findByShiftId(UUID shiftId, Pageable pageable);
 
@@ -32,6 +40,20 @@ interface AssignmentRepository extends Repository<Assignment, UUID> {
 
     @Query("select a.workerId from Assignment a where a.shiftId = :shiftId and a.status = :status order by a.claimedAt")
     List<UUID> findWorkerIdsByShiftIdAndStatus(UUID shiftId, AssignmentStatus status);
+
+    /** The waitlist of the shift in line order: who joined first, then by id for the same moment. */
+    @Query("""
+            select a.id from Assignment a where a.shiftId = :shiftId and a.status = :status
+            order by a.claimedAt, a.id
+            """)
+    List<UUID> findIdsInLine(UUID shiftId, AssignmentStatus status);
+
+    @Query("""
+            select a.shiftId as shiftId, count(a) as waiting from Assignment a
+            where a.shiftId in :shiftIds and a.status = :status
+            group by a.shiftId
+            """)
+    List<WaitingPerShift> countWaiting(Collection<UUID> shiftIds, AssignmentStatus status);
 
     // The finders below lock the rows they return, so that two concurrent changes of one claim,
     // such as an approval and a rejection, run one after the other and the second sees the first.
@@ -47,6 +69,11 @@ interface AssignmentRepository extends Repository<Assignment, UUID> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select a from Assignment a where a.shiftId = :shiftId and a.status in :statuses order by a.id")
     List<Assignment> findForUpdateByShiftIdAndStatusIn(UUID shiftId, Collection<AssignmentStatus> statuses);
+
+    /** The waitlist of the shift in line order, like {@link #findIdsInLine}. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select a from Assignment a where a.shiftId = :shiftId and a.status = :status order by a.claimedAt, a.id")
+    List<Assignment> findLineForUpdate(UUID shiftId, AssignmentStatus status);
 
     // The hours of a period: the claims of workers with a confirmed spot on shifts that have
     // started, by booked start (ADR 0028).
@@ -90,4 +117,11 @@ interface AssignmentRepository extends Repository<Assignment, UUID> {
             """)
     boolean isBookedElsewhere(
             UUID workerId, UUID except, Collection<AssignmentStatus> statuses, Instant startsAt, Instant endsAt);
+
+    interface WaitingPerShift {
+
+        UUID getShiftId();
+
+        long getWaiting();
+    }
 }
