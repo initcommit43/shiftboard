@@ -137,6 +137,41 @@ void main() {
     expect(find.text('Noch keine Nachrichten'), findsWidgets);
   });
 
+  for (final type in [
+    'WAITLIST_MOVED_UP',
+    'WAITLIST_SPOT_FREE',
+    'WAITLIST_REMOVED',
+  ]) {
+    testWidgets('a $type push loads the shift and my shifts again', (
+      tester,
+    ) async {
+      backend.on('GET /worker/shifts/$shiftId', (_) => json(workerShift()));
+      await start(tester);
+      final shifts = backend.sent('GET /worker/shifts').length;
+      final myShifts = backend.sent('GET /worker/my-shifts').length;
+
+      push.receivedController.add({'type': type, 'shiftId': shiftId});
+      await tester.pumpAndSettle();
+
+      expect(backend.sent('GET /worker/shifts').length, shifts + 1);
+      expect(backend.sent('GET /worker/my-shifts').length, myShifts + 1);
+    });
+
+    testWidgets('a tapped $type push opens its shift', (tester) async {
+      backend.on(
+        'GET /worker/shifts/$shiftId',
+        (_) => json(workerShift(assignmentStatus: 'PENDING')),
+      );
+      await start(tester);
+
+      push.openedController.add({'type': type, 'shiftId': shiftId});
+      await tester.pumpAndSettle();
+
+      expect(backend.sent('GET /worker/shifts/$shiftId'), hasLength(1));
+      expect(find.byType(ShiftDetailScreen), findsOneWidget);
+    });
+  }
+
   testWidgets('pausing new shifts is saved', (tester) async {
     backend.on(
       'PUT /worker/notification-settings',
