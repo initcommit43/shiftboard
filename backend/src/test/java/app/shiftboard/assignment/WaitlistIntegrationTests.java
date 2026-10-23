@@ -588,6 +588,119 @@ class WaitlistIntegrationTests extends IntegrationTest {
                 .filteredOn("WAITLISTED"::equals).hasSize(3 - (int) droppedOut);
     }
 
+    // --- the agency's view (#112) ----------------------------------------------------------
+
+    @Test
+    void theDispatcherSeesTheWaitlistInLineOrderAndHowManyWait() {
+        var shiftId = publish("Staplerfahrer:in", IN_THREE_DAYS, 8, 1);
+        claim(shiftId, activeWorker()).expectStatus().isCreated();
+        var first = activeWorker("Lena", "Hofer", "+43 660 5550101");
+        var second = activeWorker("Jakob", "Steiner", "+43 660 5550102");
+        var third = activeWorker("Mira", "Gruber", "+43 660 5550103");
+        for (var worker : List.of(first, second, third)) {
+            join(shiftId, worker).expectStatus().isCreated();
+        }
+        var other = publish("Ohne Warteliste", IN_THREE_DAYS.plus(Duration.ofDays(1)), 8, 1);
+
+        get("/api/v1/shifts/" + shiftId + "/waitlist", dispatcher)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.page").isEqualTo(0)
+                .jsonPath("$.size").isEqualTo(20)
+                .jsonPath("$.totalElements").isEqualTo(3)
+                .jsonPath("$.totalPages").isEqualTo(1)
+                .jsonPath("$.content[*].position").isEqualTo(List.of(1, 2, 3))
+                .jsonPath("$.content[*].worker.firstName").isEqualTo(List.of("Lena", "Jakob", "Mira"))
+                .jsonPath("$.content[0].id").isEqualTo(entryId(shiftId, first).toString())
+                .jsonPath("$.content[0].worker.id").isEqualTo(workerId(first).toString())
+                .jsonPath("$.content[0].worker.lastName").isEqualTo("Hofer")
+                .jsonPath("$.content[0].worker.phone").isEqualTo("+43 660 5550101")
+                .jsonPath("$.content[0].joinedAt").exists();
+        get("/api/v1/shifts/" + shiftId + "/waitlist?page=1&size=2", dispatcher)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.totalPages").isEqualTo(2)
+                .jsonPath("$.content[*].position").isEqualTo(List.of(3))
+                .jsonPath("$.content[0].worker.firstName").isEqualTo("Mira");
+        get("/api/v1/shifts/" + other + "/waitlist", dispatcher)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.totalElements").isEqualTo(0)
+                .jsonPath("$.content").isEmpty();
+
+        // Every shift says how many wait, in the list and in the detail.
+        get("/api/v1/shifts", dispatcher)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[0].id").isEqualTo(shiftId.toString())
+                .jsonPath("$.content[0].takenSlots").isEqualTo(1)
+                .jsonPath("$.content[0].waitingCount").isEqualTo(3)
+                .jsonPath("$.content[1].waitingCount").isEqualTo(0);
+        get("/api/v1/shifts/" + shiftId, dispatcher)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.waitingCount").isEqualTo(3);
+    }
+
+    @Test
+    void theDispatcherTakesAWorkerOffTheWaitlistAndTheOthersKeepTheirOrder() {
+        var shiftId = publish("Staplerfahrer:in", IN_THREE_DAYS, 8, 1);
+        claim(shiftId, activeWorker()).expectStatus().isCreated();
+        var first = activeWorker();
+        var second = activeWorker();
+        var device = device(first);
+        join(shiftId, first).expectStatus().isCreated();
+        join(shiftId, second).expectStatus().isCreated();
+        var entryId = entryId(shiftId, first);
+
+        removeFromWaitlist(shiftId, entryId).expectStatus().isNoContent();
+
+        assertThat(status(shiftId, first)).isNull();
+        assertThat(events.all()).contains(new WaitlistEntryRemoved(
+                agency.id(), entryId, shiftId, workerId(first), WaitlistEntryRemoved.Cause.REMOVED));
+        get("/api/v1/shifts/" + shiftId + "/waitlist", dispatcher)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[*].position").isEqualTo(List.of(1))
+                .jsonPath("$.content[0].worker.id").isEqualTo(workerId(second).toString());
+        await().atMost(Duration.ofSeconds(5)).until(() -> !push.sentTo(device).isEmpty());
+        assertThat(push.sentTo(device).getFirst().title()).isEqualTo("Nicht mehr auf der Warteliste");
+        assertThat(push.sentTo(device).getFirst().data())
+                .containsEntry("type", "WAITLIST_REMOVED").containsEntry("shiftId", shiftId.toString());
+        await().atMost(Duration.ofSeconds(5)).untilAsserted(() ->
+                get("/api/v1/worker/conversation/messages", first)
+                        .expectStatus().isOk()
+                        .expectBody()
+                        .jsonPath("$.content.length()").isEqualTo(1)
+                        .jsonPath("$.content[0].event").doesNotExist()
+                        .jsonPath("$.content[0].body").value(body -> assertThat((String) body)
+                                .startsWith("Die Agentur hat dich von der Warteliste für „Staplerfahrer:in“ am ")
+                                .endsWith(" genommen.")));
+
+        expectProblem(removeFromWaitlist(shiftId, entryId), 404, "waitlist_entry_not_found");
+        // A claim is no entry of the waitlist.
+        var claimId = jdbc.sql("select id from assignment where shift_id = ? and status = 'PENDING'")
+                .param(shiftId).query(UUID.class).single();
+        expectProblem(removeFromWaitlist(shiftId, claimId), 404, "waitlist_entry_not_found");
+        expectProblem(removeFromWaitlist(UUID.randomUUID(), entryId(shiftId, second)), 404, "shift_not_found");
+    }
+
+    @Test
+    void onlyTheAgencyOfTheShiftSeesItsWaitlist() {
+        var shiftId = publish("Staplerfahrer:in", IN_THREE_DAYS, 8, 1);
+        claim(shiftId, activeWorker()).expectStatus().isCreated();
+        var worker = activeWorker();
+        join(shiftId, worker).expectStatus().isCreated();
+        var other = login(data.account(data.agency("Alpen Events"), Role.DISPATCHER), DASHBOARD);
+
+        expectProblem(get("/api/v1/shifts/" + shiftId + "/waitlist", other), 404, "shift_not_found");
+        expectProblem(removeFromWaitlist(shiftId, entryId(shiftId, worker), other), 404, "shift_not_found");
+        expectProblem(get("/api/v1/shifts/" + shiftId + "/waitlist", worker), 403, "forbidden");
+        expectProblem(removeFromWaitlist(shiftId, entryId(shiftId, worker), worker), 403, "forbidden");
+        get("/api/v1/shifts/" + shiftId + "/waitlist", admin).expectStatus().isOk();
+        assertThat(status(shiftId, worker)).isEqualTo("WAITLISTED");
+    }
+
     // --- helpers ----------------------------------------------------------------------------
 
     void settings(boolean autoConfirm, boolean waitlist) {
@@ -607,6 +720,18 @@ class WaitlistIntegrationTests extends IntegrationTest {
     /** Signs a worker up in the agency of the test and approves the signup. */
     TokenPair activeWorker() {
         var tokens = signUp(agency.signupCode(), TestData.email());
+        post("/api/v1/workers/" + workerId(tokens) + "/approve", dispatcher).expectStatus().isOk();
+        return tokens;
+    }
+
+    TokenPair activeWorker(String firstName, String lastName, String phone) {
+        var request = signupRequest(TestData.email());
+        request.put("firstName", firstName);
+        request.put("lastName", lastName);
+        request.put("phone", phone);
+        var tokens = postSignup(agency.signupCode(), request)
+                .expectStatus().isCreated()
+                .expectBody(TokenPair.class).returnResult().getResponseBody();
         post("/api/v1/workers/" + workerId(tokens) + "/approve", dispatcher).expectStatus().isOk();
         return tokens;
     }
@@ -673,6 +798,16 @@ class WaitlistIntegrationTests extends IntegrationTest {
     UUID entryId(UUID shiftId, TokenPair worker) {
         return jdbc.sql("select id from assignment where shift_id = ? and worker_id = ?")
                 .params(shiftId, workerId(worker)).query(UUID.class).single();
+    }
+
+    RestTestClient.ResponseSpec removeFromWaitlist(UUID shiftId, UUID entryId) {
+        return removeFromWaitlist(shiftId, entryId, dispatcher);
+    }
+
+    RestTestClient.ResponseSpec removeFromWaitlist(UUID shiftId, UUID entryId, TokenPair tokens) {
+        return client.delete().uri("/api/v1/shifts/" + shiftId + "/waitlist/" + entryId)
+                .headers(headers -> headers.setBearerAuth(tokens.accessToken()))
+                .exchange();
     }
 
     RestTestClient.ResponseSpec remove(UUID shiftId, UUID assignmentId) {

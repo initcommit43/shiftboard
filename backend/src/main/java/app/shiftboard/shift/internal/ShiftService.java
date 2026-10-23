@@ -20,6 +20,7 @@ import app.shiftboard.shift.ShiftCompleted;
 import app.shiftboard.shift.ShiftDetails;
 import app.shiftboard.shift.ShiftPublished;
 import app.shiftboard.shift.ShiftSpotsAdded;
+import app.shiftboard.shift.ShiftWaitlists;
 import app.shiftboard.shift.Shifts;
 import app.shiftboard.shift.internal.ShiftController.ClientSummary;
 import app.shiftboard.shift.internal.ShiftController.ShiftChangeRequest;
@@ -57,18 +58,22 @@ class ShiftService implements Shifts {
 
     private final UserAccounts userAccounts;
 
+    private final ShiftWaitlists waitlists;
+
     private final ApplicationEventPublisher events;
 
     private final TransactionTemplate transactions;
 
     ShiftService(
             ShiftRepository shifts, Clients clients, Agencies agencies, ShiftReferences references,
-            UserAccounts userAccounts, ApplicationEventPublisher events, TransactionTemplate transactions) {
+            UserAccounts userAccounts, ShiftWaitlists waitlists, ApplicationEventPublisher events,
+            TransactionTemplate transactions) {
         this.shifts = shifts;
         this.clients = clients;
         this.agencies = agencies;
         this.references = references;
         this.userAccounts = userAccounts;
+        this.waitlists = waitlists;
         this.events = events;
         this.transactions = transactions;
     }
@@ -262,8 +267,10 @@ class ShiftService implements Shifts {
         return new ApiException(HttpStatus.NOT_FOUND, "shift_not_found", "The agency has no shift with this id.");
     }
 
+    // How many wait for each shift comes from the assignment module in one call, whatever the number of shifts.
     private List<ShiftResponse> responses(List<Shift> page) {
         var createdAt = page.stream().collect(Collectors.toMap(Shift::getId, Shift::getCreatedAt));
+        var waiting = waitlists.waitingCounts(page.stream().map(Shift::getId).toList());
         return details(page).stream()
                 .map(shift -> new ShiftResponse(
                         shift.id(),
@@ -278,6 +285,7 @@ class ShiftService implements Shifts {
                         shift.hourlyRateCents(),
                         shift.slots(),
                         shift.takenSlots(),
+                        waiting.getOrDefault(shift.id(), 0),
                         shift.qualifications(),
                         createdAt.get(shift.id())))
                 .toList();
