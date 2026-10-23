@@ -20,6 +20,24 @@ extension ShiftFacts on WorkerShift {
     _ => false,
   };
 
+  /// Whether the worker is on the shift's waitlist.
+  bool get isWaiting => waitlist != null;
+
+  /// Whether the worker can join the waitlist at [now]: the agency uses it,
+  /// the published shift is full and has not started, and the worker has
+  /// neither claimed it nor joined its waitlist (ADR 0029).
+  bool canJoinWaitlistAt(DateTime now) =>
+      (waitlistEnabled ?? false) &&
+      status == ShiftStatus.PUBLISHED &&
+      isFull &&
+      assignment == null &&
+      waitlist == null &&
+      now.isBefore(startsAt);
+
+  /// Whether the worker can still leave the waitlist at [now]: until the
+  /// start, also when the agency switched the waitlist off since.
+  bool canLeaveWaitlistAt(DateTime now) => isWaiting && now.isBefore(startsAt);
+
   /// Whether the worker can still drop out in the app at [now].
   bool canCancelAt(DateTime now) {
     final until = assignment?.cancellableUntil;

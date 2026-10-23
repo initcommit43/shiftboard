@@ -923,5 +923,117 @@
   "checkInErrorShiftGone": "Diese Schicht gibt es nicht mehr.",
   "@checkInErrorShiftGone": {
     "description": "Error: the shift was not found."
+  },
+  "shiftSpotsWaitlist": "Keine Plätze frei · Warteliste offen",
+  "@shiftSpotsWaitlist": {
+    "description": "Spots line of a full shift whose waitlist the worker can join."
+  },
+  "waitlistBadge": "Warteliste · Platz {position}",
+  "@waitlistBadge": {
+    "description": "Badge of a shift the worker is waiting for, with their place in line.",
+    "placeholders": {
+      "position": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "waitlistJoinAction": "Auf die Warteliste",
+  "@waitlistJoinAction": {
+    "description": "Button on a full shift's detail that opens the waitlist confirmation."
+  },
+  "waitlistJoinSheetTitle": "Auf die Warteliste?",
+  "@waitlistJoinSheetTitle": {
+    "description": "Title of the sheet that confirms joining the waitlist."
+  },
+  "waitlistJoinSheetMessage": "Wird ein Platz frei, rückst du der Reihe nach automatisch nach und hörst von {agency}. Nach der Absagefrist bekommen alle auf der Warteliste Bescheid, und wer zuerst anfragt, bekommt den Platz.",
+  "@waitlistJoinSheetMessage": {
+    "description": "Text of the waitlist sheet: how moving up works (ADR 0029).",
+    "placeholders": {
+      "agency": {
+        "type": "String",
+        "example": "Donau Personal"
+      }
+    }
+  },
+  "waitlistJoinSubmit": "Eintragen",
+  "@waitlistJoinSubmit": {
+    "description": "Button in the waitlist sheet that joins the waitlist."
+  },
+  "waitlistJoinSubmitting": "Wird eingetragen …",
+  "@waitlistJoinSubmitting": {
+    "description": "Join button while the request is sent."
+  },
+  "waitlistJoined": "Du stehst auf der Warteliste, Platz {position}.",
+  "@waitlistJoined": {
+    "description": "Snackbar after joining the waitlist.",
+    "placeholders": {
+      "position": {
+        "type": "int",
+        "example": "2"
+      }
+    }
+  },
+  "waitlistNoteNext": "Du rückst als Nächstes nach, wenn ein Platz frei wird.",
+  "@waitlistNoteNext": {
+    "description": "Note on a shift the worker waits for in first place."
+  },
+  "waitlistNoteAhead": "{count, plural, =1{Vor dir wartet noch 1 Person.} other{Vor dir warten noch {count} Personen.}}",
+  "@waitlistNoteAhead": {
+    "description": "Note on a shift the worker waits for: how many are ahead in line.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "waitlistNoteSpotFree": "Ein Platz ist frei. Wer zuerst anfragt, bekommt ihn.",
+  "@waitlistNoteSpotFree": {
+    "description": "Note on a shift the worker waits for that has a free spot after the cancellation deadline."
+  },
+  "waitlistLeaveAction": "Warteliste verlassen",
+  "@waitlistLeaveAction": {
+    "description": "Button on a shift's detail that starts leaving its waitlist."
+  },
+  "waitlistLeaveSheetTitle": "Warteliste verlassen?",
+  "@waitlistLeaveSheetTitle": {
+    "description": "Title of the sheet that confirms leaving the waitlist."
+  },
+  "waitlistLeaveSheetMessage": "Du verlierst deinen Platz. Trägst du dich wieder ein, stehst du hinten an.",
+  "@waitlistLeaveSheetMessage": {
+    "description": "Text of the sheet that confirms leaving the waitlist."
+  },
+  "waitlistLeaveSubmit": "Verlassen",
+  "@waitlistLeaveSubmit": {
+    "description": "The sheet's button that leaves the waitlist."
+  },
+  "waitlistLeaveSubmitting": "Wird ausgetragen …",
+  "@waitlistLeaveSubmitting": {
+    "description": "The sheet's button while leaving is sent."
+  },
+  "waitlistLeaveKeep": "Bleiben",
+  "@waitlistLeaveKeep": {
+    "description": "Button that closes the leave sheet and keeps the place."
+  },
+  "waitlistLeft": "Du stehst nicht mehr auf der Warteliste.",
+  "@waitlistLeft": {
+    "description": "Snackbar after leaving the waitlist."
+  },
+  "waitlistErrorDisabled": "Für diese Schicht gibt es keine Warteliste mehr.",
+  "@waitlistErrorDisabled": {
+    "description": "Joining failed: the agency switched the waitlist off."
+  },
+  "waitlistErrorNotFull": "Gerade ist ein Platz frei geworden. Du kannst die Schicht jetzt anfragen.",
+  "@waitlistErrorNotFull": {
+    "description": "Joining failed: the shift has a free spot again."
+  },
+  "waitlistErrorAlreadyWaiting": "Du stehst schon auf der Warteliste.",
+  "@waitlistErrorAlreadyWaiting": {
+    "description": "Joining failed: the worker is already waiting."
+  },
+  "waitlistErrorNotWaiting": "Du stehst nicht mehr auf der Warteliste. Vielleicht bist du gerade nachgerückt.",
+  "@waitlistErrorNotWaiting": {
+    "description": "Leaving failed: the worker was no longer waiting, for example because they moved up."
   }
 }

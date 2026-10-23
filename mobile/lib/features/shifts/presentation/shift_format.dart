@@ -48,17 +48,27 @@ class ShiftFormat {
   String hourlyRate(WorkerShift shift) =>
       _l10n.shiftHourlyRate(money(shift.hourlyRateCents));
 
-  String spots(WorkerShift shift) => shift.isFull
-      ? _l10n.shiftNoSpotsLeft
-      : _l10n.shiftSpotsLeft(shift.spotsLeft, shift.slots);
+  /// The spots left, and on a full shift whether its waitlist is open to the
+  /// worker.
+  String spots(WorkerShift shift) {
+    if (!shift.isFull) {
+      return _l10n.shiftSpotsLeft(shift.spotsLeft, shift.slots);
+    }
+    final waitlistOpen =
+        (shift.waitlistEnabled ?? false) &&
+        shift.status == ShiftStatus.PUBLISHED &&
+        shift.assignment == null &&
+        !shift.isWaiting;
+    return waitlistOpen ? _l10n.shiftSpotsWaitlist : _l10n.shiftNoSpotsLeft;
+  }
 
   /// For example "18:00".
   String time(DateTime time) => DateFormat.Hm(_locale).format(time.toLocal());
 }
 
 /// The badge of a shift: the worker's own claim if there is one ("Eingecheckt"
-/// while checked in), otherwise
-/// whether the shift is full. Null for an open shift, which is the normal
+/// while checked in), their place on the waitlist, otherwise whether the
+/// shift is full. Null for an open shift, which is the normal
 /// case and needs no mark.
 AppBadge? shiftBadge(WorkerShift shift, AppLocalizations l10n) {
   final claim = shift.assignment?.status;
@@ -78,6 +88,12 @@ AppBadge? shiftBadge(WorkerShift shift, AppLocalizations l10n) {
       _ => (AppStatus.pending, l10n.claimPending),
     };
     return AppBadge(status: status, label: label);
+  }
+  if (shift.waitlist case final place?) {
+    return AppBadge(
+      status: AppStatus.waiting,
+      label: l10n.waitlistBadge(place.position),
+    );
   }
   if (shift.isFull) {
     return AppBadge(status: AppStatus.full, label: l10n.shiftFull);

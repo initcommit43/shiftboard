@@ -25,11 +25,13 @@ import 'check_in.dart';
 import 'claim_sheet.dart';
 import 'shift_card.dart';
 import 'shift_format.dart';
+import 'waitlist_sheet.dart';
 
 /// Everything about one shift: the card's facts plus the description, the
 /// required qualifications, the address with a map link and the contact.
-/// A shift the worker has not claimed yet offers the claim at the bottom; a
-/// claimed one that has not started offers to drop out. Where the agency uses
+/// A shift the worker has not claimed yet offers the claim at the bottom, or
+/// its waitlist when it is full; a claimed one that has not started offers to
+/// drop out, and a place on the waitlist to leave it. Where the agency uses
 /// check-in, checking in and out takes over the bar once check-in opens.
 class ShiftDetailScreen extends ConsumerWidget {
   const ShiftDetailScreen({super.key, required this.shiftId});
@@ -114,8 +116,10 @@ class ShiftDetailScreen extends ConsumerWidget {
             ),
             Expanded(child: body),
             if (shift.value case final shift?)
-              if (shift.assignment == null)
-                _ClaimBar(shift: shift)
+              if (shift.canLeaveWaitlistAt(now))
+                _WaitlistBar(shift: shift)
+              else if (shift.assignment == null && !shift.isWaiting)
+                _ClaimBar(shift: shift, now: now)
               else if (shift.checkInAt(now).hasAction)
                 CheckInBar(shift: shift, now: now)
               else if (shift.holdsSpot &&
@@ -143,16 +147,27 @@ void _tell(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
 }
 
-/// The screen's one call to action, pinned below the details. Disabled with
-/// the reason as its label when no spot is left.
-class _ClaimBar extends ConsumerWidget {
-  const _ClaimBar({required this.shift});
+/// Opens the claim sheet for [shift] and confirms a sent claim.
+Future<void> _claim(
+  BuildContext context,
+  WidgetRef ref,
+  WorkerShift shift,
+) async {
+  final l10n = context.l10n;
+  final claimed = await showClaimSheet(context, shift);
+  if (!claimed || !context.mounted) return;
+  final agency = ref.read(currentUserProvider)?.agency.name ?? '';
+  _tell(context, l10n.claimSent(agency));
+}
 
-  final WorkerShift shift;
+/// A bar pinned below the details, above the safe area.
+class _Bar extends StatelessWidget {
+  const _Bar({required this.child});
+
+  final Widget child;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = context.l10n;
+  Widget build(BuildContext context) {
     final margin = screenMargin(context);
 
     return DecoratedBox(
@@ -168,19 +183,91 @@ class _ClaimBar extends ConsumerWidget {
             margin,
             AppSpacing.sm,
           ),
-          child: AppButton(
-            label: shift.isFull ? l10n.shiftNoSpotsLeft : l10n.claimAction,
-            onPressed: shift.isFull
-                ? null
-                : () async {
-                    final claimed = await showClaimSheet(context, shift);
-                    if (!claimed || !context.mounted) return;
-                    final agency =
-                        ref.read(currentUserProvider)?.agency.name ?? '';
-                    _tell(context, l10n.claimSent(agency));
-                  },
-          ),
+          child: child,
         ),
+      ),
+    );
+  }
+}
+
+/// The screen's one call to action, pinned below the details. On a full
+/// shift it offers the waitlist where the agency uses one, otherwise it is
+/// disabled with the reason as its label.
+class _ClaimBar extends ConsumerWidget {
+  const _ClaimBar({required this.shift, required this.now});
+
+  final WorkerShift shift;
+  final DateTime now;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+
+    final Widget button;
+    if (!shift.isFull) {
+      button = AppButton(
+        label: l10n.claimAction,
+        onPressed: () => _claim(context, ref, shift),
+      );
+    } else if (shift.canJoinWaitlistAt(now)) {
+      button = AppButton(
+        label: l10n.waitlistJoinAction,
+        onPressed: () async {
+          final joined = await showJoinWaitlistSheet(context, shift);
+          final place = joined?.waitlist;
+          if (place == null || !context.mounted) return;
+          _tell(context, l10n.waitlistJoined(place.position));
+        },
+      );
+    } else {
+      button = AppButton(label: l10n.shiftNoSpotsLeft, onPressed: null);
+    }
+    return _Bar(child: button);
+  }
+}
+
+/// The pinned bar while the worker waits for a spot: leave the waitlist, or
+/// claim the spot that is free after the cancellation deadline, when the
+/// first claim wins.
+class _WaitlistBar extends ConsumerWidget {
+  const _WaitlistBar({required this.shift});
+
+  final WorkerShift shift;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
+
+    Future<void> leave() async {
+      final left = await showLeaveWaitlistSheet(context, shift);
+      if (!left || !context.mounted) return;
+      _tell(context, l10n.waitlistLeft);
+    }
+
+    if (shift.isFull) {
+      return _Bar(
+        child: AppButton(
+          label: l10n.waitlistLeaveAction,
+          variant: AppButtonVariant.outline,
+          onPressed: leave,
+        ),
+      );
+    }
+    return _Bar(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppButton(
+            label: l10n.claimAction,
+            onPressed: () => _claim(context, ref, shift),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          AppButton(
+            label: l10n.waitlistLeaveAction,
+            variant: AppButtonVariant.text,
+            onPressed: leave,
+          ),
+        ],
       ),
     );
   }
@@ -197,7 +284,6 @@ class _CancelBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = context.l10n;
-    final margin = screenMargin(context);
     final phone = shift.contact.phone;
 
     final Widget content;
@@ -266,28 +352,13 @@ class _CancelBar extends ConsumerWidget {
       );
     }
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: context.colors.hairline)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            margin,
-            AppSpacing.md,
-            margin,
-            AppSpacing.sm,
-          ),
-          child: content,
-        ),
-      ),
-    );
+    return _Bar(child: content);
   }
 }
 
 /// What the worker should know about their claim beyond its badge: until
-/// when they can drop out, or who cancelled it.
+/// when they can drop out, or who cancelled it. On the waitlist, how many are
+/// ahead of them, or that a spot is free to claim.
 String? _claimNote(
   WorkerShift shift,
   AppLocalizations l10n,
@@ -295,6 +366,12 @@ String? _claimNote(
   String agency,
   DateTime now,
 ) {
+  if (shift.waitlist case final place?) {
+    if (!shift.isFull) return l10n.waitlistNoteSpotFree;
+    return place.position <= 1
+        ? l10n.waitlistNoteNext
+        : l10n.waitlistNoteAhead(place.position - 1);
+  }
   final assignment = shift.assignment;
   if (assignment == null) return null;
   if (assignment.status == AssignmentStatus.CANCELLED) {

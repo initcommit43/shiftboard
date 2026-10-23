@@ -152,4 +152,61 @@ void main() {
       expect(done.checkInAt(DateTime(2026, 10, 17, 17)), CheckIn.checkedOut);
     });
   });
+
+  group('waitlist', () {
+    // The fixture shift starts on Saturday, 17 October at 18:00.
+    final before = DateTime(2026, 10, 15, 10);
+    final start = DateTime(2026, 10, 17, 18);
+
+    WorkerShift full({
+      bool? waitlistEnabled = true,
+      int takenSlots = 5,
+      String status = 'PUBLISHED',
+      String? assignmentStatus,
+      int? waitlistPosition,
+    }) => standardSerializers.deserializeWith(
+      WorkerShift.serializer,
+      workerShift(
+        takenSlots: takenSlots,
+        status: status,
+        assignmentStatus: assignmentStatus,
+        waitlistEnabled: waitlistEnabled,
+        waitlistPosition: waitlistPosition,
+      ),
+    )!;
+
+    test('can be joined on a full published shift before its start', () {
+      expect(full().canJoinWaitlistAt(before), isTrue);
+      expect(full().canJoinWaitlistAt(start), isFalse);
+    });
+
+    test('needs the agency setting', () {
+      expect(full(waitlistEnabled: false).canJoinWaitlistAt(before), isFalse);
+      expect(full(waitlistEnabled: null).canJoinWaitlistAt(before), isFalse);
+    });
+
+    test('is not offered while spots are free or the shift is closed', () {
+      expect(full(takenSlots: 4).canJoinWaitlistAt(before), isFalse);
+      expect(full(status: 'CANCELLED').canJoinWaitlistAt(before), isFalse);
+    });
+
+    test('is not offered after a claim of any status or a second time', () {
+      for (final status in ['PENDING', 'CONFIRMED', 'REJECTED', 'CANCELLED']) {
+        expect(
+          full(assignmentStatus: status).canJoinWaitlistAt(before),
+          isFalse,
+          reason: status,
+        );
+      }
+      expect(full(waitlistPosition: 1).canJoinWaitlistAt(before), isFalse);
+    });
+
+    test('can be left until the start, also once switched off', () {
+      final waiting = full(waitlistEnabled: false, waitlistPosition: 3);
+      expect(waiting.isWaiting, isTrue);
+      expect(waiting.canLeaveWaitlistAt(before), isTrue);
+      expect(waiting.canLeaveWaitlistAt(start), isFalse);
+      expect(full().canLeaveWaitlistAt(before), isFalse);
+    });
+  });
 }

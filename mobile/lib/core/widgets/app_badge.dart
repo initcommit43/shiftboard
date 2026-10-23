@@ -13,6 +13,9 @@ enum AppStatus {
 
   /// A shift without free spots; neutral, since nothing went wrong.
   full,
+
+  /// A place on a shift's waitlist; neutral too, since it holds no spot.
+  waiting,
 }
 
 /// A status as a pill with an icon and a word. Not tappable.
@@ -48,6 +51,11 @@ class AppBadge extends StatelessWidget {
       ),
       AppStatus.full => (
         CupertinoIcons.minus_circle,
+        colors.ink,
+        colors.surfaceSoft,
+      ),
+      AppStatus.waiting => (
+        CupertinoIcons.hourglass,
         colors.ink,
         colors.surfaceSoft,
       ),
