@@ -57,7 +57,7 @@ class SeedDataIntegrationTests {
                 Map.entry("shift_qualification", 9),
                 Map.entry("shift_template", 5),
                 Map.entry("shift_template_qualification", 5),
-                Map.entry("assignment", 10),
+                Map.entry("assignment", 15),
                 Map.entry("conversation", 2),
                 Map.entry("message", 3)));
         assertThat(workersOfDonauPersonalWith("ACTIVE")).isEqualTo(6);
@@ -171,6 +171,51 @@ class SeedDataIntegrationTests {
                 .jsonPath("$.content[0].title").isEqualTo("Service Tagung")
                 .jsonPath("$.content[0].assignment.status").isEqualTo("CONFIRMED")
                 .jsonPath("$.content[0].assignment.checkInFrom").isNotEmpty();
+    }
+
+    @Test
+    void theFullForkliftShiftHasAWaitlistWithTheDemoWorkerFirst() {
+        var dispatcher = login("dispatcher1.donau@example.com", "DASHBOARD");
+        client.get().uri("/api/v1/agency/settings")
+                .headers(headers -> headers.setBearerAuth(dispatcher))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody().jsonPath("$.waitlist").isEqualTo(true);
+        client.get().uri("/api/v1/shifts")
+                .headers(headers -> headers.setBearerAuth(dispatcher))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[4].title").isEqualTo("Staplerfahrer:in")
+                .jsonPath("$.content[4].takenSlots").isEqualTo(2)
+                .jsonPath("$.content[4].slots").isEqualTo(2)
+                .jsonPath("$.content[4].waitingCount").isEqualTo(3);
+        var forklift = jdbc.sql("select id from shift where title = 'Staplerfahrer:in'").query(String.class).single();
+        client.get().uri("/api/v1/shifts/{id}/waitlist", forklift)
+                .headers(headers -> headers.setBearerAuth(dispatcher))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[*].worker.firstName").isEqualTo(List.of("Lena", "Mira", "Sophie"))
+                .jsonPath("$.content[*].position").isEqualTo(List.of(1, 2, 3));
+
+        // Jakob can still drop out: the shift is more than the deadline of 24 hours away.
+        var jakob = login("jakob.steiner@example.com", "WORKER_APP");
+        client.get().uri("/api/v1/worker/shifts/{id}", forklift)
+                .headers(headers -> headers.setBearerAuth(jakob))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.assignment.status").isEqualTo("CONFIRMED")
+                .jsonPath("$.assignment.cancellableUntil").value(until ->
+                        assertThat(Instant.parse((String) until)).isAfter(Instant.now()));
+        var lena = login("lena.hofer@example.com", "WORKER_APP");
+        client.get().uri("/api/v1/worker/my-shifts?includeWaitlist=true")
+                .headers(headers -> headers.setBearerAuth(lena))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[?(@.title == 'Staplerfahrer:in')].waitlist.position").isEqualTo(List.of(1));
     }
 
     @Test
