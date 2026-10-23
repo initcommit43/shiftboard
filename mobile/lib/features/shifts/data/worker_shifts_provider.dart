@@ -20,13 +20,14 @@ final workerShiftsProvider = FutureProvider.autoDispose<List<WorkerShift>>(
   retry: (retryCount, error) => null,
 );
 
-/// Every shift the worker has claimed, with their assignment, earliest first.
+/// Every shift the worker has claimed, with their assignment, and every
+/// shift they are on the waitlist for, with their place, earliest first.
 final myShiftsProvider = FutureProvider.autoDispose<List<WorkerShift>>(
   (ref) async {
     final response = await ref
         .watch(apiProvider)
         .getWorkerShiftsApi()
-        .listMyShifts(size: _listSize);
+        .listMyShifts(includeWaitlist: true, size: _listSize);
     return response.data!.content.toList();
   },
   // The list offers a manual retry and pull to refresh.

@@ -74,10 +74,42 @@ void main() {
       );
     }
     expect(backend.sent('GET /worker/my-shifts').single.queryParameters, {
-      'includeWaitlist': false,
+      'includeWaitlist': true,
       'page': 0,
       'size': 100,
     });
+  });
+
+  testWidgets('lists the shifts the worker waits for with their place', (
+    tester,
+  ) async {
+    backend.on(
+      'GET /worker/my-shifts',
+      (_) => json(
+        page([
+          workerShift(
+            takenSlots: 5,
+            waitlistEnabled: true,
+            waitlistPosition: 2,
+          ),
+        ]),
+      ),
+    );
+
+    await openMyShifts(tester);
+
+    final card = find.descendant(
+      of: find.byType(MyShiftsView),
+      matching: find.byType(ShiftCard),
+    );
+    expect(
+      find.descendant(of: card, matching: find.text('Warteliste · Platz 2')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: card, matching: find.text('Keine Plätze frei')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('tapping a claimed shift opens its detail', (tester) async {

@@ -7,7 +7,7 @@ import '../data/worker_shifts_provider.dart';
 import 'shift_list_view.dart';
 
 /// The tab with the shifts the worker has claimed and where each claim
-/// stands. [onBrowseShifts] switches to the open shifts.
+/// stands, and the shifts they wait for with their place in line. [onBrowseShifts] switches to the open shifts.
 class MyShiftsView extends StatelessWidget {
   const MyShiftsView({super.key, required this.onBrowseShifts});
 
