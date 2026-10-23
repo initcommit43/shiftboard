@@ -33,11 +33,16 @@ class AgencySettingsController {
     @PutMapping
     AgencySettings change(@Valid @RequestBody SettingsRequest request) {
         return agencyService.changeSettings(
-                new AgencySettings(request.autoConfirm(), request.cancellationDeadlineHours()));
+                request.autoConfirm(), request.cancellationDeadlineHours(), request.waitlist());
     }
 
+    /**
+     * @param waitlist absent keeps the current value, so that a client that knows no waitlist
+     *                 does not switch it off
+     */
     record SettingsRequest(
             @NotNull Boolean autoConfirm,
-            @NotNull @Min(0) @Max(AgencySettings.MAX_CANCELLATION_DEADLINE_HOURS) Integer cancellationDeadlineHours) {
+            @NotNull @Min(0) @Max(AgencySettings.MAX_CANCELLATION_DEADLINE_HOURS) Integer cancellationDeadlineHours,
+            Boolean waitlist) {
     }
 }

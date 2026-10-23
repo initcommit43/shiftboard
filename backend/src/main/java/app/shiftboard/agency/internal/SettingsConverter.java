@@ -19,11 +19,14 @@ class SettingsConverter implements AttributeConverter<AgencySettings, String> {
 
     private static final String CANCELLATION_DEADLINE_HOURS = "cancellationDeadlineHours";
 
+    private static final String WAITLIST = "waitlist";
+
     @Override
     public String convertToDatabaseColumn(AgencySettings settings) {
         var json = JSON.createObjectNode();
         json.put(AUTO_CONFIRM, settings.autoConfirm());
         json.put(CANCELLATION_DEADLINE_HOURS, settings.cancellationDeadlineHours());
+        json.put(WAITLIST, settings.waitlist());
         return JSON.writeValueAsString(json);
     }
 
@@ -36,6 +39,7 @@ class SettingsConverter implements AttributeConverter<AgencySettings, String> {
         var json = (ObjectNode) JSON.readTree(column);
         return new AgencySettings(
                 json.path(AUTO_CONFIRM).asBoolean(defaults.autoConfirm()),
-                json.path(CANCELLATION_DEADLINE_HOURS).asInt(defaults.cancellationDeadlineHours()));
+                json.path(CANCELLATION_DEADLINE_HOURS).asInt(defaults.cancellationDeadlineHours()),
+                json.path(WAITLIST).asBoolean(defaults.waitlist()));
     }
 }
