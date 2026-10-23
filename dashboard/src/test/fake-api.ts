@@ -119,6 +119,7 @@ export function shift(number: number, values: Partial<Shift> & Pick<Shift, 'titl
     hourlyRateCents: 1650,
     slots: 5,
     takenSlots: 0,
+    waitingCount: 0,
     qualifications: [],
     createdAt: new Date(2026, 9, 12, 9, 30),
     ...values,

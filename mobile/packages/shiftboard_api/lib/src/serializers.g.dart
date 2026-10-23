@@ -63,6 +63,9 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..add(SystemEvent.serializer)
       ..add(TokenResponse.serializer)
       ..add(UnreadCount.serializer)
+      ..add(WaitlistEntry.serializer)
+      ..add(WaitlistEntryPage.serializer)
+      ..add(WaitlistPlace.serializer)
       ..add(WorkedHours.serializer)
       ..add(Worker.serializer)
       ..add(WorkerPage.serializer)
@@ -110,6 +113,9 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(ShiftTemplate)]),
           () => ListBuilder<ShiftTemplate>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(WaitlistEntry)]),
+          () => ListBuilder<WaitlistEntry>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(Worker)]),
           () => ListBuilder<Worker>())

@@ -281,7 +281,7 @@ class SettingsApi {
   }
 
   /// Change the agency&#39;s workflow settings
-  /// Applies to claims and cancellations made afterwards; decisions already made stay as they are. Admins only.  Field error codes: &#x60;required&#x60;, &#x60;out_of_range&#x60; (&#x60;cancellationDeadlineHours&#x60; below 0 or above 336).  Error codes: &#x60;validation_failed&#x60; (400, with &#x60;errors&#x60;), &#x60;forbidden&#x60; (403, not an admin).
+  /// Applies to claims and cancellations made afterwards; decisions already made stay as they are. Switching &#x60;waitlist&#x60; off stops new entries; workers already waiting stay in line. Admins only.  Field error codes: &#x60;required&#x60;, &#x60;out_of_range&#x60; (&#x60;cancellationDeadlineHours&#x60; below 0 or above 336).  Error codes: &#x60;validation_failed&#x60; (400, with &#x60;errors&#x60;), &#x60;forbidden&#x60; (403, not an admin).
   ///
   /// Parameters:
   /// * [agencySettings]

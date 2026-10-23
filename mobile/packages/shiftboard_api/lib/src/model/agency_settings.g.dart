@@ -11,12 +11,16 @@ class _$AgencySettings extends AgencySettings {
   final bool autoConfirm;
   @override
   final int cancellationDeadlineHours;
+  @override
+  final bool? waitlist;
 
   factory _$AgencySettings([void Function(AgencySettingsBuilder)? updates]) =>
       (AgencySettingsBuilder()..update(updates))._build();
 
   _$AgencySettings._(
-      {required this.autoConfirm, required this.cancellationDeadlineHours})
+      {required this.autoConfirm,
+      required this.cancellationDeadlineHours,
+      this.waitlist})
       : super._();
   @override
   AgencySettings rebuild(void Function(AgencySettingsBuilder) updates) =>
@@ -30,7 +34,8 @@ class _$AgencySettings extends AgencySettings {
     if (identical(other, this)) return true;
     return other is AgencySettings &&
         autoConfirm == other.autoConfirm &&
-        cancellationDeadlineHours == other.cancellationDeadlineHours;
+        cancellationDeadlineHours == other.cancellationDeadlineHours &&
+        waitlist == other.waitlist;
   }
 
   @override
@@ -38,6 +43,7 @@ class _$AgencySettings extends AgencySettings {
     var _$hash = 0;
     _$hash = $jc(_$hash, autoConfirm.hashCode);
     _$hash = $jc(_$hash, cancellationDeadlineHours.hashCode);
+    _$hash = $jc(_$hash, waitlist.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -46,7 +52,8 @@ class _$AgencySettings extends AgencySettings {
   String toString() {
     return (newBuiltValueToStringHelper(r'AgencySettings')
           ..add('autoConfirm', autoConfirm)
-          ..add('cancellationDeadlineHours', cancellationDeadlineHours))
+          ..add('cancellationDeadlineHours', cancellationDeadlineHours)
+          ..add('waitlist', waitlist))
         .toString();
   }
 }
@@ -64,6 +71,10 @@ class AgencySettingsBuilder
   set cancellationDeadlineHours(int? cancellationDeadlineHours) =>
       _$this._cancellationDeadlineHours = cancellationDeadlineHours;
 
+  bool? _waitlist;
+  bool? get waitlist => _$this._waitlist;
+  set waitlist(bool? waitlist) => _$this._waitlist = waitlist;
+
   AgencySettingsBuilder() {
     AgencySettings._defaults(this);
   }
@@ -73,6 +84,7 @@ class AgencySettingsBuilder
     if ($v != null) {
       _autoConfirm = $v.autoConfirm;
       _cancellationDeadlineHours = $v.cancellationDeadlineHours;
+      _waitlist = $v.waitlist;
       _$v = null;
     }
     return this;
@@ -100,6 +112,7 @@ class AgencySettingsBuilder
               cancellationDeadlineHours,
               r'AgencySettings',
               'cancellationDeadlineHours'),
+          waitlist: waitlist,
         );
     replace(_$result);
     return _$result;

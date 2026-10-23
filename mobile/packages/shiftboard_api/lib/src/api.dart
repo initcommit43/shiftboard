@@ -20,6 +20,7 @@ import 'package:shiftboard_api/src/api/shift_templates_api.dart';
 import 'package:shiftboard_api/src/api/shifts_api.dart';
 import 'package:shiftboard_api/src/api/signup_api.dart';
 import 'package:shiftboard_api/src/api/system_api.dart';
+import 'package:shiftboard_api/src/api/waitlist_api.dart';
 import 'package:shiftboard_api/src/api/worker_shifts_api.dart';
 import 'package:shiftboard_api/src/api/workers_api.dart';
 
@@ -207,6 +208,12 @@ class ShiftboardApi {
   /// by doing that all interceptors will not be executed
   SystemApi getSystemApi() {
     return SystemApi(dio, serializers);
+  }
+
+  /// Get WaitlistApi instance, base route and serializer can be overridden by a given but be careful,
+  /// by doing that all interceptors will not be executed
+  WaitlistApi getWaitlistApi() {
+    return WaitlistApi(dio, serializers);
   }
 
   /// Get WorkerShiftsApi instance, base route and serializer can be overridden by a given but be careful,

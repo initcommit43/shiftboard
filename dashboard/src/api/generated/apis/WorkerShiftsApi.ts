@@ -52,6 +52,12 @@ export interface GetWorkerShiftRequest {
 
 export interface ListMyShiftsRequest {
     /**
+     * Also list the shifts the worker is on the waitlist for. False by
+     * default, so that app versions that know no waitlist see none.
+     * 
+     */
+    includeWaitlist?: boolean;
+    /**
      * Page number, starting at 0.
      */
     page?: number;
@@ -168,7 +174,7 @@ export class WorkerShiftsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Creates the worker\'s assignment as `PENDING` and counts the spot as taken. When two workers claim the last spot at the same time, one of them gets `shift_full`. The claim is not checked against the shift\'s qualifications. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403), `shift_not_found` (404), and with 409: `shift_full` (no spot left), `shift_already_claimed` (the worker has claimed this shift before, whatever became of that claim), `shift_started` (the start time has passed), `shift_not_open` (cancelled or completed) and `shift_overlap` (it overlaps one of the worker\'s pending or confirmed shifts). 
+     * Creates the worker\'s assignment as `PENDING` and counts the spot as taken. When two workers claim the last spot at the same time, one of them gets `shift_full`. The claim is not checked against the shift\'s qualifications. A worker on the shift\'s waitlist can claim a free spot too; their place in line becomes the claim. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403), `shift_not_found` (404), and with 409: `shift_full` (no spot left), `shift_already_claimed` (the worker has claimed this shift before, whatever became of that claim), `shift_started` (the start time has passed), `shift_not_open` (cancelled or completed) and `shift_overlap` (it overlaps one of the worker\'s pending or confirmed shifts). 
      * Claim a spot on a shift
      */
     async claimShiftRaw(requestParameters: ClaimShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WorkerShift>> {
@@ -179,7 +185,7 @@ export class WorkerShiftsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Creates the worker\'s assignment as `PENDING` and counts the spot as taken. When two workers claim the last spot at the same time, one of them gets `shift_full`. The claim is not checked against the shift\'s qualifications. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403), `shift_not_found` (404), and with 409: `shift_full` (no spot left), `shift_already_claimed` (the worker has claimed this shift before, whatever became of that claim), `shift_started` (the start time has passed), `shift_not_open` (cancelled or completed) and `shift_overlap` (it overlaps one of the worker\'s pending or confirmed shifts). 
+     * Creates the worker\'s assignment as `PENDING` and counts the spot as taken. When two workers claim the last spot at the same time, one of them gets `shift_full`. The claim is not checked against the shift\'s qualifications. A worker on the shift\'s waitlist can claim a free spot too; their place in line becomes the claim. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403), `shift_not_found` (404), and with 409: `shift_full` (no spot left), `shift_already_claimed` (the worker has claimed this shift before, whatever became of that claim), `shift_started` (the start time has passed), `shift_not_open` (cancelled or completed) and `shift_overlap` (it overlaps one of the worker\'s pending or confirmed shifts). 
      * Claim a spot on a shift
      */
     async claimShift(requestParameters: ClaimShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WorkerShift> {
@@ -248,6 +254,10 @@ export class WorkerShiftsApi extends runtime.BaseAPI {
     async listMyShiftsRequestOpts(requestParameters: ListMyShiftsRequest): Promise<runtime.RequestOpts> {
         const queryParameters: any = {};
 
+        if (requestParameters['includeWaitlist'] != null) {
+            queryParameters['includeWaitlist'] = requestParameters['includeWaitlist'];
+        }
+
         if (requestParameters['page'] != null) {
             queryParameters['page'] = requestParameters['page'];
         }
@@ -278,7 +288,7 @@ export class WorkerShiftsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Every shift the worker has an assignment for, whatever its status, sorted by start time, earliest first. Each shift carries the `assignment`. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403). 
+     * Every shift the worker has an assignment for, whatever its status, sorted by start time, earliest first. Each shift carries the `assignment`. With `includeWaitlist`, the shifts the worker is waiting for are listed too, carrying `waitlist` instead of `assignment`. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403). 
      * List the shifts the worker has claimed
      */
     async listMyShiftsRaw(requestParameters: ListMyShiftsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<WorkerShiftPage>> {
@@ -289,7 +299,7 @@ export class WorkerShiftsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Every shift the worker has an assignment for, whatever its status, sorted by start time, earliest first. Each shift carries the `assignment`. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403). 
+     * Every shift the worker has an assignment for, whatever its status, sorted by start time, earliest first. Each shift carries the `assignment`. With `includeWaitlist`, the shifts the worker is waiting for are listed too, carrying `waitlist` instead of `assignment`. Active workers only.  Error codes: `forbidden` (403), `worker_not_active` (403). 
      * List the shifts the worker has claimed
      */
     async listMyShifts(requestParameters: ListMyShiftsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<WorkerShiftPage> {

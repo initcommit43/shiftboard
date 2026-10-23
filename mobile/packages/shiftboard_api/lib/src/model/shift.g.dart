@@ -32,6 +32,8 @@ class _$Shift extends Shift {
   @override
   final int takenSlots;
   @override
+  final int waitingCount;
+  @override
   final BuiltList<Qualification> qualifications;
   @override
   final DateTime createdAt;
@@ -52,6 +54,7 @@ class _$Shift extends Shift {
       required this.hourlyRateCents,
       required this.slots,
       required this.takenSlots,
+      required this.waitingCount,
       required this.qualifications,
       required this.createdAt})
       : super._();
@@ -78,6 +81,7 @@ class _$Shift extends Shift {
         hourlyRateCents == other.hourlyRateCents &&
         slots == other.slots &&
         takenSlots == other.takenSlots &&
+        waitingCount == other.waitingCount &&
         qualifications == other.qualifications &&
         createdAt == other.createdAt;
   }
@@ -97,6 +101,7 @@ class _$Shift extends Shift {
     _$hash = $jc(_$hash, hourlyRateCents.hashCode);
     _$hash = $jc(_$hash, slots.hashCode);
     _$hash = $jc(_$hash, takenSlots.hashCode);
+    _$hash = $jc(_$hash, waitingCount.hashCode);
     _$hash = $jc(_$hash, qualifications.hashCode);
     _$hash = $jc(_$hash, createdAt.hashCode);
     _$hash = $jf(_$hash);
@@ -118,6 +123,7 @@ class _$Shift extends Shift {
           ..add('hourlyRateCents', hourlyRateCents)
           ..add('slots', slots)
           ..add('takenSlots', takenSlots)
+          ..add('waitingCount', waitingCount)
           ..add('qualifications', qualifications)
           ..add('createdAt', createdAt))
         .toString();
@@ -177,6 +183,10 @@ class ShiftBuilder implements Builder<Shift, ShiftBuilder> {
   int? get takenSlots => _$this._takenSlots;
   set takenSlots(int? takenSlots) => _$this._takenSlots = takenSlots;
 
+  int? _waitingCount;
+  int? get waitingCount => _$this._waitingCount;
+  set waitingCount(int? waitingCount) => _$this._waitingCount = waitingCount;
+
   ListBuilder<Qualification>? _qualifications;
   ListBuilder<Qualification> get qualifications =>
       _$this._qualifications ??= ListBuilder<Qualification>();
@@ -206,6 +216,7 @@ class ShiftBuilder implements Builder<Shift, ShiftBuilder> {
       _hourlyRateCents = $v.hourlyRateCents;
       _slots = $v.slots;
       _takenSlots = $v.takenSlots;
+      _waitingCount = $v.waitingCount;
       _qualifications = $v.qualifications.toBuilder();
       _createdAt = $v.createdAt;
       _$v = null;
@@ -251,6 +262,8 @@ class ShiftBuilder implements Builder<Shift, ShiftBuilder> {
                 BuiltValueNullFieldError.checkNotNull(slots, r'Shift', 'slots'),
             takenSlots: BuiltValueNullFieldError.checkNotNull(
                 takenSlots, r'Shift', 'takenSlots'),
+            waitingCount: BuiltValueNullFieldError.checkNotNull(
+                waitingCount, r'Shift', 'waitingCount'),
             qualifications: qualifications.build(),
             createdAt: BuiltValueNullFieldError.checkNotNull(
                 createdAt, r'Shift', 'createdAt'),

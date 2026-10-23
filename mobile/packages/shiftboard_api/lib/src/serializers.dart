@@ -70,6 +70,9 @@ import 'package:shiftboard_api/src/model/signup_info.dart';
 import 'package:shiftboard_api/src/model/system_event.dart';
 import 'package:shiftboard_api/src/model/token_response.dart';
 import 'package:shiftboard_api/src/model/unread_count.dart';
+import 'package:shiftboard_api/src/model/waitlist_entry.dart';
+import 'package:shiftboard_api/src/model/waitlist_entry_page.dart';
+import 'package:shiftboard_api/src/model/waitlist_place.dart';
 import 'package:shiftboard_api/src/model/worked_hours.dart';
 import 'package:shiftboard_api/src/model/worker.dart';
 import 'package:shiftboard_api/src/model/worker_page.dart';
@@ -138,6 +141,9 @@ part 'serializers.g.dart';
   SystemEvent,
   TokenResponse,
   UnreadCount,
+  WaitlistEntry,
+  WaitlistEntryPage,
+  WaitlistPlace,
   WorkedHours,
   Worker,
   WorkerPage,
@@ -191,6 +197,10 @@ Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(WorkerShift)]),
         () => ListBuilder<WorkerShift>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(WaitlistEntry)]),
+        () => ListBuilder<WaitlistEntry>(),
       )
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Conversation)]),

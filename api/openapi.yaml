@@ -52,6 +52,8 @@ tags:
     description: Push notification devices and preferences of a worker
   - name: hours
     description: Check-in and check-out, and the hours the agency approves for payroll
+  - name: waitlist
+    description: The line of workers waiting for a spot on a full shift
 security:
   - bearerAuth: []
 paths:
@@ -418,7 +420,8 @@ paths:
       summary: Change the agency's workflow settings
       description: |
         Applies to claims and cancellations made afterwards; decisions already
-        made stay as they are. Admins only.
+        made stay as they are. Switching `waitlist` off stops new entries;
+        workers already waiting stay in line. Admins only.
 
         Field error codes: `required`, `out_of_range`
         (`cancellationDeadlineHours` below 0 or above 336).
@@ -885,6 +888,7 @@ paths:
       summary: List the claims on a shift
       description: |
         The assignments of the shift, sorted by claim time, oldest first.
+        The waitlist is not part of it (`GET /shifts/{shiftId}/waitlist`).
         Dispatchers and admins only.
 
         Error codes: `forbidden` (403), `shift_not_found` (404).
@@ -903,6 +907,68 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ShiftAssignmentPage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /shifts/{shiftId}/waitlist:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+    get:
+      operationId: listShiftWaitlist
+      tags: [waitlist]
+      summary: List the waitlist of a shift
+      description: |
+        The workers waiting for a spot, in line order: first come, first
+        served. Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `shift_not_found` (404).
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of the waitlist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WaitlistEntryPage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /shifts/{shiftId}/waitlist/{entryId}:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+      - name: entryId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    delete:
+      operationId: removeFromWaitlist
+      tags: [waitlist]
+      summary: Take a worker off the waitlist
+      description: |
+        The worker gets a system message; the order of the others stays.
+        Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `shift_not_found` (404),
+        `waitlist_entry_not_found` (404).
+      responses:
+        "204":
+          description: The worker is off the waitlist.
         "401":
           $ref: "#/components/responses/Problem"
         "403":
@@ -1361,7 +1427,8 @@ paths:
         Creates the worker's assignment as `PENDING` and counts the spot as
         taken. When two workers claim the last spot at the same time, one of
         them gets `shift_full`. The claim is not checked against the shift's
-        qualifications. Active workers only.
+        qualifications. A worker on the shift's waitlist can claim a free spot
+        too; their place in line becomes the claim. Active workers only.
 
         Error codes: `forbidden` (403), `worker_not_active` (403),
         `shift_not_found` (404), and with 409: `shift_full` (no spot left),
@@ -1411,6 +1478,75 @@ paths:
       responses:
         "200":
           description: The shift with the worker's cancelled assignment.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerShift"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /worker/shifts/{shiftId}/waitlist:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+    post:
+      operationId: joinWaitlist
+      tags: [waitlist]
+      summary: Join the waitlist of a full shift
+      description: |
+        Puts the worker at the back of the shift's waitlist. A place in line
+        holds no spot. When a spot frees up before the cancellation deadline,
+        the first in line moves up into a claim (pending, or confirmed when
+        the agency confirms automatically) and gets a system message and a
+        push; after the deadline, everyone waiting gets a push and the first
+        to claim gets the spot (ADR 0029). Active workers only.
+
+        Error codes: `forbidden` (403), `worker_not_active` (403),
+        `shift_not_found` (404), and with 409: `waitlist_disabled` (the
+        agency does not use the waitlist), `shift_not_full` (claim instead),
+        `shift_already_claimed` (the worker has claimed this shift before),
+        `already_on_waitlist`, `shift_started`, `shift_not_open` (cancelled
+        or completed) and `shift_overlap` (it overlaps one of the worker's
+        pending or confirmed shifts).
+      responses:
+        "201":
+          description: The shift with the worker's place on the waitlist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkerShift"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+    delete:
+      operationId: leaveWaitlist
+      tags: [waitlist]
+      summary: Leave the waitlist of a shift
+      description: |
+        Takes the worker off the waitlist without a trace; they can join
+        again at the back of the line. Possible until the shift starts, also
+        when the agency has switched the waitlist off. Active workers only.
+
+        Error codes: `forbidden` (403), `worker_not_active` (403),
+        `shift_not_found` (404), `not_on_waitlist` (404), `shift_started`
+        (409).
+      responses:
+        "200":
+          description: The shift without the worker's place.
           content:
             application/json:
               schema:
@@ -1505,10 +1641,20 @@ paths:
       description: |
         Every shift the worker has an assignment for, whatever its status,
         sorted by start time, earliest first. Each shift carries the
-        `assignment`. Active workers only.
+        `assignment`. With `includeWaitlist`, the shifts the worker is waiting
+        for are listed too, carrying `waitlist` instead of `assignment`.
+        Active workers only.
 
         Error codes: `forbidden` (403), `worker_not_active` (403).
       parameters:
+        - name: includeWaitlist
+          in: query
+          description: |
+            Also list the shifts the worker is on the waitlist for. False by
+            default, so that app versions that know no waitlist see none.
+          schema:
+            type: boolean
+            default: false
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/Size"
       responses:
@@ -2257,6 +2403,7 @@ components:
         - hourlyRateCents
         - slots
         - takenSlots
+        - waitingCount
         - qualifications
         - createdAt
       properties:
@@ -2293,6 +2440,11 @@ components:
           type: integer
           format: int32
           description: How many of the slots are claimed.
+        waitingCount:
+          type: integer
+          format: int32
+          minimum: 0
+          description: How many workers are on the shift's waitlist.
         qualifications:
           type: array
           description: Qualifications the shift asks for. Information only; a claim is not checked against them.
@@ -2743,6 +2895,12 @@ components:
             How many hours before the start a worker can still drop out in the
             app. 24 by default; 0 means until the start.
           examples: [24]
+        waitlist:
+          type: boolean
+          description: |
+            Workers can join the waitlist of a full shift and move up when a
+            spot frees up (ADR 0029). Off by default. Always present in
+            responses; absent in a request keeps the current value.
 
     ShiftContact:
       type: object
@@ -2819,8 +2977,74 @@ components:
         contact:
           $ref: "#/components/schemas/ShiftContact"
         assignment:
-          description: The worker's own claim on this shift. Absent when they have not claimed it.
+          description: |
+            The worker's own claim on this shift. Absent when they have not
+            claimed it, and while they are on the waitlist.
           $ref: "#/components/schemas/AssignmentSummary"
+        waitlistEnabled:
+          type: boolean
+          description: |
+            The agency uses the waitlist. Clients offer joining when this is
+            true, the shift is full and published, it has not started, and the
+            worker has neither an `assignment` nor a `waitlist` place. Absent
+            means false.
+        waitlist:
+          description: The worker's place on the shift's waitlist. Absent when they are not waiting.
+          $ref: "#/components/schemas/WaitlistPlace"
+
+    WaitlistPlace:
+      type: object
+      description: Where a worker stands on the waitlist of a shift.
+      required: [position, joinedAt]
+      properties:
+        position:
+          type: integer
+          format: int32
+          minimum: 1
+          description: The place in line; 1 moves up next.
+        joinedAt:
+          type: string
+          format: date-time
+
+    WaitlistEntry:
+      type: object
+      description: A worker waiting for a spot on a shift, as the agency sees them.
+      required: [id, position, worker, joinedAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        position:
+          type: integer
+          format: int32
+          minimum: 1
+          description: The place in line; 1 moves up next.
+        worker:
+          $ref: "#/components/schemas/AssignedWorker"
+        joinedAt:
+          type: string
+          format: date-time
+
+    WaitlistEntryPage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/WaitlistEntry"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
 
     WorkerShiftPage:
       type: object

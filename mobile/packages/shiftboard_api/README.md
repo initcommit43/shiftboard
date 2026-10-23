@@ -125,6 +125,10 @@ Class | Method | HTTP request | Description
 [*SignupApi*](doc/SignupApi.md) | [**getSignupInfo**](doc/SignupApi.md#getsignupinfo) | **GET** /signup/{signupCode} | Look up the agency behind a signup link
 [*SignupApi*](doc/SignupApi.md) | [**signUp**](doc/SignupApi.md#signup) | **POST** /signup/{signupCode} | Sign up as a worker of the agency
 [*SystemApi*](doc/SystemApi.md) | [**ping**](doc/SystemApi.md#ping) | **GET** /ping | Check that the API is reachable
+[*WaitlistApi*](doc/WaitlistApi.md) | [**joinWaitlist**](doc/WaitlistApi.md#joinwaitlist) | **POST** /worker/shifts/{shiftId}/waitlist | Join the waitlist of a full shift
+[*WaitlistApi*](doc/WaitlistApi.md) | [**leaveWaitlist**](doc/WaitlistApi.md#leavewaitlist) | **DELETE** /worker/shifts/{shiftId}/waitlist | Leave the waitlist of a shift
+[*WaitlistApi*](doc/WaitlistApi.md) | [**listShiftWaitlist**](doc/WaitlistApi.md#listshiftwaitlist) | **GET** /shifts/{shiftId}/waitlist | List the waitlist of a shift
+[*WaitlistApi*](doc/WaitlistApi.md) | [**removeFromWaitlist**](doc/WaitlistApi.md#removefromwaitlist) | **DELETE** /shifts/{shiftId}/waitlist/{entryId} | Take a worker off the waitlist
 [*WorkerShiftsApi*](doc/WorkerShiftsApi.md) | [**cancelClaim**](doc/WorkerShiftsApi.md#cancelclaim) | **POST** /worker/shifts/{shiftId}/cancel | Drop out of a claimed shift
 [*WorkerShiftsApi*](doc/WorkerShiftsApi.md) | [**claimShift**](doc/WorkerShiftsApi.md#claimshift) | **POST** /worker/shifts/{shiftId}/claim | Claim a spot on a shift
 [*WorkerShiftsApi*](doc/WorkerShiftsApi.md) | [**getWorkerShift**](doc/WorkerShiftsApi.md#getworkershift) | **GET** /worker/shifts/{shiftId} | One shift as a worker sees it
@@ -193,6 +197,9 @@ Class | Method | HTTP request | Description
  - [SystemEvent](doc/SystemEvent.md)
  - [TokenResponse](doc/TokenResponse.md)
  - [UnreadCount](doc/UnreadCount.md)
+ - [WaitlistEntry](doc/WaitlistEntry.md)
+ - [WaitlistEntryPage](doc/WaitlistEntryPage.md)
+ - [WaitlistPlace](doc/WaitlistPlace.md)
  - [WorkedHours](doc/WorkedHours.md)
  - [Worker](doc/Worker.md)
  - [WorkerPage](doc/WorkerPage.md)

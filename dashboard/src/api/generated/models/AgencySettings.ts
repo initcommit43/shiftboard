@@ -29,6 +29,13 @@ export interface AgencySettings {
      * 
      */
     cancellationDeadlineHours: number;
+    /**
+     * Workers can join the waitlist of a full shift and move up when a
+     * spot frees up (ADR 0029). Off by default. Always present in
+     * responses; absent in a request keeps the current value.
+     * 
+     */
+    waitlist?: boolean;
 }
 
 /**
@@ -52,6 +59,7 @@ export function AgencySettingsFromJSONTyped(json: any, ignoreDiscriminator: bool
         
         'autoConfirm': json['autoConfirm'],
         'cancellationDeadlineHours': json['cancellationDeadlineHours'],
+        'waitlist': json['waitlist'] == null ? undefined : json['waitlist'],
     };
 }
 
@@ -68,6 +76,7 @@ export function AgencySettingsToJSONTyped(value?: AgencySettings | null, ignoreD
         
         'autoConfirm': value['autoConfirm'],
         'cancellationDeadlineHours': value['cancellationDeadlineHours'],
+        'waitlist': value['waitlist'],
     };
 }
 

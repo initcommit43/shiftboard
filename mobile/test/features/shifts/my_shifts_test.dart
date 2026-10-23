@@ -74,6 +74,7 @@ void main() {
       );
     }
     expect(backend.sent('GET /worker/my-shifts').single.queryParameters, {
+      'includeWaitlist': false,
       'page': 0,
       'size': 100,
     });
