@@ -13,6 +13,7 @@ part 'agency_settings.g.dart';
 /// Properties:
 /// * [autoConfirm] - Claims are confirmed right away instead of waiting for the agency. Off by default.
 /// * [cancellationDeadlineHours] - How many hours before the start a worker can still drop out in the app. 24 by default; 0 means until the start.
+/// * [waitlist] - Workers can join the waitlist of a full shift and move up when a spot frees up (ADR 0029). Off by default. Always present in responses; absent in a request keeps the current value.
 @BuiltValue()
 abstract class AgencySettings
     implements Built<AgencySettings, AgencySettingsBuilder> {
@@ -23,6 +24,10 @@ abstract class AgencySettings
   /// How many hours before the start a worker can still drop out in the app. 24 by default; 0 means until the start.
   @BuiltValueField(wireName: r'cancellationDeadlineHours')
   int get cancellationDeadlineHours;
+
+  /// Workers can join the waitlist of a full shift and move up when a spot frees up (ADR 0029). Off by default. Always present in responses; absent in a request keeps the current value.
+  @BuiltValueField(wireName: r'waitlist')
+  bool? get waitlist;
 
   AgencySettings._();
 
@@ -60,6 +65,13 @@ class _$AgencySettingsSerializer
       object.cancellationDeadlineHours,
       specifiedType: const FullType(int),
     );
+    if (object.waitlist != null) {
+      yield r'waitlist';
+      yield serializers.serialize(
+        object.waitlist,
+        specifiedType: const FullType(bool),
+      );
+    }
   }
 
   @override
@@ -98,6 +110,14 @@ class _$AgencySettingsSerializer
             specifiedType: const FullType(int),
           ) as int;
           result.cancellationDeadlineHours = valueDes;
+          break;
+        case r'waitlist':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(bool),
+          ) as bool?;
+          if (valueDes == null) continue;
+          result.waitlist = valueDes;
           break;
         default:
           unhandled.add(key);

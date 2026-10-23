@@ -13,6 +13,7 @@ lib/src/api/shift_templates_api.dart
 lib/src/api/shifts_api.dart
 lib/src/api/signup_api.dart
 lib/src/api/system_api.dart
+lib/src/api/waitlist_api.dart
 lib/src/api/worker_shifts_api.dart
 lib/src/api/workers_api.dart
 lib/src/api_util.dart
@@ -79,6 +80,9 @@ lib/src/model/signup_info.dart
 lib/src/model/system_event.dart
 lib/src/model/token_response.dart
 lib/src/model/unread_count.dart
+lib/src/model/waitlist_entry.dart
+lib/src/model/waitlist_entry_page.dart
+lib/src/model/waitlist_place.dart
 lib/src/model/worked_hours.dart
 lib/src/model/worker.dart
 lib/src/model/worker_page.dart

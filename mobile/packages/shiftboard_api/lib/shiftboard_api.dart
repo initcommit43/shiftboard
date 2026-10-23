@@ -21,6 +21,7 @@ export 'package:shiftboard_api/src/api/shift_templates_api.dart';
 export 'package:shiftboard_api/src/api/shifts_api.dart';
 export 'package:shiftboard_api/src/api/signup_api.dart';
 export 'package:shiftboard_api/src/api/system_api.dart';
+export 'package:shiftboard_api/src/api/waitlist_api.dart';
 export 'package:shiftboard_api/src/api/worker_shifts_api.dart';
 export 'package:shiftboard_api/src/api/workers_api.dart';
 
@@ -80,6 +81,9 @@ export 'package:shiftboard_api/src/model/signup_info.dart';
 export 'package:shiftboard_api/src/model/system_event.dart';
 export 'package:shiftboard_api/src/model/token_response.dart';
 export 'package:shiftboard_api/src/model/unread_count.dart';
+export 'package:shiftboard_api/src/model/waitlist_entry.dart';
+export 'package:shiftboard_api/src/model/waitlist_entry_page.dart';
+export 'package:shiftboard_api/src/model/waitlist_place.dart';
 export 'package:shiftboard_api/src/model/worked_hours.dart';
 export 'package:shiftboard_api/src/model/worker.dart';
 export 'package:shiftboard_api/src/model/worker_page.dart';

@@ -237,7 +237,7 @@ export class SettingsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Applies to claims and cancellations made afterwards; decisions already made stay as they are. Admins only.  Field error codes: `required`, `out_of_range` (`cancellationDeadlineHours` below 0 or above 336).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403, not an admin). 
+     * Applies to claims and cancellations made afterwards; decisions already made stay as they are. Switching `waitlist` off stops new entries; workers already waiting stay in line. Admins only.  Field error codes: `required`, `out_of_range` (`cancellationDeadlineHours` below 0 or above 336).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403, not an admin). 
      * Change the agency\'s workflow settings
      */
     async updateAgencySettingsRaw(requestParameters: UpdateAgencySettingsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<AgencySettings>> {
@@ -248,7 +248,7 @@ export class SettingsApi extends runtime.BaseAPI {
     }
 
     /**
-     * Applies to claims and cancellations made afterwards; decisions already made stay as they are. Admins only.  Field error codes: `required`, `out_of_range` (`cancellationDeadlineHours` below 0 or above 336).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403, not an admin). 
+     * Applies to claims and cancellations made afterwards; decisions already made stay as they are. Switching `waitlist` off stops new entries; workers already waiting stay in line. Admins only.  Field error codes: `required`, `out_of_range` (`cancellationDeadlineHours` below 0 or above 336).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403, not an admin). 
      * Change the agency\'s workflow settings
      */
     async updateAgencySettings(requestParameters: UpdateAgencySettingsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<AgencySettings> {

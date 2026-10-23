@@ -34,6 +34,13 @@ import {
     ClientSummaryToJSON,
     ClientSummaryToJSONTyped,
 } from './ClientSummary';
+import type { WaitlistPlace } from './WaitlistPlace';
+import {
+    WaitlistPlaceFromJSON,
+    WaitlistPlaceFromJSONTyped,
+    WaitlistPlaceToJSON,
+    WaitlistPlaceToJSONTyped,
+} from './WaitlistPlace';
 import type { ShiftStatus } from './ShiftStatus';
 import {
     ShiftStatusFromJSON,
@@ -119,9 +126,23 @@ export interface WorkerShift {
      */
     contact: ShiftContact;
     /**
-     * The worker's own claim on this shift. Absent when they have not claimed it.
+     * The worker's own claim on this shift. Absent when they have not
+     * claimed it, and while they are on the waitlist.
+     * 
      */
     assignment?: AssignmentSummary;
+    /**
+     * The agency uses the waitlist. Clients offer joining when this is
+     * true, the shift is full and published, it has not started, and the
+     * worker has neither an `assignment` nor a `waitlist` place. Absent
+     * means false.
+     * 
+     */
+    waitlistEnabled?: boolean;
+    /**
+     * The worker's place on the shift's waitlist. Absent when they are not waiting.
+     */
+    waitlist?: WaitlistPlace;
 }
 
 
@@ -171,6 +192,8 @@ export function WorkerShiftFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'qualifications': ((json['qualifications'] as Array<any>).map(QualificationFromJSON)),
         'contact': ShiftContactFromJSON(json['contact']),
         'assignment': json['assignment'] == null ? undefined : AssignmentSummaryFromJSON(json['assignment']),
+        'waitlistEnabled': json['waitlistEnabled'] == null ? undefined : json['waitlistEnabled'],
+        'waitlist': json['waitlist'] == null ? undefined : WaitlistPlaceFromJSON(json['waitlist']),
     };
 }
 
@@ -200,6 +223,8 @@ export function WorkerShiftToJSONTyped(value?: WorkerShift | null, ignoreDiscrim
         'qualifications': ((value['qualifications'] as Array<any>).map(QualificationToJSON)),
         'contact': ShiftContactToJSON(value['contact']),
         'assignment': AssignmentSummaryToJSON(value['assignment']),
+        'waitlistEnabled': value['waitlistEnabled'],
+        'waitlist': WaitlistPlaceToJSON(value['waitlist']),
     };
 }
 

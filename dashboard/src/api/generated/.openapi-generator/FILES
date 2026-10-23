@@ -10,6 +10,7 @@ apis/ShiftTemplatesApi.ts
 apis/ShiftsApi.ts
 apis/SignupApi.ts
 apis/SystemApi.ts
+apis/WaitlistApi.ts
 apis/WorkerShiftsApi.ts
 apis/WorkersApi.ts
 apis/index.ts
@@ -70,6 +71,9 @@ models/SignupInfo.ts
 models/SystemEvent.ts
 models/TokenResponse.ts
 models/UnreadCount.ts
+models/WaitlistEntry.ts
+models/WaitlistEntryPage.ts
+models/WaitlistPlace.ts
 models/WorkedHours.ts
 models/Worker.ts
 models/WorkerPage.ts

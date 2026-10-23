@@ -37,6 +37,10 @@ class _$WorkerShift extends WorkerShift {
   final ShiftContact contact;
   @override
   final AssignmentSummary? assignment;
+  @override
+  final bool? waitlistEnabled;
+  @override
+  final WaitlistPlace? waitlist;
 
   factory _$WorkerShift([void Function(WorkerShiftBuilder)? updates]) =>
       (WorkerShiftBuilder()..update(updates))._build();
@@ -56,7 +60,9 @@ class _$WorkerShift extends WorkerShift {
       required this.takenSlots,
       required this.qualifications,
       required this.contact,
-      this.assignment})
+      this.assignment,
+      this.waitlistEnabled,
+      this.waitlist})
       : super._();
   @override
   WorkerShift rebuild(void Function(WorkerShiftBuilder) updates) =>
@@ -83,7 +89,9 @@ class _$WorkerShift extends WorkerShift {
         takenSlots == other.takenSlots &&
         qualifications == other.qualifications &&
         contact == other.contact &&
-        assignment == other.assignment;
+        assignment == other.assignment &&
+        waitlistEnabled == other.waitlistEnabled &&
+        waitlist == other.waitlist;
   }
 
   @override
@@ -104,6 +112,8 @@ class _$WorkerShift extends WorkerShift {
     _$hash = $jc(_$hash, qualifications.hashCode);
     _$hash = $jc(_$hash, contact.hashCode);
     _$hash = $jc(_$hash, assignment.hashCode);
+    _$hash = $jc(_$hash, waitlistEnabled.hashCode);
+    _$hash = $jc(_$hash, waitlist.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -125,7 +135,9 @@ class _$WorkerShift extends WorkerShift {
           ..add('takenSlots', takenSlots)
           ..add('qualifications', qualifications)
           ..add('contact', contact)
-          ..add('assignment', assignment))
+          ..add('assignment', assignment)
+          ..add('waitlistEnabled', waitlistEnabled)
+          ..add('waitlist', waitlist))
         .toString();
   }
 }
@@ -199,6 +211,16 @@ class WorkerShiftBuilder implements Builder<WorkerShift, WorkerShiftBuilder> {
   set assignment(AssignmentSummaryBuilder? assignment) =>
       _$this._assignment = assignment;
 
+  bool? _waitlistEnabled;
+  bool? get waitlistEnabled => _$this._waitlistEnabled;
+  set waitlistEnabled(bool? waitlistEnabled) =>
+      _$this._waitlistEnabled = waitlistEnabled;
+
+  WaitlistPlaceBuilder? _waitlist;
+  WaitlistPlaceBuilder get waitlist =>
+      _$this._waitlist ??= WaitlistPlaceBuilder();
+  set waitlist(WaitlistPlaceBuilder? waitlist) => _$this._waitlist = waitlist;
+
   WorkerShiftBuilder() {
     WorkerShift._defaults(this);
   }
@@ -221,6 +243,8 @@ class WorkerShiftBuilder implements Builder<WorkerShift, WorkerShiftBuilder> {
       _qualifications = $v.qualifications.toBuilder();
       _contact = $v.contact.toBuilder();
       _assignment = $v.assignment?.toBuilder();
+      _waitlistEnabled = $v.waitlistEnabled;
+      _waitlist = $v.waitlist?.toBuilder();
       _$v = null;
     }
     return this;
@@ -267,6 +291,8 @@ class WorkerShiftBuilder implements Builder<WorkerShift, WorkerShiftBuilder> {
             qualifications: qualifications.build(),
             contact: contact.build(),
             assignment: _assignment?.build(),
+            waitlistEnabled: waitlistEnabled,
+            waitlist: _waitlist?.build(),
           );
     } catch (_) {
       late String _$failedField;
@@ -282,6 +308,9 @@ class WorkerShiftBuilder implements Builder<WorkerShift, WorkerShiftBuilder> {
         contact.build();
         _$failedField = 'assignment';
         _assignment?.build();
+
+        _$failedField = 'waitlist';
+        _waitlist?.build();
       } catch (e) {
         throw BuiltValueNestedFieldError(
             r'WorkerShift', _$failedField, e.toString());

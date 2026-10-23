@@ -116,7 +116,7 @@ class AssignmentsApi {
   }
 
   /// List the claims on a shift
-  /// The assignments of the shift, sorted by claim time, oldest first. Dispatchers and admins only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;shift_not_found&#x60; (404).
+  /// The assignments of the shift, sorted by claim time, oldest first. The waitlist is not part of it (&#x60;GET /shifts/{shiftId}/waitlist&#x60;). Dispatchers and admins only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;shift_not_found&#x60; (404).
   ///
   /// Parameters:
   /// * [shiftId]

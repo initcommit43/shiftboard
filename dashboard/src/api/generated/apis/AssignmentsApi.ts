@@ -222,7 +222,7 @@ export class AssignmentsApi extends runtime.BaseAPI {
     }
 
     /**
-     * The assignments of the shift, sorted by claim time, oldest first. Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404). 
+     * The assignments of the shift, sorted by claim time, oldest first. The waitlist is not part of it (`GET /shifts/{shiftId}/waitlist`). Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404). 
      * List the claims on a shift
      */
     async listShiftAssignmentsRaw(requestParameters: ListShiftAssignmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ShiftAssignmentPage>> {
@@ -233,7 +233,7 @@ export class AssignmentsApi extends runtime.BaseAPI {
     }
 
     /**
-     * The assignments of the shift, sorted by claim time, oldest first. Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404). 
+     * The assignments of the shift, sorted by claim time, oldest first. The waitlist is not part of it (`GET /shifts/{shiftId}/waitlist`). Dispatchers and admins only.  Error codes: `forbidden` (403), `shift_not_found` (404). 
      * List the claims on a shift
      */
     async listShiftAssignments(requestParameters: ListShiftAssignmentsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ShiftAssignmentPage> {

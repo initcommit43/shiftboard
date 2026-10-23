@@ -28,6 +28,7 @@ part 'shift.g.dart';
 /// * [hourlyRateCents] - Gross pay per hour in euro cents.
 /// * [slots] - How many workers the shift needs.
 /// * [takenSlots] - How many of the slots are claimed.
+/// * [waitingCount] - How many workers are on the shift's waitlist.
 /// * [qualifications] - Qualifications the shift asks for. Information only; a claim is not checked against them.
 /// * [createdAt]
 @BuiltValue()
@@ -71,6 +72,10 @@ abstract class Shift implements Built<Shift, ShiftBuilder> {
   /// How many of the slots are claimed.
   @BuiltValueField(wireName: r'takenSlots')
   int get takenSlots;
+
+  /// How many workers are on the shift's waitlist.
+  @BuiltValueField(wireName: r'waitingCount')
+  int get waitingCount;
 
   /// Qualifications the shift asks for. Information only; a claim is not checked against them.
   @BuiltValueField(wireName: r'qualifications')
@@ -162,6 +167,11 @@ class _$ShiftSerializer implements PrimitiveSerializer<Shift> {
     yield r'takenSlots';
     yield serializers.serialize(
       object.takenSlots,
+      specifiedType: const FullType(int),
+    );
+    yield r'waitingCount';
+    yield serializers.serialize(
+      object.waitingCount,
       specifiedType: const FullType(int),
     );
     yield r'qualifications';
@@ -283,6 +293,13 @@ class _$ShiftSerializer implements PrimitiveSerializer<Shift> {
             specifiedType: const FullType(int),
           ) as int;
           result.takenSlots = valueDes;
+          break;
+        case r'waitingCount':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType(int),
+          ) as int;
+          result.waitingCount = valueDes;
           break;
         case r'qualifications':
           final valueDes = serializers.deserialize(

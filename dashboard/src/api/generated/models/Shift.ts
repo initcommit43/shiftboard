@@ -97,6 +97,10 @@ export interface Shift {
      */
     takenSlots: number;
     /**
+     * How many workers are on the shift's waitlist.
+     */
+    waitingCount: number;
+    /**
      * Qualifications the shift asks for. Information only; a claim is not checked against them.
      */
     qualifications: Array<Qualification>;
@@ -123,6 +127,7 @@ export function instanceOfShift(value: object): value is Shift {
     if (!('hourlyRateCents' in value) || value['hourlyRateCents'] === undefined) return false;
     if (!('slots' in value) || value['slots'] === undefined) return false;
     if (!('takenSlots' in value) || value['takenSlots'] === undefined) return false;
+    if (!('waitingCount' in value) || value['waitingCount'] === undefined) return false;
     if (!('qualifications' in value) || value['qualifications'] === undefined) return false;
     if (!('createdAt' in value) || value['createdAt'] === undefined) return false;
     return true;
@@ -150,6 +155,7 @@ export function ShiftFromJSONTyped(json: any, ignoreDiscriminator: boolean): Shi
         'hourlyRateCents': json['hourlyRateCents'],
         'slots': json['slots'],
         'takenSlots': json['takenSlots'],
+        'waitingCount': json['waitingCount'],
         'qualifications': ((json['qualifications'] as Array<any>).map(QualificationFromJSON)),
         'createdAt': (json['createdAt'] == null ? json['createdAt'] : parseDateTime(json['createdAt'])),
     };
@@ -178,6 +184,7 @@ export function ShiftToJSONTyped(value?: Shift | null, ignoreDiscriminator: bool
         'hourlyRateCents': value['hourlyRateCents'],
         'slots': value['slots'],
         'takenSlots': value['takenSlots'],
+        'waitingCount': value['waitingCount'],
         'qualifications': ((value['qualifications'] as Array<any>).map(QualificationToJSON)),
         'createdAt': value['createdAt'] == null ? value['createdAt'] : serializeDateTime(value['createdAt']),
     };

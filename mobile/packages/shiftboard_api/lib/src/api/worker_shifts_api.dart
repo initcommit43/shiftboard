@@ -106,7 +106,7 @@ class WorkerShiftsApi {
   }
 
   /// Claim a spot on a shift
-  /// Creates the worker&#39;s assignment as &#x60;PENDING&#x60; and counts the spot as taken. When two workers claim the last spot at the same time, one of them gets &#x60;shift_full&#x60;. The claim is not checked against the shift&#39;s qualifications. Active workers only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;worker_not_active&#x60; (403), &#x60;shift_not_found&#x60; (404), and with 409: &#x60;shift_full&#x60; (no spot left), &#x60;shift_already_claimed&#x60; (the worker has claimed this shift before, whatever became of that claim), &#x60;shift_started&#x60; (the start time has passed), &#x60;shift_not_open&#x60; (cancelled or completed) and &#x60;shift_overlap&#x60; (it overlaps one of the worker&#39;s pending or confirmed shifts).
+  /// Creates the worker&#39;s assignment as &#x60;PENDING&#x60; and counts the spot as taken. When two workers claim the last spot at the same time, one of them gets &#x60;shift_full&#x60;. The claim is not checked against the shift&#39;s qualifications. A worker on the shift&#39;s waitlist can claim a free spot too; their place in line becomes the claim. Active workers only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;worker_not_active&#x60; (403), &#x60;shift_not_found&#x60; (404), and with 409: &#x60;shift_full&#x60; (no spot left), &#x60;shift_already_claimed&#x60; (the worker has claimed this shift before, whatever became of that claim), &#x60;shift_started&#x60; (the start time has passed), &#x60;shift_not_open&#x60; (cancelled or completed) and &#x60;shift_overlap&#x60; (it overlaps one of the worker&#39;s pending or confirmed shifts).
   ///
   /// Parameters:
   /// * [shiftId]
@@ -276,9 +276,10 @@ class WorkerShiftsApi {
   }
 
   /// List the shifts the worker has claimed
-  /// Every shift the worker has an assignment for, whatever its status, sorted by start time, earliest first. Each shift carries the &#x60;assignment&#x60;. Active workers only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;worker_not_active&#x60; (403).
+  /// Every shift the worker has an assignment for, whatever its status, sorted by start time, earliest first. Each shift carries the &#x60;assignment&#x60;. With &#x60;includeWaitlist&#x60;, the shifts the worker is waiting for are listed too, carrying &#x60;waitlist&#x60; instead of &#x60;assignment&#x60;. Active workers only.  Error codes: &#x60;forbidden&#x60; (403), &#x60;worker_not_active&#x60; (403).
   ///
   /// Parameters:
+  /// * [includeWaitlist] - Also list the shifts the worker is on the waitlist for. False by default, so that app versions that know no waitlist see none.
   /// * [page] - Page number, starting at 0.
   /// * [size] - Page size.
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -291,6 +292,7 @@ class WorkerShiftsApi {
   /// Returns a [Future] containing a [Response] with a [WorkerShiftPage] as data
   /// Throws [DioException] if API call or serialization fails
   Future<Response<WorkerShiftPage>> listMyShifts({
+    bool? includeWaitlist = false,
     int? page = 0,
     int? size = 20,
     CancelToken? cancelToken,
@@ -320,6 +322,9 @@ class WorkerShiftsApi {
     );
 
     final _queryParameters = <String, dynamic>{
+      if (includeWaitlist != null)
+        r'includeWaitlist': encodeQueryParameter(
+            _serializers, includeWaitlist, const FullType(bool)),
       if (page != null)
         r'page': encodeQueryParameter(_serializers, page, const FullType(int)),
       if (size != null)

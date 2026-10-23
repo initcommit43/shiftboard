@@ -6,6 +6,7 @@
 import 'package:shiftboard_api/src/model/shift_status.dart';
 import 'package:shiftboard_api/src/model/client_summary.dart';
 import 'package:shiftboard_api/src/model/shift_contact.dart';
+import 'package:shiftboard_api/src/model/waitlist_place.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:shiftboard_api/src/model/location.dart';
 import 'package:shiftboard_api/src/model/qualification.dart';
@@ -32,7 +33,9 @@ part 'worker_shift.g.dart';
 /// * [takenSlots] - How many of the slots are claimed. The shift is full when it equals `slots`.
 /// * [qualifications] - Qualifications the shift asks for. Information only; a claim is not checked against them.
 /// * [contact]
-/// * [assignment] - The worker's own claim on this shift. Absent when they have not claimed it.
+/// * [assignment] - The worker's own claim on this shift. Absent when they have not claimed it, and while they are on the waitlist.
+/// * [waitlistEnabled] - The agency uses the waitlist. Clients offer joining when this is true, the shift is full and published, it has not started, and the worker has neither an `assignment` nor a `waitlist` place. Absent means false.
+/// * [waitlist] - The worker's place on the shift's waitlist. Absent when they are not waiting.
 @BuiltValue()
 abstract class WorkerShift implements Built<WorkerShift, WorkerShiftBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -85,9 +88,17 @@ abstract class WorkerShift implements Built<WorkerShift, WorkerShiftBuilder> {
   @BuiltValueField(wireName: r'contact')
   ShiftContact get contact;
 
-  /// The worker's own claim on this shift. Absent when they have not claimed it.
+  /// The worker's own claim on this shift. Absent when they have not claimed it, and while they are on the waitlist.
   @BuiltValueField(wireName: r'assignment')
   AssignmentSummary? get assignment;
+
+  /// The agency uses the waitlist. Clients offer joining when this is true, the shift is full and published, it has not started, and the worker has neither an `assignment` nor a `waitlist` place. Absent means false.
+  @BuiltValueField(wireName: r'waitlistEnabled')
+  bool? get waitlistEnabled;
+
+  /// The worker's place on the shift's waitlist. Absent when they are not waiting.
+  @BuiltValueField(wireName: r'waitlist')
+  WaitlistPlace? get waitlist;
 
   WorkerShift._();
 
@@ -189,6 +200,20 @@ class _$WorkerShiftSerializer implements PrimitiveSerializer<WorkerShift> {
       yield serializers.serialize(
         object.assignment,
         specifiedType: const FullType(AssignmentSummary),
+      );
+    }
+    if (object.waitlistEnabled != null) {
+      yield r'waitlistEnabled';
+      yield serializers.serialize(
+        object.waitlistEnabled,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.waitlist != null) {
+      yield r'waitlist';
+      yield serializers.serialize(
+        object.waitlist,
+        specifiedType: const FullType(WaitlistPlace),
       );
     }
   }
@@ -322,6 +347,22 @@ class _$WorkerShiftSerializer implements PrimitiveSerializer<WorkerShift> {
           ) as AssignmentSummary?;
           if (valueDes == null) continue;
           result.assignment.replace(valueDes);
+          break;
+        case r'waitlistEnabled':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(bool),
+          ) as bool?;
+          if (valueDes == null) continue;
+          result.waitlistEnabled = valueDes;
+          break;
+        case r'waitlist':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(WaitlistPlace),
+          ) as WaitlistPlace?;
+          if (valueDes == null) continue;
+          result.waitlist.replace(valueDes);
           break;
         default:
           unhandled.add(key);
