@@ -133,6 +133,8 @@ Map<String, Object?> currentUser(
 ///
 /// [start] and [end] are local times, so that tests read the times the app
 /// shows. [checkInFrom] is only set where the agency uses check-in.
+/// [waitlistEnabled] is set where the agency uses the waitlist, and
+/// [waitlistPosition] puts the worker on it at that place.
 Map<String, Object?> workerShift({
   String id = '0199c0de-0000-7000-8000-0000000000c1',
   String title = 'Lagerunterstützung',
@@ -153,6 +155,8 @@ Map<String, Object?> workerShift({
   DateTime? checkedOutAt,
   bool? hoursApproved,
   String status = 'PUBLISHED',
+  bool? waitlistEnabled,
+  int? waitlistPosition,
 }) => {
   'id': id,
   'title': title,
@@ -189,6 +193,12 @@ Map<String, Object?> workerShift({
       'checkedInAt': ?checkedInAt?.toUtc().toIso8601String(),
       'checkedOutAt': ?checkedOutAt?.toUtc().toIso8601String(),
       'hoursApproved': ?hoursApproved,
+    },
+  'waitlistEnabled': ?waitlistEnabled,
+  if (waitlistPosition != null)
+    'waitlist': {
+      'position': waitlistPosition,
+      'joinedAt': '2026-10-14T09:00:00Z',
     },
 };
 

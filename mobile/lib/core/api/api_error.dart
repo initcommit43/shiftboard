@@ -31,6 +31,10 @@ abstract final class ApiErrorCode {
   static const notCheckedIn = 'not_checked_in';
   static const alreadyCheckedOut = 'already_checked_out';
   static const hoursApproved = 'hours_approved';
+  static const waitlistDisabled = 'waitlist_disabled';
+  static const shiftNotFull = 'shift_not_full';
+  static const alreadyOnWaitlist = 'already_on_waitlist';
+  static const notOnWaitlist = 'not_on_waitlist';
 }
 
 /// A failed API call, reduced to what the UI decides on.
