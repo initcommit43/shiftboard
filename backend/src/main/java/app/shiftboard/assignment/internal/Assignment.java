@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import app.shiftboard.shift.ShiftDetails;
 import app.shiftboard.system.InvalidFieldException;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -30,6 +31,11 @@ import org.hibernate.annotations.UuidGenerator;
  *
  * Pending and confirmed assignments hold a slot of their shift; leaving those statuses frees it.
  *
+ * <p>A worker can also wait for a spot on a full shift: {@code WAITLISTED}, first come, first
+ * served (ADR 0029). The place in line holds no slot. When a spot frees up, the first in line
+ * moves up and the place becomes a claim, as if it had been made at that moment. Leaving the
+ * waitlist deletes the place, so it leaves no trace.
+ *
  * <p>A worker with a confirmed spot checks in and out in the app, and the agency approves the
  * hours they worked (ADR 0028).
  */
@@ -39,6 +45,8 @@ class Assignment {
 
     /** How long before the booked start a worker can check in. */
     static final Duration CHECK_IN_EARLY = Duration.ofMinutes(30);
+
+    private static final String PUBLISHED = "PUBLISHED";
 
     /** The longest stretch of approved hours. */
     private static final Duration LONGEST_WORK = Duration.ofHours(24);
@@ -64,6 +72,7 @@ class Assignment {
 
     private Instant endsAt;
 
+    /** When the claim was made; while on the waitlist, when the worker joined it. */
     private Instant claimedAt;
 
     /** When the claim last changed after it was made: decided on, cancelled or completed. */
@@ -99,13 +108,14 @@ class Assignment {
     protected Assignment() {
     }
 
-    private Assignment(UUID shiftId, UUID workerId, Instant startsAt, Instant endsAt, Instant claimedAt) {
+    private Assignment(
+            UUID shiftId, UUID workerId, Instant startsAt, Instant endsAt, Instant claimedAt, AssignmentStatus status) {
         this.shiftId = shiftId;
         this.workerId = workerId;
         this.startsAt = startsAt;
         this.endsAt = endsAt;
         this.claimedAt = claimedAt;
-        this.status = AssignmentStatus.PENDING;
+        this.status = status;
     }
 
     /**
@@ -114,11 +124,63 @@ class Assignment {
      */
     static Assignment claim(
             UUID shiftId, UUID workerId, Instant startsAt, Instant endsAt, Instant now, boolean autoConfirm) {
-        var assignment = new Assignment(shiftId, workerId, startsAt, endsAt, now);
+        var assignment = new Assignment(shiftId, workerId, startsAt, endsAt, now, AssignmentStatus.PENDING);
         if (autoConfirm) {
             assignment.approve(now);
         }
         return assignment;
+    }
+
+    /**
+     * A place at the back of the waitlist of a shift: only when the agency uses the waitlist, and
+     * the shift is published, full and has not started. Whether the worker is on the shift
+     * already or booked at the same time is up to the caller, who knows their other assignments.
+     */
+    static Assignment join(ShiftDetails shift, UUID workerId, boolean waitlistEnabled, Instant now) {
+        if (!waitlistEnabled) {
+            throw AssignmentConflictException.waitlistDisabled();
+        }
+        if (!PUBLISHED.equals(shift.status())) {
+            throw AssignmentConflictException.shiftNotOpen();
+        }
+        if (!now.isBefore(shift.startsAt())) {
+            throw AssignmentConflictException.shiftStarted();
+        }
+        if (shift.takenSlots() < shift.slots()) {
+            throw AssignmentConflictException.shiftNotFull();
+        }
+        return new Assignment(
+                shift.id(), workerId, shift.startsAt(), shift.endsAt(), now, AssignmentStatus.WAITLISTED);
+    }
+
+    /**
+     * The place in line becomes a claim, made now: the first in line moves up into a freed spot,
+     * or the worker claims a free spot from the waitlist. Like any claim, it waits for the agency
+     * to decide, unless the agency confirms claims automatically. The caller takes the slot.
+     */
+    void moveUp(Instant now, boolean autoConfirm) {
+        requireWaiting();
+        status = AssignmentStatus.PENDING;
+        claimedAt = now;
+        if (autoConfirm) {
+            approve(now);
+        }
+    }
+
+    /**
+     * The worker leaves the waitlist: possible until the start, also when the agency no longer
+     * uses the waitlist. The caller deletes the place, so it leaves no trace.
+     */
+    void leave(Instant now) {
+        requireWaiting();
+        if (!now.isBefore(startsAt)) {
+            throw AssignmentConflictException.shiftStarted();
+        }
+    }
+
+    /** Whether this is a place on the waitlist rather than a claim. */
+    boolean waiting() {
+        return status == AssignmentStatus.WAITLISTED;
     }
 
     void approve(Instant now) {
@@ -151,9 +213,14 @@ class Assignment {
         cancel(CancelledBy.AGENCY, reason, now);
     }
 
-    /** The shift moved: the worker keeps the spot and is booked for the new time (ADR 0026). */
+    /**
+     * The shift moved: the worker keeps the spot, or the place in line, and is booked for the new
+     * time (ADR 0026).
+     */
     void reschedule(Instant startsAt, Instant endsAt) {
-        requireHoldsSlot();
+        if (!holdsSlot() && !waiting()) {
+            throw AssignmentConflictException.notActive();
+        }
         this.startsAt = startsAt;
         this.endsAt = endsAt;
     }
@@ -291,6 +358,12 @@ class Assignment {
     private void requirePending() {
         if (status != AssignmentStatus.PENDING) {
             throw AssignmentConflictException.notPending();
+        }
+    }
+
+    private void requireWaiting() {
+        if (!waiting()) {
+            throw new IllegalStateException("Assignment " + id + " is not on the waitlist");
         }
     }
 

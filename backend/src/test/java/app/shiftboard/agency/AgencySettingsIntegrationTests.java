@@ -28,14 +28,54 @@ class AgencySettingsIntegrationTests extends IntegrationTest {
     }
 
     @Test
-    void approvalAndTwentyFourHoursByDefault() {
+    void approvalTwentyFourHoursAndNoWaitlistByDefault() {
         for (var tokens : new TokenPair[] {admin, dispatcher}) {
             get("/api/v1/agency/settings", tokens)
                     .expectStatus().isOk()
                     .expectBody()
                     .jsonPath("$.autoConfirm").isEqualTo(false)
-                    .jsonPath("$.cancellationDeadlineHours").isEqualTo(24);
+                    .jsonPath("$.cancellationDeadlineHours").isEqualTo(24)
+                    .jsonPath("$.waitlist").isEqualTo(false);
         }
+    }
+
+    @Test
+    void anAdminSwitchesTheWaitlistAndARequestWithoutItKeepsIt() {
+        put(Map.of("autoConfirm", false, "cancellationDeadlineHours", 24, "waitlist", true), admin)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.waitlist").isEqualTo(true);
+
+        // A client that knows no waitlist leaves it as it is.
+        put(Map.of("autoConfirm", true, "cancellationDeadlineHours", 12), admin)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.autoConfirm").isEqualTo(true)
+                .jsonPath("$.waitlist").isEqualTo(true);
+        get("/api/v1/agency/settings", dispatcher)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.waitlist").isEqualTo(true);
+
+        put(Map.of("autoConfirm", true, "cancellationDeadlineHours", 12, "waitlist", false), admin)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.waitlist").isEqualTo(false);
+        expectProblem(put(Map.of("autoConfirm", true, "cancellationDeadlineHours", 12, "waitlist", true), dispatcher),
+                403, "forbidden");
+    }
+
+    @Test
+    void storedSettingsWithoutTheWaitlistHaveItOff() {
+        jdbc.sql("update agency set settings = '{\"autoConfirm\": true, \"cancellationDeadlineHours\": 6}' where id = ?")
+                .param(agency.id()).update();
+
+        get("/api/v1/agency/settings", admin)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.autoConfirm").isEqualTo(true)
+                .jsonPath("$.cancellationDeadlineHours").isEqualTo(6)
+                .jsonPath("$.waitlist").isEqualTo(false);
     }
 
     @Test

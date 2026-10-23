@@ -17,6 +17,7 @@ import app.shiftboard.shift.ShiftDetails;
 import app.shiftboard.shift.Shifts;
 import app.shiftboard.system.ApiException;
 import app.shiftboard.system.ConflictRetry;
+import app.shiftboard.system.InvalidFieldException;
 import app.shiftboard.worker.Workers;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +39,8 @@ class ShiftAssignmentService {
 
     private final Shifts shifts;
 
+    private final Waitlist waitlist;
+
     private final Workers workers;
 
     private final ApplicationEventPublisher events;
@@ -45,21 +48,26 @@ class ShiftAssignmentService {
     private final TransactionTemplate transactions;
 
     ShiftAssignmentService(
-            AssignmentRepository assignments, Shifts shifts, Workers workers, ApplicationEventPublisher events,
-            TransactionTemplate transactions) {
+            AssignmentRepository assignments, Shifts shifts, Waitlist waitlist, Workers workers,
+            ApplicationEventPublisher events, TransactionTemplate transactions) {
         this.assignments = assignments;
         this.shifts = shifts;
+        this.waitlist = waitlist;
         this.workers = workers;
         this.events = events;
         this.transactions = transactions;
     }
 
+    /** The claims only: the waitlist is not part of them, and its status is not one of the API's (ADR 0029). */
     @Transactional(readOnly = true)
     ShiftAssignmentPage list(UUID shiftId, AssignmentStatus status, int page, int size) {
+        if (status == AssignmentStatus.WAITLISTED) {
+            throw new InvalidFieldException("status", "invalid_format");
+        }
         requireShift(shiftId);
         var pageable = PageRequest.of(page, size, OLDEST_CLAIM_FIRST);
         var result = status == null
-                ? assignments.findByShiftId(shiftId, pageable)
+                ? assignments.findByShiftIdAndStatusNot(shiftId, AssignmentStatus.WAITLISTED, pageable)
                 : assignments.findByShiftIdAndStatus(shiftId, status, pageable);
         return new ShiftAssignmentPage(
                 responses(shiftId, result.getContent()), page, size, result.getTotalElements(),
@@ -75,18 +83,25 @@ class ShiftAssignmentService {
         });
     }
 
-    /** Rejecting frees the spot, so it changes the shift too and is repeated on a conflict there. */
+    /**
+     * Rejecting frees the spot, for the first in line on the waitlist (ADR 0029). It changes the
+     * shift too, so it is repeated on a conflict there.
+     */
     ShiftAssignmentResponse reject(UUID shiftId, UUID assignmentId) {
         return ConflictRetry.run(() -> change(shiftId, assignmentId, assignment -> {
             assignment.reject(Instant.now());
             shifts.release(shiftId);
             events.publishEvent(new AssignmentRejected(
                     TenantContext.require(), assignment.getId(), shiftId, assignment.getWorkerId()));
+            waitlist.fill(shiftId);
             return assignment;
         }), ConflictRetry::busy);
     }
 
-    /** Removing frees the spot, so it changes the shift too and is repeated on a conflict there. */
+    /**
+     * Removing frees the spot, for the first in line on the waitlist (ADR 0029). It changes the
+     * shift too, so it is repeated on a conflict there.
+     */
     ShiftAssignmentResponse remove(UUID shiftId, UUID assignmentId, String reason) {
         return ConflictRetry.run(() -> change(shiftId, assignmentId, assignment -> {
             assignment.remove(reason, Instant.now());
@@ -94,6 +109,7 @@ class ShiftAssignmentService {
             events.publishEvent(new AssignmentCancelled(
                     TenantContext.require(), assignment.getId(), shiftId, assignment.getWorkerId(),
                     AssignmentCancelled.Cause.REMOVED));
+            waitlist.fill(shiftId);
             return assignment;
         }), ConflictRetry::busy);
     }
@@ -114,12 +130,13 @@ class ShiftAssignmentService {
         });
     }
 
-    /** Applies the change to the locked assignment in a transaction of its own. */
+    /** Applies the change to the locked claim in a transaction of its own; a place on the waitlist is no claim. */
     private ShiftAssignmentResponse change(
             UUID shiftId, UUID assignmentId, Function<Assignment, Assignment> change) {
         return transactions.execute(_ -> {
             requireShift(shiftId);
             var assignment = assignments.findForUpdate(assignmentId, shiftId)
+                    .filter(found -> !found.waiting())
                     .orElseThrow(() -> new ApiException(
                             HttpStatus.NOT_FOUND, "assignment_not_found", "The shift has no claim with this id."));
             return responses(shiftId, List.of(assignments.saveAndFlush(change.apply(assignment)))).getFirst();

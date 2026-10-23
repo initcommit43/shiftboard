@@ -68,10 +68,13 @@ class AgencyService implements Agencies {
         return agencies.findAllIds();
     }
 
+    /** Changes the settings; a waitlist passed as {@code null} stays as it is. */
     @Transactional
-    AgencySettings changeSettings(AgencySettings settings) {
+    AgencySettings changeSettings(boolean autoConfirm, int cancellationDeadlineHours, Boolean waitlist) {
         var agency = currentAgency();
-        agency.changeSettings(settings);
+        var current = agency.getSettings();
+        agency.changeSettings(new AgencySettings(
+                autoConfirm, cancellationDeadlineHours, waitlist == null ? current.waitlist() : waitlist));
         return agency.getSettings();
     }
 

@@ -128,6 +128,7 @@ class ShiftController {
             int hourlyRateCents,
             int slots,
             int takenSlots,
+            int waitingCount,
             List<QualificationSummary> qualifications,
             Instant createdAt) {
     }

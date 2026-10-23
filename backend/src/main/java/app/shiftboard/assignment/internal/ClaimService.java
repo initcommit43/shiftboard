@@ -18,7 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * One attempt to claim a spot, in one transaction: the slot is taken and the assignment stored,
- * or neither.
+ * or neither. A worker on the waitlist of the shift claims a free spot too, and their place in
+ * line becomes the claim (ADR 0029).
  */
 @Service
 class ClaimService {
@@ -44,18 +45,31 @@ class ClaimService {
      */
     @Transactional
     void claim(UUID shiftId, UUID workerId) {
-        if (assignments.existsByShiftIdAndWorkerId(shiftId, workerId)) {
+        // Only the status: the place in line is loaded once it is locked, below.
+        var existing = assignments.findStatus(shiftId, workerId);
+        if (existing.isPresent() && existing.get() != AssignmentStatus.WAITLISTED) {
             throw alreadyClaimed();
         }
+        // The slot first: every change that frees or takes a slot changes the shift before it
+        // locks assignments, so that two of them wait for each other instead of deadlocking.
         var shift = shifts.claim(shiftId);
         if (assignments.isBooked(workerId, AssignmentStatus.HOLDING, shift.startsAt(), shift.endsAt())) {
             throw overlap();
         }
         var autoConfirm = agencies.settings().autoConfirm();
+        var now = Instant.now();
         Assignment assignment;
         try {
-            assignment = assignments.saveAndFlush(Assignment.claim(
-                    shiftId, workerId, shift.startsAt(), shift.endsAt(), Instant.now(), autoConfirm));
+            if (existing.isPresent()) {
+                var waiting = assignments.findForUpdateByShiftIdAndWorkerId(shiftId, workerId)
+                        .filter(Assignment::waiting)
+                        .orElseThrow(ClaimService::alreadyClaimed);
+                waiting.moveUp(now, autoConfirm);
+                assignment = assignments.saveAndFlush(waiting);
+            } else {
+                assignment = assignments.saveAndFlush(Assignment.claim(
+                        shiftId, workerId, shift.startsAt(), shift.endsAt(), now, autoConfirm));
+            }
         } catch (DataIntegrityViolationException e) {
             // A concurrent claim of the same worker was stored between the checks above and this
             // insert; the constraints caught it.
@@ -79,12 +93,12 @@ class ClaimService {
         return e;
     }
 
-    private static ApiException alreadyClaimed() {
+    static ApiException alreadyClaimed() {
         return new ApiException(
                 HttpStatus.CONFLICT, "shift_already_claimed", "The worker has already claimed this shift.");
     }
 
-    private static ApiException overlap() {
+    static ApiException overlap() {
         return new ApiException(
                 HttpStatus.CONFLICT, "shift_overlap", "The shift overlaps another shift the worker is booked for.");
     }
