@@ -16,6 +16,7 @@ import { useCurrentUser } from '@/features/auth/use-session'
 
 import { FeaturesForm } from './features-form'
 import { useAgencySettings, useSaveAgencySettings } from './queries'
+import { SettingCheckbox } from './setting-checkbox'
 
 const MAX_DEADLINE_HOURS = 336
 
@@ -82,6 +83,7 @@ function SettingsForm({ saved }: { saved: AgencySettings }) {
   const { role } = useCurrentUser()
   const save = useSaveAgencySettings()
   const [autoConfirm, setAutoConfirm] = useState(saved.autoConfirm)
+  const [waitlist, setWaitlist] = useState(saved.waitlist ?? false)
   const [hours, setHours] = useState(String(saved.cancellationDeadlineHours))
   const [invalid, setInvalid] = useState(false)
   const readOnly = role !== 'ADMIN'
@@ -98,7 +100,7 @@ function SettingsForm({ saved }: { saved: AgencySettings }) {
           document.getElementById('settings-deadline')?.focus()
           return
         }
-        save.mutate({ autoConfirm, cancellationDeadlineHours })
+        save.mutate({ autoConfirm, cancellationDeadlineHours, waitlist })
       }}
     >
       {readOnly && (
@@ -115,27 +117,22 @@ function SettingsForm({ saved }: { saved: AgencySettings }) {
       )}
 
       <Card>
-        <div className="flex items-start gap-4">
-          <input
-            id="settings-auto-confirm"
-            type="checkbox"
-            className="mt-1 size-5 shrink-0 accent-action"
-            checked={autoConfirm}
-            disabled={readOnly}
-            aria-describedby="settings-auto-confirm-hint"
-            onChange={(event) => {
-              setAutoConfirm(event.target.checked)
-            }}
-          />
-          <div className="space-y-1">
-            <Label htmlFor="settings-auto-confirm" className="type-body-md-bold text-ink">
-              {t('settings.autoConfirm')}
-            </Label>
-            <p id="settings-auto-confirm-hint" className="type-body-sm text-ink-secondary">
-              {t('settings.autoConfirmHint')}
-            </p>
-          </div>
-        </div>
+        <SettingCheckbox
+          id="settings-auto-confirm"
+          label={t('settings.autoConfirm')}
+          hint={t('settings.autoConfirmHint')}
+          checked={autoConfirm}
+          disabled={readOnly}
+          onChange={setAutoConfirm}
+        />
+        <SettingCheckbox
+          id="settings-waitlist"
+          label={t('settings.waitlist')}
+          hint={t('settings.waitlistHint')}
+          checked={waitlist}
+          disabled={readOnly}
+          onChange={setWaitlist}
+        />
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="settings-deadline">{t('settings.deadline')}</Label>

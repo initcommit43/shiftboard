@@ -458,6 +458,8 @@
     "loading": "Loading settings …",
     "autoConfirm": "Confirm requests automatically",
     "autoConfirmHint": "Workers get the spot right away, without your approval. Applies to new requests.",
+    "waitlist": "Waitlist for full shifts",
+    "waitlistHint": "Workers can join the waitlist of a full shift in the app. When a spot frees up, the first in line moves up automatically. Switched off, nobody new can join; whoever is already waiting stays in line.",
     "deadline": "Cancellation deadline in hours",
     "deadlineHint": "How long before the start workers can cancel in the app. 0 means until the start.",
     "deadlineInvalid": "A whole number from 0 to 336.",

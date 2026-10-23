@@ -458,6 +458,8 @@
     "loading": "Einstellungen werden geladen …",
     "autoConfirm": "Anfragen automatisch bestätigen",
     "autoConfirmHint": "Mitarbeiter:innen bekommen den Platz sofort, ohne dass ihr freigebt. Gilt für neue Anfragen.",
+    "waitlist": "Warteliste für volle Einsätze",
+    "waitlistHint": "Ist eine Schicht voll, können sich Mitarbeiter:innen in der App auf die Warteliste setzen. Wird ein Platz frei, rückt die erste Person automatisch nach. Ausgeschaltet kommt niemand Neues dazu; wer schon wartet, bleibt auf der Liste.",
     "deadline": "Absagefrist in Stunden",
     "deadlineHint": "So lange vor Beginn können Mitarbeiter:innen in der App absagen. 0 heißt: bis zum Beginn.",
     "deadlineInvalid": "Eine ganze Zahl zwischen 0 und 336.",

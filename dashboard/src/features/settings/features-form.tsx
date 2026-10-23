@@ -7,10 +7,10 @@ import type { AgencyFeatures } from '@/api/generated'
 import { Alert, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
 import { useCurrentUser } from '@/features/auth/use-session'
 
 import { useAgencyFeatures, useSaveAgencyFeatures } from './queries'
+import { SettingCheckbox } from './setting-checkbox'
 
 /** Optional features of the agency. Shown once loaded; the workflow settings above carry the page's states. */
 export function FeaturesForm() {
@@ -46,7 +46,7 @@ function Features({ saved }: { saved: AgencyFeatures }) {
         </Alert>
       )}
       <Card>
-        <Feature
+        <SettingCheckbox
           id="settings-contact-button"
           label={t('settings.features.contactButton')}
           hint={t('settings.features.contactButtonHint')}
@@ -54,7 +54,7 @@ function Features({ saved }: { saved: AgencyFeatures }) {
           disabled={readOnly}
           onChange={setContactButton}
         />
-        <Feature
+        <SettingCheckbox
           id="settings-check-in"
           label={t('settings.features.checkIn')}
           hint={t('settings.features.checkInHint')}
@@ -72,45 +72,5 @@ function Features({ saved }: { saved: AgencyFeatures }) {
         </div>
       )}
     </form>
-  )
-}
-
-function Feature({
-  id,
-  label,
-  hint,
-  checked,
-  disabled,
-  onChange,
-}: {
-  id: string
-  label: string
-  hint: string
-  checked: boolean
-  disabled: boolean
-  onChange: (checked: boolean) => void
-}) {
-  return (
-    <div className="flex items-start gap-4">
-      <input
-        id={id}
-        type="checkbox"
-        className="mt-1 size-5 shrink-0 accent-action"
-        checked={checked}
-        disabled={disabled}
-        aria-describedby={`${id}-hint`}
-        onChange={(event) => {
-          onChange(event.target.checked)
-        }}
-      />
-      <div className="space-y-1">
-        <Label htmlFor={id} className="type-body-md-bold text-ink">
-          {label}
-        </Label>
-        <p id={`${id}-hint`} className="type-body-sm text-ink-secondary">
-          {hint}
-        </p>
-      </div>
-    </div>
   )
 }

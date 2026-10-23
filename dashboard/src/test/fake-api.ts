@@ -292,7 +292,7 @@ export function installFakeApi() {
         assignment(4, jakob, { status: AssignmentStatus.COMPLETED, decidedAt: new Date(2026, 9, 8, 15, 1) }),
       ],
     } as Record<string, ShiftAssignment[]>,
-    settings: { autoConfirm: false, cancellationDeadlineHours: 24 } as AgencySettings,
+    settings: { autoConfirm: false, cancellationDeadlineHours: 24, waitlist: false } as AgencySettings,
     features: { contactButton: false, checkIn: false } as AgencyFeatures,
     conversations: [lenaConversation, jakobConversation],
     /** The messages per conversation id, newest first as the API sends them. */
