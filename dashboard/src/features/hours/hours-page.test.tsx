@@ -167,6 +167,10 @@ describe('hours page', () => {
     const to = screen.getByLabelText('Bis')
     await user.clear(to)
     await user.type(to, '2026-10-31')
+    // The router commits the new address in a transition, and each field builds the next
+    // address from the one it rendered with. Editing "Von" before "Bis" has landed would
+    // write the old, empty end back, so wait for September to October first.
+    expect(await screen.findByText('5 Einträge, davon 2 freigegeben')).toBeInTheDocument()
     await user.clear(from)
     await user.type(from, '2026-10-01')
 
