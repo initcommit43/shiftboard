@@ -57,6 +57,8 @@ class WorkerShiftService {
 
     private final ClaimService claims;
 
+    private final Waitlist waitlist;
+
     private final Shifts shifts;
 
     private final WorkerProfileProvider workerProfiles;
@@ -68,11 +70,12 @@ class WorkerShiftService {
     private final TransactionTemplate transactions;
 
     WorkerShiftService(
-            AssignmentRepository assignments, ClaimService claims, Shifts shifts,
+            AssignmentRepository assignments, ClaimService claims, Waitlist waitlist, Shifts shifts,
             WorkerProfileProvider workerProfiles, Agencies agencies, ApplicationEventPublisher events,
             TransactionTemplate transactions) {
         this.assignments = assignments;
         this.claims = claims;
+        this.waitlist = waitlist;
         this.shifts = shifts;
         this.workerProfiles = workerProfiles;
         this.agencies = agencies;
@@ -147,8 +150,9 @@ class WorkerShiftService {
     }
 
     /**
-     * Drops out of a claimed shift before the agency's cancellation deadline. Freeing the spot
-     * changes the shift, so the attempt is repeated on a conflict there.
+     * Drops out of a claimed shift before the agency's cancellation deadline. The first in line
+     * on the waitlist moves up into the spot in the same transaction. Freeing the spot changes the
+     * shift, so the attempt is repeated on a conflict there.
      */
     WorkerShiftResponse cancel(UUID accountId, UUID shiftId) {
         var workerId = activeWorker(accountId);
@@ -163,6 +167,7 @@ class WorkerShiftService {
             events.publishEvent(new AssignmentCancelled(
                     TenantContext.require(), assignment.getId(), shiftId, workerId,
                     AssignmentCancelled.Cause.WORKER));
+            waitlist.fill(shiftId);
             return assignment;
         }), ConflictRetry::busy);
         return get(accountId, shiftId);

@@ -123,6 +123,38 @@ class WaitlistTests {
         assertConflictOn("assignment_not_confirmed", waiting(), entry -> entry.checkIn(START));
     }
 
+    @Test
+    void beforeTheDeadlineAFreeSpotGoesToTheFirstInLine() {
+        var deadline = Duration.ofHours(24);
+
+        assertThat(Waitlist.decide(shift("PUBLISHED", 2, 1), deadline, BEFORE)).isEqualTo(Waitlist.Decision.MOVE_UP);
+        assertThat(Waitlist.decide(shift("PUBLISHED", 2, 1), deadline, START.minus(deadline).minusSeconds(1)))
+                .isEqualTo(Waitlist.Decision.MOVE_UP);
+    }
+
+    @Test
+    void fromTheDeadlineAFreeSpotIsOfferedToEveryoneWaiting() {
+        var deadline = Duration.ofHours(24);
+
+        assertThat(Waitlist.decide(shift("PUBLISHED", 2, 1), deadline, START.minus(deadline)))
+                .isEqualTo(Waitlist.Decision.OFFER);
+        assertThat(Waitlist.decide(shift("PUBLISHED", 2, 1), deadline, START.minusSeconds(1)))
+                .isEqualTo(Waitlist.Decision.OFFER);
+        // Without a deadline, workers move up until the start.
+        assertThat(Waitlist.decide(shift("PUBLISHED", 2, 1), Duration.ZERO, START.minusSeconds(1)))
+                .isEqualTo(Waitlist.Decision.MOVE_UP);
+    }
+
+    @Test
+    void nobodyMovesUpWithoutAFreeSpotOrOnceTheShiftStartedOrIsOver() {
+        var deadline = Duration.ofHours(24);
+
+        assertThat(Waitlist.decide(shift("PUBLISHED", 2, 2), deadline, BEFORE)).isEqualTo(Waitlist.Decision.NONE);
+        assertThat(Waitlist.decide(shift("PUBLISHED", 2, 1), deadline, START)).isEqualTo(Waitlist.Decision.NONE);
+        assertThat(Waitlist.decide(shift("CANCELLED", 2, 0), deadline, BEFORE)).isEqualTo(Waitlist.Decision.NONE);
+        assertThat(Waitlist.decide(shift("COMPLETED", 2, 1), deadline, BEFORE)).isEqualTo(Waitlist.Decision.NONE);
+    }
+
     private static Assignment waiting() {
         return Assignment.join(shift("PUBLISHED", 1, 1), WORKER, true, BEFORE);
     }

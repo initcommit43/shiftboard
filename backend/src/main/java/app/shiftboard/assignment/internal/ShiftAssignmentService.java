@@ -39,6 +39,8 @@ class ShiftAssignmentService {
 
     private final Shifts shifts;
 
+    private final Waitlist waitlist;
+
     private final Workers workers;
 
     private final ApplicationEventPublisher events;
@@ -46,10 +48,11 @@ class ShiftAssignmentService {
     private final TransactionTemplate transactions;
 
     ShiftAssignmentService(
-            AssignmentRepository assignments, Shifts shifts, Workers workers, ApplicationEventPublisher events,
-            TransactionTemplate transactions) {
+            AssignmentRepository assignments, Shifts shifts, Waitlist waitlist, Workers workers,
+            ApplicationEventPublisher events, TransactionTemplate transactions) {
         this.assignments = assignments;
         this.shifts = shifts;
+        this.waitlist = waitlist;
         this.workers = workers;
         this.events = events;
         this.transactions = transactions;
@@ -80,18 +83,25 @@ class ShiftAssignmentService {
         });
     }
 
-    /** Rejecting frees the spot, so it changes the shift too and is repeated on a conflict there. */
+    /**
+     * Rejecting frees the spot, for the first in line on the waitlist (ADR 0029). It changes the
+     * shift too, so it is repeated on a conflict there.
+     */
     ShiftAssignmentResponse reject(UUID shiftId, UUID assignmentId) {
         return ConflictRetry.run(() -> change(shiftId, assignmentId, assignment -> {
             assignment.reject(Instant.now());
             shifts.release(shiftId);
             events.publishEvent(new AssignmentRejected(
                     TenantContext.require(), assignment.getId(), shiftId, assignment.getWorkerId()));
+            waitlist.fill(shiftId);
             return assignment;
         }), ConflictRetry::busy);
     }
 
-    /** Removing frees the spot, so it changes the shift too and is repeated on a conflict there. */
+    /**
+     * Removing frees the spot, for the first in line on the waitlist (ADR 0029). It changes the
+     * shift too, so it is repeated on a conflict there.
+     */
     ShiftAssignmentResponse remove(UUID shiftId, UUID assignmentId, String reason) {
         return ConflictRetry.run(() -> change(shiftId, assignmentId, assignment -> {
             assignment.remove(reason, Instant.now());
@@ -99,6 +109,7 @@ class ShiftAssignmentService {
             events.publishEvent(new AssignmentCancelled(
                     TenantContext.require(), assignment.getId(), shiftId, assignment.getWorkerId(),
                     AssignmentCancelled.Cause.REMOVED));
+            waitlist.fill(shiftId);
             return assignment;
         }), ConflictRetry::busy);
     }

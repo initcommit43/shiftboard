@@ -19,6 +19,7 @@ import app.shiftboard.shift.ShiftChanged;
 import app.shiftboard.shift.ShiftCompleted;
 import app.shiftboard.shift.ShiftDetails;
 import app.shiftboard.shift.ShiftPublished;
+import app.shiftboard.shift.ShiftSpotsAdded;
 import app.shiftboard.shift.Shifts;
 import app.shiftboard.shift.internal.ShiftController.ClientSummary;
 import app.shiftboard.shift.internal.ShiftController.ShiftChangeRequest;
@@ -108,14 +109,16 @@ class ShiftService implements Shifts {
 
     /**
      * Changes the shift. The listeners of {@link ShiftChanged} move the booked time of its claims
-     * in the same transaction and may reject the change. Each attempt is a transaction of its own,
-     * so that a concurrent claim that was faster is seen by the next one.
+     * in the same transaction and may reject the change; those of {@link ShiftSpotsAdded} fill new
+     * spots from the waitlist. Each attempt is a transaction of its own, so that a concurrent claim
+     * that was faster is seen by the next one.
      */
     ShiftResponse update(UUID shiftId, ShiftChangeRequest request) {
         var qualificationIds = request.qualificationIds() == null ? Set.<UUID>of() : request.qualificationIds();
         return ConflictRetry.run(() -> transactions.execute(_ -> {
             var shift = shifts.findById(shiftId).orElseThrow(ShiftService::notFound);
             references.check(request.clientId(), request.locationId(), qualificationIds);
+            var spotsAdded = request.slots() > shift.getSlots();
             var changes = shift.update(
                     request.clientId(),
                     request.locationId(),
@@ -135,6 +138,9 @@ class ShiftService implements Shifts {
                 events.publishEvent(new ShiftChanged(
                         TenantContext.require(), shiftId, UUID.randomUUID(), changes, updated.getStartsAt(),
                         updated.getEndsAt()));
+            }
+            if (updated.getStatus() == ShiftStatus.PUBLISHED && spotsAdded) {
+                events.publishEvent(new ShiftSpotsAdded(TenantContext.require(), shiftId));
             }
             return responses(List.of(updated)).getFirst();
         }), ConflictRetry::busy);

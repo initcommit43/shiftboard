@@ -291,6 +291,14 @@ class MessagingService {
             case CLAIM_CANCELLED_BY_WORKER -> "Du hast " + shiftName + " abgesagt.";
             case REMOVED_BY_AGENCY -> "Die Agentur hat dich aus " + shiftName + " genommen.";
             case SHIFT_CANCELLED -> "Die Schicht " + shiftName + " wurde abgesagt.";
+            case WAITLIST_MOVED_UP -> "Du bist von der Warteliste für " + shiftName
+                    + " nachgerückt. Deine Anfrage wartet auf die Bestätigung der Agentur.";
+            case WAITLIST_MOVED_UP_CONFIRMED -> "Du bist von der Warteliste für " + shiftName
+                    + " nachgerückt. Deine Schicht ist bestätigt.";
+            case WAITLIST_REMOVED_BY_AGENCY -> "Die Agentur hat dich von der Warteliste für " + shiftName
+                    + " genommen.";
+            case WAITLIST_SKIPPED -> "Für " + shiftName + " ist ein Platz frei geworden, aber du hast zur selben"
+                    + " Zeit schon eine Schicht. Du bist nicht mehr auf der Warteliste.";
             case SHIFT_CHANGED -> throw new IllegalArgumentException("A shift change brings its own text");
         };
     }
@@ -345,8 +353,8 @@ class MessagingService {
                     return new MessageResponse(
                             message.getId(),
                             message.getType(),
-                            // Not in the API yet: installed apps reject event values they do not know (ADR 0026).
-                            message.getEvent() == SystemEvent.SHIFT_CHANGED ? null : message.getEvent(),
+                            // Installed apps reject event values they do not know (ADR 0026).
+                            message.getEvent() == null || !message.getEvent().inApi() ? null : message.getEvent(),
                             message.getBody(),
                             message.isFromWorker(),
                             message.getSenderUserId() == null ? null : senders.get(message.getSenderUserId()),

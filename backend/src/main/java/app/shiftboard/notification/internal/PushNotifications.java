@@ -14,6 +14,9 @@ import app.shiftboard.assignment.AssignmentCancelled;
 import app.shiftboard.assignment.AssignmentConfirmed;
 import app.shiftboard.assignment.AssignmentRejected;
 import app.shiftboard.assignment.AssignmentShiftChanged;
+import app.shiftboard.assignment.WaitlistEntryRemoved;
+import app.shiftboard.assignment.WaitlistMovedUp;
+import app.shiftboard.assignment.WaitlistSpotFree;
 import app.shiftboard.messaging.MessageSent;
 import app.shiftboard.notification.internal.PushSender.PushMessage;
 import app.shiftboard.shift.ShiftDetails;
@@ -98,6 +101,39 @@ class PushNotifications {
     @TransactionalEventListener
     void on(AssignmentShiftChanged changed) {
         aboutShift(changed.agencyId(), changed.workerId(), changed.shiftId(), "Schicht geändert", "SHIFT_CHANGED");
+    }
+
+    /** The only push about it, also when the claim was confirmed right away (ADR 0029). */
+    @Async
+    @TransactionalEventListener
+    void on(WaitlistMovedUp movedUp) {
+        inAgency(movedUp.agencyId(), () -> shifts.find(movedUp.shiftId()).ifPresent(shift ->
+                push.send(List.of(movedUp.workerId()), message(
+                        "Du bist nachgerückt",
+                        shift.title() + " · " + when(shift) + " · "
+                                + (movedUp.confirmed() ? "bestätigt" : "wartet auf Bestätigung"),
+                        "WAITLIST_MOVED_UP", shift))));
+    }
+
+    /** After the deadline, everyone waiting may claim the free spot; the first claim wins (ADR 0029). */
+    @Async
+    @TransactionalEventListener
+    void on(WaitlistSpotFree spotFree) {
+        inAgency(spotFree.agencyId(), () -> shifts.find(spotFree.shiftId()).ifPresent(shift ->
+                push.send(spotFree.workerIds(), message(
+                        "Platz frei", shift.title() + " · " + when(shift), "WAITLIST_SPOT_FREE", shift))));
+    }
+
+    /** Workers waiting for a shift that is called off get the push of those who held a spot. */
+    @Async
+    @TransactionalEventListener
+    void on(WaitlistEntryRemoved removed) {
+        switch (removed.cause()) {
+            case REMOVED, OVERLAP -> aboutShift(removed.agencyId(), removed.workerId(), removed.shiftId(),
+                    "Nicht mehr auf der Warteliste", "WAITLIST_REMOVED");
+            case SHIFT_CANCELLED -> aboutShift(removed.agencyId(), removed.workerId(), removed.shiftId(),
+                    "Schicht abgesagt", "SHIFT_CANCELLED");
+        }
     }
 
     /** Messages and broadcasts of the agency; the worker's own messages need no push. */

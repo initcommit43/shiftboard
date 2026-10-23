@@ -7,6 +7,8 @@ import app.shiftboard.assignment.AssignmentCancelled;
 import app.shiftboard.assignment.AssignmentConfirmed;
 import app.shiftboard.assignment.AssignmentRejected;
 import app.shiftboard.assignment.AssignmentShiftChanged;
+import app.shiftboard.assignment.WaitlistEntryRemoved;
+import app.shiftboard.assignment.WaitlistMovedUp;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
@@ -44,6 +46,24 @@ class SystemMessages {
             case SHIFT_CANCELLED -> SystemEvent.SHIFT_CANCELLED;
         };
         record(cancelled.agencyId(), cancelled.workerId(), cancelled.shiftId(), cancelled.assignmentId(), event);
+    }
+
+    /** Also stands in for the confirmation when the agency confirms automatically. */
+    @TransactionalEventListener
+    void on(WaitlistMovedUp movedUp) {
+        record(movedUp.agencyId(), movedUp.workerId(), movedUp.shiftId(), movedUp.assignmentId(),
+                movedUp.confirmed() ? SystemEvent.WAITLIST_MOVED_UP_CONFIRMED : SystemEvent.WAITLIST_MOVED_UP);
+    }
+
+    /** Workers waiting for a shift that is called off are told like those who held a spot. */
+    @TransactionalEventListener
+    void on(WaitlistEntryRemoved removed) {
+        var event = switch (removed.cause()) {
+            case REMOVED -> SystemEvent.WAITLIST_REMOVED_BY_AGENCY;
+            case OVERLAP -> SystemEvent.WAITLIST_SKIPPED;
+            case SHIFT_CANCELLED -> SystemEvent.SHIFT_CANCELLED;
+        };
+        record(removed.agencyId(), removed.workerId(), removed.shiftId(), removed.entryId(), event);
     }
 
     /** Every change gets a message of its own. */
