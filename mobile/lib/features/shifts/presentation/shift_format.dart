@@ -69,7 +69,7 @@ class ShiftFormat {
 /// The badge of a shift: the worker's own claim if there is one ("Eingecheckt"
 /// while checked in), their place on the waitlist, otherwise whether the
 /// shift is full. Null for an open shift, which is the normal
-/// case and needs no mark.
+/// case and needs no mark, and for a claim status the app does not know.
 AppBadge? shiftBadge(WorkerShift shift, AppLocalizations l10n) {
   final claim = shift.assignment?.status;
   // On the job: checked in, not yet out.
@@ -85,8 +85,11 @@ AppBadge? shiftBadge(WorkerShift shift, AppLocalizations l10n) {
       AssignmentStatus.CANCELLED => (AppStatus.cancelled, l10n.claimCancelled),
       AssignmentStatus.COMPLETED => (AppStatus.confirmed, l10n.claimCompleted),
       AssignmentStatus.NO_SHOW => (AppStatus.cancelled, l10n.claimNoShow),
-      _ => (AppStatus.pending, l10n.claimPending),
+      AssignmentStatus.PENDING => (AppStatus.pending, l10n.claimPending),
+      // A status newer than the app (ADR 0030): better no mark than a wrong one.
+      _ => (null, null),
     };
+    if (status == null || label == null) return null;
     return AppBadge(status: status, label: label);
   }
   if (shift.waitlist case final place?) {

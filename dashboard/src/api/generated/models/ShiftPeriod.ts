@@ -22,6 +22,7 @@
 export const ShiftPeriod = {
     UPCOMING: 'UPCOMING',
     PAST: 'PAST',
+    unknown_default_open_api: '11184809',
 } as const;
 export type ShiftPeriod = typeof ShiftPeriod[keyof typeof ShiftPeriod];
 

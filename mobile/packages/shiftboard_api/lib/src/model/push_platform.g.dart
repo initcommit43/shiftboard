@@ -8,6 +8,8 @@ part of 'push_platform.dart';
 
 const PushPlatform _$ANDROID = const PushPlatform._('ANDROID');
 const PushPlatform _$IOS = const PushPlatform._('IOS');
+const PushPlatform _$unknownDefaultOpenApi =
+    const PushPlatform._('unknownDefaultOpenApi');
 
 PushPlatform _$valueOf(String name) {
   switch (name) {
@@ -15,8 +17,10 @@ PushPlatform _$valueOf(String name) {
       return _$ANDROID;
     case 'IOS':
       return _$IOS;
+    case 'unknownDefaultOpenApi':
+      return _$unknownDefaultOpenApi;
     default:
-      throw ArgumentError(name);
+      return _$unknownDefaultOpenApi;
   }
 }
 
@@ -24,12 +28,14 @@ final BuiltSet<PushPlatform> _$values =
     BuiltSet<PushPlatform>(const <PushPlatform>[
   _$ANDROID,
   _$IOS,
+  _$unknownDefaultOpenApi,
 ]);
 
 class _$PushPlatformMeta {
   const _$PushPlatformMeta();
   PushPlatform get ANDROID => _$ANDROID;
   PushPlatform get IOS => _$IOS;
+  PushPlatform get unknownDefaultOpenApi => _$unknownDefaultOpenApi;
   PushPlatform valueOf(String name) => _$valueOf(name);
   BuiltSet<PushPlatform> get values => _$values;
 }
@@ -45,10 +51,12 @@ class _$PushPlatformSerializer implements PrimitiveSerializer<PushPlatform> {
   static const Map<String, Object> _toWire = const <String, Object>{
     'ANDROID': 'ANDROID',
     'IOS': 'IOS',
+    'unknownDefaultOpenApi': 'unknown_default_open_api',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'ANDROID': 'ANDROID',
     'IOS': 'IOS',
+    'unknown_default_open_api': 'unknownDefaultOpenApi',
   };
 
   @override

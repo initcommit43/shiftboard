@@ -91,8 +91,8 @@ class ShiftChangeIntegrationTests extends IntegrationTest {
                     .expectStatus().isOk()
                     .expectBody()
                     .jsonPath("$.content[0].type").isEqualTo("SYSTEM")
-                    // Clients show the body: installed apps do not know the event yet.
-                    .jsonPath("$.content[0].event").doesNotExist()
+                    // Clients show the body, which says what changed.
+                    .jsonPath("$.content[0].event").isEqualTo("SHIFT_CHANGED")
                     .jsonPath("$.content[0].shift.id").isEqualTo(shiftId.toString())
                     .jsonPath("$.content[0].body").isEqualTo(
                             "Die Agentur hat „Service Bankett“ geändert."

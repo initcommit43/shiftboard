@@ -9,6 +9,8 @@ part of 'message_type.dart';
 const MessageType _$TEXT = const MessageType._('TEXT');
 const MessageType _$SYSTEM = const MessageType._('SYSTEM');
 const MessageType _$BROADCAST = const MessageType._('BROADCAST');
+const MessageType _$unknownDefaultOpenApi =
+    const MessageType._('unknownDefaultOpenApi');
 
 MessageType _$valueOf(String name) {
   switch (name) {
@@ -18,8 +20,10 @@ MessageType _$valueOf(String name) {
       return _$SYSTEM;
     case 'BROADCAST':
       return _$BROADCAST;
+    case 'unknownDefaultOpenApi':
+      return _$unknownDefaultOpenApi;
     default:
-      throw ArgumentError(name);
+      return _$unknownDefaultOpenApi;
   }
 }
 
@@ -28,6 +32,7 @@ final BuiltSet<MessageType> _$values =
   _$TEXT,
   _$SYSTEM,
   _$BROADCAST,
+  _$unknownDefaultOpenApi,
 ]);
 
 class _$MessageTypeMeta {
@@ -35,6 +40,7 @@ class _$MessageTypeMeta {
   MessageType get TEXT => _$TEXT;
   MessageType get SYSTEM => _$SYSTEM;
   MessageType get BROADCAST => _$BROADCAST;
+  MessageType get unknownDefaultOpenApi => _$unknownDefaultOpenApi;
   MessageType valueOf(String name) => _$valueOf(name);
   BuiltSet<MessageType> get values => _$values;
 }
@@ -51,11 +57,13 @@ class _$MessageTypeSerializer implements PrimitiveSerializer<MessageType> {
     'TEXT': 'TEXT',
     'SYSTEM': 'SYSTEM',
     'BROADCAST': 'BROADCAST',
+    'unknownDefaultOpenApi': 'unknown_default_open_api',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'TEXT': 'TEXT',
     'SYSTEM': 'SYSTEM',
     'BROADCAST': 'BROADCAST',
+    'unknown_default_open_api': 'unknownDefaultOpenApi',
   };
 
   @override

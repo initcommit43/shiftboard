@@ -8,6 +8,8 @@ part of 'hours_status.dart';
 
 const HoursStatus _$OPEN = const HoursStatus._('OPEN');
 const HoursStatus _$APPROVED = const HoursStatus._('APPROVED');
+const HoursStatus _$unknownDefaultOpenApi =
+    const HoursStatus._('unknownDefaultOpenApi');
 
 HoursStatus _$valueOf(String name) {
   switch (name) {
@@ -15,8 +17,10 @@ HoursStatus _$valueOf(String name) {
       return _$OPEN;
     case 'APPROVED':
       return _$APPROVED;
+    case 'unknownDefaultOpenApi':
+      return _$unknownDefaultOpenApi;
     default:
-      throw ArgumentError(name);
+      return _$unknownDefaultOpenApi;
   }
 }
 
@@ -24,12 +28,14 @@ final BuiltSet<HoursStatus> _$values =
     BuiltSet<HoursStatus>(const <HoursStatus>[
   _$OPEN,
   _$APPROVED,
+  _$unknownDefaultOpenApi,
 ]);
 
 class _$HoursStatusMeta {
   const _$HoursStatusMeta();
   HoursStatus get OPEN => _$OPEN;
   HoursStatus get APPROVED => _$APPROVED;
+  HoursStatus get unknownDefaultOpenApi => _$unknownDefaultOpenApi;
   HoursStatus valueOf(String name) => _$valueOf(name);
   BuiltSet<HoursStatus> get values => _$values;
 }
@@ -45,10 +51,12 @@ class _$HoursStatusSerializer implements PrimitiveSerializer<HoursStatus> {
   static const Map<String, Object> _toWire = const <String, Object>{
     'OPEN': 'OPEN',
     'APPROVED': 'APPROVED',
+    'unknownDefaultOpenApi': 'unknown_default_open_api',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'OPEN': 'OPEN',
     'APPROVED': 'APPROVED',
+    'unknown_default_open_api': 'unknownDefaultOpenApi',
   };
 
   @override

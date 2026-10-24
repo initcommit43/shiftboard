@@ -8,6 +8,8 @@ part of 'shift_period.dart';
 
 const ShiftPeriod _$UPCOMING = const ShiftPeriod._('UPCOMING');
 const ShiftPeriod _$PAST = const ShiftPeriod._('PAST');
+const ShiftPeriod _$unknownDefaultOpenApi =
+    const ShiftPeriod._('unknownDefaultOpenApi');
 
 ShiftPeriod _$valueOf(String name) {
   switch (name) {
@@ -15,8 +17,10 @@ ShiftPeriod _$valueOf(String name) {
       return _$UPCOMING;
     case 'PAST':
       return _$PAST;
+    case 'unknownDefaultOpenApi':
+      return _$unknownDefaultOpenApi;
     default:
-      throw ArgumentError(name);
+      return _$unknownDefaultOpenApi;
   }
 }
 
@@ -24,12 +28,14 @@ final BuiltSet<ShiftPeriod> _$values =
     BuiltSet<ShiftPeriod>(const <ShiftPeriod>[
   _$UPCOMING,
   _$PAST,
+  _$unknownDefaultOpenApi,
 ]);
 
 class _$ShiftPeriodMeta {
   const _$ShiftPeriodMeta();
   ShiftPeriod get UPCOMING => _$UPCOMING;
   ShiftPeriod get PAST => _$PAST;
+  ShiftPeriod get unknownDefaultOpenApi => _$unknownDefaultOpenApi;
   ShiftPeriod valueOf(String name) => _$valueOf(name);
   BuiltSet<ShiftPeriod> get values => _$values;
 }
@@ -45,10 +51,12 @@ class _$ShiftPeriodSerializer implements PrimitiveSerializer<ShiftPeriod> {
   static const Map<String, Object> _toWire = const <String, Object>{
     'UPCOMING': 'UPCOMING',
     'PAST': 'PAST',
+    'unknownDefaultOpenApi': 'unknown_default_open_api',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'UPCOMING': 'UPCOMING',
     'PAST': 'PAST',
+    'unknown_default_open_api': 'unknownDefaultOpenApi',
   };
 
   @override

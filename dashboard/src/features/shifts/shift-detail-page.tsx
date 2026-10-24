@@ -14,7 +14,7 @@ import { HoursSection } from '@/features/hours/hours-section'
 
 import { CancelShift } from './cancel-shift'
 import { ClaimsSection } from './claims-section'
-import { formatShiftDate, formatShiftTime, STATUS_VARIANT } from './format'
+import { formatShiftDate, formatShiftTime, statusBadge } from './format'
 import { usePublishShift, useShift } from './queries'
 import { SaveAsTemplate } from './save-as-template'
 import { isEditable, shiftSource, sourceToTemplate } from './shift-draft'
@@ -78,6 +78,7 @@ function isCancellable(shift: Shift) {
 
 function ShiftDetail({ shift }: { shift: Shift }) {
   const { t, i18n } = useTranslation()
+  const status = statusBadge(t, shift.status)
   const publish = usePublishShift()
   const money = new Intl.NumberFormat(i18n.language, { style: 'currency', currency: 'EUR' })
 
@@ -129,7 +130,7 @@ function ShiftDetail({ shift }: { shift: Shift }) {
           <Fact label={t('shifts.columns.date')}>{formatShiftDate(shift.startsAt, i18n.language)}</Fact>
           <Fact label={t('shifts.columns.time')}>{formatShiftTime(t, i18n.language, shift)}</Fact>
           <Fact label={t('shifts.columns.status')}>
-            <Badge variant={STATUS_VARIANT[shift.status]}>{t(`shifts.status.${shift.status}`)}</Badge>
+            <Badge variant={status.variant}>{status.label}</Badge>
           </Fact>
           <Fact label={t('shifts.columns.spots')}>
             {t('shifts.spots', { taken: shift.takenSlots, total: shift.slots })}

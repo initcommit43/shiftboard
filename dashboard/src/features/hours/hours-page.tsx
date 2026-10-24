@@ -24,7 +24,7 @@ import { formatShiftDate, formatShiftTime } from '@/features/shifts/format'
 import { downloadFile } from '@/lib/download'
 
 import { hoursCsv } from './csv'
-import { formatHours, formatMoney, HOURS_STATUS_VARIANT } from './format'
+import { formatHours, formatMoney, hoursStatusBadge } from './format'
 import { lastMonth, periodRange } from './period'
 import { useHoursOfPeriod } from './queries'
 
@@ -214,6 +214,7 @@ function HoursRow({ entry }: { entry: HoursEntry }) {
   const { hours, shift, worker } = entry
   const name = `${worker.firstName} ${worker.lastName}`
   const none = <span className="text-ink-tertiary">–</span>
+  const status = hoursStatusBadge(t, entry.status)
 
   return (
     <TableRow>
@@ -251,7 +252,7 @@ function HoursRow({ entry }: { entry: HoursEntry }) {
       </TableCell>
       <TableCell>
         <div className="flex flex-col items-start gap-1">
-          <Badge variant={HOURS_STATUS_VARIANT[entry.status]}>{t(`hours.status.${entry.status}`)}</Badge>
+          <Badge variant={status.variant}>{status.label}</Badge>
           {!hours && (
             <Link
               to={`/shifts/${shift.id}`}

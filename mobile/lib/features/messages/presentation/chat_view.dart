@@ -444,7 +444,9 @@ class _ShiftLine extends StatelessWidget {
   }
 }
 
-/// The worker's wording of what a system message reports.
+/// The worker's wording of what a system message reports. A shift change
+/// shows its body, which says what changed, and so does an event newer than
+/// the app (ADR 0030).
 String systemText(Message message, AppLocalizations l10n) {
   return switch (message.event) {
     SystemEvent.CLAIM_CONFIRMED => l10n.chatEventConfirmed,
@@ -452,6 +454,11 @@ String systemText(Message message, AppLocalizations l10n) {
     SystemEvent.CLAIM_CANCELLED_BY_WORKER => l10n.chatEventCancelledByYou,
     SystemEvent.REMOVED_BY_AGENCY => l10n.chatEventRemoved,
     SystemEvent.SHIFT_CANCELLED => l10n.chatEventShiftCancelled,
+    SystemEvent.WAITLIST_MOVED_UP => l10n.chatEventWaitlistMovedUp,
+    SystemEvent.WAITLIST_MOVED_UP_CONFIRMED =>
+      l10n.chatEventWaitlistMovedUpConfirmed,
+    SystemEvent.WAITLIST_REMOVED_BY_AGENCY => l10n.chatEventWaitlistRemoved,
+    SystemEvent.WAITLIST_SKIPPED => l10n.chatEventWaitlistSkipped,
     _ => message.body,
   };
 }

@@ -15,7 +15,16 @@
 
 /**
  * What a `SYSTEM` message reports, so that clients can word it in their
- * language. `body` carries a German text as a fallback.
+ * language. `body` carries a German text as a fallback. `SHIFT_CHANGED`
+ * means the agency changed the shift, and its `body` says what changed.
+ * The `WAITLIST_*` events report the waitlist: moved up into a claim
+ * that waits for the agency (`WAITLIST_MOVED_UP`) or into a confirmed
+ * spot (`WAITLIST_MOVED_UP_CONFIRMED`), taken off by the agency
+ * (`WAITLIST_REMOVED_BY_AGENCY`), or taken off because the worker is
+ * booked at the same time by now (`WAITLIST_SKIPPED`).
+ * 
+ * New values may be added. Clients show the `body` of an event they do
+ * not know.
  * 
  * @export
  */
@@ -25,6 +34,12 @@ export const SystemEvent = {
     CLAIM_CANCELLED_BY_WORKER: 'CLAIM_CANCELLED_BY_WORKER',
     REMOVED_BY_AGENCY: 'REMOVED_BY_AGENCY',
     SHIFT_CANCELLED: 'SHIFT_CANCELLED',
+    SHIFT_CHANGED: 'SHIFT_CHANGED',
+    WAITLIST_MOVED_UP: 'WAITLIST_MOVED_UP',
+    WAITLIST_MOVED_UP_CONFIRMED: 'WAITLIST_MOVED_UP_CONFIRMED',
+    WAITLIST_REMOVED_BY_AGENCY: 'WAITLIST_REMOVED_BY_AGENCY',
+    WAITLIST_SKIPPED: 'WAITLIST_SKIPPED',
+    unknown_default_open_api: '11184809',
 } as const;
 export type SystemEvent = typeof SystemEvent[keyof typeof SystemEvent];
 

@@ -20,6 +20,7 @@
 export const ClientType = {
     WORKER_APP: 'WORKER_APP',
     DASHBOARD: 'DASHBOARD',
+    unknown_default_open_api: '11184809',
 } as const;
 export type ClientType = typeof ClientType[keyof typeof ClientType];
 

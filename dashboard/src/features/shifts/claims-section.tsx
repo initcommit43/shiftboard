@@ -2,6 +2,7 @@ import { Inbox, LoaderCircle, TriangleAlert, Users } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { known } from '@/api/enums'
 import {
   AssignmentStatus,
   CancelledBy,
@@ -214,17 +215,25 @@ function PendingRow({ shiftId, assignment }: { shiftId: string; assignment: Shif
   )
 }
 
-function statusLabel(t: ReturnType<typeof useTranslation>['t'], assignment: ShiftAssignment) {
-  if (assignment.status === AssignmentStatus.CANCELLED) {
-    return t(
-      assignment.cancelledBy === CancelledBy.WORKER
-        ? 'shiftDetail.claims.status.cancelledByWorker'
-        : assignment.reason
-          ? 'shiftDetail.claims.status.removed'
-          : 'shiftDetail.claims.status.cancelledWithShift',
-    )
+/** The badge of a claim; a status newer than the dashboard shows as unknown. */
+function statusBadge(t: ReturnType<typeof useTranslation>['t'], assignment: ShiftAssignment) {
+  const status = known(AssignmentStatus, assignment.status)
+  if (!status) {
+    return { variant: 'tag' as const, label: t('unknownValue') }
   }
-  return t(`shiftDetail.claims.status.${assignment.status}`)
+  if (status === AssignmentStatus.CANCELLED) {
+    return {
+      variant: ASSIGNMENT_VARIANT[status],
+      label: t(
+        assignment.cancelledBy === CancelledBy.WORKER
+          ? 'shiftDetail.claims.status.cancelledByWorker'
+          : assignment.reason
+            ? 'shiftDetail.claims.status.removed'
+            : 'shiftDetail.claims.status.cancelledWithShift',
+      ),
+    }
+  }
+  return { variant: ASSIGNMENT_VARIANT[status], label: t(`shiftDetail.claims.status.${status}`) }
 }
 
 function TeamRow({ shiftId, assignment }: { shiftId: string; assignment: ShiftAssignment }) {
@@ -234,6 +243,7 @@ function TeamRow({ shiftId, assignment }: { shiftId: string; assignment: ShiftAs
   const name = workerName(assignment)
   // Who checked in or has approved hours was there and can't be a no-show (ADR 0028).
   const attended = assignment.checkedInAt !== undefined || assignment.hours !== undefined
+  const status = statusBadge(t, assignment)
 
   return (
     <TableRow>
@@ -241,7 +251,7 @@ function TeamRow({ shiftId, assignment }: { shiftId: string; assignment: ShiftAs
       <TableCell>{assignment.worker.phone}</TableCell>
       <TableCell className="whitespace-normal">
         <div className="flex flex-col items-start gap-1">
-          <Badge variant={ASSIGNMENT_VARIANT[assignment.status]}>{statusLabel(t, assignment)}</Badge>
+          <Badge variant={status.variant}>{status.label}</Badge>
           {assignment.reason && (
             <span className="type-body-sm text-ink-secondary">
               {t('shiftDetail.claims.reason', { reason: assignment.reason })}

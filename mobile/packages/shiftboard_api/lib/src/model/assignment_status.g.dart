@@ -12,6 +12,8 @@ const AssignmentStatus _$REJECTED = const AssignmentStatus._('REJECTED');
 const AssignmentStatus _$CANCELLED = const AssignmentStatus._('CANCELLED');
 const AssignmentStatus _$COMPLETED = const AssignmentStatus._('COMPLETED');
 const AssignmentStatus _$NO_SHOW = const AssignmentStatus._('NO_SHOW');
+const AssignmentStatus _$unknownDefaultOpenApi =
+    const AssignmentStatus._('unknownDefaultOpenApi');
 
 AssignmentStatus _$valueOf(String name) {
   switch (name) {
@@ -27,8 +29,10 @@ AssignmentStatus _$valueOf(String name) {
       return _$COMPLETED;
     case 'NO_SHOW':
       return _$NO_SHOW;
+    case 'unknownDefaultOpenApi':
+      return _$unknownDefaultOpenApi;
     default:
-      throw ArgumentError(name);
+      return _$unknownDefaultOpenApi;
   }
 }
 
@@ -40,6 +44,7 @@ final BuiltSet<AssignmentStatus> _$values =
   _$CANCELLED,
   _$COMPLETED,
   _$NO_SHOW,
+  _$unknownDefaultOpenApi,
 ]);
 
 class _$AssignmentStatusMeta {
@@ -50,6 +55,7 @@ class _$AssignmentStatusMeta {
   AssignmentStatus get CANCELLED => _$CANCELLED;
   AssignmentStatus get COMPLETED => _$COMPLETED;
   AssignmentStatus get NO_SHOW => _$NO_SHOW;
+  AssignmentStatus get unknownDefaultOpenApi => _$unknownDefaultOpenApi;
   AssignmentStatus valueOf(String name) => _$valueOf(name);
   BuiltSet<AssignmentStatus> get values => _$values;
 }
@@ -71,6 +77,7 @@ class _$AssignmentStatusSerializer
     'CANCELLED': 'CANCELLED',
     'COMPLETED': 'COMPLETED',
     'NO_SHOW': 'NO_SHOW',
+    'unknownDefaultOpenApi': 'unknown_default_open_api',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'PENDING': 'PENDING',
@@ -79,6 +86,7 @@ class _$AssignmentStatusSerializer
     'CANCELLED': 'CANCELLED',
     'COMPLETED': 'COMPLETED',
     'NO_SHOW': 'NO_SHOW',
+    'unknown_default_open_api': 'unknownDefaultOpenApi',
   };
 
   @override

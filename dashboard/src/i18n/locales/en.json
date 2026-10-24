@@ -2,6 +2,7 @@
   "app": {
     "name": "shiftboard"
   },
+  "unknownValue": "Unknown",
   "shell": {
     "navigation": "Main navigation",
     "nav": {
@@ -542,7 +543,11 @@
       "CLAIM_REJECTED": "Request rejected",
       "CLAIM_CANCELLED_BY_WORKER": "Dropped out",
       "REMOVED_BY_AGENCY": "Removed from the shift",
-      "SHIFT_CANCELLED": "Shift cancelled"
+      "SHIFT_CANCELLED": "Shift cancelled",
+      "WAITLIST_MOVED_UP": "Moved up from the waitlist",
+      "WAITLIST_MOVED_UP_CONFIRMED": "Moved up from the waitlist and confirmed",
+      "WAITLIST_REMOVED_BY_AGENCY": "Taken off the waitlist",
+      "WAITLIST_SKIPPED": "Skipped on the waitlist: booked at the same time"
     }
   },
   "broadcast": {

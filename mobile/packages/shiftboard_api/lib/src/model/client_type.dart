@@ -15,6 +15,8 @@ class ClientType extends EnumClass {
   static const ClientType WORKER_APP = _$WORKER_APP;
   @BuiltValueEnumConst(wireName: r'DASHBOARD')
   static const ClientType DASHBOARD = _$DASHBOARD;
+  @BuiltValueEnumConst(wireName: r'unknown_default_open_api', fallback: true)
+  static const ClientType unknownDefaultOpenApi = _$unknownDefaultOpenApi;
 
   static Serializer<ClientType> get serializer => _$clientTypeSerializer;
 

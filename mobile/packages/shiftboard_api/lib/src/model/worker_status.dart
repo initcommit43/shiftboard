@@ -17,6 +17,8 @@ class WorkerStatus extends EnumClass {
   static const WorkerStatus ACTIVE = _$ACTIVE;
   @BuiltValueEnumConst(wireName: r'INACTIVE')
   static const WorkerStatus INACTIVE = _$INACTIVE;
+  @BuiltValueEnumConst(wireName: r'unknown_default_open_api', fallback: true)
+  static const WorkerStatus unknownDefaultOpenApi = _$unknownDefaultOpenApi;
 
   static Serializer<WorkerStatus> get serializer => _$workerStatusSerializer;
 

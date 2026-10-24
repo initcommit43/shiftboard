@@ -11,6 +11,8 @@ Both clients are generated from it with [openapi-generator](https://openapi-gene
 
 Never edit the generated code or write API models by hand in the clients.
 
+New enum values are backward compatible: both generators run with `enumUnknownDefaultCase`, and the clients fall back for values they don't know, such as showing a system message's `body` (ADR 0030). Client code that switches over an enum needs a fallback branch.
+
 ## Commands
 
 Run in `api/`. Needs Node.js, Java and the Dart SDK (part of Flutter).

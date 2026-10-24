@@ -23,6 +23,7 @@ export const WorkerStatus = {
     PENDING: 'PENDING',
     ACTIVE: 'ACTIVE',
     INACTIVE: 'INACTIVE',
+    unknown_default_open_api: '11184809',
 } as const;
 export type WorkerStatus = typeof WorkerStatus[keyof typeof WorkerStatus];
 
