@@ -510,7 +510,7 @@ class _Details extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            Text(format.spots(shift), style: secondary),
+            Text(format.spots(shift, now), style: secondary),
           ],
         ),
         if (shift.description case final description?
