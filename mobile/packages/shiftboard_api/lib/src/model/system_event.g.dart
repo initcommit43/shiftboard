@@ -13,6 +13,8 @@ const SystemEvent _$CLAIM_CANCELLED_BY_WORKER =
 const SystemEvent _$REMOVED_BY_AGENCY =
     const SystemEvent._('REMOVED_BY_AGENCY');
 const SystemEvent _$SHIFT_CANCELLED = const SystemEvent._('SHIFT_CANCELLED');
+const SystemEvent _$unknownDefaultOpenApi =
+    const SystemEvent._('unknownDefaultOpenApi');
 
 SystemEvent _$valueOf(String name) {
   switch (name) {
@@ -26,8 +28,10 @@ SystemEvent _$valueOf(String name) {
       return _$REMOVED_BY_AGENCY;
     case 'SHIFT_CANCELLED':
       return _$SHIFT_CANCELLED;
+    case 'unknownDefaultOpenApi':
+      return _$unknownDefaultOpenApi;
     default:
-      throw ArgumentError(name);
+      return _$unknownDefaultOpenApi;
   }
 }
 
@@ -38,6 +42,7 @@ final BuiltSet<SystemEvent> _$values =
   _$CLAIM_CANCELLED_BY_WORKER,
   _$REMOVED_BY_AGENCY,
   _$SHIFT_CANCELLED,
+  _$unknownDefaultOpenApi,
 ]);
 
 class _$SystemEventMeta {
@@ -47,6 +52,7 @@ class _$SystemEventMeta {
   SystemEvent get CLAIM_CANCELLED_BY_WORKER => _$CLAIM_CANCELLED_BY_WORKER;
   SystemEvent get REMOVED_BY_AGENCY => _$REMOVED_BY_AGENCY;
   SystemEvent get SHIFT_CANCELLED => _$SHIFT_CANCELLED;
+  SystemEvent get unknownDefaultOpenApi => _$unknownDefaultOpenApi;
   SystemEvent valueOf(String name) => _$valueOf(name);
   BuiltSet<SystemEvent> get values => _$values;
 }
@@ -65,6 +71,7 @@ class _$SystemEventSerializer implements PrimitiveSerializer<SystemEvent> {
     'CLAIM_CANCELLED_BY_WORKER': 'CLAIM_CANCELLED_BY_WORKER',
     'REMOVED_BY_AGENCY': 'REMOVED_BY_AGENCY',
     'SHIFT_CANCELLED': 'SHIFT_CANCELLED',
+    'unknownDefaultOpenApi': 'unknown_default_open_api',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'CLAIM_CONFIRMED': 'CLAIM_CONFIRMED',
@@ -72,6 +79,7 @@ class _$SystemEventSerializer implements PrimitiveSerializer<SystemEvent> {
     'CLAIM_CANCELLED_BY_WORKER': 'CLAIM_CANCELLED_BY_WORKER',
     'REMOVED_BY_AGENCY': 'REMOVED_BY_AGENCY',
     'SHIFT_CANCELLED': 'SHIFT_CANCELLED',
+    'unknown_default_open_api': 'unknownDefaultOpenApi',
   };
 
   @override

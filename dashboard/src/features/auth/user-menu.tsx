@@ -1,6 +1,8 @@
 import { ChevronDown, LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+import { known } from '@/api/enums'
+import { Role } from '@/api/generated'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,7 +19,8 @@ export function UserMenu() {
   const { t } = useTranslation()
   const user = useCurrentUser()
   const logout = useLogout()
-  const role = t(`roles.${user.role}`)
+  const knownRole = known(Role, user.role)
+  const role = knownRole ? t(`roles.${knownRole}`) : t('unknownValue')
 
   return (
     <DropdownMenu>

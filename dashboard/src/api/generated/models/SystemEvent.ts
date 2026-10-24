@@ -25,6 +25,7 @@ export const SystemEvent = {
     CLAIM_CANCELLED_BY_WORKER: 'CLAIM_CANCELLED_BY_WORKER',
     REMOVED_BY_AGENCY: 'REMOVED_BY_AGENCY',
     SHIFT_CANCELLED: 'SHIFT_CANCELLED',
+    unknown_default_open_api: '11184809',
 } as const;
 export type SystemEvent = typeof SystemEvent[keyof typeof SystemEvent];
 

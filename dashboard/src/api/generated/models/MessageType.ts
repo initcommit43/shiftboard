@@ -24,6 +24,7 @@ export const MessageType = {
     TEXT: 'TEXT',
     SYSTEM: 'SYSTEM',
     BROADCAST: 'BROADCAST',
+    unknown_default_open_api: '11184809',
 } as const;
 export type MessageType = typeof MessageType[keyof typeof MessageType];
 

@@ -10,6 +10,8 @@ const ShiftStatus _$DRAFT = const ShiftStatus._('DRAFT');
 const ShiftStatus _$PUBLISHED = const ShiftStatus._('PUBLISHED');
 const ShiftStatus _$COMPLETED = const ShiftStatus._('COMPLETED');
 const ShiftStatus _$CANCELLED = const ShiftStatus._('CANCELLED');
+const ShiftStatus _$unknownDefaultOpenApi =
+    const ShiftStatus._('unknownDefaultOpenApi');
 
 ShiftStatus _$valueOf(String name) {
   switch (name) {
@@ -21,8 +23,10 @@ ShiftStatus _$valueOf(String name) {
       return _$COMPLETED;
     case 'CANCELLED':
       return _$CANCELLED;
+    case 'unknownDefaultOpenApi':
+      return _$unknownDefaultOpenApi;
     default:
-      throw ArgumentError(name);
+      return _$unknownDefaultOpenApi;
   }
 }
 
@@ -32,6 +36,7 @@ final BuiltSet<ShiftStatus> _$values =
   _$PUBLISHED,
   _$COMPLETED,
   _$CANCELLED,
+  _$unknownDefaultOpenApi,
 ]);
 
 class _$ShiftStatusMeta {
@@ -40,6 +45,7 @@ class _$ShiftStatusMeta {
   ShiftStatus get PUBLISHED => _$PUBLISHED;
   ShiftStatus get COMPLETED => _$COMPLETED;
   ShiftStatus get CANCELLED => _$CANCELLED;
+  ShiftStatus get unknownDefaultOpenApi => _$unknownDefaultOpenApi;
   ShiftStatus valueOf(String name) => _$valueOf(name);
   BuiltSet<ShiftStatus> get values => _$values;
 }
@@ -57,12 +63,14 @@ class _$ShiftStatusSerializer implements PrimitiveSerializer<ShiftStatus> {
     'PUBLISHED': 'PUBLISHED',
     'COMPLETED': 'COMPLETED',
     'CANCELLED': 'CANCELLED',
+    'unknownDefaultOpenApi': 'unknown_default_open_api',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'DRAFT': 'DRAFT',
     'PUBLISHED': 'PUBLISHED',
     'COMPLETED': 'COMPLETED',
     'CANCELLED': 'CANCELLED',
+    'unknown_default_open_api': 'unknownDefaultOpenApi',
   };
 
   @override

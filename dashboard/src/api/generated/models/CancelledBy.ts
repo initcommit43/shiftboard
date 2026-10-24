@@ -22,6 +22,7 @@
 export const CancelledBy = {
     WORKER: 'WORKER',
     AGENCY: 'AGENCY',
+    unknown_default_open_api: '11184809',
 } as const;
 export type CancelledBy = typeof CancelledBy[keyof typeof CancelledBy];
 

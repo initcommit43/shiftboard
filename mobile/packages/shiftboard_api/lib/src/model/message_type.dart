@@ -17,6 +17,8 @@ class MessageType extends EnumClass {
   static const MessageType SYSTEM = _$SYSTEM;
   @BuiltValueEnumConst(wireName: r'BROADCAST')
   static const MessageType BROADCAST = _$BROADCAST;
+  @BuiltValueEnumConst(wireName: r'unknown_default_open_api', fallback: true)
+  static const MessageType unknownDefaultOpenApi = _$unknownDefaultOpenApi;
 
   static Serializer<MessageType> get serializer => _$messageTypeSerializer;
 

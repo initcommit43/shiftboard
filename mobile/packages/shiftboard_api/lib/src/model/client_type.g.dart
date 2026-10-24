@@ -8,6 +8,8 @@ part of 'client_type.dart';
 
 const ClientType _$WORKER_APP = const ClientType._('WORKER_APP');
 const ClientType _$DASHBOARD = const ClientType._('DASHBOARD');
+const ClientType _$unknownDefaultOpenApi =
+    const ClientType._('unknownDefaultOpenApi');
 
 ClientType _$valueOf(String name) {
   switch (name) {
@@ -15,20 +17,24 @@ ClientType _$valueOf(String name) {
       return _$WORKER_APP;
     case 'DASHBOARD':
       return _$DASHBOARD;
+    case 'unknownDefaultOpenApi':
+      return _$unknownDefaultOpenApi;
     default:
-      throw ArgumentError(name);
+      return _$unknownDefaultOpenApi;
   }
 }
 
 final BuiltSet<ClientType> _$values = BuiltSet<ClientType>(const <ClientType>[
   _$WORKER_APP,
   _$DASHBOARD,
+  _$unknownDefaultOpenApi,
 ]);
 
 class _$ClientTypeMeta {
   const _$ClientTypeMeta();
   ClientType get WORKER_APP => _$WORKER_APP;
   ClientType get DASHBOARD => _$DASHBOARD;
+  ClientType get unknownDefaultOpenApi => _$unknownDefaultOpenApi;
   ClientType valueOf(String name) => _$valueOf(name);
   BuiltSet<ClientType> get values => _$values;
 }
@@ -44,10 +50,12 @@ class _$ClientTypeSerializer implements PrimitiveSerializer<ClientType> {
   static const Map<String, Object> _toWire = const <String, Object>{
     'WORKER_APP': 'WORKER_APP',
     'DASHBOARD': 'DASHBOARD',
+    'unknownDefaultOpenApi': 'unknown_default_open_api',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'WORKER_APP': 'WORKER_APP',
     'DASHBOARD': 'DASHBOARD',
+    'unknown_default_open_api': 'unknownDefaultOpenApi',
   };
 
   @override

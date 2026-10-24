@@ -20,6 +20,7 @@
 export const HoursStatus = {
     OPEN: 'OPEN',
     APPROVED: 'APPROVED',
+    unknown_default_open_api: '11184809',
 } as const;
 export type HoursStatus = typeof HoursStatus[keyof typeof HoursStatus];
 

@@ -23,6 +23,8 @@ class AssignmentStatus extends EnumClass {
   static const AssignmentStatus COMPLETED = _$COMPLETED;
   @BuiltValueEnumConst(wireName: r'NO_SHOW')
   static const AssignmentStatus NO_SHOW = _$NO_SHOW;
+  @BuiltValueEnumConst(wireName: r'unknown_default_open_api', fallback: true)
+  static const AssignmentStatus unknownDefaultOpenApi = _$unknownDefaultOpenApi;
 
   static Serializer<AssignmentStatus> get serializer =>
       _$assignmentStatusSerializer;

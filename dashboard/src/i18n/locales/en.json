@@ -2,6 +2,7 @@
   "app": {
     "name": "shiftboard"
   },
+  "unknownValue": "Unknown",
   "shell": {
     "navigation": "Main navigation",
     "nav": {

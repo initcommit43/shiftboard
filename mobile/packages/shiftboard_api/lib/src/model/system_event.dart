@@ -22,6 +22,8 @@ class SystemEvent extends EnumClass {
   static const SystemEvent REMOVED_BY_AGENCY = _$REMOVED_BY_AGENCY;
   @BuiltValueEnumConst(wireName: r'SHIFT_CANCELLED')
   static const SystemEvent SHIFT_CANCELLED = _$SHIFT_CANCELLED;
+  @BuiltValueEnumConst(wireName: r'unknown_default_open_api', fallback: true)
+  static const SystemEvent unknownDefaultOpenApi = _$unknownDefaultOpenApi;
 
   static Serializer<SystemEvent> get serializer => _$systemEventSerializer;
 

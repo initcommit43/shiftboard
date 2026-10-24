@@ -1,5 +1,8 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shiftboard/core/l10n/generated/app_localizations.dart';
 import 'package:shiftboard/features/shifts/domain/shift_facts.dart';
+import 'package:shiftboard/features/shifts/presentation/shift_format.dart';
 import 'package:shiftboard_api/shiftboard_api.dart';
 
 import '../../support/fake_backend.dart';
@@ -207,6 +210,36 @@ void main() {
       expect(waiting.canLeaveWaitlistAt(before), isTrue);
       expect(waiting.canLeaveWaitlistAt(start), isFalse);
       expect(full().canLeaveWaitlistAt(before), isFalse);
+    });
+  });
+
+  group('a claim status newer than the app', () {
+    // The generated client maps values it does not know to a fallback (ADR 0030).
+    final shift = standardSerializers.deserializeWith(
+      WorkerShift.serializer,
+      workerShift(
+        assignmentStatus: 'ON_HOLD',
+        cancellableUntil: DateTime(2026, 10, 17, 12),
+        checkInFrom: DateTime(2026, 10, 17, 17, 30),
+      ),
+    )!;
+
+    test('arrives as the fallback value', () {
+      expect(shift.assignment!.status, AssignmentStatus.unknownDefaultOpenApi);
+    });
+
+    test('holds no spot and allows nothing', () {
+      final now = DateTime(2026, 10, 17, 10);
+      expect(shift.holdsSpot, isFalse);
+      expect(shift.canCancelAt(now), isFalse);
+      expect(shift.checkInAt(DateTime(2026, 10, 17, 18)), CheckIn.none);
+    });
+
+    test('shows no badge rather than a wrong one', () {
+      expect(
+        shiftBadge(shift, lookupAppLocalizations(const Locale('de'))),
+        isNull,
+      );
     });
   });
 }

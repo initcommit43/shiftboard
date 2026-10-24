@@ -88,6 +88,29 @@ void main() {
     expect(find.text('Lagerunterstützung · Sa., 17. Okt.'), findsNWidgets(2));
   });
 
+  testWidgets('shows the body of an event newer than the app', (tester) async {
+    backend.on(
+      messagesRoute,
+      (_) => json(
+        page([
+          message(
+            3,
+            'Die Agentur hat deine Schicht getauscht.',
+            type: 'SYSTEM',
+            event: 'SHIFT_SWAPPED',
+            aboutShift: true,
+          ),
+        ]),
+      ),
+    );
+    await openMessagesTab(tester);
+
+    expect(
+      find.text('Die Agentur hat deine Schicht getauscht.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('shows an empty state before the first message', (tester) async {
     await openMessagesTab(tester);
 
