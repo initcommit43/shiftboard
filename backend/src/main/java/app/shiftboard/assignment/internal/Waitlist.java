@@ -90,6 +90,10 @@ class Waitlist {
                     agencyId, shiftId, line.stream().map(Assignment::getWorkerId).toList()));
             return;
         }
+        // The caller has written the shift already, so the workers come second, as in a claim. A
+        // claim of one of them on another shift waits until this move up is done, and the other
+        // way round.
+        assignments.lockBookings(line.stream().map(Assignment::getWorkerId).toList());
         var free = shift.slots() - shift.takenSlots();
         for (var entry : line) {
             if (free == 0) {
