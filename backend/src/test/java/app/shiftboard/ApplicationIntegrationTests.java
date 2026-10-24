@@ -49,10 +49,14 @@ class ApplicationIntegrationTests extends IntegrationTest {
     @Test
     void flywayMigratesTheSchemaOnStartup() {
         var applied = jdbc.sql("select count(*) from flyway_schema_history where success").query(Integer.class).single();
-        var publications = jdbc.sql("select count(*) from event_publication").query(Integer.class).single();
+        var failed = jdbc.sql("select count(*) from flyway_schema_history where not success").query(Integer.class).single();
+        // The registry of Spring Modulith comes from the first migration, not from Modulith itself.
+        // Whether it holds rows depends on the tests that ran before in the same database.
+        var registry = jdbc.sql("select to_regclass('event_publication') is not null").query(Boolean.class).single();
 
         assertThat(applied).isPositive();
-        assertThat(publications).isZero();
+        assertThat(failed).isZero();
+        assertThat(registry).isTrue();
     }
 
     @Test
