@@ -72,6 +72,9 @@ class ShiftLifecycleListener {
     void on(ShiftChanged changed) {
         var holding = assignments.findForUpdateByShiftIdAndStatusIn(changed.shiftId(), AssignmentStatus.HOLDING);
         if (changed.changes().contains(ShiftChanged.Change.TIME)) {
+            // The shift is written already; a claim of one of the workers elsewhere waits for the
+            // new time, and the other way round.
+            assignments.lockBookings(holding.stream().map(Assignment::getWorkerId).toList());
             for (var assignment : holding) {
                 if (assignments.isBookedElsewhere(
                         assignment.getWorkerId(), assignment.getId(), AssignmentStatus.HOLDING, changed.startsAt(),
