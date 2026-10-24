@@ -19,6 +19,17 @@ describe('messageText', () => {
     )
   })
 
+  it('words the waitlist events', () => {
+    expect(messageText(t, system('WAITLIST_MOVED_UP_CONFIRMED', 'Du bist nachgerückt.'))).toBe(
+      'Von der Warteliste nachgerückt und bestätigt',
+    )
+  })
+
+  it('shows the body of a shift change, which says what changed', () => {
+    const body = 'Die Agentur hat „Service Bankett“ geändert. Zeit: Mi., 7. Jan., 08:00 – ca. 16:00.'
+    expect(messageText(t, system('SHIFT_CHANGED', body))).toBe(body)
+  })
+
   it('shows the body of an event newer than the dashboard', () => {
     // The generated client passes event values it does not know through as they are.
     const newer = system('SHIFT_SWAPPED' as SystemEvent, 'Die Agentur hat deine Schicht getauscht.')

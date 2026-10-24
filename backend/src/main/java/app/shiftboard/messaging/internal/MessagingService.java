@@ -353,8 +353,7 @@ class MessagingService {
                     return new MessageResponse(
                             message.getId(),
                             message.getType(),
-                            // Installed apps reject event values they do not know (ADR 0026).
-                            message.getEvent() == null || !message.getEvent().inApi() ? null : message.getEvent(),
+                            message.getEvent(),
                             message.getBody(),
                             message.isFromWorker(),
                             message.getSenderUserId() == null ? null : senders.get(message.getSenderUserId()),
