@@ -12,6 +12,7 @@ import {
   umschlaglager,
 } from '@/test/fake-api'
 import { renderApp } from '@/test/render'
+import { enter, typingUser } from '@/test/user'
 
 /** A day from today at the given time, in the browser's time zone. */
 function inDays(days: number, hours: number, minutes = 0) {
@@ -47,7 +48,7 @@ describe('editing a shift', () => {
 
   it('changes every field, keeps the date and goes back to the shift', async () => {
     renderApp(`/shifts/${upcoming.id}`)
-    const user = userEvent.setup()
+    const user = typingUser()
 
     await user.click(await screen.findByRole('link', { name: 'Bearbeiten' }))
 
@@ -63,9 +64,9 @@ describe('editing a shift', () => {
 
     await user.selectOptions(screen.getByLabelText('Einsatzort'), 'Umschlaglager Wels')
     await user.clear(screen.getByLabelText('Beginn'))
-    await user.type(screen.getByLabelText('Beginn'), '08:00')
+    await enter(user, screen.getByLabelText('Beginn'), '08:00')
     await user.clear(screen.getByLabelText('Stundenlohn in Euro'))
-    await user.type(screen.getByLabelText('Stundenlohn in Euro'), '17,20')
+    await enter(user, screen.getByLabelText('Stundenlohn in Euro'), '17,20')
     await user.clear(screen.getByLabelText('Beschreibung'))
     await user.click(screen.getByRole('button', { name: 'Änderungen speichern' }))
 
