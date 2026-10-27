@@ -6,6 +6,9 @@ import { type ConversationEvent, ConversationEventFromJSON } from '@/api/generat
 export const RECONNECT_BASE_MS = 1_000
 export const RECONNECT_MAX_MS = 30_000
 
+/** The server pings every 25 seconds; a connection without any bytes for this long is dead. */
+export const SILENCE_TIMEOUT_MS = 60_000
+
 export interface InboxEventHandlers {
   /** The stream is open: notices arrive from now on. */
   onOpen: () => void
@@ -54,7 +57,36 @@ export async function followInboxEvents(handlers: InboxEventHandlers, signal: Ab
   }
 }
 
+/**
+ * One connection. A watchdog aborts it when no bytes arrive for the silence
+ * timeout, as a connection that died without closing never ends on its own;
+ * that counts as a failure.
+ */
 async function connect(handlers: InboxEventHandlers, signal: AbortSignal) {
+  const connection = new AbortController()
+  const abort = () => {
+    connection.abort()
+  }
+  signal.addEventListener('abort', abort, { once: true })
+  let watchdog: ReturnType<typeof setTimeout> | undefined
+  const watch = () => {
+    clearTimeout(watchdog)
+    watchdog = setTimeout(abort, SILENCE_TIMEOUT_MS)
+  }
+
+  watch()
+  try {
+    const result = await openAndRead(handlers, connection.signal, watch)
+    // Aborted while the caller still listens: the watchdog gave up on it.
+    const silent = connection.signal.aborted && !signal.aborted
+    return silent ? { ...result, outcome: 'failed' as const } : result
+  } finally {
+    clearTimeout(watchdog)
+    signal.removeEventListener('abort', abort)
+  }
+}
+
+async function openAndRead(handlers: InboxEventHandlers, signal: AbortSignal, onBytes: () => void) {
   const { path, headers } = await messagesApi.streamInboxEventsRequestOpts()
   const authorization = headers['Authorization'] ?? null
   const result = (outcome: Outcome, opened = false) => ({ outcome, opened, authorization })
@@ -90,6 +122,7 @@ async function connect(handlers: InboxEventHandlers, signal: AbortSignal) {
         }
       },
       signal,
+      onBytes,
     )
     return result('ended', true)
   } catch {

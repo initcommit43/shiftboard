@@ -74,12 +74,14 @@ export function createEventStreamParser(onEvent: (event: ServerSentEvent) => voi
 
 /**
  * Reads an event stream body until the server ends it or the signal aborts.
- * Rejects when the connection fails.
+ * Rejects when the connection fails. `onBytes` hears of every chunk, comments
+ * included, so that a caller can tell a quiet stream from a dead one.
  */
 export async function readEventStream(
   body: ReadableStream<Uint8Array>,
   onEvent: (event: ServerSentEvent) => void,
   signal: AbortSignal,
+  onBytes?: () => void,
 ): Promise<void> {
   const reader = body.getReader()
   const decoder = new TextDecoder()
@@ -94,6 +96,7 @@ export async function readEventStream(
       if (done || signal.aborted) {
         return
       }
+      onBytes?.()
       parse(decoder.decode(value, { stream: true }))
     }
   } finally {

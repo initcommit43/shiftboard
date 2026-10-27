@@ -12,7 +12,7 @@ import {
 } from '@/test/fake-api'
 import { renderApp } from '@/test/render'
 
-import { RECONNECT_MAX_MS } from './inbox-events'
+import { RECONNECT_MAX_MS, SILENCE_TIMEOUT_MS } from './inbox-events'
 import { POLL_MS } from './queries'
 
 const EVENTS = 'GET /conversations/events'
@@ -181,6 +181,36 @@ describe('live inbox', () => {
       expect(api.count(EVENTS)).toBe(6)
       await vi.advanceTimersByTimeAsync(1_000)
       expect(api.count(EVENTS)).toBe(7)
+    })
+
+    it('drops a stream that goes silent, polls meanwhile and reconnects', async () => {
+      renderApp('/messages')
+      await conversations()
+      await streamOpen()
+
+      // Pings keep it open past the silence timeout.
+      await vi.advanceTimersByTimeAsync(25_000)
+      api.sendEventText(': ping\n')
+      await vi.advanceTimersByTimeAsync(25_000)
+      api.sendEventText(': ping\n')
+      await vi.advanceTimersByTimeAsync(SILENCE_TIMEOUT_MS - 1_000)
+      expect(api.openEventStreams).toBe(1)
+      expect(api.count(EVENTS)).toBe(1)
+
+      // Then nothing arrives: the connection is given up, and the next attempts fail.
+      for (let attempt = 0; attempt < 5; attempt++) {
+        api.respondOnce(EVENTS, problem(503, 'unavailable'))
+      }
+      const live = api.count(INBOX)
+      await vi.advanceTimersByTimeAsync(1_500)
+      expect(api.openEventStreams).toBe(0)
+      await vi.advanceTimersByTimeAsync(1_500)
+      expect(api.count(EVENTS)).toBe(2)
+
+      await vi.advanceTimersByTimeAsync(POLL_MS)
+      await waitFor(() => {
+        expect(api.count(INBOX)).toBeGreaterThan(live)
+      })
     })
 
     it('refreshes an expired token and reconnects', async () => {
