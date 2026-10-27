@@ -29,6 +29,12 @@ interface ShiftRepository extends Repository<Shift, UUID> {
 
     Page<Shift> findByStatusAndStartsAtAfter(ShiftStatus status, Instant time, Pageable pageable);
 
+    Page<Shift> findByClientIdAndStatusInAndEndsAtAfter(
+            UUID clientId, Collection<ShiftStatus> statuses, Instant time, Pageable pageable);
+
+    Page<Shift> findByClientIdAndStatusInAndEndsAtLessThanEqual(
+            UUID clientId, Collection<ShiftStatus> statuses, Instant time, Pageable pageable);
+
     /** The ids of the shifts in this status that ended by the given time, the earliest end first. */
     List<ShiftIdOnly> findByStatusAndEndsAtLessThanEqualOrderByEndsAt(ShiftStatus status, Instant time, Limit limit);
 
