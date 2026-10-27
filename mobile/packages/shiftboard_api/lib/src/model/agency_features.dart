@@ -13,6 +13,7 @@ part 'agency_features.g.dart';
 /// Properties:
 /// * [contactButton] - Workers see a WhatsApp button for the contact person on a shift, for agencies that prefer that over the in-app chat. Off by default.
 /// * [checkIn] - Workers check in and out of their shifts in the app. Off by default. Always present in responses; absent in a request, it stays as it is.
+/// * [clientPortal] - The staff of the agency's clients log in to see their shifts and who is coming (ADR 0032). Off by default. Always present in responses; absent in a request, it stays as it is.
 @BuiltValue()
 abstract class AgencyFeatures
     implements Built<AgencyFeatures, AgencyFeaturesBuilder> {
@@ -23,6 +24,10 @@ abstract class AgencyFeatures
   /// Workers check in and out of their shifts in the app. Off by default. Always present in responses; absent in a request, it stays as it is.
   @BuiltValueField(wireName: r'checkIn')
   bool? get checkIn;
+
+  /// The staff of the agency's clients log in to see their shifts and who is coming (ADR 0032). Off by default. Always present in responses; absent in a request, it stays as it is.
+  @BuiltValueField(wireName: r'clientPortal')
+  bool? get clientPortal;
 
   AgencyFeatures._();
 
@@ -59,6 +64,13 @@ class _$AgencyFeaturesSerializer
       yield r'checkIn';
       yield serializers.serialize(
         object.checkIn,
+        specifiedType: const FullType(bool),
+      );
+    }
+    if (object.clientPortal != null) {
+      yield r'clientPortal';
+      yield serializers.serialize(
+        object.clientPortal,
         specifiedType: const FullType(bool),
       );
     }
@@ -101,6 +113,14 @@ class _$AgencyFeaturesSerializer
           ) as bool?;
           if (valueDes == null) continue;
           result.checkIn = valueDes;
+          break;
+        case r'clientPortal':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(bool),
+          ) as bool?;
+          if (valueDes == null) continue;
+          result.clientPortal = valueDes;
           break;
         default:
           unhandled.add(key);

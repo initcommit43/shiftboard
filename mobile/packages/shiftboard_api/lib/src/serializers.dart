@@ -25,8 +25,19 @@ import 'package:shiftboard_api/src/model/broadcast_result.dart';
 import 'package:shiftboard_api/src/model/cancelled_by.dart';
 import 'package:shiftboard_api/src/model/client.dart';
 import 'package:shiftboard_api/src/model/client_page.dart';
+import 'package:shiftboard_api/src/model/client_setup_info.dart';
+import 'package:shiftboard_api/src/model/client_setup_request.dart';
+import 'package:shiftboard_api/src/model/client_shift.dart';
+import 'package:shiftboard_api/src/model/client_shift_detail.dart';
+import 'package:shiftboard_api/src/model/client_shift_page.dart';
+import 'package:shiftboard_api/src/model/client_shift_period.dart';
+import 'package:shiftboard_api/src/model/client_shift_worker.dart';
 import 'package:shiftboard_api/src/model/client_summary.dart';
 import 'package:shiftboard_api/src/model/client_type.dart';
+import 'package:shiftboard_api/src/model/client_user.dart';
+import 'package:shiftboard_api/src/model/client_user_invitation.dart';
+import 'package:shiftboard_api/src/model/client_user_request.dart';
+import 'package:shiftboard_api/src/model/client_user_status.dart';
 import 'package:shiftboard_api/src/model/conversation.dart';
 import 'package:shiftboard_api/src/model/conversation_change.dart';
 import 'package:shiftboard_api/src/model/conversation_event.dart';
@@ -98,8 +109,20 @@ part 'serializers.g.dart';
   CancelledBy,
   Client,
   ClientPage,
+  ClientSetupInfo,
+  ClientSetupRequest,
+  ClientShift,
+  $ClientShift,
+  ClientShiftDetail,
+  ClientShiftPage,
+  ClientShiftPeriod,
+  ClientShiftWorker,
   ClientSummary,
   ClientType,
+  ClientUser,
+  ClientUserInvitation,
+  ClientUserRequest,
+  ClientUserStatus,
   Conversation,
   ConversationChange,
   ConversationEvent,
@@ -183,6 +206,18 @@ Serializers serializers = (_$serializers.toBuilder()
         () => ListBuilder<Location>(),
       )
       ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(ClientUser)]),
+        () => ListBuilder<ClientUser>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(ClientShiftWorker)]),
+        () => ListBuilder<ClientShiftWorker>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(ClientShift)]),
+        () => ListBuilder<ClientShift>(),
+      )
+      ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Client)]),
         () => ListBuilder<Client>(),
       )
@@ -214,6 +249,7 @@ Serializers serializers = (_$serializers.toBuilder()
         const FullType(BuiltList, [FullType(ShiftTemplate)]),
         () => ListBuilder<ShiftTemplate>(),
       )
+      ..add(ClientShift.serializer)
       ..add(const OneOfSerializer())
       ..add(const AnyOfSerializer())
       ..add(const DateSerializer())

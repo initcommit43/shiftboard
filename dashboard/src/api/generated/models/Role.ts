@@ -14,6 +14,7 @@
 
 
 /**
+ * `CLIENT` is a user at one of the agency's clients (ADR 0032).
  * 
  * @export
  */
@@ -21,6 +22,7 @@ export const Role = {
     ADMIN: 'ADMIN',
     DISPATCHER: 'DISPATCHER',
     WORKER: 'WORKER',
+    CLIENT: 'CLIENT',
     unknown_default_open_api: '11184809',
 } as const;
 export type Role = typeof Role[keyof typeof Role];

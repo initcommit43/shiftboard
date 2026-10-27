@@ -2,6 +2,8 @@
 /* eslint-disable */
 export * from './AssignmentsApi';
 export * from './AuthApi';
+export * from './ClientPortalApi';
+export * from './ClientUsersApi';
 export * from './ClientsApi';
 export * from './HoursApi';
 export * from './MessagesApi';

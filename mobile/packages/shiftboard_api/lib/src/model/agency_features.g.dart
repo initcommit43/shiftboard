@@ -11,11 +11,15 @@ class _$AgencyFeatures extends AgencyFeatures {
   final bool contactButton;
   @override
   final bool? checkIn;
+  @override
+  final bool? clientPortal;
 
   factory _$AgencyFeatures([void Function(AgencyFeaturesBuilder)? updates]) =>
       (AgencyFeaturesBuilder()..update(updates))._build();
 
-  _$AgencyFeatures._({required this.contactButton, this.checkIn}) : super._();
+  _$AgencyFeatures._(
+      {required this.contactButton, this.checkIn, this.clientPortal})
+      : super._();
   @override
   AgencyFeatures rebuild(void Function(AgencyFeaturesBuilder) updates) =>
       (toBuilder()..update(updates)).build();
@@ -28,7 +32,8 @@ class _$AgencyFeatures extends AgencyFeatures {
     if (identical(other, this)) return true;
     return other is AgencyFeatures &&
         contactButton == other.contactButton &&
-        checkIn == other.checkIn;
+        checkIn == other.checkIn &&
+        clientPortal == other.clientPortal;
   }
 
   @override
@@ -36,6 +41,7 @@ class _$AgencyFeatures extends AgencyFeatures {
     var _$hash = 0;
     _$hash = $jc(_$hash, contactButton.hashCode);
     _$hash = $jc(_$hash, checkIn.hashCode);
+    _$hash = $jc(_$hash, clientPortal.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -44,7 +50,8 @@ class _$AgencyFeatures extends AgencyFeatures {
   String toString() {
     return (newBuiltValueToStringHelper(r'AgencyFeatures')
           ..add('contactButton', contactButton)
-          ..add('checkIn', checkIn))
+          ..add('checkIn', checkIn)
+          ..add('clientPortal', clientPortal))
         .toString();
   }
 }
@@ -62,6 +69,10 @@ class AgencyFeaturesBuilder
   bool? get checkIn => _$this._checkIn;
   set checkIn(bool? checkIn) => _$this._checkIn = checkIn;
 
+  bool? _clientPortal;
+  bool? get clientPortal => _$this._clientPortal;
+  set clientPortal(bool? clientPortal) => _$this._clientPortal = clientPortal;
+
   AgencyFeaturesBuilder() {
     AgencyFeatures._defaults(this);
   }
@@ -71,6 +82,7 @@ class AgencyFeaturesBuilder
     if ($v != null) {
       _contactButton = $v.contactButton;
       _checkIn = $v.checkIn;
+      _clientPortal = $v.clientPortal;
       _$v = null;
     }
     return this;
@@ -95,6 +107,7 @@ class AgencyFeaturesBuilder
           contactButton: BuiltValueNullFieldError.checkNotNull(
               contactButton, r'AgencyFeatures', 'contactButton'),
           checkIn: checkIn,
+          clientPortal: clientPortal,
         );
     replace(_$result);
     return _$result;

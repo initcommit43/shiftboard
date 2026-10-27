@@ -20,6 +20,13 @@ import {
     RoleToJSON,
     RoleToJSONTyped,
 } from './Role';
+import type { ClientSummary } from './ClientSummary';
+import {
+    ClientSummaryFromJSON,
+    ClientSummaryFromJSONTyped,
+    ClientSummaryToJSON,
+    ClientSummaryToJSONTyped,
+} from './ClientSummary';
 import type { AgencySummary } from './AgencySummary';
 import {
     AgencySummaryFromJSON,
@@ -61,6 +68,10 @@ export interface CurrentUser {
      * Present when the role is `WORKER`.
      */
     worker?: WorkerProfile;
+    /**
+     * Present when the role is `CLIENT`; the client the user belongs to.
+     */
+    client?: ClientSummary;
 }
 
 
@@ -91,6 +102,7 @@ export function CurrentUserFromJSONTyped(json: any, ignoreDiscriminator: boolean
         'role': RoleFromJSON(json['role']),
         'agency': AgencySummaryFromJSON(json['agency']),
         'worker': json['worker'] == null ? undefined : WorkerProfileFromJSON(json['worker']),
+        'client': json['client'] == null ? undefined : ClientSummaryFromJSON(json['client']),
     };
 }
 
@@ -110,6 +122,7 @@ export function CurrentUserToJSONTyped(value?: CurrentUser | null, ignoreDiscrim
         'role': RoleToJSON(value['role']),
         'agency': AgencySummaryToJSON(value['agency']),
         'worker': WorkerProfileToJSON(value['worker']),
+        'client': ClientSummaryToJSON(value['client']),
     };
 }
 
