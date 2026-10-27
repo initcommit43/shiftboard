@@ -5,7 +5,6 @@ import '../../support/fake_backend.dart';
 import 'chat_test.dart' show message, messagesRoute;
 
 const eventsRoute = 'GET /worker/conversation/events';
-const unreadRoute = 'GET /worker/conversation';
 
 /// A `conversation` event as the server sends it, after a heartbeat.
 String notice(String change) =>
@@ -17,24 +16,21 @@ String notice(String change) =>
 void main() {
   late FakeBackend backend;
   late List<Map<String, Object?>> messages;
-  late int unread;
 
   setUp(() {
     backend = FakeBackend();
     fakeTokenStorage(suffix: '1');
     messages = [message(1, 'Willkommen bei Donau Personal.')];
-    unread = 0;
     backend
       ..on('GET /me', (_) => json(currentUser('ACTIVE')))
       ..on(messagesRoute, (_) => json(page([...messages])))
-      ..on(unreadRoute, (_) => json({'unreadCount': unread}))
       ..on('POST /auth/logout', (_) => noContent());
   });
 
   /// The agency writes; the server stores it and sends a notice.
   Future<void> agencyWrites(WidgetTester tester, String body) async {
     messages.insert(0, message(messages.length + 1, body));
-    unread++;
+    backend.unread++;
     backend.sendEvent(notice('MESSAGE'));
     await tester.pumpAndSettle();
   }
@@ -49,53 +45,88 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('a new message shows up in the open chat', (tester) async {
-    await pumpApp(tester, backend);
+  Future<void> openChat(WidgetTester tester) async {
     await tester.tap(find.text('Nachrichten'));
     await tester.pumpAndSettle();
+  }
+
+  testWidgets('a new message shows up in the open chat', (tester) async {
+    await pumpApp(tester, backend);
+    await openChat(tester);
     expect(backend.openEventStreams, 1);
 
     await agencyWrites(tester, 'Kannst du morgen eine Stunde früher?');
 
     expect(find.text('Kannst du morgen eine Stunde früher?'), findsOneWidget);
+    // Seen right away, so nothing to count.
+    expect(find.text('1'), findsNothing);
   });
 
-  testWidgets('the chat tab counts a message that arrives', (tester) async {
+  testWidgets('on another tab a message is counted and stays unread', (
+    tester,
+  ) async {
     await pumpApp(tester, backend);
-    expect(find.text('1'), findsNothing);
+    // The chat is not open yet, so it has loaded nothing.
+    expect(backend.sent(messagesRoute), isEmpty);
 
     await agencyWrites(tester, 'Bitte Sicherheitsschuhe mitbringen.');
 
     expect(find.text('1'), findsOneWidget);
+    expect(backend.sent(messagesRoute), isEmpty);
+
+    await openChat(tester);
+
+    expect(backend.sent(messagesRoute), hasLength(1));
+    expect(find.text('Bitte Sicherheitsschuhe mitbringen.'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
+  });
+
+  testWidgets('a message after leaving the chat is counted until it opens', (
+    tester,
+  ) async {
+    await pumpApp(tester, backend);
+    await openChat(tester);
+    await tester.tap(find.text('Schichten'));
+    await tester.pumpAndSettle();
+    final loads = backend.sent(messagesRoute).length;
+
+    await agencyWrites(tester, 'Die Schicht beginnt um 7 Uhr.');
+
+    expect(find.text('1'), findsOneWidget);
+    expect(backend.sent(messagesRoute), hasLength(loads));
+
+    await openChat(tester);
+
+    expect(find.text('Die Schicht beginnt um 7 Uhr.'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
   });
 
   testWidgets('a read notice updates the count without reloading the chat', (
     tester,
   ) async {
-    unread = 2;
+    backend.unread = 2;
     await pumpApp(tester, backend);
     expect(find.text('2'), findsOneWidget);
-    final loads = backend.sent(messagesRoute).length;
 
-    unread = 0;
+    // Read on another device.
+    backend.unread = 0;
     backend.sendEvent(notice('READ'));
     await tester.pumpAndSettle();
 
     expect(find.text('2'), findsNothing);
-    expect(backend.sent(messagesRoute), hasLength(loads));
+    expect(backend.sent(messagesRoute), isEmpty);
   });
 
   testWidgets('a change newer than the app reloads like a message', (
     tester,
   ) async {
     await pumpApp(tester, backend);
+    await openChat(tester);
     final loads = backend.sent(messagesRoute).length;
 
-    unread = 1;
     backend.sendEvent(notice('REACTION'));
     await tester.pumpAndSettle();
 
-    expect(find.text('1'), findsOneWidget);
     expect(backend.sent(messagesRoute), hasLength(loads + 1));
   });
 
@@ -121,7 +152,7 @@ void main() {
 
     // A push would bring this while the app is away.
     messages.insert(0, message(2, 'Die Schicht beginnt um 7 Uhr.'));
-    unread = 1;
+    backend.unread = 1;
     await lifecycle(tester, [
       AppLifecycleState.hidden,
       AppLifecycleState.inactive,
@@ -154,7 +185,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(backend.openEventStreams, 0);
 
-    unread = 1;
+    backend.unread = 1;
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
 

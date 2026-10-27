@@ -22,12 +22,16 @@ class FakeBackend implements HttpClientAdapter {
   FakeBackend() {
     on('GET /worker/shifts', (_) => json(page([])));
     on('GET /worker/my-shifts', (_) => json(page([])));
-    on('GET /worker/conversation', (_) => json({'unreadCount': 0}));
+    on('GET /worker/conversation', (_) => json({'unreadCount': unread}));
     on('GET /worker/conversation/messages', (_) => json(page([])));
     on('GET /worker/conversation/events', (_) => eventStream());
   }
 
   final _handlers = <String, Handler>{};
+
+  /// How many of the agency's messages the worker has not read. Loading the
+  /// messages marks them as read, as on the real backend.
+  int unread = 0;
 
   final _eventStreams = <StreamController<Uint8List>>[];
 
@@ -87,7 +91,12 @@ class FakeBackend implements HttpClientAdapter {
     final route = '${options.method} ${options.path}';
     final handler = _handlers[route];
     if (handler == null) throw StateError('No fake answer for $route');
-    return handler(options);
+    final response = await handler(options);
+    if (route == 'GET /worker/conversation/messages' &&
+        response.statusCode == 200) {
+      unread = 0;
+    }
+    return response;
   }
 
   @override

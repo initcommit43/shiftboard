@@ -135,8 +135,10 @@ final liveChatProvider = Provider<void>((ref) {
 });
 
 void _reload(Ref ref, ConversationChange change) {
-  // READ only changes the count. The chat shows no read state, and reloading
-  // it would mark messages as read again.
+  // Reloads the messages only where a chat on screen holds them (see
+  // ChatView); otherwise they load when the chat is opened, and the badge
+  // keeps counting. READ only changes the count: the chat shows no read
+  // state.
   if (change != ConversationChange.READ) ref.invalidate(myMessagesProvider);
   ref.invalidate(unreadMessagesProvider);
 }
