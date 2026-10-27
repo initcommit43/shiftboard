@@ -783,7 +783,7 @@ class MessagesApi {
   }
 
   /// Live notices when a conversation of the agency changes
-  /// A server-sent event stream (&#x60;text/event-stream&#x60;) that stays open. Each &#x60;conversation&#x60; event carries a &#x60;ConversationEvent&#x60; as JSON in its &#x60;data&#x60;: which conversation changed and how. Clients then reload the inbox or the open conversation through the endpoints above; the notice carries no message data. Comment lines (&#x60;: ping&#x60;) keep idle connections open. Dispatchers and admins only; the access token goes in the &#x60;Authorization&#x60; header, so clients read the stream with a streaming HTTP request rather than &#x60;EventSource&#x60;. When the stream ends or fails, clients reconnect with backoff and fall back to polling meanwhile (ADR 0031).  Error codes: &#x60;forbidden&#x60; (403).
+  /// A server-sent event stream (&#x60;text/event-stream&#x60;) that stays open. Each &#x60;conversation&#x60; event carries a &#x60;ConversationEvent&#x60; as JSON in its &#x60;data&#x60;: which conversation changed and how. Clients then reload the inbox or the open conversation through the endpoints above; the notice carries no message data. A comment line (&#x60;: ping&#x60;) every 25 seconds keeps idle connections open; clients that hear nothing for 60 seconds reconnect. The stream ends when the access token expires. Dispatchers and admins only; the access token goes in the &#x60;Authorization&#x60; header, so clients read the stream with a streaming HTTP request rather than &#x60;EventSource&#x60;. When the stream ends or fails, clients reconnect with backoff and fall back to polling meanwhile (ADR 0031).  Error codes: &#x60;forbidden&#x60; (403).
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
@@ -858,7 +858,7 @@ class MessagesApi {
   }
 
   /// Live notices when the worker&#39;s conversation changes
-  /// A server-sent event stream (&#x60;text/event-stream&#x60;) that stays open while the app is in the foreground. Each &#x60;conversation&#x60; event carries a &#x60;ConversationEvent&#x60; as JSON in its &#x60;data&#x60;; the app then reloads the conversation or its unread count. Comment lines (&#x60;: ping&#x60;) keep idle connections open. Active workers only; the access token goes in the &#x60;Authorization&#x60; header (ADR 0031).  Error codes: &#x60;forbidden&#x60; (403), &#x60;worker_not_active&#x60; (403).
+  /// A server-sent event stream (&#x60;text/event-stream&#x60;) that stays open while the app is in the foreground. Each &#x60;conversation&#x60; event carries a &#x60;ConversationEvent&#x60; as JSON in its &#x60;data&#x60;; the app then reloads the conversation or its unread count. A comment line (&#x60;: ping&#x60;) every 25 seconds keeps idle connections open; clients that hear nothing for 60 seconds reconnect. The stream ends when the access token expires. Active workers only; the access token goes in the &#x60;Authorization&#x60; header (ADR 0031).  Error codes: &#x60;forbidden&#x60; (403), &#x60;worker_not_active&#x60; (403).
   ///
   /// Parameters:
   /// * [cancelToken] - A [CancelToken] that can be used to cancel the operation
