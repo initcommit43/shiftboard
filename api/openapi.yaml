@@ -557,6 +557,41 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /conversations/events:
+    get:
+      operationId: streamInboxEvents
+      tags: [messages]
+      summary: Live notices when a conversation of the agency changes
+      description: |
+        A server-sent event stream (`text/event-stream`) that stays open. Each
+        `conversation` event carries a `ConversationEvent` as JSON in its
+        `data`: which conversation changed and how. Clients then reload the
+        inbox or the open conversation through the endpoints above; the
+        notice carries no message data. Comment lines (`: ping`) keep idle
+        connections open. Dispatchers and admins only; the access token goes
+        in the `Authorization` header, so clients read the stream with a
+        streaming HTTP request rather than `EventSource`. When the stream
+        ends or fails, clients reconnect with backoff and fall back to
+        polling meanwhile (ADR 0031).
+
+        Error codes: `forbidden` (403).
+      responses:
+        "200":
+          description: An open stream of `conversation` events.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: Events named `conversation` whose `data` is a `ConversationEvent`.
+                contentSchema:
+                  $ref: "#/components/schemas/ConversationEvent"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
   /conversations/{conversationId}/messages:
     parameters:
       - $ref: "#/components/parameters/ConversationId"
@@ -1689,6 +1724,37 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UnreadCount"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /worker/conversation/events:
+    get:
+      operationId: streamMyConversationEvents
+      tags: [messages]
+      summary: Live notices when the worker's conversation changes
+      description: |
+        A server-sent event stream (`text/event-stream`) that stays open while
+        the app is in the foreground. Each `conversation` event carries a
+        `ConversationEvent` as JSON in its `data`; the app then reloads the
+        conversation or its unread count. Comment lines (`: ping`) keep idle
+        connections open. Active workers only; the access token goes in the
+        `Authorization` header (ADR 0031).
+
+        Error codes: `forbidden` (403), `worker_not_active` (403).
+      responses:
+        "200":
+          description: An open stream of `conversation` events.
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: Events named `conversation` whose `data` is a `ConversationEvent`.
+                contentSchema:
+                  $ref: "#/components/schemas/ConversationEvent"
         "401":
           $ref: "#/components/responses/Problem"
         "403":
@@ -3075,6 +3141,27 @@ components:
           type: integer
           format: int32
           minimum: 0
+
+    ConversationEvent:
+      type: object
+      description: |
+        The `data` of a `conversation` event on the event streams. Tells which
+        conversation changed; the client reloads it.
+      required: [conversationId, change]
+      properties:
+        conversationId:
+          type: string
+          format: uuid
+        change:
+          $ref: "#/components/schemas/ConversationChange"
+
+    ConversationChange:
+      type: string
+      description: |
+        `MESSAGE` when a message of any type was added, `READ` when messages
+        in it were marked as read. Clients treat values they don't know like
+        `MESSAGE` and reload.
+      enum: [MESSAGE, READ]
 
     MessageType:
       type: string

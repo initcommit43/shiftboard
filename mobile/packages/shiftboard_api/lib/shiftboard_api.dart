@@ -39,6 +39,8 @@ export 'package:shiftboard_api/src/model/client_page.dart';
 export 'package:shiftboard_api/src/model/client_summary.dart';
 export 'package:shiftboard_api/src/model/client_type.dart';
 export 'package:shiftboard_api/src/model/conversation.dart';
+export 'package:shiftboard_api/src/model/conversation_change.dart';
+export 'package:shiftboard_api/src/model/conversation_event.dart';
 export 'package:shiftboard_api/src/model/conversation_page.dart';
 export 'package:shiftboard_api/src/model/conversation_worker.dart';
 export 'package:shiftboard_api/src/model/current_user.dart';

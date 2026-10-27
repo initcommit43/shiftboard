@@ -104,6 +104,8 @@ Class | Method | HTTP request | Description
 [*MessagesApi*](doc/MessagesApi.md) | [**listMyMessages**](doc/MessagesApi.md#listmymessages) | **GET** /worker/conversation/messages | The messages of the worker&#39;s conversation
 [*MessagesApi*](doc/MessagesApi.md) | [**replyToConversation**](doc/MessagesApi.md#replytoconversation) | **POST** /conversations/{conversationId}/messages | Answer a worker
 [*MessagesApi*](doc/MessagesApi.md) | [**sendMessage**](doc/MessagesApi.md#sendmessage) | **POST** /worker/conversation/messages | Write to the agency
+[*MessagesApi*](doc/MessagesApi.md) | [**streamInboxEvents**](doc/MessagesApi.md#streaminboxevents) | **GET** /conversations/events | Live notices when a conversation of the agency changes
+[*MessagesApi*](doc/MessagesApi.md) | [**streamMyConversationEvents**](doc/MessagesApi.md#streammyconversationevents) | **GET** /worker/conversation/events | Live notices when the worker&#39;s conversation changes
 [*NotificationsApi*](doc/NotificationsApi.md) | [**getNotificationSettings**](doc/NotificationsApi.md#getnotificationsettings) | **GET** /worker/notification-settings | The worker&#39;s notification preferences
 [*NotificationsApi*](doc/NotificationsApi.md) | [**registerPushToken**](doc/NotificationsApi.md#registerpushtoken) | **POST** /worker/push-tokens | Register this device for push notifications
 [*NotificationsApi*](doc/NotificationsApi.md) | [**unregisterPushToken**](doc/NotificationsApi.md#unregisterpushtoken) | **DELETE** /worker/push-tokens/{token} | Stop push notifications to this device
@@ -155,6 +157,8 @@ Class | Method | HTTP request | Description
  - [ClientSummary](doc/ClientSummary.md)
  - [ClientType](doc/ClientType.md)
  - [Conversation](doc/Conversation.md)
+ - [ConversationChange](doc/ConversationChange.md)
+ - [ConversationEvent](doc/ConversationEvent.md)
  - [ConversationPage](doc/ConversationPage.md)
  - [ConversationWorker](doc/ConversationWorker.md)
  - [CurrentUser](doc/CurrentUser.md)
