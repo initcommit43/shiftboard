@@ -4,6 +4,8 @@ import { redirectSignedIn, requireSession } from '@/features/auth/guards'
 import { LoginPage } from '@/features/auth/login-page'
 import { SessionLoading } from '@/features/auth/session-loading'
 import { APP_ROUTE_ID } from '@/features/auth/use-session'
+import { ClientPage } from '@/features/clients/client-page'
+import { ClientsPage } from '@/features/clients/clients-page'
 import { HoursPage } from '@/features/hours/hours-page'
 import { MessagesPage } from '@/features/messages/messages-page'
 import { SettingsPage } from '@/features/settings/settings-page'
@@ -41,6 +43,8 @@ export const routes: RouteObject[] = [
           { path: 'signups', element: <SignupsPage /> },
           { path: 'messages', element: <MessagesPage /> },
           { path: 'messages/:conversationId', element: <MessagesPage /> },
+          { path: 'clients', element: <ClientsPage /> },
+          { path: 'clients/:clientId', element: <ClientPage /> },
           { path: 'settings', element: <SettingsPage /> },
           { path: '*', element: <NotFoundPage /> },
         ],

@@ -15,7 +15,8 @@
       "pendingSignups_one": "{{count}} pending signup",
       "pendingSignups_other": "{{count}} pending signups",
       "unreadMessages_one": "{{count}} unread message",
-      "unreadMessages_other": "{{count}} unread messages"
+      "unreadMessages_other": "{{count}} unread messages",
+      "clients": "Clients"
     },
     "theme": {
       "toLight": "Switch to light theme",
@@ -36,7 +37,8 @@
   "roles": {
     "ADMIN": "Admin",
     "DISPATCHER": "Dispatcher",
-    "WORKER": "Worker"
+    "WORKER": "Worker",
+    "CLIENT": "Client access"
   },
   "login": {
     "tagline": "Every shift, covered.",
@@ -250,7 +252,12 @@
     "shift_not_started": "The shift has not started yet. Hours can be recorded once it has.",
     "assignment_not_worked": "This person no longer holds a confirmed spot. The list has been updated.",
     "worker_attended": "This person was there: they checked in or have approved hours. They can't be marked as a no-show.",
-    "waitlist_entry_not_found": "This person is no longer on the waitlist: they left or moved up. The list has been updated."
+    "waitlist_entry_not_found": "This person is no longer on the waitlist: they left or moved up. The list has been updated.",
+    "client_portal_off": "The client portal is switched off.",
+    "client_not_found": "This client no longer exists.",
+    "client_user_not_found": "This access no longer exists. The list has been updated.",
+    "client_user_not_invited": "This person has already set a password or no longer has access. The list has been updated.",
+    "email_already_registered": "There is already an account with this email address."
   },
   "hours": {
     "amount": "{{hours}} h",
@@ -636,6 +643,105 @@
       "description": "The template is then gone for everyone at your agency. Shifts already created from it stay as they are.",
       "keep": "Keep",
       "confirm": "Delete template"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "description": "Give your clients' contacts access to the client portal. There they see their shifts and who is coming.",
+    "loading": "Loading clients …",
+    "columns": {
+      "name": "Client",
+      "locations": "Locations",
+      "actions": "Actions"
+    },
+    "access": "Access",
+    "accessNamed": "Access for {{name}}",
+    "count_one": "{{count}} client",
+    "count_other": "{{count}} clients",
+    "back": "All clients",
+    "empty": {
+      "title": "No clients yet",
+      "description": "Your agency has no clients set up yet."
+    },
+    "error": {
+      "title": "Clients couldn't be loaded",
+      "description": "Please try again. If the problem persists, reload the page.",
+      "retry": "Try again"
+    },
+    "notFound": {
+      "title": "Client not found",
+      "description": "This client doesn't exist or no longer exists."
+    },
+    "portalOff": {
+      "title": "The client portal is switched off",
+      "description": "An admin can switch it on in the settings under Optional features.",
+      "descriptionAdmin": "Switch it on in the settings under Optional features to give clients access.",
+      "toSettings": "Go to settings"
+    },
+    "users": {
+      "description": "Who at {{client}} has access to the client portal. It shows the shifts of {{client}} and the names of confirmed workers, no hourly rates.",
+      "loading": "Loading access …",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "INVITED": "Invited",
+        "ACTIVE": "Active",
+        "DEACTIVATED": "Deactivated"
+      },
+      "empty": {
+        "title": "No access yet",
+        "description": "Give someone access. You'll get a link the person at {{client}} sets their password with."
+      },
+      "error": {
+        "title": "Access couldn't be loaded",
+        "description": "Please try again. If the problem persists, reload the page."
+      },
+      "invite": {
+        "action": "Give access",
+        "title": "Give access",
+        "description": "For someone at {{client}}. Afterwards you get a link to pass on, which they set their password with.",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "cancel": "Cancel",
+        "confirm": "Give access",
+        "errors": {
+          "required": "Please fill in.",
+          "invalid_length": "The text is too long.",
+          "invalid_format": "Please enter a valid email address.",
+          "taken": "There is already an account with this email address.",
+          "unknown": "This value was not accepted."
+        }
+      },
+      "link": {
+        "title": "Link for {{name}}",
+        "description": "Pass the link on to {{name}}, by email for example. It lets them set a password. The link works once and is valid until {{expiresAt}}.",
+        "descriptionRenewed": "The previous link no longer works. Pass this one on to {{name}}. It works once and is valid until {{expiresAt}}.",
+        "label": "Link to set a password",
+        "copy": "Copy",
+        "copied": "Link copied",
+        "copyFailed": "Copying didn't work. Select the link and copy it yourself.",
+        "hint": "The link is shown only now. If it gets lost, create a new one.",
+        "done": "Done"
+      },
+      "renew": {
+        "action": "Create new link",
+        "actionNamed": "Create a new link for {{name}}"
+      },
+      "deactivate": {
+        "action": "End access",
+        "actionNamed": "End access for {{name}}",
+        "title": "End access for {{name}}?",
+        "description": "{{name}} can no longer log in and is logged out on all devices. An open link stops working.",
+        "keep": "Cancel",
+        "confirm": "End access",
+        "done": "Access for {{name}} ended",
+        "doneDescription": "The person is logged out on all devices."
+      }
     }
   }
 }

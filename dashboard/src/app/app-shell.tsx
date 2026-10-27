@@ -1,5 +1,6 @@
 import {
   Bookmark,
+  Building2,
   Calendar,
   Clock,
   type LucideIcon,
@@ -17,6 +18,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { Badge } from '@/components/ui/badge'
 import { useCurrentUser, useSessionExpiry } from '@/features/auth/use-session'
 import { UserMenu } from '@/features/auth/user-menu'
+import { useClientPortalOn } from '@/features/clients/queries'
 import { useUnreadMessageCount } from '@/features/messages/queries'
 import { usePendingSignupCount } from '@/features/signups/queries'
 import { initials } from '@/lib/initials'
@@ -80,6 +82,16 @@ function UnreadMessagesBadge() {
   )
 }
 
+/** The clients and their portal access; there only while the client portal is switched on. */
+function ClientsNavItem() {
+  const { t } = useTranslation()
+
+  if (!useClientPortalOn()) {
+    return null
+  }
+  return <NavItem to="/clients" icon={Building2} label={t('shell.nav.clients')} />
+}
+
 export function AppShell() {
   const { t } = useTranslation()
   const { agency } = useCurrentUser()
@@ -102,6 +114,7 @@ export function AppShell() {
           <NavItem to="/messages" icon={MessageSquare} label={t('shell.nav.messages')}>
             <UnreadMessagesBadge />
           </NavItem>
+          <ClientsNavItem />
           <NavItem to="/settings" icon={SlidersHorizontal} label={t('shell.nav.settings')} />
         </nav>
       </aside>

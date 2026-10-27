@@ -9,6 +9,9 @@ import {
   AgencyFeaturesToJSON,
   type Client,
   ClientToJSON,
+  type ClientUser,
+  ClientUserStatus,
+  ClientUserToJSON,
   type CurrentUser,
   CurrentUserToJSON,
   type FieldError,
@@ -217,6 +220,28 @@ export function waitlistEntry(number: number, person: Worker, position: number):
   }
 }
 
+export function clientUser(
+  number: number,
+  firstName: string,
+  lastName: string,
+  status: ClientUserStatus,
+): ClientUser {
+  return {
+    id: `0199c3a0-0000-7000-8000-0000000009${String(number).padStart(2, '0')}`,
+    firstName,
+    lastName,
+    email: `${firstName}.${lastName}@nordlicht.example`.toLowerCase(),
+    status,
+  }
+}
+
+/** Portal users of Nordlicht Logistik, sorted by last name as the API sends them. */
+export const petra = clientUser(1, 'Petra', 'Lindner', ClientUserStatus.ACTIVE)
+export const tobias = clientUser(2, 'Tobias', 'Wallner', ClientUserStatus.INVITED)
+
+/** Until when a setup code issued by the fake works. */
+export const SETUP_EXPIRES_AT = new Date(2026, 9, 22, 14, 30)
+
 export const lastWeek = shift(4, {
   title: 'Messeaufbau',
   status: ShiftStatus.COMPLETED,
@@ -326,6 +351,14 @@ export function installFakeApi() {
       [jakobConversation.id]: [jakobConversation.lastMessage],
     } as Record<string, Message[]>,
     user: dispatcher,
+    /** The portal users per client id. */
+    clientUsers: {
+      [nordlicht.id]: [petra, tobias],
+    } as Record<string, ClientUser[]>,
+    /** The open setup codes, each with the user it belongs to. */
+    setupCodes: {
+      'tobias-first-code': { clientId: nordlicht.id, userId: tobias.id },
+    } as Record<string, { clientId: string; userId: string }>,
 
     /** The query parameters of each request to a route, oldest first. */
     queries(route: string) {
@@ -714,6 +747,79 @@ export function installFakeApi() {
     return page(url, entries, HoursEntryToJSON)
   }
 
+  // Setup codes issued by the fake are numbered.
+  let setupNumber = 0
+
+  function issueSetupCode(clientId: string, user: ClientUser) {
+    for (const [code, owner] of Object.entries(api.setupCodes)) {
+      if (owner.userId === user.id) {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- the codes are a lookup table
+        delete api.setupCodes[code]
+      }
+    }
+    setupNumber += 1
+    const setupCode = `setup-code-${String(setupNumber)}`
+    api.setupCodes[setupCode] = { clientId, userId: user.id }
+    return { user: ClientUserToJSON(user), setupCode, expiresAt: SETUP_EXPIRES_AT.toISOString() }
+  }
+
+  function inviteClientUser(clientId: string, body: Record<string, string>) {
+    if (!api.features.clientPortal) {
+      return problem(403, 'client_portal_off')
+    }
+    const errors: FieldError[] = []
+    for (const field of ['firstName', 'lastName', 'email']) {
+      if (!body[field]?.trim()) {
+        errors.push({ field, code: 'required' })
+      }
+    }
+    if (body['email'] && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(body['email'])) {
+      errors.push({ field: 'email', code: 'invalid_format' })
+    }
+    if (errors.length > 0) {
+      return problem(400, 'validation_failed', errors)
+    }
+    const email = (body['email'] ?? '').toLowerCase()
+    const everyone = Object.values(api.clientUsers).flat()
+    if (email === api.user.email || everyone.some((it) => it.email === email)) {
+      return problem(409, 'email_already_registered')
+    }
+    const created: ClientUser = {
+      ...clientUser(everyone.length + 10, body['firstName'] ?? '', body['lastName'] ?? '', ClientUserStatus.INVITED),
+      email,
+    }
+    api.clientUsers[clientId] = [...(api.clientUsers[clientId] ?? []), created].sort((a, b) =>
+      `${a.lastName} ${a.firstName}`.localeCompare(`${b.lastName} ${b.firstName}`, 'de'),
+    )
+    return json(issueSetupCode(clientId, created), 201)
+  }
+
+  function clientUserAction(clientId: string, userId: string, action: string) {
+    const users = api.clientUsers[clientId] ?? []
+    const found = users.find((it) => it.id === userId)
+    if (!found) {
+      return problem(404, 'client_user_not_found')
+    }
+    if (action === 'setup-link') {
+      if (!api.features.clientPortal) {
+        return problem(403, 'client_portal_off')
+      }
+      if (found.status !== ClientUserStatus.INVITED) {
+        return problem(409, 'client_user_not_invited')
+      }
+      return json(issueSetupCode(clientId, found))
+    }
+    const deactivated = { ...found, status: ClientUserStatus.DEACTIVATED }
+    api.clientUsers[clientId] = users.map((it) => (it === found ? deactivated : it))
+    for (const [code, owner] of Object.entries(api.setupCodes)) {
+      if (owner.userId === userId) {
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- the codes are a lookup table
+        delete api.setupCodes[code]
+      }
+    }
+    return json(ClientUserToJSON(deactivated))
+  }
+
   function respond(route: string, url: URL, body: unknown, authorization: string | null) {
     if (route === 'POST /auth/login') {
       const { email, password, client } = body as Record<string, string>
@@ -746,6 +852,20 @@ export function installFakeApi() {
     }
     if (route === 'GET /clients') {
       return page(url, api.clients, ClientToJSON)
+    }
+    const clientUsersRoute = /^(GET|POST) \/clients\/([^/]+)\/users$/.exec(route)
+    if (clientUsersRoute) {
+      const clientId = clientUsersRoute[2] ?? ''
+      if (!api.clients.some((it) => it.id === clientId)) {
+        return problem(404, 'client_not_found')
+      }
+      return clientUsersRoute[1] === 'GET'
+        ? json((api.clientUsers[clientId] ?? []).map((it) => ClientUserToJSON(it)))
+        : inviteClientUser(clientId, body as Record<string, string>)
+    }
+    const clientUserRoute = /^POST \/clients\/([^/]+)\/users\/([^/]+)\/(setup-link|deactivate)$/.exec(route)
+    if (clientUserRoute) {
+      return clientUserAction(clientUserRoute[1] ?? '', clientUserRoute[2] ?? '', clientUserRoute[3] ?? '')
     }
     if (route === 'GET /qualifications') {
       return page(url, api.qualifications, QualificationToJSON)
