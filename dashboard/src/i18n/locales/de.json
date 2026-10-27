@@ -43,13 +43,14 @@
   "login": {
     "tagline": "Jede Schicht besetzt.",
     "title": "Anmelden",
-    "description": "Melde dich mit deinem Agentur-Konto im Dashboard an.",
+    "description": "Melde dich mit deinem Konto im Dashboard oder im Kundenportal an.",
     "email": "E-Mail",
     "emailPlaceholder": "name@example.com",
     "password": "Passwort",
     "passwordPlaceholder": "Dein Passwort",
     "submit": "Anmelden",
-    "workerHint": "Du bist Mitarbeiter:in? Deine Schichten findest du in der shiftboard App."
+    "workerHint": "Du bist Mitarbeiter:in? Deine Schichten findest du in der shiftboard App.",
+    "clientPortalOff": "Das Kundenportal ist derzeit ausgeschaltet. Bitte wende dich an die Agentur."
   },
   "shifts": {
     "title": "Schichten",
@@ -257,7 +258,9 @@
     "client_not_found": "Diesen Kunden gibt es nicht mehr.",
     "client_user_not_found": "Diesen Zugang gibt es nicht mehr. Die Liste wurde aktualisiert.",
     "client_user_not_invited": "Diese Person hat schon ein Passwort gesetzt oder keinen Zugang mehr. Die Liste wurde aktualisiert.",
-    "email_already_registered": "Mit dieser E-Mail-Adresse gibt es schon ein Konto."
+    "email_already_registered": "Mit dieser E-Mail-Adresse gibt es schon ein Konto.",
+    "account_deactivated": "Dein Zugang wurde beendet. Wenn du wieder Zugang brauchst, wende dich an die Agentur.",
+    "setup_code_invalid": "Dieser Link ist ungültig, abgelaufen oder wurde schon verwendet. Bitte die Agentur um einen neuen."
   },
   "hours": {
     "amount": "{{hours}} Std.",
@@ -741,6 +744,77 @@
         "confirm": "Zugang beenden",
         "done": "Zugang von {{name}} beendet",
         "doneDescription": "Die Person ist auf allen Geräten abgemeldet."
+      }
+    }
+  },
+  "clientSetup": {
+    "loading": "Einladung wird geladen …",
+    "title": "Passwort festlegen",
+    "greeting": "Hallo {{firstName}}, hier richtest du deinen Zugang zum Kundenportal von {{agency}} für {{client}} ein. Dort siehst du eure Schichten und wer kommt.",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "passwordHint": "Mindestens 8 Zeichen.",
+    "confirmation": "Passwort wiederholen",
+    "submit": "Passwort festlegen und anmelden",
+    "toLogin": "Zur Anmeldung",
+    "errors": {
+      "required": "Bitte gib ein Passwort ein.",
+      "too_short": "Das Passwort braucht mindestens 8 Zeichen.",
+      "mismatch": "Die Passwörter stimmen nicht überein."
+    },
+    "invalid": {
+      "title": "Dieser Link funktioniert nicht",
+      "description": "Er ist ungültig, abgelaufen oder wurde schon verwendet. Bitte deine Ansprechperson bei der Agentur um einen neuen Link. Hast du dein Passwort schon festgelegt, melde dich einfach an."
+    },
+    "portalOff": {
+      "title": "Das Kundenportal ist nicht verfügbar",
+      "description": "Die Agentur hat das Kundenportal ausgeschaltet. Bitte wende dich an deine Ansprechperson dort."
+    },
+    "error": {
+      "title": "Die Einladung konnte nicht geladen werden",
+      "retry": "Erneut versuchen"
+    }
+  },
+  "portal": {
+    "home": "Zu euren Schichten",
+    "byAgency": "Kundenportal von {{agency}}",
+    "status": {
+      "DRAFT": "Entwurf",
+      "PUBLISHED": "Geplant",
+      "COMPLETED": "Vorbei",
+      "CANCELLED": "Abgesagt"
+    },
+    "fill": {
+      "count": "{{confirmed}} von {{total}}",
+      "full": "Voll",
+      "cancelled": "Abgesagt, keine Plätze"
+    },
+    "shifts": {
+      "title": "Eure Schichten",
+      "description": "Die Schichten, die {{agency}} für euch besetzt, und wie viele Plätze schon bestätigt sind.",
+      "descriptionPast": "Schichten, die vorbei sind.",
+      "empty": {
+        "title": "Keine anstehenden Schichten",
+        "description": "Sobald die Agentur eine Schicht für euch plant, erscheint sie hier."
+      },
+      "emptyPast": {
+        "title": "Noch keine vergangenen Schichten",
+        "description": "Schichten erscheinen hier, sobald sie vorbei sind."
+      },
+      "error": {
+        "title": "Schichten konnten nicht geladen werden",
+        "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu.",
+        "retry": "Erneut versuchen"
+      }
+    },
+    "detail": {
+      "back": "Alle Schichten",
+      "cancelled": "Diese Schicht wurde abgesagt.",
+      "team": "Wer kommt",
+      "teamHint": "Alle, die die Agentur für diese Schicht bestätigt hat.",
+      "noTeam": {
+        "title": "Noch niemand bestätigt",
+        "description": "Sobald die Agentur Mitarbeiter:innen für diese Schicht bestätigt, stehen ihre Namen hier."
       }
     }
   }

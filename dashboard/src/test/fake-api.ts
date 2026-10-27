@@ -12,6 +12,9 @@ import {
   type ClientUser,
   ClientUserStatus,
   ClientUserToJSON,
+  type ClientShiftDetail,
+  ClientShiftDetailToJSON,
+  ClientShiftToJSON,
   type CurrentUser,
   CurrentUserToJSON,
   type FieldError,
@@ -242,6 +245,87 @@ export const tobias = clientUser(2, 'Tobias', 'Wallner', ClientUserStatus.INVITE
 /** Until when a setup code issued by the fake works. */
 export const SETUP_EXPIRES_AT = new Date(2026, 9, 22, 14, 30)
 
+/** A client user as the session knows them after logging in. */
+export function asCurrentUser(user: ClientUser, client: Client = nordlicht): CurrentUser {
+  return {
+    id: user.id,
+    email: user.email,
+    role: 'CLIENT',
+    agency: dispatcher.agency,
+    client: { id: client.id, name: client.name },
+  }
+}
+
+/** Petra at Nordlicht Logistik, logged in to the client portal. */
+export const clientContact = asCurrentUser(petra)
+
+export function clientShift(
+  number: number,
+  values: Partial<ClientShiftDetail> & Pick<ClientShiftDetail, 'title'>,
+): ClientShiftDetail {
+  return {
+    id: `0199c3a0-0000-7000-8000-0000000010${String(number).padStart(2, '0')}`,
+    status: ShiftStatus.PUBLISHED,
+    location: zentrallager,
+    startsAt: new Date(2026, 9, 15, 8, 0),
+    endsAt: new Date(2026, 9, 15, 16, 0),
+    endIsEstimate: false,
+    slots: 5,
+    confirmedCount: 0,
+    description: '',
+    confirmedWorkers: [],
+    ...values,
+  }
+}
+
+/** Nordlicht's shifts as its portal shows them: names of confirmed workers only. */
+export const portalWarehouse = clientShift(1, {
+  title: 'Lagerunterstützung',
+  endIsEstimate: true,
+  confirmedCount: 4,
+  description: 'Sicherheitsschuhe mitbringen. Treffpunkt ist Tor 3.',
+  confirmedWorkers: [
+    { firstName: 'Mira', lastName: 'Aigner' },
+    { firstName: 'Lena', lastName: 'Hofer' },
+    { firstName: 'Sophie', lastName: 'Huber' },
+    { firstName: 'Jakob', lastName: 'Steiner' },
+  ],
+})
+export const portalInventory = clientShift(2, {
+  title: 'Nachtinventur',
+  location: umschlaglager,
+  startsAt: new Date(2026, 9, 19, 22, 0),
+  endsAt: new Date(2026, 9, 20, 6, 0),
+  slots: 2,
+  confirmedCount: 2,
+  confirmedWorkers: [
+    { firstName: 'Lena', lastName: 'Hofer' },
+    { firstName: 'Jakob', lastName: 'Steiner' },
+  ],
+})
+export const portalUnloading = clientShift(3, {
+  title: 'Wareneingang',
+  status: ShiftStatus.CANCELLED,
+  startsAt: new Date(2026, 9, 21, 6, 0),
+  endsAt: new Date(2026, 9, 21, 12, 0),
+  slots: 3,
+})
+export const portalNewYear = clientShift(4, {
+  title: 'Inventur Jahresende',
+  startsAt: new Date(2026, 11, 30, 7, 0),
+  endsAt: new Date(2026, 11, 30, 15, 0),
+  slots: 3,
+})
+export const portalFair = clientShift(5, {
+  title: 'Messeaufbau',
+  status: ShiftStatus.COMPLETED,
+  startsAt: new Date(2026, 9, 8, 7, 0),
+  endsAt: new Date(2026, 9, 8, 15, 0),
+  slots: 1,
+  confirmedCount: 1,
+  confirmedWorkers: [{ firstName: 'Jakob', lastName: 'Steiner' }],
+})
+
 export const lastWeek = shift(4, {
   title: 'Messeaufbau',
   status: ShiftStatus.COMPLETED,
@@ -359,6 +443,10 @@ export function installFakeApi() {
     setupCodes: {
       'tobias-first-code': { clientId: nordlicht.id, userId: tobias.id },
     } as Record<string, { clientId: string; userId: string }>,
+    /** What the logged-in client user's portal lists, earliest first. */
+    clientShifts: [portalWarehouse, portalInventory, portalUnloading, portalNewYear],
+    /** The client's ended shifts, latest first. */
+    pastClientShifts: [portalFair],
 
     /** The query parameters of each request to a route, oldest first. */
     queries(route: string) {
@@ -820,21 +908,91 @@ export function installFakeApi() {
     return json(ClientUserToJSON(deactivated))
   }
 
+  /** Why the signed-in client user may not log in, if they may not. Staff are never blocked. */
+  function clientUserBlocked() {
+    if (api.user.role !== 'CLIENT') {
+      return undefined
+    }
+    if (!api.features.clientPortal) {
+      return problem(403, 'client_portal_off')
+    }
+    const account = Object.values(api.clientUsers)
+      .flat()
+      .find((it) => it.id === api.user.id)
+    return account?.status === ClientUserStatus.DEACTIVATED
+      ? problem(403, 'account_deactivated')
+      : undefined
+  }
+
+  function clientSetup(method: string, setupCode: string, body: unknown) {
+    if (!api.features.clientPortal) {
+      return problem(403, 'client_portal_off')
+    }
+    const owner = api.setupCodes[setupCode]
+    const users = owner ? (api.clientUsers[owner.clientId] ?? []) : []
+    const invited = users.find((it) => it.id === owner?.userId)
+    const client = api.clients.find((it) => it.id === owner?.clientId)
+    if (!owner || !invited || !client) {
+      return problem(404, 'setup_code_invalid')
+    }
+    if (method === 'GET') {
+      return json({
+        firstName: invited.firstName,
+        email: invited.email,
+        clientName: client.name,
+        agencyName: dispatcher.agency.name,
+      })
+    }
+    const password = (body as Record<string, string>)['password'] ?? ''
+    if (password.length < 8) {
+      return problem(400, 'validation_failed', [{ field: 'password', code: 'invalid_length' }])
+    }
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete -- the codes are a lookup table
+    delete api.setupCodes[setupCode]
+    const active = { ...invited, status: ClientUserStatus.ACTIVE }
+    api.clientUsers[owner.clientId] = users.map((it) => (it === invited ? active : it))
+    api.user = asCurrentUser(active, client)
+    return json(issueTokens())
+  }
+
+  function clientShiftsRoute(route: string, url: URL) {
+    if (api.user.role !== 'CLIENT') {
+      return problem(403, 'forbidden')
+    }
+    if (route === 'GET /client/shifts') {
+      const past = url.searchParams.get('period') === 'PAST'
+      return page(url, past ? api.pastClientShifts : api.clientShifts, ClientShiftToJSON)
+    }
+    const shiftId = route.replace('GET /client/shifts/', '')
+    const found = [...api.clientShifts, ...api.pastClientShifts].find((it) => it.id === shiftId)
+    return found ? json(ClientShiftDetailToJSON(found)) : problem(404, 'shift_not_found')
+  }
+
   function respond(route: string, url: URL, body: unknown, authorization: string | null) {
     if (route === 'POST /auth/login') {
       const { email, password, client } = body as Record<string, string>
       if (client !== 'DASHBOARD') {
         return problem(403, 'wrong_client')
       }
-      return email === api.user.email && password === PASSWORD
-        ? json(issueTokens())
-        : problem(401, 'invalid_credentials')
+      if (email !== api.user.email || password !== PASSWORD) {
+        return problem(401, 'invalid_credentials')
+      }
+      const blocked = clientUserBlocked()
+      return blocked ?? json(issueTokens())
+    }
+    const setupRoute = /^(GET|POST) \/client-setup\/([^/]+)$/.exec(route)
+    if (setupRoute) {
+      return clientSetup(setupRoute[1] ?? '', decodeURIComponent(setupRoute[2] ?? ''), body)
     }
     if (route === 'POST /auth/refresh') {
       const sent = (body as Record<string, string>)['refreshToken']
-      return refreshToken !== null && sent === refreshToken
-        ? json(issueTokens())
-        : problem(401, 'invalid_refresh_token')
+      if (refreshToken === null || sent !== refreshToken) {
+        return problem(401, 'invalid_refresh_token')
+      }
+      // Deactivating revokes the refresh tokens; switching the portal off keeps them but refuses them.
+      return api.user.role === 'CLIENT' && !api.features.clientPortal
+        ? problem(403, 'client_portal_off')
+        : json(issueTokens())
     }
     if (route === 'POST /auth/logout') {
       accessToken = null
@@ -846,6 +1004,13 @@ export function installFakeApi() {
     }
     if (route === 'GET /me') {
       return json(CurrentUserToJSON(api.user))
+    }
+    if (/^GET \/client\/shifts(\/[^/]+)?$/.test(route)) {
+      return clientShiftsRoute(route, url)
+    }
+    // Client users reach nothing of the agency's API (ADR 0032).
+    if (api.user.role === 'CLIENT') {
+      return problem(403, 'forbidden')
     }
     if (route === 'GET /workers') {
       return page(url, api.pending, WorkerToJSON)

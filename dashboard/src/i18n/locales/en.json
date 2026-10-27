@@ -43,13 +43,14 @@
   "login": {
     "tagline": "Every shift, covered.",
     "title": "Log in",
-    "description": "Log in to the dashboard with your agency account.",
+    "description": "Log in to the dashboard or the client portal with your account.",
     "email": "Email",
     "emailPlaceholder": "name@example.com",
     "password": "Password",
     "passwordPlaceholder": "Your password",
     "submit": "Log in",
-    "workerHint": "Are you a worker? You'll find your shifts in the shiftboard app."
+    "workerHint": "Are you a worker? You'll find your shifts in the shiftboard app.",
+    "clientPortalOff": "The client portal is currently switched off. Please contact the agency."
   },
   "shifts": {
     "title": "Shifts",
@@ -257,7 +258,9 @@
     "client_not_found": "This client no longer exists.",
     "client_user_not_found": "This access no longer exists. The list has been updated.",
     "client_user_not_invited": "This person has already set a password or no longer has access. The list has been updated.",
-    "email_already_registered": "There is already an account with this email address."
+    "email_already_registered": "There is already an account with this email address.",
+    "account_deactivated": "Your access has been ended. If you need access again, please contact the agency.",
+    "setup_code_invalid": "This link is invalid, has expired or was already used. Please ask the agency for a new one."
   },
   "hours": {
     "amount": "{{hours}} h",
@@ -741,6 +744,77 @@
         "confirm": "End access",
         "done": "Access for {{name}} ended",
         "doneDescription": "The person is logged out on all devices."
+      }
+    }
+  },
+  "clientSetup": {
+    "loading": "Loading invitation …",
+    "title": "Set your password",
+    "greeting": "Hi {{firstName}}, here you set up your access to the client portal of {{agency}} for {{client}}. There you see your shifts and who is coming.",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 8 characters.",
+    "confirmation": "Repeat password",
+    "submit": "Set password and log in",
+    "toLogin": "Go to login",
+    "errors": {
+      "required": "Please enter a password.",
+      "too_short": "The password needs at least 8 characters.",
+      "mismatch": "The passwords don't match."
+    },
+    "invalid": {
+      "title": "This link doesn't work",
+      "description": "It is invalid, has expired or was already used. Please ask your contact at the agency for a new link. If you already set your password, just log in."
+    },
+    "portalOff": {
+      "title": "The client portal isn't available",
+      "description": "The agency has switched the client portal off. Please contact your contact person there."
+    },
+    "error": {
+      "title": "The invitation couldn't be loaded",
+      "retry": "Try again"
+    }
+  },
+  "portal": {
+    "home": "To your shifts",
+    "byAgency": "Client portal of {{agency}}",
+    "status": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Planned",
+      "COMPLETED": "Over",
+      "CANCELLED": "Cancelled"
+    },
+    "fill": {
+      "count": "{{confirmed}} of {{total}}",
+      "full": "Full",
+      "cancelled": "Cancelled, no spots"
+    },
+    "shifts": {
+      "title": "Your shifts",
+      "description": "The shifts {{agency}} staffs for you, and how many spots are confirmed.",
+      "descriptionPast": "Shifts that are over.",
+      "empty": {
+        "title": "No upcoming shifts",
+        "description": "As soon as the agency plans a shift for you, it shows up here."
+      },
+      "emptyPast": {
+        "title": "No past shifts yet",
+        "description": "Shifts show up here once they are over."
+      },
+      "error": {
+        "title": "Shifts couldn't be loaded",
+        "description": "Please try again. If the problem persists, reload the page.",
+        "retry": "Try again"
+      }
+    },
+    "detail": {
+      "back": "All shifts",
+      "cancelled": "This shift has been cancelled.",
+      "team": "Who is coming",
+      "teamHint": "Everyone the agency has confirmed for this shift.",
+      "noTeam": {
+        "title": "Nobody confirmed yet",
+        "description": "As soon as the agency confirms workers for this shift, their names show up here."
       }
     }
   }
