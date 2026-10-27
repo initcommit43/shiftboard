@@ -24,9 +24,47 @@ class FakeBackend implements HttpClientAdapter {
     on('GET /worker/my-shifts', (_) => json(page([])));
     on('GET /worker/conversation', (_) => json({'unreadCount': 0}));
     on('GET /worker/conversation/messages', (_) => json(page([])));
+    on('GET /worker/conversation/events', (_) => eventStream());
   }
 
   final _handlers = <String, Handler>{};
+
+  final _eventStreams = <StreamController<Uint8List>>[];
+
+  /// How many conversation event streams are open right now.
+  int get openEventStreams => _eventStreams.length;
+
+  /// An open `text/event-stream` answer that [sendEvent] writes to until the
+  /// app closes it.
+  ResponseBody eventStream() {
+    late final StreamController<Uint8List> controller;
+    controller = StreamController<Uint8List>(
+      onCancel: () => _eventStreams.remove(controller),
+    );
+    _eventStreams.add(controller);
+    return ResponseBody(
+      controller.stream,
+      200,
+      headers: {
+        Headers.contentTypeHeader: ['text/event-stream'],
+      },
+    );
+  }
+
+  /// Writes [raw] to every open event stream, as the server would.
+  void sendEvent(String raw) {
+    for (final controller in [..._eventStreams]) {
+      controller.add(utf8.encode(raw));
+    }
+  }
+
+  /// Ends every open event stream, as when the server goes away.
+  void dropEventStreams() {
+    for (final controller in [..._eventStreams]) {
+      _eventStreams.remove(controller);
+      controller.close().ignore();
+    }
+  }
 
   /// Every request that was sent, oldest first.
   final requests = <RequestOptions>[];
