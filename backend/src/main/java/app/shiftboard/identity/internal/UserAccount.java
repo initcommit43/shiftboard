@@ -40,6 +40,12 @@ class UserAccount {
 
     private String phone;
 
+    // The client a CLIENT user belongs to; null for everyone else.
+    private UUID clientId;
+
+    @Enumerated(EnumType.STRING)
+    private AccountStatus status = AccountStatus.ACTIVE;
+
     protected UserAccount() {
     }
 
@@ -48,6 +54,29 @@ class UserAccount {
         this.email = normalizeEmail(email);
         this.passwordHash = passwordHash;
         this.role = role;
+    }
+
+    /** A user at a client, without a password until they set one with their setup link. */
+    static UserAccount invitedClientUser(UUID agencyId, UUID clientId, String email, String firstName, String lastName) {
+        var account = new UserAccount(agencyId, email, null, Role.CLIENT);
+        account.clientId = clientId;
+        account.firstName = firstName;
+        account.lastName = lastName;
+        account.status = AccountStatus.INVITED;
+        return account;
+    }
+
+    /** Sets the password of an invited client user, which makes them active. */
+    void completeSetup(String passwordHash) {
+        if (status != AccountStatus.INVITED) {
+            throw new IllegalStateException("Only invited users set their first password");
+        }
+        this.passwordHash = passwordHash;
+        this.status = AccountStatus.ACTIVE;
+    }
+
+    void deactivate() {
+        status = AccountStatus.DEACTIVATED;
     }
 
     /** Emails are compared and stored in lower case. */
@@ -85,5 +114,13 @@ class UserAccount {
 
     String getPhone() {
         return phone;
+    }
+
+    UUID getClientId() {
+        return clientId;
+    }
+
+    AccountStatus getStatus() {
+        return status;
     }
 }

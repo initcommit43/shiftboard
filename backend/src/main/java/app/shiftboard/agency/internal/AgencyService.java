@@ -49,10 +49,13 @@ class AgencyService implements Agencies {
 
     /** Switches the features; one passed as {@code null} stays as it is. */
     @Transactional
-    AgencyFeatures changeFeatures(boolean contactButton, Boolean checkIn) {
+    AgencyFeatures changeFeatures(boolean contactButton, Boolean checkIn, Boolean clientPortal) {
         var agency = currentAgency();
         var current = agency.getFeatures();
-        agency.changeFeatures(new AgencyFeatures(contactButton, checkIn == null ? current.checkIn() : checkIn));
+        agency.changeFeatures(new AgencyFeatures(
+                contactButton,
+                checkIn == null ? current.checkIn() : checkIn,
+                clientPortal == null ? current.clientPortal() : clientPortal));
         return agency.getFeatures();
     }
 

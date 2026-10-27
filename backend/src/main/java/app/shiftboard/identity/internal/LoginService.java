@@ -39,13 +39,19 @@ class LoginService {
         // Verify against a hash even when the email is unknown, so that both failures
         // take the same time and look the same.
         var passwordHash = account.map(UserAccount::getPasswordHash).orElse(unknownAccountHash);
-        if (!passwordEncoder.matches(password, passwordHash) || account.isEmpty()) {
+        // Invited client users have no password yet; checking against a hash keeps the timing the same.
+        if (passwordHash == null) {
+            passwordHash = unknownAccountHash;
+        }
+        if (!passwordEncoder.matches(password, passwordHash) || account.isEmpty()
+                || account.get().getStatus() == AccountStatus.INVITED) {
             throw new ApiException(HttpStatus.UNAUTHORIZED, "invalid_credentials", "Email or password is wrong.");
         }
         if (!client.admits(account.get().getRole())) {
             throw new ApiException(HttpStatus.FORBIDDEN, "wrong_client", "This account cannot use this client.");
         }
 
+        sessions.requireAdmitted(account.get());
         rateLimiter.reset(limiterKey);
         return sessions.open(account.get());
     }

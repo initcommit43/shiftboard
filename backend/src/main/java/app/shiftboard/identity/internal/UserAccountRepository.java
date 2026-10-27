@@ -18,4 +18,6 @@ interface UserAccountRepository extends Repository<UserAccount, UUID> {
     Optional<UserAccount> findByEmail(String email);
 
     boolean existsByEmail(String email);
+
+    List<UserAccount> findByClientIdOrderByLastNameAscFirstNameAsc(UUID clientId);
 }
