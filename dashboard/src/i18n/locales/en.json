@@ -504,6 +504,8 @@
       "contactButtonHint": "Workers see a button on every shift that opens WhatsApp with the contact person. For agencies that prefer that.",
       "checkIn": "Check in in the app",
       "checkInHint": "Workers check in and out of their shifts in the app. Without it, hours are approved from the planned times.",
+      "clientPortal": "Client portal",
+      "clientPortalHint": "Your clients log in to the dashboard and see their shifts and the names of confirmed workers, but no hourly rates. You give access under “Clients”. While it's off, no client can log in.",
       "save": "Save optional features",
       "saved": "The optional features are saved"
     }

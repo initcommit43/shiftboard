@@ -314,7 +314,7 @@ export function installFakeApi() {
       [inventory.id]: [waitlistEntry(1, lena, 1), waitlistEntry(2, mira, 2)],
     } as Record<string, WaitlistEntry[]>,
     settings: { autoConfirm: false, cancellationDeadlineHours: 24, waitlist: false } as AgencySettings,
-    features: { contactButton: false, checkIn: false } as AgencyFeatures,
+    features: { contactButton: false, checkIn: false, clientPortal: false } as AgencyFeatures,
     conversations: [lenaConversation, jakobConversation],
     /** The messages per conversation id, newest first as the API sends them. */
     messages: {

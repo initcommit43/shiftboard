@@ -504,6 +504,8 @@
       "contactButtonHint": "Mitarbeiter:innen sehen bei jeder Schicht einen Button, der WhatsApp mit der Ansprechperson öffnet. Für Agenturen, die lieber so kommunizieren.",
       "checkIn": "Einchecken in der App",
       "checkInHint": "Mitarbeiter:innen checken in der App bei ihren Schichten ein und aus. Ohne diese Funktion werden die Stunden nach den geplanten Zeiten freigegeben.",
+      "clientPortal": "Kundenportal",
+      "clientPortalHint": "Eure Kunden melden sich im Dashboard an und sehen ihre Schichten und die Namen der bestätigten Mitarbeiter:innen, aber keine Stundenlöhne. Zugänge vergebt ihr unter „Kunden“. Ausgeschaltet kann sich kein Kunde anmelden.",
       "save": "Zusatzfunktionen speichern",
       "saved": "Die Zusatzfunktionen sind gespeichert"
     }
