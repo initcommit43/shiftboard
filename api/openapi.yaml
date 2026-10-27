@@ -569,8 +569,9 @@ paths:
         inbox or the open conversation through the endpoints above; the
         notice carries no message data. A comment line (`: ping`) every 25
         seconds keeps idle connections open; clients that hear nothing for 60
-        seconds reconnect. The stream ends when the access token expires. Dispatchers and admins only; the access token goes
-        in the `Authorization` header, so clients read the stream with a
+        seconds reconnect. The stream ends when the access token expires.
+        Dispatchers and admins only; the access token goes in the
+        `Authorization` header, so clients read the stream with a
         streaming HTTP request rather than `EventSource`. When the stream
         ends or fails, clients reconnect with backoff and fall back to
         polling meanwhile (ADR 0031).
