@@ -20,8 +20,17 @@ import 'messages_provider.dart';
 /// by hand. It goes through the app's Dio, so the auth interceptor adds the
 /// token and renews it on a 401 as for every other call. The notices are
 /// read with the generated serializers.
+///
+/// The server sends `:connected` at once and a heartbeat every 25 seconds.
+/// When no bytes at all arrive for [silenceLimit], the connection is taken as
+/// dead (for example after the phone switched networks): Dio's receive
+/// timeout, which it applies between chunks of a streamed body, closes the
+/// response and fails the stream, and the caller reconnects.
 class ConversationEventSource {
-  ConversationEventSource(this._api);
+  ConversationEventSource(
+    this._api, {
+    this.silenceLimit = const Duration(seconds: 60),
+  });
 
   static const path = '/worker/conversation/events';
 
@@ -29,6 +38,7 @@ class ConversationEventSource {
   static const eventName = 'conversation';
 
   final ShiftboardApi _api;
+  final Duration silenceLimit;
 
   Future<Stream<ConversationEvent>> open(CancelToken cancelToken) async {
     final response = await _api.dio.get<ResponseBody>(
@@ -37,8 +47,9 @@ class ConversationEventSource {
       options: Options(
         responseType: ResponseType.stream,
         headers: {HttpHeaders.acceptHeader: 'text/event-stream'},
-        // Only until the server answers; the stream itself stays open.
-        receiveTimeout: const Duration(seconds: 30),
+        // The watchdog: the longest wait for the next bytes, comments
+        // included.
+        receiveTimeout: silenceLimit,
         // As the generated client marks it, so that the token goes along.
         extra: {
           'secure': [

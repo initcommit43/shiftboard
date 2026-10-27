@@ -110,8 +110,10 @@ class LiveConnection<T> {
           await close();
         }
       }
+      // Ended or failed: make sure the old request is gone.
+      if (!cancelToken.isCancelled) cancelToken.cancel();
       if (isClosed) break;
-      // Ended or failed: try again after a while.
+      // Try again after a while.
       await Future.any([_sleep(_backoff.next()), _closing.future]);
     }
   }
