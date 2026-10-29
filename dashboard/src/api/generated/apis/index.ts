@@ -12,6 +12,7 @@ export * from './SettingsApi';
 export * from './ShiftTemplatesApi';
 export * from './ShiftsApi';
 export * from './SignupApi';
+export * from './StaffRequestsApi';
 export * from './SystemApi';
 export * from './WaitlistApi';
 export * from './WorkerShiftsApi';

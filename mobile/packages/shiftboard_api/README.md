@@ -90,8 +90,11 @@ Class | Method | HTTP request | Description
 [*AuthApi*](doc/AuthApi.md) | [**login**](doc/AuthApi.md#login) | **POST** /auth/login | Log in with email and password
 [*AuthApi*](doc/AuthApi.md) | [**logout**](doc/AuthApi.md#logout) | **POST** /auth/logout | End the session on this device
 [*AuthApi*](doc/AuthApi.md) | [**refreshToken**](doc/AuthApi.md#refreshtoken) | **POST** /auth/refresh | Exchange a refresh token for a new token pair
+[*ClientPortalApi*](doc/ClientPortalApi.md) | [**createClientStaffRequest**](doc/ClientPortalApi.md#createclientstaffrequest) | **POST** /client/staff-requests | Ask the agency for staff
 [*ClientPortalApi*](doc/ClientPortalApi.md) | [**getClientShift**](doc/ClientPortalApi.md#getclientshift) | **GET** /client/shifts/{shiftId} | One shift of the client, with who is coming
 [*ClientPortalApi*](doc/ClientPortalApi.md) | [**listClientShifts**](doc/ClientPortalApi.md#listclientshifts) | **GET** /client/shifts | The client&#39;s shifts
+[*ClientPortalApi*](doc/ClientPortalApi.md) | [**listClientStaffRequests**](doc/ClientPortalApi.md#listclientstaffrequests) | **GET** /client/staff-requests | The staff the client has requested
+[*ClientPortalApi*](doc/ClientPortalApi.md) | [**withdrawClientStaffRequest**](doc/ClientPortalApi.md#withdrawclientstaffrequest) | **POST** /client/staff-requests/{requestId}/withdraw | Withdraw an open request
 [*ClientUsersApi*](doc/ClientUsersApi.md) | [**completeClientSetup**](doc/ClientUsersApi.md#completeclientsetup) | **POST** /client-setup/{setupCode} | Set a password and log in to the client portal
 [*ClientUsersApi*](doc/ClientUsersApi.md) | [**deactivateClientUser**](doc/ClientUsersApi.md#deactivateclientuser) | **POST** /clients/{clientId}/users/{userId}/deactivate | End a client user&#39;s access
 [*ClientUsersApi*](doc/ClientUsersApi.md) | [**getClientSetupInfo**](doc/ClientUsersApi.md#getclientsetupinfo) | **GET** /client-setup/{setupCode} | Look up the invitation behind a setup link
@@ -134,6 +137,10 @@ Class | Method | HTTP request | Description
 [*ShiftsApi*](doc/ShiftsApi.md) | [**updateShift**](doc/ShiftsApi.md#updateshift) | **PUT** /shifts/{shiftId} | Change a shift
 [*SignupApi*](doc/SignupApi.md) | [**getSignupInfo**](doc/SignupApi.md#getsignupinfo) | **GET** /signup/{signupCode} | Look up the agency behind a signup link
 [*SignupApi*](doc/SignupApi.md) | [**signUp**](doc/SignupApi.md#signup) | **POST** /signup/{signupCode} | Sign up as a worker of the agency
+[*StaffRequestsApi*](doc/StaffRequestsApi.md) | [**createShiftFromStaffRequest**](doc/StaffRequestsApi.md#createshiftfromstaffrequest) | **POST** /staff-requests/{requestId}/shift | Turn an open request into a shift
+[*StaffRequestsApi*](doc/StaffRequestsApi.md) | [**declineStaffRequest**](doc/StaffRequestsApi.md#declinestaffrequest) | **POST** /staff-requests/{requestId}/decline | Decline an open request, with a reason the client sees
+[*StaffRequestsApi*](doc/StaffRequestsApi.md) | [**getStaffRequest**](doc/StaffRequestsApi.md#getstaffrequest) | **GET** /staff-requests/{requestId} | One request for staff
+[*StaffRequestsApi*](doc/StaffRequestsApi.md) | [**listStaffRequests**](doc/StaffRequestsApi.md#liststaffrequests) | **GET** /staff-requests | Clients&#39; requests for staff
 [*SystemApi*](doc/SystemApi.md) | [**ping**](doc/SystemApi.md#ping) | **GET** /ping | Check that the API is reachable
 [*WaitlistApi*](doc/WaitlistApi.md) | [**joinWaitlist**](doc/WaitlistApi.md#joinwaitlist) | **POST** /worker/shifts/{shiftId}/waitlist | Join the waitlist of a full shift
 [*WaitlistApi*](doc/WaitlistApi.md) | [**leaveWaitlist**](doc/WaitlistApi.md#leavewaitlist) | **DELETE** /worker/shifts/{shiftId}/waitlist | Leave the waitlist of a shift
@@ -217,6 +224,11 @@ Class | Method | HTTP request | Description
  - [ShiftTemplatePage](doc/ShiftTemplatePage.md)
  - [ShiftTemplateRequest](doc/ShiftTemplateRequest.md)
  - [SignupInfo](doc/SignupInfo.md)
+ - [StaffRequest](doc/StaffRequest.md)
+ - [StaffRequestDecline](doc/StaffRequestDecline.md)
+ - [StaffRequestPage](doc/StaffRequestPage.md)
+ - [StaffRequestRequest](doc/StaffRequestRequest.md)
+ - [StaffRequestStatus](doc/StaffRequestStatus.md)
  - [SystemEvent](doc/SystemEvent.md)
  - [TokenResponse](doc/TokenResponse.md)
  - [UnreadCount](doc/UnreadCount.md)
