@@ -1,3 +1,4 @@
+import type { TFunction } from 'i18next'
 import { Inbox, LoaderCircle, TriangleAlert, Users } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -216,7 +217,7 @@ function PendingRow({ shiftId, assignment }: { shiftId: string; assignment: Shif
 }
 
 /** The badge of a claim; a status newer than the dashboard shows as unknown. */
-function statusBadge(t: ReturnType<typeof useTranslation>['t'], assignment: ShiftAssignment) {
+function statusBadge(t: TFunction, assignment: ShiftAssignment) {
   const status = known(AssignmentStatus, assignment.status)
   if (!status) {
     return { variant: 'tag' as const, label: t('unknownValue') }

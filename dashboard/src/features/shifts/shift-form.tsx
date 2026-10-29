@@ -2,9 +2,16 @@ import { CircleAlert, Info, LoaderCircle } from 'lucide-react'
 import { type ReactNode, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
+import { toast } from 'sonner'
 
 import { ApiError, errorMessage } from '@/api/errors'
-import { type Client, type Qualification, type Shift, ShiftStatus } from '@/api/generated'
+import {
+  type Client,
+  type Qualification,
+  type Shift,
+  ShiftStatus,
+  type StaffRequest,
+} from '@/api/generated'
 import { Alert, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -61,7 +68,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 /**
  * The form for a new shift. With `template` it edits that template instead: it asks for the
  * template's name, has no date, and saves the template. With `editing` it saves the changes
- * to that shift.
+ * to that shift. With `staffRequest` it creates the shift from that client's request, which
+ * closes the request.
  */
 export function ShiftForm({
   clients,
@@ -69,6 +77,7 @@ export function ShiftForm({
   initial,
   template,
   editing,
+  staffRequest,
 }: {
   clients: Client[]
   qualifications: Qualification[]
@@ -76,10 +85,11 @@ export function ShiftForm({
   initial?: { draft: ShiftDraft; missing: MissingField[] }
   template?: { id: string; name: string }
   editing?: Shift
+  staffRequest?: StaffRequest
 }) {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const create = useCreateShift()
+  const create = useCreateShift(staffRequest?.id)
   const update = useUpdateShiftTemplate(template?.id ?? '')
   const save = useUpdateShift(editing?.id ?? '')
   const [draft, setDraft] = useState(() => initial?.draft ?? emptyDraft(clients))
@@ -110,6 +120,12 @@ export function ShiftForm({
         void navigate('/shifts')
       },
       onError: (error) => {
+        // The client withdrew the request, or a colleague handled it in the meantime.
+        if (staffRequest && error instanceof ApiError && (error.status === 409 || error.status === 404)) {
+          toast.error(t('staffRequests.toShift.gone'))
+          void navigate('/staff-requests')
+          return
+        }
         if (error instanceof ApiError) {
           const rejected = serverErrors(error.fieldErrors)
           setErrors(rejected)
@@ -545,7 +561,7 @@ export function ShiftForm({
             }}
           />
           <Button asChild variant="ghost">
-            <Link to="/shifts">{t('shifts.form.cancel')}</Link>
+            <Link to={staffRequest ? '/staff-requests' : '/shifts'}>{t('shifts.form.cancel')}</Link>
           </Button>
         </div>
       )}

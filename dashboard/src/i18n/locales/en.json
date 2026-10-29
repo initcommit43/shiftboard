@@ -16,7 +16,10 @@
       "pendingSignups_other": "{{count}} pending signups",
       "unreadMessages_one": "{{count}} unread message",
       "unreadMessages_other": "{{count}} unread messages",
-      "clients": "Clients"
+      "clients": "Clients",
+      "staffRequests": "Requests",
+      "openStaffRequests_one": "{{count}} open request",
+      "openStaffRequests_other": "{{count}} open requests"
     },
     "theme": {
       "toLight": "Switch to light theme",
@@ -151,13 +154,20 @@
         "rate_out_of_range": "The hourly rate has to be above €0.",
         "slots_out_of_range": "Between 1 and 500 spots.",
         "unknown": "This entry was not accepted.",
-        "below_taken": "Fewer spots than are taken. Reject or remove someone first."
+        "below_taken": "Fewer spots than are taken. Reject or remove someone first.",
+        "not_request_client": "The shift has to be for the request's client."
       },
       "duplicate": {
         "title": "Duplicate shift",
         "description": "Everything is copied except the date. Pick one, then publish or save as a draft."
       },
-      "missing": "No longer available, so left empty: {{fields}}. Please choose again."
+      "missing": "No longer available, so left empty: {{fields}}. Please choose again.",
+      "fromRequest": {
+        "title": "Create shift from request",
+        "description": "Client, location, time and number of people are taken from the request. Add the hourly rate, then publish or save as a draft.",
+        "notice": "Request from {{client}}, sent by {{name}} on {{date}}",
+        "noticeHint": "Saving links the request to the shift and closes it. The client sees the shift once it is published."
+      }
     },
     "descriptionPast": "Shifts that are over: who worked and who did not turn up.",
     "periods": {
@@ -915,11 +925,97 @@
     }
   },
   "staffRequests": {
+    "title": "Requests",
+    "descriptions": {
+      "OPEN": "Your clients' staff requests still waiting for you, earliest start first.",
+      "ACCEPTED": "Requests that were turned into a shift.",
+      "DECLINED": "Requests you declined, with the reason the client sees.",
+      "WITHDRAWN": "Requests the client withdrew."
+    },
+    "tabs": {
+      "label": "Status",
+      "OPEN": "Open",
+      "ACCEPTED": "Accepted",
+      "DECLINED": "Declined",
+      "WITHDRAWN": "Withdrawn"
+    },
     "status": {
       "OPEN": "Open",
       "ACCEPTED": "Accepted",
       "DECLINED": "Declined",
       "WITHDRAWN": "Withdrawn"
-    }
+    },
+    "columns": {
+      "client": "Client",
+      "role": "Role",
+      "workerCount": "People",
+      "requestedBy": "Requested by",
+      "actions": "Actions"
+    },
+    "count": {
+      "OPEN_one": "{{count}} open request",
+      "OPEN_other": "{{count}} open requests",
+      "ACCEPTED_one": "{{count}} accepted request",
+      "ACCEPTED_other": "{{count}} accepted requests",
+      "DECLINED_one": "{{count}} declined request",
+      "DECLINED_other": "{{count}} declined requests",
+      "WITHDRAWN_one": "{{count}} withdrawn request",
+      "WITHDRAWN_other": "{{count}} withdrawn requests"
+    },
+    "loading": "Loading requests …",
+    "empty": {
+      "OPEN": {
+        "title": "No open requests",
+        "description": "When a client requests staff in the client portal, the request shows up here."
+      },
+      "ACCEPTED": {
+        "title": "No accepted requests yet",
+        "description": "Requests you turn into a shift show up here."
+      },
+      "DECLINED": {
+        "title": "No declined requests",
+        "description": "Requests you decline show up here."
+      },
+      "WITHDRAWN": {
+        "title": "No withdrawn requests",
+        "description": "When a client withdraws an open request, it shows up here."
+      }
+    },
+    "error": {
+      "title": "Requests couldn't be loaded",
+      "description": "Please try again. If the problem persists, reload the page.",
+      "retry": "Try again"
+    },
+    "toShift": {
+      "action": "Create shift",
+      "actionNamed": "Create a shift from the request of {{client}} for {{date}}",
+      "gone": "This request is no longer open: the client withdrew it or it has already been handled."
+    },
+    "openShift": "Go to shift",
+    "declineReason": "Reason: {{reason}}",
+    "withdrawnAt": "Withdrawn on {{date}}",
+    "decline": {
+      "action": "Decline",
+      "actionNamed": "Decline the request of {{client}} for {{date}}",
+      "title": "Decline the request of {{client}} for {{date}}?",
+      "description": "The client then sees the request as declined, with your reason.",
+      "reason": "Reason",
+      "reasonPlaceholder": "e.g. All workers are already booked on that day.",
+      "reasonHint": "The client sees this text in the client portal.",
+      "reasonRequired": "Please give a reason.",
+      "keep": "Cancel",
+      "confirm": "Decline",
+      "done": "Request from {{client}} declined",
+      "doneDescription": "The client sees the reason in the client portal."
+    },
+    "notFound": {
+      "title": "Request not found",
+      "description": "This request doesn't exist."
+    },
+    "notOpen": {
+      "title": "Request already handled",
+      "description": "This request is no longer open: it was already turned into a shift, declined or withdrawn by the client."
+    },
+    "back": "Back to requests"
   }
 }

@@ -2,7 +2,14 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tansta
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
-import { assignmentsApi, clientsApi, shiftsApi, shiftTemplatesApi, waitlistApi } from '@/api/client'
+import {
+  assignmentsApi,
+  clientsApi,
+  shiftsApi,
+  shiftTemplatesApi,
+  staffRequestsApi,
+  waitlistApi,
+} from '@/api/client'
 import { errorMessage } from '@/api/errors'
 import type {
   Shift,
@@ -14,6 +21,7 @@ import type {
   ShiftTemplateRequest,
   WaitlistEntry,
 } from '@/api/generated'
+import { staffRequestKeys } from '@/features/staff-requests/queries'
 
 export const PAGE_SIZE = 20
 
@@ -135,19 +143,29 @@ export function useDeleteShiftTemplate() {
   })
 }
 
-export function useCreateShift() {
+/**
+ * Creates a shift. With `requestId` it is created from that request for staff, which the
+ * API then links to the shift and closes.
+ */
+export function useCreateShift(requestId?: string) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (shiftRequest: ShiftRequest) => shiftsApi.createShift({ shiftRequest }),
+    mutationFn: (shiftRequest: ShiftRequest) =>
+      requestId
+        ? staffRequestsApi.createShiftFromStaffRequest({ requestId, shiftRequest })
+        : shiftsApi.createShift({ shiftRequest }),
     onSuccess: (shift) => {
       toast.success(
         t(shift.status === 'PUBLISHED' ? 'shifts.created.published' : 'shifts.created.draft', {
           title: shift.title,
         }),
       )
-      return queryClient.invalidateQueries({ queryKey: shiftKeys.all })
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: shiftKeys.all }),
+        requestId && queryClient.invalidateQueries({ queryKey: staffRequestKeys.all }),
+      ])
     },
   })
 }

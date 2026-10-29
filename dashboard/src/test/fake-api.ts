@@ -1125,6 +1125,52 @@ export function installFakeApi() {
     return json(StaffRequestToJSON(decided))
   }
 
+  /** The agency's side of the requests: list, look up, turn into a shift, decline. */
+  function staffRequestsRoute(route: string, url: URL, body: unknown) {
+    if (route === 'GET /staff-requests') {
+      const status = url.searchParams.get('status') ?? StaffRequestStatus.OPEN
+      const open = status === StaffRequestStatus.OPEN
+      const matching = api.staffRequests
+        .filter((it) => it.status === status)
+        .sort((a, b) =>
+          open
+            ? a.startsAt.getTime() - b.startsAt.getTime()
+            : (b.decidedAt?.getTime() ?? 0) - (a.decidedAt?.getTime() ?? 0),
+        )
+      return page(url, matching, StaffRequestToJSON)
+    }
+    const [, method, requestId, action] =
+      /^(GET|POST) \/staff-requests\/([^/]+)(?:\/(shift|decline))?$/.exec(route) ?? []
+    const found = api.staffRequests.find((it) => it.id === requestId)
+    if (!found) {
+      return problem(404, 'staff_request_not_found')
+    }
+    if (method === 'GET' && action === undefined) {
+      return json(StaffRequestToJSON(found))
+    }
+    if (found.status !== StaffRequestStatus.OPEN) {
+      return problem(409, 'staff_request_not_open')
+    }
+    if (action === 'decline') {
+      const reason = ((body as Record<string, string>)['reason'] ?? '').trim()
+      if (!reason) {
+        return problem(400, 'validation_failed', [{ field: 'reason', code: 'required' }])
+      }
+      return decideRequest(found, { status: StaffRequestStatus.DECLINED, declineReason: reason })
+    }
+    const shiftBody = body as Record<string, unknown>
+    if (shiftBody['clientId'] !== found.client.id) {
+      return problem(400, 'validation_failed', [{ field: 'clientId', code: 'not_request_client' }])
+    }
+    const before = new Set(api.shifts.map((it) => it.id))
+    const response = createShift(shiftBody)
+    const created = api.shifts.find((it) => !before.has(it.id))
+    if (created) {
+      decideRequest(found, { status: StaffRequestStatus.ACCEPTED, shiftId: created.id })
+    }
+    return response
+  }
+
   function respond(route: string, url: URL, body: unknown, authorization: string | null) {
     if (route === 'POST /auth/login') {
       const { email, password, client } = body as Record<string, string>
@@ -1177,6 +1223,9 @@ export function installFakeApi() {
     }
     if (route === 'GET /clients') {
       return page(url, api.clients, ClientToJSON)
+    }
+    if (/^(GET|POST) \/staff-requests(\/|$)/.test(route)) {
+      return staffRequestsRoute(route, url, body)
     }
     const clientUsersRoute = /^(GET|POST) \/clients\/([^/]+)\/users$/.exec(route)
     if (clientUsersRoute) {

@@ -20,6 +20,7 @@ import { NewShiftPage } from '@/features/shifts/new-shift-page'
 import { ShiftDetailPage } from '@/features/shifts/shift-detail-page'
 import { ShiftsPage } from '@/features/shifts/shifts-page'
 import { SignupsPage } from '@/features/signups/signups-page'
+import { StaffRequestsPage } from '@/features/staff-requests/staff-requests-page'
 import { EditTemplatePage } from '@/features/templates/edit-template-page'
 import { TemplatesPage } from '@/features/templates/templates-page'
 
@@ -65,6 +66,7 @@ export const routes: RouteObject[] = [
           { path: 'signups', element: <SignupsPage /> },
           { path: 'messages', element: <MessagesPage /> },
           { path: 'messages/:conversationId', element: <MessagesPage /> },
+          { path: 'staff-requests', element: <StaffRequestsPage /> },
           { path: 'clients', element: <ClientsPage /> },
           { path: 'clients/:clientId', element: <ClientPage /> },
           { path: 'settings', element: <SettingsPage /> },

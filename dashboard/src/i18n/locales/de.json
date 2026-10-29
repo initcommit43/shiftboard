@@ -16,7 +16,10 @@
       "pendingSignups_other": "{{count}} offene Anmeldungen",
       "unreadMessages_one": "{{count}} ungelesene Nachricht",
       "unreadMessages_other": "{{count}} ungelesene Nachrichten",
-      "clients": "Kunden"
+      "clients": "Kunden",
+      "staffRequests": "Anfragen",
+      "openStaffRequests_one": "{{count}} offene Anfrage",
+      "openStaffRequests_other": "{{count}} offene Anfragen"
     },
     "theme": {
       "toLight": "Zum hellen Design wechseln",
@@ -151,13 +154,20 @@
         "rate_out_of_range": "Der Stundenlohn muss über 0 € liegen.",
         "slots_out_of_range": "Zwischen 1 und 500 Plätze.",
         "unknown": "Diese Angabe wurde nicht angenommen.",
-        "below_taken": "Weniger Plätze als vergeben. Lehne zuerst jemanden ab oder nimm jemanden heraus."
+        "below_taken": "Weniger Plätze als vergeben. Lehne zuerst jemanden ab oder nimm jemanden heraus.",
+        "not_request_client": "Die Schicht muss für den Kunden der Anfrage sein."
       },
       "duplicate": {
         "title": "Schicht duplizieren",
         "description": "Alles ist übernommen außer dem Datum. Wähle es aus, dann veröffentlichen oder als Entwurf speichern."
       },
-      "missing": "Nicht mehr vorhanden und daher leer: {{fields}}. Bitte neu auswählen."
+      "missing": "Nicht mehr vorhanden und daher leer: {{fields}}. Bitte neu auswählen.",
+      "fromRequest": {
+        "title": "Schicht aus Anfrage anlegen",
+        "description": "Kunde, Ort, Zeit und Personenzahl sind aus der Anfrage übernommen. Ergänze den Stundenlohn, dann veröffentlichen oder als Entwurf speichern.",
+        "notice": "Anfrage von {{client}}, gesendet von {{name}} am {{date}}",
+        "noticeHint": "Beim Speichern wird die Anfrage mit der Schicht verknüpft und geschlossen. Der Kunde sieht die Schicht, sobald sie veröffentlicht ist."
+      }
     },
     "descriptionPast": "Schichten, die vorbei sind: wer gearbeitet hat und wer nicht erschienen ist.",
     "periods": {
@@ -915,11 +925,97 @@
     }
   },
   "staffRequests": {
+    "title": "Anfragen",
+    "descriptions": {
+      "OPEN": "Personalanfragen eurer Kunden, die noch auf euch warten, frühester Beginn zuerst.",
+      "ACCEPTED": "Anfragen, aus denen eine Schicht geworden ist.",
+      "DECLINED": "Anfragen, die ihr abgelehnt habt, mit dem Grund, den der Kunde sieht.",
+      "WITHDRAWN": "Anfragen, die der Kunde zurückgezogen hat."
+    },
+    "tabs": {
+      "label": "Status",
+      "OPEN": "Offen",
+      "ACCEPTED": "Angenommen",
+      "DECLINED": "Abgelehnt",
+      "WITHDRAWN": "Zurückgezogen"
+    },
     "status": {
       "OPEN": "Offen",
       "ACCEPTED": "Angenommen",
       "DECLINED": "Abgelehnt",
       "WITHDRAWN": "Zurückgezogen"
-    }
+    },
+    "columns": {
+      "client": "Kunde",
+      "role": "Tätigkeit",
+      "workerCount": "Personen",
+      "requestedBy": "Angefragt von",
+      "actions": "Aktionen"
+    },
+    "count": {
+      "OPEN_one": "{{count}} offene Anfrage",
+      "OPEN_other": "{{count}} offene Anfragen",
+      "ACCEPTED_one": "{{count}} angenommene Anfrage",
+      "ACCEPTED_other": "{{count}} angenommene Anfragen",
+      "DECLINED_one": "{{count}} abgelehnte Anfrage",
+      "DECLINED_other": "{{count}} abgelehnte Anfragen",
+      "WITHDRAWN_one": "{{count}} zurückgezogene Anfrage",
+      "WITHDRAWN_other": "{{count}} zurückgezogene Anfragen"
+    },
+    "loading": "Anfragen werden geladen …",
+    "empty": {
+      "OPEN": {
+        "title": "Keine offenen Anfragen",
+        "description": "Wenn ein Kunde im Kundenportal Personal anfragt, erscheint die Anfrage hier."
+      },
+      "ACCEPTED": {
+        "title": "Noch keine angenommenen Anfragen",
+        "description": "Anfragen, aus denen ihr eine Schicht anlegt, erscheinen hier."
+      },
+      "DECLINED": {
+        "title": "Keine abgelehnten Anfragen",
+        "description": "Anfragen, die ihr ablehnt, erscheinen hier."
+      },
+      "WITHDRAWN": {
+        "title": "Keine zurückgezogenen Anfragen",
+        "description": "Zieht ein Kunde eine offene Anfrage zurück, erscheint sie hier."
+      }
+    },
+    "error": {
+      "title": "Anfragen konnten nicht geladen werden",
+      "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu.",
+      "retry": "Erneut versuchen"
+    },
+    "toShift": {
+      "action": "Als Schicht anlegen",
+      "actionNamed": "Anfrage von {{client}} für {{date}} als Schicht anlegen",
+      "gone": "Diese Anfrage ist nicht mehr offen: Der Kunde hat sie zurückgezogen oder sie wurde schon bearbeitet."
+    },
+    "openShift": "Zur Schicht",
+    "declineReason": "Grund: {{reason}}",
+    "withdrawnAt": "Zurückgezogen am {{date}}",
+    "decline": {
+      "action": "Ablehnen",
+      "actionNamed": "Anfrage von {{client}} für {{date}} ablehnen",
+      "title": "Anfrage von {{client}} für {{date}} ablehnen?",
+      "description": "Der Kunde sieht die Anfrage danach als abgelehnt, mit deinem Grund.",
+      "reason": "Grund",
+      "reasonPlaceholder": "z. B. An diesem Tag sind alle Mitarbeiter:innen schon eingeplant.",
+      "reasonHint": "Der Kunde sieht diesen Text im Kundenportal.",
+      "reasonRequired": "Bitte gib einen Grund an.",
+      "keep": "Abbrechen",
+      "confirm": "Ablehnen",
+      "done": "Anfrage von {{client}} abgelehnt",
+      "doneDescription": "Der Kunde sieht den Grund im Kundenportal."
+    },
+    "notFound": {
+      "title": "Anfrage nicht gefunden",
+      "description": "Diese Anfrage gibt es nicht."
+    },
+    "notOpen": {
+      "title": "Anfrage schon bearbeitet",
+      "description": "Diese Anfrage ist nicht mehr offen: Sie wurde schon als Schicht angelegt, abgelehnt oder vom Kunden zurückgezogen."
+    },
+    "back": "Zu den Anfragen"
   }
 }
