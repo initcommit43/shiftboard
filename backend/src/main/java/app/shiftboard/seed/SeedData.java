@@ -18,10 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Two fictional agencies with their qualifications, settings, dashboard users, workers, clients,
- * locations, shifts, shift templates, a few claims, a waitlist and the hours of past shifts. The
- * rows are written with plain SQL, like a migration would, because nothing in the application
- * creates agencies, dashboard users or clients yet. Runs once: a database that has the demo agency
- * is left alone.
+ * locations, shifts, shift templates, a few claims, a waitlist, the hours of past shifts and the
+ * staff requests of a client. The rows are written with plain SQL, like a migration would,
+ * because nothing in the application creates agencies, dashboard users or clients yet. Runs once:
+ * a database that has the demo agency is left alone.
  */
 @Component
 @Profile("local")
@@ -167,8 +167,21 @@ class SeedData implements ApplicationRunner {
 
         // Nordlicht Logistik sees its shifts in the client portal: Petra has set her password, Karl
         // was invited and has not, so the agency can create a new setup link for him.
-        clientUser(agency, logistics, "kunde.nordlicht@example.com", "Petra", "Wimmer", "ACTIVE");
+        var petra = clientUser(agency, logistics, "kunde.nordlicht@example.com", "Petra", "Wimmer", "ACTIVE");
         clientUser(agency, logistics, "karl.huber.nordlicht@example.com", "Karl", "Huber", "INVITED");
+
+        // Petra has asked for staff (ADR 0032): two requests wait for a dispatcher, the warehouse help
+        // came from one, one was declined and one she took back herself.
+        staffRequest(agency, logistics, warehouse, petra, "Kommissionierung", "Sicherheitsschuhe mitbringen.", 6, 6, 8,
+                false, 4, "OPEN", null, null, 1);
+        staffRequest(agency, logistics, depot, petra, "Staplerfahrer:in", "Nur mit gültigem Staplerschein.", 8, 7, 8,
+                true, 2, "OPEN", null, null, 0);
+        staffRequest(agency, logistics, warehouse, petra, "Lagerunterstützung", "Tor 3, bitte pünktlich.", 1, 6, 8,
+                false, 5, "ACCEPTED", warehouseHelp, null, 4);
+        staffRequest(agency, logistics, warehouse, petra, "Inventur Wochenende", null, 12, 8, 6, false, 6,
+                "DECLINED", null, "An diesem Wochenende sind wir leider ausgebucht.", 3);
+        staffRequest(agency, logistics, depot, petra, "Verladung", null, 10, 14, 4, false, 3, "WITHDRAWN", null, null,
+                5);
 
         // Lena asked about the wedding and has no answer yet; Jakob got his confirmation.
         var lenaChat = conversation(agency, lena);
@@ -253,15 +266,43 @@ class SeedData implements ApplicationRunner {
     }
 
     /** A user at a client (ADR 0032); an invited one has no password yet. */
-    private void clientUser(
+    private UUID clientUser(
             UUID agencyId, UUID clientId, String email, String firstName, String lastName, String status) {
-        jdbc.sql("""
+        return jdbc.sql("""
                 insert into user_account (
                     id, agency_id, email, password_hash, role, first_name, last_name, client_id, status)
-                values (uuidv7(), ?, ?, ?, 'CLIENT', ?, ?, ?, ?)
+                values (uuidv7(), ?, ?, ?, 'CLIENT', ?, ?, ?, ?) returning id
                 """)
                 .params(agencyId, email, "INVITED".equals(status) ? null : passwordHash, firstName, lastName,
                         clientId, status)
+                .query(UUID.class).single();
+    }
+
+    /**
+     * A client's request for staff that starts {@code inDays} days from today at {@code startHour}
+     * o'clock in Vienna, sent {@code sentDaysAgo} days ago. A handled one was decided a day later.
+     */
+    private void staffRequest(
+            UUID agencyId, UUID clientId, UUID locationId, UUID requestedBy, String role, String notes, int inDays,
+            int startHour, int hours, boolean endIsEstimate, int workerCount, String status, UUID shiftId,
+            String declineReason, int sentDaysAgo) {
+        jdbc.sql("""
+                with start as (
+                    select (date_trunc('day', now() at time zone 'Europe/Vienna')
+                            + make_interval(days => ?, hours => ?)) at time zone 'Europe/Vienna' as at
+                ), sent as (
+                    select now() - make_interval(days => ?) as at
+                )
+                insert into staff_request (
+                    id, agency_id, client_id, location_id, requested_by, role, starts_at, ends_at, end_is_estimate,
+                    worker_count, notes, status, decline_reason, shift_id, decided_at, created_at, updated_at)
+                select uuidv7(), ?, ?, ?, ?, ?, start.at, start.at + make_interval(hours => ?), ?, ?, ?, ?, ?, ?,
+                       case when ? = 'OPEN' then null else sent.at + interval '1 day' end, sent.at, sent.at
+                from start, sent
+                """)
+                .params(
+                        inDays, startHour, sentDaysAgo, agencyId, clientId, locationId, requestedBy, role, hours,
+                        endIsEstimate, workerCount, notes, status, declineReason, shiftId, status)
                 .update();
     }
 
