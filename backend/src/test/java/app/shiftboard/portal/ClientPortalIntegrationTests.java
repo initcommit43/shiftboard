@@ -148,6 +148,20 @@ class ClientPortalIntegrationTests extends IntegrationTest {
         expectProblem(get("/api/v1/client/shifts/" + foreign, innUser), 404, "shift_not_found");
     }
 
+    @Test
+    void aClientListsOnlyItsOwnLocationsByName() {
+        data.location(agency, clientId, "Außenlager Enns", "Hafenweg 3, 4470 Enns");
+
+        get("/api/v1/client/locations", clientUser)
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.length()").isEqualTo(2)
+                .jsonPath("$[0].name").isEqualTo("Außenlager Enns")
+                .jsonPath("$[1].name").isEqualTo("Zentrallager Linz")
+                .jsonPath("$[1].address").isEqualTo("Hafenstraße 12, 4020 Linz");
+        expectProblem(get("/api/v1/client/locations", dispatcher), 403, "forbidden");
+    }
+
     // --- helpers -------------------------------------------------------------------------
 
     private TokenPair clientUser(UUID forClient) {
