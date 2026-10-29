@@ -260,7 +260,9 @@
     "client_user_not_invited": "Diese Person hat schon ein Passwort gesetzt oder keinen Zugang mehr. Die Liste wurde aktualisiert.",
     "email_already_registered": "Mit dieser E-Mail-Adresse gibt es schon ein Konto.",
     "account_deactivated": "Dein Zugang wurde beendet. Wenn du wieder Zugang brauchst, wende dich an die Agentur.",
-    "setup_code_invalid": "Dieser Link ist ungültig, abgelaufen oder wurde schon verwendet. Bitte die Agentur um einen neuen."
+    "setup_code_invalid": "Dieser Link ist ungültig, abgelaufen oder wurde schon verwendet. Bitte die Agentur um einen neuen.",
+    "staff_request_not_found": "Diese Anfrage gibt es nicht mehr. Die Liste wurde aktualisiert.",
+    "staff_request_not_open": "Diese Anfrage wurde schon bearbeitet oder zurückgezogen. Die Liste wurde aktualisiert."
   },
   "hours": {
     "amount": "{{hours}} Std.",
@@ -816,6 +818,108 @@
         "title": "Noch niemand bestätigt",
         "description": "Sobald die Agentur Mitarbeiter:innen für diese Schicht bestätigt, stehen ihre Namen hier."
       }
+    },
+    "navigation": "Portalnavigation",
+    "nav": {
+      "shifts": "Schichten",
+      "requests": "Personalanfragen"
+    },
+    "requests": {
+      "title": "Personalanfragen",
+      "description": "Fragt bei {{agency}} Personal an und seht, was aus euren Anfragen geworden ist.",
+      "new": "Personal anfragen",
+      "loading": "Anfragen werden geladen …",
+      "status": {
+        "OPEN": "Offen",
+        "ACCEPTED": "Eingeplant",
+        "DECLINED": "Abgelehnt",
+        "WITHDRAWN": "Zurückgezogen"
+      },
+      "columns": {
+        "role": "Tätigkeit",
+        "workerCount": "Personen",
+        "outcome": "Ergebnis und Aktionen"
+      },
+      "people_one": "{{count}} Person",
+      "people_other": "{{count}} Personen",
+      "requestedBy": "Angefragt von {{name}}",
+      "count_one": "{{count}} Anfrage",
+      "count_other": "{{count}} Anfragen",
+      "toShift": "Zur Schicht",
+      "preparing": "Die Agentur bereitet die Schicht vor.",
+      "declineReason": "Grund: {{reason}}",
+      "declinedNoReason": "Die Agentur hat abgelehnt.",
+      "empty": {
+        "title": "Noch keine Anfragen",
+        "description": "Braucht ihr Personal? Schickt der Agentur eine Anfrage mit Datum, Zeit, Ort und Personenzahl."
+      },
+      "error": {
+        "title": "Anfragen konnten nicht geladen werden",
+        "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu.",
+        "retry": "Erneut versuchen"
+      },
+      "sent": {
+        "title": "Anfrage für {{role}} gesendet",
+        "description": "Die Agentur meldet sich hier mit einer Schicht oder einer Absage."
+      },
+      "withdraw": {
+        "action": "Zurückziehen",
+        "actionNamed": "Anfrage {{role}} am {{date}} zurückziehen",
+        "title": "Anfrage zurückziehen?",
+        "description": "Die Anfrage {{role}} am {{date}} wird zurückgezogen. Die Agentur bearbeitet sie dann nicht mehr.",
+        "keep": "Behalten",
+        "confirm": "Zurückziehen",
+        "done": "Anfrage {{role}} zurückgezogen"
+      },
+      "form": {
+        "back": "Alle Anfragen",
+        "title": "Personal anfragen",
+        "description": "Sag der Agentur, wann, wo und wie viele Personen ihr braucht. Sie meldet sich mit einer Schicht oder einer Absage.",
+        "sections": {
+          "what": "Einsatz",
+          "time": "Zeit"
+        },
+        "fields": {
+          "locationId": "Einsatzort",
+          "role": "Tätigkeit",
+          "date": "Datum",
+          "startTime": "Beginn",
+          "endTime": "Ende",
+          "workerCount": "Anzahl Personen",
+          "notes": "Hinweise"
+        },
+        "rolePlaceholder": "z. B. Lagerhelfer:innen",
+        "roleHint": "Was die Personen tun werden.",
+        "notesHint": "Treffpunkt, Kleidung, Ansprechperson vor Ort und alles, was die Agentur sonst wissen sollte.",
+        "endIsEstimate": "Das Ende ist ungefähr (wird mit „ca.“ angezeigt)",
+        "send": "Anfrage senden",
+        "errors": {
+          "required": "Bitte ausfüllen.",
+          "invalid_format": "Bitte eine ganze Zahl eingeben.",
+          "invalid_length": "Der Text ist zu lang.",
+          "before_start": "Das Ende muss nach dem Beginn liegen.",
+          "in_past": "Dieser Zeitpunkt ist schon vorbei.",
+          "out_of_range": "Zwischen 1 und 500 Personen.",
+          "not_found": "Diesen Einsatzort gibt es nicht mehr. Lade die Seite neu.",
+          "unknown": "Diese Angabe wurde nicht angenommen."
+        },
+        "error": {
+          "title": "Das Formular konnte nicht geladen werden",
+          "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu."
+        },
+        "noLocations": {
+          "title": "Noch keine Einsatzorte",
+          "description": "Für eine Anfrage braucht es einen Einsatzort. {{agency}} hat für euch noch keinen hinterlegt. Bitte wende dich an die Agentur."
+        }
+      }
+    }
+  },
+  "staffRequests": {
+    "status": {
+      "OPEN": "Offen",
+      "ACCEPTED": "Angenommen",
+      "DECLINED": "Abgelehnt",
+      "WITHDRAWN": "Zurückgezogen"
     }
   }
 }

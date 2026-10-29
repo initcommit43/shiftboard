@@ -9,6 +9,8 @@ import { ClientPage } from '@/features/clients/client-page'
 import { ClientsPage } from '@/features/clients/clients-page'
 import { HoursPage } from '@/features/hours/hours-page'
 import { MessagesPage } from '@/features/messages/messages-page'
+import { PortalRequestFormPage } from '@/features/portal/portal-request-form-page'
+import { PortalRequestsPage } from '@/features/portal/portal-requests-page'
 import { PortalShell } from '@/features/portal/portal-shell'
 import { PortalShiftDetailPage } from '@/features/portal/portal-shift-detail-page'
 import { PortalShiftsPage } from '@/features/portal/portal-shifts-page'
@@ -42,6 +44,8 @@ export const routes: RouteObject[] = [
         children: [
           { index: true, element: <PortalShiftsPage /> },
           { path: 'shifts/:shiftId', element: <PortalShiftDetailPage /> },
+          { path: 'requests', element: <PortalRequestsPage /> },
+          { path: 'requests/new', element: <PortalRequestFormPage /> },
           { path: '*', element: <NotFoundPage /> },
         ],
       },
