@@ -92,6 +92,7 @@ Class | Method | HTTP request | Description
 [*AuthApi*](doc/AuthApi.md) | [**refreshToken**](doc/AuthApi.md#refreshtoken) | **POST** /auth/refresh | Exchange a refresh token for a new token pair
 [*ClientPortalApi*](doc/ClientPortalApi.md) | [**createClientStaffRequest**](doc/ClientPortalApi.md#createclientstaffrequest) | **POST** /client/staff-requests | Ask the agency for staff
 [*ClientPortalApi*](doc/ClientPortalApi.md) | [**getClientShift**](doc/ClientPortalApi.md#getclientshift) | **GET** /client/shifts/{shiftId} | One shift of the client, with who is coming
+[*ClientPortalApi*](doc/ClientPortalApi.md) | [**listClientLocations**](doc/ClientPortalApi.md#listclientlocations) | **GET** /client/locations | The locations of the client, to request staff for
 [*ClientPortalApi*](doc/ClientPortalApi.md) | [**listClientShifts**](doc/ClientPortalApi.md#listclientshifts) | **GET** /client/shifts | The client&#39;s shifts
 [*ClientPortalApi*](doc/ClientPortalApi.md) | [**listClientStaffRequests**](doc/ClientPortalApi.md#listclientstaffrequests) | **GET** /client/staff-requests | The staff the client has requested
 [*ClientPortalApi*](doc/ClientPortalApi.md) | [**withdrawClientStaffRequest**](doc/ClientPortalApi.md#withdrawclientstaffrequest) | **POST** /client/staff-requests/{requestId}/withdraw | Withdraw an open request

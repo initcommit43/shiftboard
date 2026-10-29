@@ -2358,6 +2358,32 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /client/locations:
+    get:
+      operationId: listClientLocations
+      tags: [client-portal]
+      summary: The locations of the client, to request staff for
+      description: |
+        Sorted by name. A client has a handful of locations, so the list is
+        not paged. Client users only.
+
+        Error codes: `forbidden` (403).
+      responses:
+        "200":
+          description: The locations.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Location"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
   /client/staff-requests:
     get:
       operationId: listClientStaffRequests

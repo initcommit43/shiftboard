@@ -29,6 +29,11 @@ import {
     ClientShiftPeriodToJSON,
 } from '../models/ClientShiftPeriod';
 import {
+    type Location,
+    LocationFromJSON,
+    LocationToJSON,
+} from '../models/Location';
+import {
     type Problem,
     ProblemFromJSON,
     ProblemToJSON,
@@ -210,6 +215,53 @@ export class ClientPortalApi extends runtime.BaseAPI {
      */
     async getClientShift(requestParameters: GetClientShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClientShiftDetail> {
         const response = await this.getClientShiftRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for listClientLocations without sending the request
+     */
+    async listClientLocationsRequestOpts(): Promise<runtime.RequestOpts> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/client/locations`;
+
+        return {
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Sorted by name. A client has a handful of locations, so the list is not paged. Client users only.  Error codes: `forbidden` (403). 
+     * The locations of the client, to request staff for
+     */
+    async listClientLocationsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Location>>> {
+        const requestOptions = await this.listClientLocationsRequestOpts();
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(LocationFromJSON));
+    }
+
+    /**
+     * Sorted by name. A client has a handful of locations, so the list is not paged. Client users only.  Error codes: `forbidden` (403). 
+     * The locations of the client, to request staff for
+     */
+    async listClientLocations(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Location>> {
+        const response = await this.listClientLocationsRaw(initOverrides);
         return await response.value();
     }
 
