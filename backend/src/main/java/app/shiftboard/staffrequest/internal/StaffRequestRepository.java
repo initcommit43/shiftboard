@@ -23,4 +23,6 @@ interface StaffRequestRepository extends Repository<StaffRequest, UUID> {
     Optional<StaffRequest> findForUpdateById(UUID id);
 
     Page<StaffRequest> findByClientId(UUID clientId, Pageable pageable);
+
+    Page<StaffRequest> findByStatus(StaffRequestStatus status, Pageable pageable);
 }

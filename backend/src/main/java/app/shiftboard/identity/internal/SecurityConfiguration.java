@@ -71,6 +71,7 @@ class SecurityConfiguration {
                                 "/api/v1/qualifications/**",
                                 "/api/v1/shifts/**",
                                 "/api/v1/shift-templates/**",
+                                "/api/v1/staff-requests/**",
                                 "/api/v1/hours/**")
                         .hasAnyRole(Role.DISPATCHER.name(), Role.ADMIN.name())
                         .requestMatchers("/api/v1/worker/**")

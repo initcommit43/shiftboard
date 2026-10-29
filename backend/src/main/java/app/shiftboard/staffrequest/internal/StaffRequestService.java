@@ -22,6 +22,10 @@ class StaffRequestService {
 
     private static final Sort NEWEST_FIRST = Sort.by(Sort.Order.desc("createdAt"), Sort.Order.desc("id"));
 
+    private static final Sort EARLIEST_START_FIRST = Sort.by("startsAt", "id");
+
+    private static final Sort LATEST_DECISION_FIRST = Sort.by(Sort.Order.desc("decidedAt"), Sort.Order.desc("id"));
+
     private final StaffRequestRepository requests;
 
     private final Clients clients;
@@ -81,6 +85,29 @@ class StaffRequestService {
         return forClient(List.of(request)).getFirst();
     }
 
+    /** Open ones earliest start first, the handled ones latest decision first. */
+    @Transactional(readOnly = true)
+    StaffRequestResponse.Page listForAgency(StaffRequestStatus status, int page, int size) {
+        var sort = status == StaffRequestStatus.OPEN ? EARLIEST_START_FIRST : LATEST_DECISION_FIRST;
+        var result = requests.findByStatus(status, PageRequest.of(page, size, sort));
+        return new StaffRequestResponse.Page(
+                forAgency(result.getContent()), page, size, result.getTotalElements(), result.getTotalPages());
+    }
+
+    /** @throws ApiException {@code staff_request_not_found} */
+    @Transactional(readOnly = true)
+    StaffRequestResponse get(UUID requestId) {
+        return forAgency(List.of(requests.findById(requestId).orElseThrow(StaffRequestService::notFound))).getFirst();
+    }
+
+    /** @throws ApiException {@code staff_request_not_found} or {@code staff_request_not_open} */
+    @Transactional
+    StaffRequestResponse decline(UUID requestId, String reason) {
+        var request = requests.findForUpdateById(requestId).orElseThrow(StaffRequestService::notFound);
+        request.decline(reason.strip(), Instant.now());
+        return forAgency(List.of(request)).getFirst();
+    }
+
     static ApiException notFound() {
         return new ApiException(
                 HttpStatus.NOT_FOUND, "staff_request_not_found", "There is no staff request with this id.");
@@ -93,6 +120,10 @@ class StaffRequestService {
                 .filter(Objects::nonNull)
                 .toList()).keySet();
         return responses(page, visible::contains);
+    }
+
+    private List<StaffRequestResponse> forAgency(List<StaffRequest> page) {
+        return responses(page, shiftId -> true);
     }
 
     // Clients, locations and names come from their modules in one call each, whatever the number of requests.
