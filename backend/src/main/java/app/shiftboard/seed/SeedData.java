@@ -55,8 +55,11 @@ class SeedData implements ApplicationRunner {
 
     private void seedDonauPersonal() {
         var agency = agency("Donau Personal", DONAU_SIGNUP_CODE);
-        // Workers check in and out in the app (ADR 0028).
-        jdbc.sql("update agency set features = '{\"contactButton\": false, \"checkIn\": true}' where id = ?")
+        // Workers check in and out in the app (ADR 0028); clients log in to the portal (ADR 0032).
+        jdbc.sql("""
+                update agency set features = '{"contactButton": false, "checkIn": true, "clientPortal": true}'
+                where id = ?
+                """)
                 .param(agency).update();
         // Full shifts have a waitlist (ADR 0029); the other settings are the defaults.
         jdbc.sql("""
@@ -102,6 +105,9 @@ class SeedData implements ApplicationRunner {
         // Took place about a month ago; its hours are approved, so the payroll export has rows.
         var fair = shift(agency, catering, hall, dispatcher, "Auf- und Abbau Messe", null, -30, 8, 6, true, "14.50", 4,
                 "COMPLETED");
+        // Called off by the agency; the client portal shows it as cancelled.
+        shift(agency, logistics, warehouse, dispatcher, "Wareneingang", null, 4, 6, 8, false, "16.50", 3, "CANCELLED",
+                lager);
         // Starts shortly after the data is seeded, so that check-in can be tried right away.
         var conference = shiftInMinutes(agency, hotel, ballroom, dispatcher, "Service Tagung",
                 "Schwarze Hose, weißes Hemd. Treffpunkt an der Rezeption.", 20, 6, "15.00", 2, service);
@@ -158,6 +164,11 @@ class SeedData implements ApplicationRunner {
         approveHours(inventory, jakob, 0, 8 * 60, 30, dispatcher);
         approveHours(fair, jakob, 0, 6 * 60 + 15, 0, dispatcher);
         approveHours(fair, paul, 0, 6 * 60, 0, dispatcher);
+
+        // Nordlicht Logistik sees its shifts in the client portal: Petra has set her password, Karl
+        // was invited and has not, so the agency can create a new setup link for him.
+        clientUser(agency, logistics, "kunde.nordlicht@example.com", "Petra", "Wimmer", "ACTIVE");
+        clientUser(agency, logistics, "karl.huber.nordlicht@example.com", "Karl", "Huber", "INVITED");
 
         // Lena asked about the wedding and has no answer yet; Jakob got his confirmation.
         var lenaChat = conversation(agency, lena);
@@ -239,6 +250,19 @@ class SeedData implements ApplicationRunner {
                 values (uuidv7(), ?, ?, ?, ?, ?, ?, ?) returning id
                 """).params(agencyId, email, passwordHash, role, firstName, lastName, phone)
                 .query(UUID.class).single();
+    }
+
+    /** A user at a client (ADR 0032); an invited one has no password yet. */
+    private void clientUser(
+            UUID agencyId, UUID clientId, String email, String firstName, String lastName, String status) {
+        jdbc.sql("""
+                insert into user_account (
+                    id, agency_id, email, password_hash, role, first_name, last_name, client_id, status)
+                values (uuidv7(), ?, ?, ?, 'CLIENT', ?, ?, ?, ?)
+                """)
+                .params(agencyId, email, "INVITED".equals(status) ? null : passwordHash, firstName, lastName,
+                        clientId, status)
+                .update();
     }
 
     private UUID client(UUID agencyId, String name) {

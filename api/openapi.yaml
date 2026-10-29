@@ -57,7 +57,9 @@ tags:
   - name: client-users
     description: Portal access for the staff of the agency's clients (ADR 0032)
   - name: client-portal
-    description: What a client's staff see of their shifts in the portal (ADR 0032)
+    description: What a client's staff see of their shifts in the portal, and the staff they request (ADR 0032)
+  - name: staff-requests
+    description: Clients' requests for staff, which dispatchers turn into shifts or decline (ADR 0032)
 security:
   - bearerAuth: []
 paths:
@@ -1594,6 +1596,153 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /staff-requests:
+    get:
+      operationId: listStaffRequests
+      tags: [staff-requests]
+      summary: Clients' requests for staff
+      description: |
+        `OPEN` (the default) lists the requests waiting for a dispatcher,
+        earliest start first, so `totalElements` is the number to show in
+        the navigation. The other statuses list the handled ones, latest
+        first. Works whether or not the client portal is switched on, so
+        requests sent before it was switched off can still be handled.
+        Dispatchers and admins only.
+
+        Error codes: `forbidden` (403).
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/StaffRequestStatus"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of requests.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffRequestPage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /staff-requests/{requestId}:
+    parameters:
+      - $ref: "#/components/parameters/StaffRequestId"
+    get:
+      operationId: getStaffRequest
+      tags: [staff-requests]
+      summary: One request for staff
+      description: |
+        Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `staff_request_not_found` (404).
+      responses:
+        "200":
+          description: The request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffRequest"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /staff-requests/{requestId}/shift:
+    parameters:
+      - $ref: "#/components/parameters/StaffRequestId"
+    post:
+      operationId: createShiftFromStaffRequest
+      tags: [staff-requests]
+      summary: Turn an open request into a shift
+      description: |
+        Creates the shift like `POST /shifts` and, in the same step, links
+        it to the request and sets the request to `ACCEPTED`. The client
+        sees the shift once it is published. The dispatcher becomes the
+        contact person. Dispatchers and admins only.
+
+        Field error codes: as for `POST /shifts`, plus `not_request_client`
+        (`clientId` is not the client who sent the request).
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403), `staff_request_not_found` (404), `staff_request_not_open`
+        (409, withdrawn, declined or already turned into a shift).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ShiftRequest"
+      responses:
+        "201":
+          description: The created shift.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shift"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /staff-requests/{requestId}/decline:
+    parameters:
+      - $ref: "#/components/parameters/StaffRequestId"
+    post:
+      operationId: declineStaffRequest
+      tags: [staff-requests]
+      summary: Decline an open request, with a reason the client sees
+      description: |
+        Dispatchers and admins only.
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403), `staff_request_not_found` (404), `staff_request_not_open`
+        (409).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StaffRequestDecline"
+      responses:
+        "200":
+          description: The declined request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffRequest"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
   /worker/shifts:
     get:
       operationId: listWorkerShifts
@@ -2209,6 +2358,125 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /client/locations:
+    get:
+      operationId: listClientLocations
+      tags: [client-portal]
+      summary: The locations of the client, to request staff for
+      description: |
+        Sorted by name. A client has a handful of locations, so the list is
+        not paged. Client users only.
+
+        Error codes: `forbidden` (403).
+      responses:
+        "200":
+          description: The locations.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Location"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /client/staff-requests:
+    get:
+      operationId: listClientStaffRequests
+      tags: [client-portal]
+      summary: The staff the client has requested
+      description: |
+        Requests sent by anyone at the logged-in user's client, newest
+        first, whatever their status. Client users only.
+
+        Error codes: `forbidden` (403).
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of requests.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffRequestPage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+    post:
+      operationId: createClientStaffRequest
+      tags: [client-portal]
+      summary: Ask the agency for staff
+      description: |
+        Creates the request as `OPEN`. Client users only.
+
+        Field error codes: `required`, `invalid_length`, `out_of_range`
+        (`workerCount` below 1 or above 500), `in_past` (`startsAt` has
+        passed), `before_start` (`endsAt` is not after `startsAt`) and
+        `not_found` (`locationId` is not a location of the client).
+
+        Error codes: `validation_failed` (400, with `errors`), `forbidden`
+        (403).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StaffRequestRequest"
+      responses:
+        "201":
+          description: The created request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffRequest"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /client/staff-requests/{requestId}/withdraw:
+    parameters:
+      - $ref: "#/components/parameters/StaffRequestId"
+    post:
+      operationId: withdrawClientStaffRequest
+      tags: [client-portal]
+      summary: Withdraw an open request
+      description: |
+        Anyone at the client may withdraw any of the client's open
+        requests. Client users only.
+
+        Error codes: `forbidden` (403), `staff_request_not_found` (404, also
+        for other clients' requests), `staff_request_not_open` (409).
+      responses:
+        "200":
+          description: The withdrawn request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffRequest"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -2271,6 +2539,13 @@ components:
         format: uuid
     TemplateId:
       name: templateId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    StaffRequestId:
+      name: requestId
       in: path
       required: true
       schema:
@@ -2775,6 +3050,148 @@ components:
               description: Sorted by last and first name.
               items:
                 $ref: "#/components/schemas/ClientShiftWorker"
+
+    StaffRequestStatus:
+      type: string
+      description: |
+        `OPEN` until a dispatcher handles it, then `ACCEPTED` (turned into a
+        shift) or `DECLINED` (with a reason). `WITHDRAWN` when the client
+        took it back while it was open.
+      enum: [OPEN, ACCEPTED, DECLINED, WITHDRAWN]
+
+    StaffRequestRequest:
+      type: object
+      required: [locationId, role, startsAt, endsAt, workerCount]
+      properties:
+        locationId:
+          type: string
+          format: uuid
+          description: A location of the client.
+        role:
+          type: string
+          minLength: 1
+          maxLength: 120
+          description: What the people will do; becomes the shift's title.
+          examples: [Lagerhelfer]
+        startsAt:
+          type: string
+          format: date-time
+          description: Must not have passed.
+        endsAt:
+          type: string
+          format: date-time
+          description: Must be after `startsAt`.
+        endIsEstimate:
+          type: boolean
+          default: false
+          description: The end is approximate ("ca.").
+        workerCount:
+          type: integer
+          format: int32
+          minimum: 1
+          maximum: 500
+          description: How many people the client needs.
+        notes:
+          type: string
+          maxLength: 2000
+          description: Anything else the agency should know.
+
+    StaffRequest:
+      type: object
+      description: |
+        A client's request for staff. Clients and dispatchers get the same
+        shape; it holds nothing about pay.
+      required:
+        - id
+        - status
+        - client
+        - location
+        - role
+        - startsAt
+        - endsAt
+        - endIsEstimate
+        - workerCount
+        - notes
+        - requestedBy
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          $ref: "#/components/schemas/StaffRequestStatus"
+        client:
+          $ref: "#/components/schemas/ClientSummary"
+        location:
+          $ref: "#/components/schemas/Location"
+        role:
+          type: string
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        endIsEstimate:
+          type: boolean
+        workerCount:
+          type: integer
+          format: int32
+          minimum: 1
+        notes:
+          type: string
+          description: Empty when the client wrote nothing.
+        requestedBy:
+          type: string
+          description: Full name of the client user who sent the request.
+        createdAt:
+          type: string
+          format: date-time
+        decidedAt:
+          type: string
+          format: date-time
+          description: When it was accepted, declined or withdrawn; absent while open.
+        declineReason:
+          type: string
+          description: Why the agency declined; only when `DECLINED`.
+        shiftId:
+          type: string
+          format: uuid
+          description: |
+            The shift the request was turned into; only when `ACCEPTED`.
+            Clients get it only once the shift is published, since they
+            never see drafts.
+
+    StaffRequestPage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/StaffRequest"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+
+    StaffRequestDecline:
+      type: object
+      required: [reason]
+      properties:
+        reason:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Shown to the client.
 
     Client:
       type: object

@@ -56,7 +56,9 @@ class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/api/v1/ping", "/api/v1/signup/**", "/api/v1/auth/**", "/actuator/health")
+                        .requestMatchers(
+                                "/api/v1/ping", "/api/v1/signup/**", "/api/v1/client-setup/**", "/api/v1/auth/**",
+                                "/actuator/health")
                         .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/agency/**")
                         .hasAnyRole(Role.DISPATCHER.name(), Role.ADMIN.name())
@@ -73,6 +75,8 @@ class SecurityConfiguration {
                         .hasAnyRole(Role.DISPATCHER.name(), Role.ADMIN.name())
                         .requestMatchers("/api/v1/worker/**")
                         .hasRole(Role.WORKER.name())
+                        .requestMatchers("/api/v1/client/**")
+                        .hasRole(Role.CLIENT.name())
                         .anyRequest()
                         .authenticated())
                 .oauth2ResourceServer(resourceServer -> resourceServer

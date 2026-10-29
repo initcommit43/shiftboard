@@ -80,6 +80,11 @@ import 'package:shiftboard_api/src/model/shift_template.dart';
 import 'package:shiftboard_api/src/model/shift_template_page.dart';
 import 'package:shiftboard_api/src/model/shift_template_request.dart';
 import 'package:shiftboard_api/src/model/signup_info.dart';
+import 'package:shiftboard_api/src/model/staff_request.dart';
+import 'package:shiftboard_api/src/model/staff_request_decline.dart';
+import 'package:shiftboard_api/src/model/staff_request_page.dart';
+import 'package:shiftboard_api/src/model/staff_request_request.dart';
+import 'package:shiftboard_api/src/model/staff_request_status.dart';
 import 'package:shiftboard_api/src/model/system_event.dart';
 import 'package:shiftboard_api/src/model/token_response.dart';
 import 'package:shiftboard_api/src/model/unread_count.dart';
@@ -165,6 +170,11 @@ part 'serializers.g.dart';
   ShiftTemplatePage,
   ShiftTemplateRequest,
   SignupInfo,
+  StaffRequest,
+  StaffRequestDecline,
+  StaffRequestPage,
+  StaffRequestRequest,
+  StaffRequestStatus,
   SystemEvent,
   TokenResponse,
   UnreadCount,
@@ -196,6 +206,10 @@ Serializers serializers = (_$serializers.toBuilder()
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(Shift)]),
         () => ListBuilder<Shift>(),
+      )
+      ..addBuilderFactory(
+        const FullType(BuiltList, [FullType(StaffRequest)]),
+        () => ListBuilder<StaffRequest>(),
       )
       ..addBuilderFactory(
         const FullType(BuiltList, [FullType(FieldError)]),
