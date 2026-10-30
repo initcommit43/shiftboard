@@ -2,6 +2,7 @@ package app.shiftboard.messaging.internal;
 
 import java.math.BigDecimal;
 import java.text.NumberFormat;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -43,6 +44,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
  * Conversations between the agency and its workers: one per worker, created with its first
@@ -83,10 +85,12 @@ class MessagingService {
 
     private final ApplicationEventPublisher events;
 
+    private final ConversationStreams streams;
+
     MessagingService(
             ConversationRepository conversations, MessageRepository messages, WorkerProfileProvider workerProfiles,
             Workers workers, Shifts shifts, UserAccounts userAccounts, Assignments assignments,
-            ApplicationEventPublisher events) {
+            ApplicationEventPublisher events, ConversationStreams streams) {
         this.conversations = conversations;
         this.messages = messages;
         this.workerProfiles = workerProfiles;
@@ -95,6 +99,7 @@ class MessagingService {
         this.userAccounts = userAccounts;
         this.assignments = assignments;
         this.events = events;
+        this.streams = streams;
     }
 
     // --- the worker's side ----------------------------------------------------------------
@@ -115,7 +120,7 @@ class MessagingService {
         if (conversation.isEmpty()) {
             return new MessagePage(List.of(), page, size, 0, 0);
         }
-        messages.markRead(conversation.get().getId(), false, Instant.now());
+        markRead(conversation.get(), false);
         return page(conversation.get().getId(), page, size);
     }
 
@@ -126,12 +131,22 @@ class MessagingService {
         var now = Instant.now();
         var conversation = conversationOf(workerId, now);
         var message = messages.saveAndFlush(Message.fromWorker(conversation.getId(), body, shiftId, now));
+        messageAdded(conversation);
         events.publishEvent(new MessageSent(
                 TenantContext.require(), message.getId(), workerId, true, false, shiftId, body));
         return responses(List.of(message)).getFirst();
     }
 
+    @Transactional(readOnly = true)
+    SseEmitter workerStream(UUID accountId, Duration lifetime) {
+        return streams.openForWorker(activeWorker(accountId), lifetime);
+    }
+
     // --- the agency's side ----------------------------------------------------------------
+
+    SseEmitter inboxStream(Duration lifetime) {
+        return streams.openForStaff(TenantContext.require(), lifetime);
+    }
 
     @Transactional(readOnly = true)
     ConversationPage inbox(int page, int size) {
@@ -171,7 +186,7 @@ class MessagingService {
     @Transactional
     MessagePage conversationMessages(UUID conversationId, int page, int size) {
         var conversation = conversation(conversationId);
-        messages.markRead(conversation.getId(), true, Instant.now());
+        markRead(conversation, true);
         return page(conversation.getId(), page, size);
     }
 
@@ -182,6 +197,7 @@ class MessagingService {
         var now = Instant.now();
         var message = messages.saveAndFlush(Message.fromAgency(conversation.getId(), accountId, body, shiftId, now));
         conversation.messageAt(now);
+        messageAdded(conversation);
         events.publishEvent(new MessageSent(
                 TenantContext.require(), message.getId(), conversation.getWorkerId(), false, false, shiftId, body));
         return responses(List.of(message)).getFirst();
@@ -203,6 +219,7 @@ class MessagingService {
             var conversation = conversationOf(workerId, now);
             var message = messages.saveAndFlush(
                     Message.broadcast(conversation.getId(), accountId, body, shiftId, now));
+            messageAdded(conversation);
             events.publishEvent(new MessageSent(
                     TenantContext.require(), message.getId(), workerId, false, true, shiftId, body));
         }
@@ -225,6 +242,7 @@ class MessagingService {
         var conversation = conversationOf(workerId, now);
         messages.saveAndFlush(
                 Message.system(conversation.getId(), event, fallbackText(event, shift), shiftId, dedupKey, now));
+        messageAdded(conversation);
     }
 
     /**
@@ -241,6 +259,7 @@ class MessagingService {
         var conversation = conversationOf(workerId, now);
         messages.saveAndFlush(Message.system(
                 conversation.getId(), SystemEvent.SHIFT_CHANGED, changeText(changes, shift), shiftId, dedupKey, now));
+        messageAdded(conversation);
     }
 
     /** Such as "Die Agentur hat „Lager“ geändert. Zeit: Do., 22. Okt., 08:00 – 16:00. Stundenlohn: 17,00 €." */
@@ -304,6 +323,19 @@ class MessagingService {
     }
 
     // --- shared ---------------------------------------------------------------------------
+
+    /** Marks the other side's messages as read and tells the open streams, if any were unread. */
+    private void markRead(Conversation conversation, boolean fromWorker) {
+        if (messages.markRead(conversation.getId(), fromWorker, Instant.now()) > 0) {
+            streams.changed(conversation.getAgencyId(), conversation.getWorkerId(), conversation.getId(),
+                    ConversationStreams.Change.READ);
+        }
+    }
+
+    private void messageAdded(Conversation conversation) {
+        streams.changed(conversation.getAgencyId(), conversation.getWorkerId(), conversation.getId(),
+                ConversationStreams.Change.MESSAGE);
+    }
 
     private Conversation conversationOf(UUID workerId, Instant now) {
         conversations.createIfMissing(TenantContext.require(), workerId, now);
