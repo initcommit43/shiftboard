@@ -7,7 +7,8 @@ import '../../../core/api/api_provider.dart';
 const _pageSize = 50;
 
 /// The worker's conversation with the agency, newest message first. Loading
-/// it marks the agency's messages as read.
+/// it marks the agency's messages as read, so only a chat on screen watches
+/// it (see `ChatView`); invalidating it while none does loads nothing.
 final myMessagesProvider = FutureProvider.autoDispose<List<Message>>(
   (ref) async {
     final response = await ref

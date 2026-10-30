@@ -61,6 +61,8 @@ class _PushHandlerState extends ConsumerState<PushHandler> {
   }
 
   void _refresh(PushData data) {
+    // The messages reload only where a chat on screen holds them, so a push
+    // on another tab leaves them unread and the badge counts it.
     ref
       ..invalidate(workerShiftsProvider)
       ..invalidate(myShiftsProvider)
