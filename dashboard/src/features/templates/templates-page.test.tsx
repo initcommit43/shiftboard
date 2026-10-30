@@ -12,6 +12,7 @@ import {
   zentrallager,
 } from '@/test/fake-api'
 import { renderApp } from '@/test/render'
+import { enter, typingUser } from '@/test/user'
 
 describe('templates page', () => {
   let api: ReturnType<typeof installFakeApi>
@@ -90,7 +91,7 @@ describe('templates page', () => {
   describe('editing', () => {
     it('changes every field, the name included, and goes back to the list', async () => {
       renderApp('/templates')
-      const user = userEvent.setup()
+      const user = typingUser()
 
       await user.click(
         await screen.findByRole('link', { name: 'Vorlage „Lager Frühschicht“ bearbeiten' }),
@@ -104,11 +105,11 @@ describe('templates page', () => {
       expect(screen.getByLabelText('Ende')).toHaveValue('14:00')
 
       await user.clear(name)
-      await user.type(name, 'Lager Spätschicht')
+      await enter(user, name, 'Lager Spätschicht')
       await user.clear(screen.getByLabelText('Beginn'))
-      await user.type(screen.getByLabelText('Beginn'), '22:00')
+      await enter(user, screen.getByLabelText('Beginn'), '22:00')
       await user.clear(screen.getByLabelText('Ende'))
-      await user.type(screen.getByLabelText('Ende'), '06:00')
+      await enter(user, screen.getByLabelText('Ende'), '06:00')
       expect(screen.getByText('Endet am Folgetag.')).toBeInTheDocument()
       await user.clear(screen.getByLabelText('Plätze'))
       await user.type(screen.getByLabelText('Plätze'), '4')
