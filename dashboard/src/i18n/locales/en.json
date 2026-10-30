@@ -36,7 +36,8 @@
   "roles": {
     "ADMIN": "Admin",
     "DISPATCHER": "Dispatcher",
-    "WORKER": "Worker"
+    "WORKER": "Worker",
+    "CLIENT": "Client access"
   },
   "login": {
     "tagline": "Every shift, covered.",

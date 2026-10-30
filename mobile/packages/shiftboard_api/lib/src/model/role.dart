@@ -9,6 +9,7 @@ import 'package:built_value/serializer.dart';
 
 part 'role.g.dart';
 
+/// `CLIENT` is a user at one of the agency's clients (ADR 0032).
 class Role extends EnumClass {
   @BuiltValueEnumConst(wireName: r'ADMIN')
   static const Role ADMIN = _$ADMIN;
@@ -16,6 +17,8 @@ class Role extends EnumClass {
   static const Role DISPATCHER = _$DISPATCHER;
   @BuiltValueEnumConst(wireName: r'WORKER')
   static const Role WORKER = _$WORKER;
+  @BuiltValueEnumConst(wireName: r'CLIENT')
+  static const Role CLIENT = _$CLIENT;
   @BuiltValueEnumConst(wireName: r'unknown_default_open_api', fallback: true)
   static const Role unknownDefaultOpenApi = _$unknownDefaultOpenApi;
 

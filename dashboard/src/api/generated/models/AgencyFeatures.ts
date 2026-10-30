@@ -32,6 +32,13 @@ export interface AgencyFeatures {
      * 
      */
     checkIn?: boolean;
+    /**
+     * The staff of the agency's clients log in to see their shifts and
+     * who is coming (ADR 0032). Off by default. Always present in
+     * responses; absent in a request, it stays as it is.
+     * 
+     */
+    clientPortal?: boolean;
 }
 
 /**
@@ -54,6 +61,7 @@ export function AgencyFeaturesFromJSONTyped(json: any, ignoreDiscriminator: bool
         
         'contactButton': json['contactButton'],
         'checkIn': json['checkIn'] == null ? undefined : json['checkIn'],
+        'clientPortal': json['clientPortal'] == null ? undefined : json['clientPortal'],
     };
 }
 
@@ -70,6 +78,7 @@ export function AgencyFeaturesToJSONTyped(value?: AgencyFeatures | null, ignoreD
         
         'contactButton': value['contactButton'],
         'checkIn': value['checkIn'],
+        'clientPortal': value['clientPortal'],
     };
 }
 

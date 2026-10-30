@@ -36,7 +36,8 @@
   "roles": {
     "ADMIN": "Admin",
     "DISPATCHER": "Disponent:in",
-    "WORKER": "Mitarbeiter:in"
+    "WORKER": "Mitarbeiter:in",
+    "CLIENT": "Kundenzugang"
   },
   "login": {
     "tagline": "Jede Schicht besetzt.",

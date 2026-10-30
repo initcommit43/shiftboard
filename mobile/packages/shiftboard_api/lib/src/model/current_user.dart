@@ -3,6 +3,7 @@
 //
 
 // ignore_for_file: unused_element
+import 'package:shiftboard_api/src/model/client_summary.dart';
 import 'package:shiftboard_api/src/model/worker_profile.dart';
 import 'package:shiftboard_api/src/model/agency_summary.dart';
 import 'package:shiftboard_api/src/model/role.dart';
@@ -19,6 +20,7 @@ part 'current_user.g.dart';
 /// * [role]
 /// * [agency]
 /// * [worker] - Present when the role is `WORKER`.
+/// * [client] - Present when the role is `CLIENT`; the client the user belongs to.
 @BuiltValue()
 abstract class CurrentUser implements Built<CurrentUser, CurrentUserBuilder> {
   @BuiltValueField(wireName: r'id')
@@ -29,7 +31,7 @@ abstract class CurrentUser implements Built<CurrentUser, CurrentUserBuilder> {
 
   @BuiltValueField(wireName: r'role')
   Role get role;
-  // enum roleEnum {  ADMIN,  DISPATCHER,  WORKER,  };
+  // enum roleEnum {  ADMIN,  DISPATCHER,  WORKER,  CLIENT,  };
 
   @BuiltValueField(wireName: r'agency')
   AgencySummary get agency;
@@ -37,6 +39,10 @@ abstract class CurrentUser implements Built<CurrentUser, CurrentUserBuilder> {
   /// Present when the role is `WORKER`.
   @BuiltValueField(wireName: r'worker')
   WorkerProfile? get worker;
+
+  /// Present when the role is `CLIENT`; the client the user belongs to.
+  @BuiltValueField(wireName: r'client')
+  ClientSummary? get client;
 
   CurrentUser._();
 
@@ -86,6 +92,13 @@ class _$CurrentUserSerializer implements PrimitiveSerializer<CurrentUser> {
       yield serializers.serialize(
         object.worker,
         specifiedType: const FullType(WorkerProfile),
+      );
+    }
+    if (object.client != null) {
+      yield r'client';
+      yield serializers.serialize(
+        object.client,
+        specifiedType: const FullType(ClientSummary),
       );
     }
   }
@@ -148,6 +161,14 @@ class _$CurrentUserSerializer implements PrimitiveSerializer<CurrentUser> {
           ) as WorkerProfile?;
           if (valueDes == null) continue;
           result.worker.replace(valueDes);
+          break;
+        case r'client':
+          final valueDes = serializers.deserialize(
+            value,
+            specifiedType: const FullType.nullable(ClientSummary),
+          ) as ClientSummary?;
+          if (valueDes == null) continue;
+          result.client.replace(valueDes);
           break;
         default:
           unhandled.add(key);

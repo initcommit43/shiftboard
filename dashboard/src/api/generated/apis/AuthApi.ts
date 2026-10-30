@@ -142,7 +142,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * Workers log in to the worker app, dispatchers and admins to the dashboard. The request names the client it comes from; a role on the wrong client is rejected.  Error codes: `validation_failed` (400), `invalid_credentials` (401, the same for an unknown email and a wrong password), `wrong_client` (403), `too_many_attempts` (429). 
+     * Workers log in to the worker app; dispatchers, admins and client users to the dashboard. The request names the client it comes from; a role on the wrong client is rejected. Client users can log in only while the agency has the client portal switched on and their access is active.  Error codes: `validation_failed` (400), `invalid_credentials` (401, the same for an unknown email and a wrong password), `wrong_client` (403), `client_portal_off` (403), `account_deactivated` (403), `too_many_attempts` (429). 
      * Log in with email and password
      */
     async loginRaw(requestParameters: LoginOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponse>> {
@@ -153,7 +153,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * Workers log in to the worker app, dispatchers and admins to the dashboard. The request names the client it comes from; a role on the wrong client is rejected.  Error codes: `validation_failed` (400), `invalid_credentials` (401, the same for an unknown email and a wrong password), `wrong_client` (403), `too_many_attempts` (429). 
+     * Workers log in to the worker app; dispatchers, admins and client users to the dashboard. The request names the client it comes from; a role on the wrong client is rejected. Client users can log in only while the agency has the client portal switched on and their access is active.  Error codes: `validation_failed` (400), `invalid_credentials` (401, the same for an unknown email and a wrong password), `wrong_client` (403), `client_portal_off` (403), `account_deactivated` (403), `too_many_attempts` (429). 
      * Log in with email and password
      */
     async login(requestParameters: LoginOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponse> {
@@ -239,7 +239,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * The refresh token is single use; the response contains its replacement.  Error codes: `invalid_refresh_token` (401, unknown, expired, revoked or already used). 
+     * The refresh token is single use; the response contains its replacement. Deactivating a client user revokes their refresh tokens.  Error codes: `invalid_refresh_token` (401, unknown, expired, revoked or already used), `client_portal_off` (403, a client user while the agency has the portal switched off). 
      * Exchange a refresh token for a new token pair
      */
     async refreshTokenRaw(requestParameters: RefreshTokenOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponse>> {
@@ -250,7 +250,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * The refresh token is single use; the response contains its replacement.  Error codes: `invalid_refresh_token` (401, unknown, expired, revoked or already used). 
+     * The refresh token is single use; the response contains its replacement. Deactivating a client user revokes their refresh tokens.  Error codes: `invalid_refresh_token` (401, unknown, expired, revoked or already used), `client_portal_off` (403, a client user while the agency has the portal switched off). 
      * Exchange a refresh token for a new token pair
      */
     async refreshToken(requestParameters: RefreshTokenOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponse> {

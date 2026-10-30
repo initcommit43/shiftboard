@@ -54,6 +54,10 @@ tags:
     description: Check-in and check-out, and the hours the agency approves for payroll
   - name: waitlist
     description: The line of workers waiting for a spot on a full shift
+  - name: client-users
+    description: Portal access for the staff of the agency's clients (ADR 0032)
+  - name: client-portal
+    description: What a client's staff see of their shifts in the portal (ADR 0032)
 security:
   - bearerAuth: []
 paths:
@@ -136,19 +140,84 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /client-setup/{setupCode}:
+    parameters:
+      - $ref: "#/components/parameters/SetupCode"
+    get:
+      operationId: getClientSetupInfo
+      tags: [client-users]
+      summary: Look up the invitation behind a setup link
+      description: |
+        What the set-password form shows: who is invited, for which client
+        and agency. Needs no authentication.
+
+        Error codes: `setup_code_invalid` (404, unknown, already used or
+        expired), `client_portal_off` (403).
+      security: []
+      responses:
+        "200":
+          description: The invitation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientSetupInfo"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+    post:
+      operationId: completeClientSetup
+      tags: [client-users]
+      summary: Set a password and log in to the client portal
+      description: |
+        Uses up the setup code, sets the password of the client user and logs
+        them in. Needs no authentication.
+
+        Field error codes: `required`, `invalid_length` (`password`).
+
+        Error codes: `validation_failed` (400, with `errors`),
+        `client_portal_off` (403), `setup_code_invalid` (404).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientSetupRequest"
+      responses:
+        "200":
+          description: The password is set; the client user is logged in.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
   /auth/login:
     post:
       operationId: login
       tags: [auth]
       summary: Log in with email and password
       description: |
-        Workers log in to the worker app, dispatchers and admins to the
-        dashboard. The request names the client it comes from; a role on the
-        wrong client is rejected.
+        Workers log in to the worker app; dispatchers, admins and client users
+        to the dashboard. The request names the client it comes from; a role
+        on the wrong client is rejected. Client users can log in only while
+        the agency has the client portal switched on and their access is
+        active.
 
         Error codes: `validation_failed` (400), `invalid_credentials` (401,
         the same for an unknown email and a wrong password), `wrong_client`
-        (403), `too_many_attempts` (429).
+        (403), `client_portal_off` (403), `account_deactivated` (403),
+        `too_many_attempts` (429).
       security: []
       requestBody:
         required: true
@@ -181,10 +250,11 @@ paths:
       summary: Exchange a refresh token for a new token pair
       description: |
         The refresh token is single use; the response contains its
-        replacement.
+        replacement. Deactivating a client user revokes their refresh tokens.
 
         Error codes: `invalid_refresh_token` (401, unknown, expired, revoked or
-        already used).
+        already used), `client_portal_off` (403, a client user while the
+        agency has the portal switched off).
       security: []
       requestBody:
         required: true
@@ -361,6 +431,140 @@ paths:
         "401":
           $ref: "#/components/responses/Problem"
         "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /clients/{clientId}/users:
+    parameters:
+      - $ref: "#/components/parameters/ClientId"
+    get:
+      operationId: listClientUsers
+      tags: [client-users]
+      summary: The portal users of a client
+      description: |
+        Sorted by last and first name. Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `client_not_found` (404).
+      responses:
+        "200":
+          description: The client's users.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ClientUser"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+    post:
+      operationId: inviteClientUser
+      tags: [client-users]
+      summary: Give someone at the client access to the portal
+      description: |
+        Creates a client user with status `INVITED` and returns a one-time
+        setup code for the dashboard to turn into a link
+        (`/client-setup/{setupCode}`). The code works once and expires after
+        7 days. Only while the client portal is switched on. Dispatchers and
+        admins only.
+
+        Field error codes: `required`, `invalid_length` (`firstName`,
+        `lastName`), `invalid_format` (`email`).
+
+        Error codes: `validation_failed` (400, with `errors`),
+        `forbidden` (403), `client_portal_off` (403), `client_not_found`
+        (404), `email_already_registered` (409).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClientUserRequest"
+      responses:
+        "201":
+          description: The new client user and their setup code.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientUserInvitation"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /clients/{clientId}/users/{userId}/setup-link:
+    parameters:
+      - $ref: "#/components/parameters/ClientId"
+      - $ref: "#/components/parameters/ClientUserId"
+    post:
+      operationId: renewClientUserSetupLink
+      tags: [client-users]
+      summary: Create a new setup code for a user who hasn't set a password
+      description: |
+        The earlier code stops working. Only while the client portal is
+        switched on. Dispatchers and admins only.
+
+        Error codes: `forbidden` (403), `client_portal_off` (403),
+        `client_user_not_found` (404), `client_user_not_invited` (409, the
+        user has set a password or is deactivated).
+      responses:
+        "200":
+          description: The user and their new setup code.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientUserInvitation"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /clients/{clientId}/users/{userId}/deactivate:
+    parameters:
+      - $ref: "#/components/parameters/ClientId"
+      - $ref: "#/components/parameters/ClientUserId"
+    post:
+      operationId: deactivateClientUser
+      tags: [client-users]
+      summary: End a client user's access
+      description: |
+        The user can no longer log in, their sessions end and an open setup
+        code stops working. Deactivating twice changes nothing. Dispatchers
+        and admins only.
+
+        Error codes: `forbidden` (403), `client_user_not_found` (404).
+      responses:
+        "200":
+          description: The deactivated user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientUser"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
           $ref: "#/components/responses/Problem"
         default:
           $ref: "#/components/responses/Problem"
@@ -1942,6 +2146,69 @@ paths:
         default:
           $ref: "#/components/responses/Problem"
 
+  /client/shifts:
+    get:
+      operationId: listClientShifts
+      tags: [client-portal]
+      summary: The client's shifts
+      description: |
+        Shifts the agency staffs for the logged-in user's client. Drafts are
+        left out; cancelled shifts are included. `UPCOMING` lists shifts
+        that haven't ended, earliest start first; `PAST` lists ended ones,
+        latest start first. Client users only.
+
+        Error codes: `forbidden` (403).
+      parameters:
+        - name: period
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ClientShiftPeriod"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Size"
+      responses:
+        "200":
+          description: One page of shifts.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientShiftPage"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
+  /client/shifts/{shiftId}:
+    parameters:
+      - $ref: "#/components/parameters/ShiftId"
+    get:
+      operationId: getClientShift
+      tags: [client-portal]
+      summary: One shift of the client, with who is coming
+      description: |
+        Lists the first and last names of the confirmed workers, nothing else
+        about them. Client users only.
+
+        Error codes: `forbidden` (403), `shift_not_found` (404, also for
+        drafts and other clients' shifts).
+      responses:
+        "200":
+          description: The shift.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClientShiftDetail"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        default:
+          $ref: "#/components/responses/Problem"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -1965,6 +2232,29 @@ components:
       schema:
         type: string
         format: uuid
+    ClientId:
+      name: clientId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ClientUserId:
+      name: userId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    SetupCode:
+      name: setupCode
+      in: path
+      required: true
+      description: The code from a client user's setup link.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 64
     ShiftId:
       name: shiftId
       in: path
@@ -2129,7 +2419,9 @@ components:
 
     Role:
       type: string
-      enum: [ADMIN, DISPATCHER, WORKER]
+      description: |
+        `CLIENT` is a user at one of the agency's clients (ADR 0032).
+      enum: [ADMIN, DISPATCHER, WORKER, CLIENT]
 
     WorkerStatus:
       type: string
@@ -2166,6 +2458,12 @@ components:
             Workers check in and out of their shifts in the app. Off by
             default. Always present in responses; absent in a request, it
             stays as it is.
+        clientPortal:
+          type: boolean
+          description: |
+            The staff of the agency's clients log in to see their shifts and
+            who is coming (ADR 0032). Off by default. Always present in
+            responses; absent in a request, it stays as it is.
 
     WorkerProfile:
       type: object
@@ -2198,6 +2496,9 @@ components:
         worker:
           description: Present when the role is `WORKER`.
           $ref: "#/components/schemas/WorkerProfile"
+        client:
+          description: Present when the role is `CLIENT`; the client the user belongs to.
+          $ref: "#/components/schemas/ClientSummary"
 
     Worker:
       type: object
@@ -2297,6 +2598,183 @@ components:
         name:
           type: string
           examples: [Nordlicht Logistik]
+
+    ClientUserStatus:
+      type: string
+      description: |
+        `INVITED` until the user sets a password with their setup link,
+        `ACTIVE` afterwards, `DEACTIVATED` once the agency ended their
+        access.
+      enum: [INVITED, ACTIVE, DEACTIVATED]
+
+    ClientUser:
+      type: object
+      description: Someone at a client with access to the portal.
+      required: [id, firstName, lastName, email, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+          format: email
+        status:
+          $ref: "#/components/schemas/ClientUserStatus"
+
+    ClientUserRequest:
+      type: object
+      required: [firstName, lastName, email]
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        lastName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        email:
+          type: string
+          format: email
+          maxLength: 254
+
+    ClientUserInvitation:
+      type: object
+      description: |
+        A client user with a fresh setup code. The code is shown only here;
+        the backend keeps a hash of it.
+      required: [user, setupCode, expiresAt]
+      properties:
+        user:
+          $ref: "#/components/schemas/ClientUser"
+        setupCode:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    ClientSetupInfo:
+      type: object
+      required: [firstName, email, clientName, agencyName]
+      properties:
+        firstName:
+          type: string
+        email:
+          type: string
+          format: email
+        clientName:
+          type: string
+        agencyName:
+          type: string
+
+    ClientSetupRequest:
+      type: object
+      required: [password]
+      properties:
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 128
+
+    ClientShiftPeriod:
+      type: string
+      description: Shifts that haven't ended (`UPCOMING`, the default) or ended ones (`PAST`).
+      enum: [UPCOMING, PAST]
+
+    ClientShift:
+      type: object
+      description: |
+        A shift as the client sees it: no hourly rate, no requests or
+        waitlist (ADR 0032).
+      required:
+        - id
+        - title
+        - status
+        - location
+        - startsAt
+        - endsAt
+        - endIsEstimate
+        - slots
+        - confirmedCount
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        status:
+          description: Never `DRAFT`.
+          $ref: "#/components/schemas/ShiftStatus"
+        location:
+          $ref: "#/components/schemas/Location"
+        startsAt:
+          type: string
+          format: date-time
+        endsAt:
+          type: string
+          format: date-time
+        endIsEstimate:
+          type: boolean
+        slots:
+          type: integer
+          format: int32
+          minimum: 1
+        confirmedCount:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Workers confirmed for the shift; pending requests don't count.
+
+    ClientShiftPage:
+      type: object
+      required: [content, page, size, totalElements, totalPages]
+      properties:
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ClientShift"
+        page:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+
+    ClientShiftWorker:
+      type: object
+      description: A confirmed worker, by name only.
+      required: [firstName, lastName]
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+
+    ClientShiftDetail:
+      allOf:
+        - $ref: "#/components/schemas/ClientShift"
+        - type: object
+          required: [description, confirmedWorkers]
+          properties:
+            description:
+              type: string
+              description: What the agency wrote about the shift; empty when it wrote nothing.
+            confirmedWorkers:
+              type: array
+              description: Sorted by last and first name.
+              items:
+                $ref: "#/components/schemas/ClientShiftWorker"
 
     Client:
       type: object

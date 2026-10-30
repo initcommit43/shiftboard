@@ -7,6 +7,7 @@ part of 'serializers.dart';
 // **************************************************************************
 
 Serializers _$serializers = (Serializers().toBuilder()
+      ..add($ClientShift.serializer)
       ..add(AgencyFeatures.serializer)
       ..add(AgencySettings.serializer)
       ..add(AgencySummary.serializer)
@@ -18,8 +19,18 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..add(CancelledBy.serializer)
       ..add(Client.serializer)
       ..add(ClientPage.serializer)
+      ..add(ClientSetupInfo.serializer)
+      ..add(ClientSetupRequest.serializer)
+      ..add(ClientShiftDetail.serializer)
+      ..add(ClientShiftPage.serializer)
+      ..add(ClientShiftPeriod.serializer)
+      ..add(ClientShiftWorker.serializer)
       ..add(ClientSummary.serializer)
       ..add(ClientType.serializer)
+      ..add(ClientUser.serializer)
+      ..add(ClientUserInvitation.serializer)
+      ..add(ClientUserRequest.serializer)
+      ..add(ClientUserStatus.serializer)
       ..add(Conversation.serializer)
       ..add(ConversationChange.serializer)
       ..add(ConversationEvent.serializer)
@@ -79,6 +90,12 @@ Serializers _$serializers = (Serializers().toBuilder()
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(Client)]),
           () => ListBuilder<Client>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(ClientShift)]),
+          () => ListBuilder<ClientShift>())
+      ..addBuilderFactory(
+          const FullType(BuiltList, const [const FullType(ClientShiftWorker)]),
+          () => ListBuilder<ClientShiftWorker>())
       ..addBuilderFactory(
           const FullType(BuiltList, const [const FullType(Conversation)]),
           () => ListBuilder<Conversation>())

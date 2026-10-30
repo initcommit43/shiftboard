@@ -90,6 +90,14 @@ Class | Method | HTTP request | Description
 [*AuthApi*](doc/AuthApi.md) | [**login**](doc/AuthApi.md#login) | **POST** /auth/login | Log in with email and password
 [*AuthApi*](doc/AuthApi.md) | [**logout**](doc/AuthApi.md#logout) | **POST** /auth/logout | End the session on this device
 [*AuthApi*](doc/AuthApi.md) | [**refreshToken**](doc/AuthApi.md#refreshtoken) | **POST** /auth/refresh | Exchange a refresh token for a new token pair
+[*ClientPortalApi*](doc/ClientPortalApi.md) | [**getClientShift**](doc/ClientPortalApi.md#getclientshift) | **GET** /client/shifts/{shiftId} | One shift of the client, with who is coming
+[*ClientPortalApi*](doc/ClientPortalApi.md) | [**listClientShifts**](doc/ClientPortalApi.md#listclientshifts) | **GET** /client/shifts | The client&#39;s shifts
+[*ClientUsersApi*](doc/ClientUsersApi.md) | [**completeClientSetup**](doc/ClientUsersApi.md#completeclientsetup) | **POST** /client-setup/{setupCode} | Set a password and log in to the client portal
+[*ClientUsersApi*](doc/ClientUsersApi.md) | [**deactivateClientUser**](doc/ClientUsersApi.md#deactivateclientuser) | **POST** /clients/{clientId}/users/{userId}/deactivate | End a client user&#39;s access
+[*ClientUsersApi*](doc/ClientUsersApi.md) | [**getClientSetupInfo**](doc/ClientUsersApi.md#getclientsetupinfo) | **GET** /client-setup/{setupCode} | Look up the invitation behind a setup link
+[*ClientUsersApi*](doc/ClientUsersApi.md) | [**inviteClientUser**](doc/ClientUsersApi.md#inviteclientuser) | **POST** /clients/{clientId}/users | Give someone at the client access to the portal
+[*ClientUsersApi*](doc/ClientUsersApi.md) | [**listClientUsers**](doc/ClientUsersApi.md#listclientusers) | **GET** /clients/{clientId}/users | The portal users of a client
+[*ClientUsersApi*](doc/ClientUsersApi.md) | [**renewClientUserSetupLink**](doc/ClientUsersApi.md#renewclientusersetuplink) | **POST** /clients/{clientId}/users/{userId}/setup-link | Create a new setup code for a user who hasn&#39;t set a password
 [*ClientsApi*](doc/ClientsApi.md) | [**listClients**](doc/ClientsApi.md#listclients) | **GET** /clients | List the agency&#39;s clients with their locations
 [*ClientsApi*](doc/ClientsApi.md) | [**listQualifications**](doc/ClientsApi.md#listqualifications) | **GET** /qualifications | List the agency&#39;s qualifications
 [*HoursApi*](doc/HoursApi.md) | [**approveHours**](doc/HoursApi.md#approvehours) | **PUT** /shifts/{shiftId}/assignments/{assignmentId}/hours | Approve the hours a worker worked
@@ -154,8 +162,19 @@ Class | Method | HTTP request | Description
  - [CancelledBy](doc/CancelledBy.md)
  - [Client](doc/Client.md)
  - [ClientPage](doc/ClientPage.md)
+ - [ClientSetupInfo](doc/ClientSetupInfo.md)
+ - [ClientSetupRequest](doc/ClientSetupRequest.md)
+ - [ClientShift](doc/ClientShift.md)
+ - [ClientShiftDetail](doc/ClientShiftDetail.md)
+ - [ClientShiftPage](doc/ClientShiftPage.md)
+ - [ClientShiftPeriod](doc/ClientShiftPeriod.md)
+ - [ClientShiftWorker](doc/ClientShiftWorker.md)
  - [ClientSummary](doc/ClientSummary.md)
  - [ClientType](doc/ClientType.md)
+ - [ClientUser](doc/ClientUser.md)
+ - [ClientUserInvitation](doc/ClientUserInvitation.md)
+ - [ClientUserRequest](doc/ClientUserRequest.md)
+ - [ClientUserStatus](doc/ClientUserStatus.md)
  - [Conversation](doc/Conversation.md)
  - [ConversationChange](doc/ConversationChange.md)
  - [ConversationEvent](doc/ConversationEvent.md)

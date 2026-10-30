@@ -102,7 +102,7 @@ class AuthApi {
   }
 
   /// Log in with email and password
-  /// Workers log in to the worker app, dispatchers and admins to the dashboard. The request names the client it comes from; a role on the wrong client is rejected.  Error codes: &#x60;validation_failed&#x60; (400), &#x60;invalid_credentials&#x60; (401, the same for an unknown email and a wrong password), &#x60;wrong_client&#x60; (403), &#x60;too_many_attempts&#x60; (429).
+  /// Workers log in to the worker app; dispatchers, admins and client users to the dashboard. The request names the client it comes from; a role on the wrong client is rejected. Client users can log in only while the agency has the client portal switched on and their access is active.  Error codes: &#x60;validation_failed&#x60; (400), &#x60;invalid_credentials&#x60; (401, the same for an unknown email and a wrong password), &#x60;wrong_client&#x60; (403), &#x60;client_portal_off&#x60; (403), &#x60;account_deactivated&#x60; (403), &#x60;too_many_attempts&#x60; (429).
   ///
   /// Parameters:
   /// * [loginRequest]
@@ -264,7 +264,7 @@ class AuthApi {
   }
 
   /// Exchange a refresh token for a new token pair
-  /// The refresh token is single use; the response contains its replacement.  Error codes: &#x60;invalid_refresh_token&#x60; (401, unknown, expired, revoked or already used).
+  /// The refresh token is single use; the response contains its replacement. Deactivating a client user revokes their refresh tokens.  Error codes: &#x60;invalid_refresh_token&#x60; (401, unknown, expired, revoked or already used), &#x60;client_portal_off&#x60; (403, a client user while the agency has the portal switched off).
   ///
   /// Parameters:
   /// * [refreshTokenRequest]

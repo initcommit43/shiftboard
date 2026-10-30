@@ -17,6 +17,8 @@ class _$CurrentUser extends CurrentUser {
   final AgencySummary agency;
   @override
   final WorkerProfile? worker;
+  @override
+  final ClientSummary? client;
 
   factory _$CurrentUser([void Function(CurrentUserBuilder)? updates]) =>
       (CurrentUserBuilder()..update(updates))._build();
@@ -26,7 +28,8 @@ class _$CurrentUser extends CurrentUser {
       required this.email,
       required this.role,
       required this.agency,
-      this.worker})
+      this.worker,
+      this.client})
       : super._();
   @override
   CurrentUser rebuild(void Function(CurrentUserBuilder) updates) =>
@@ -43,7 +46,8 @@ class _$CurrentUser extends CurrentUser {
         email == other.email &&
         role == other.role &&
         agency == other.agency &&
-        worker == other.worker;
+        worker == other.worker &&
+        client == other.client;
   }
 
   @override
@@ -54,6 +58,7 @@ class _$CurrentUser extends CurrentUser {
     _$hash = $jc(_$hash, role.hashCode);
     _$hash = $jc(_$hash, agency.hashCode);
     _$hash = $jc(_$hash, worker.hashCode);
+    _$hash = $jc(_$hash, client.hashCode);
     _$hash = $jf(_$hash);
     return _$hash;
   }
@@ -65,7 +70,8 @@ class _$CurrentUser extends CurrentUser {
           ..add('email', email)
           ..add('role', role)
           ..add('agency', agency)
-          ..add('worker', worker))
+          ..add('worker', worker)
+          ..add('client', client))
         .toString();
   }
 }
@@ -93,6 +99,10 @@ class CurrentUserBuilder implements Builder<CurrentUser, CurrentUserBuilder> {
   WorkerProfileBuilder get worker => _$this._worker ??= WorkerProfileBuilder();
   set worker(WorkerProfileBuilder? worker) => _$this._worker = worker;
 
+  ClientSummaryBuilder? _client;
+  ClientSummaryBuilder get client => _$this._client ??= ClientSummaryBuilder();
+  set client(ClientSummaryBuilder? client) => _$this._client = client;
+
   CurrentUserBuilder() {
     CurrentUser._defaults(this);
   }
@@ -105,6 +115,7 @@ class CurrentUserBuilder implements Builder<CurrentUser, CurrentUserBuilder> {
       _role = $v.role;
       _agency = $v.agency.toBuilder();
       _worker = $v.worker?.toBuilder();
+      _client = $v.client?.toBuilder();
       _$v = null;
     }
     return this;
@@ -135,6 +146,7 @@ class CurrentUserBuilder implements Builder<CurrentUser, CurrentUserBuilder> {
                 role, r'CurrentUser', 'role'),
             agency: agency.build(),
             worker: _worker?.build(),
+            client: _client?.build(),
           );
     } catch (_) {
       late String _$failedField;
@@ -143,6 +155,8 @@ class CurrentUserBuilder implements Builder<CurrentUser, CurrentUserBuilder> {
         agency.build();
         _$failedField = 'worker';
         _worker?.build();
+        _$failedField = 'client';
+        _client?.build();
       } catch (e) {
         throw BuiltValueNestedFieldError(
             r'CurrentUser', _$failedField, e.toString());
