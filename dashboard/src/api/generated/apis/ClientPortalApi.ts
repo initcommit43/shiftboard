@@ -29,10 +29,37 @@ import {
     ClientShiftPeriodToJSON,
 } from '../models/ClientShiftPeriod';
 import {
+    type Location,
+    LocationFromJSON,
+    LocationToJSON,
+} from '../models/Location';
+import {
     type Problem,
     ProblemFromJSON,
     ProblemToJSON,
 } from '../models/Problem';
+import {
+    type StaffRequest,
+    StaffRequestFromJSON,
+    StaffRequestToJSON,
+} from '../models/StaffRequest';
+import {
+    type StaffRequestPage,
+    StaffRequestPageFromJSON,
+    StaffRequestPageToJSON,
+} from '../models/StaffRequestPage';
+import {
+    type StaffRequestRequest,
+    StaffRequestRequestFromJSON,
+    StaffRequestRequestToJSON,
+} from '../models/StaffRequestRequest';
+
+export interface CreateClientStaffRequestRequest {
+    /**
+     * 
+     */
+    staffRequestRequest: StaffRequestRequest;
+}
 
 export interface GetClientShiftRequest {
     /**
@@ -56,10 +83,85 @@ export interface ListClientShiftsRequest {
     size?: number;
 }
 
+export interface ListClientStaffRequestsRequest {
+    /**
+     * Page number, starting at 0.
+     */
+    page?: number;
+    /**
+     * Page size.
+     */
+    size?: number;
+}
+
+export interface WithdrawClientStaffRequestRequest {
+    /**
+     * 
+     */
+    requestId: string;
+}
+
 /**
  * 
  */
 export class ClientPortalApi extends runtime.BaseAPI {
+
+    /**
+     * Creates request options for createClientStaffRequest without sending the request
+     */
+    async createClientStaffRequestRequestOpts(requestParameters: CreateClientStaffRequestRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['staffRequestRequest'] == null) {
+            throw new runtime.RequiredError(
+                'staffRequestRequest',
+                'Required parameter "staffRequestRequest" was null or undefined when calling createClientStaffRequest().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/client/staff-requests`;
+
+        return {
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: StaffRequestRequestToJSON(requestParameters['staffRequestRequest']),
+        };
+    }
+
+    /**
+     * Creates the request as `OPEN`. Client users only.  Field error codes: `required`, `invalid_length`, `out_of_range` (`workerCount` below 1 or above 500), `in_past` (`startsAt` has passed), `before_start` (`endsAt` is not after `startsAt`) and `not_found` (`locationId` is not a location of the client).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403). 
+     * Ask the agency for staff
+     */
+    async createClientStaffRequestRaw(requestParameters: CreateClientStaffRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StaffRequest>> {
+        const requestOptions = await this.createClientStaffRequestRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => StaffRequestFromJSON(jsonValue));
+    }
+
+    /**
+     * Creates the request as `OPEN`. Client users only.  Field error codes: `required`, `invalid_length`, `out_of_range` (`workerCount` below 1 or above 500), `in_past` (`startsAt` has passed), `before_start` (`endsAt` is not after `startsAt`) and `not_found` (`locationId` is not a location of the client).  Error codes: `validation_failed` (400, with `errors`), `forbidden` (403). 
+     * Ask the agency for staff
+     */
+    async createClientStaffRequest(requestParameters: CreateClientStaffRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StaffRequest> {
+        const response = await this.createClientStaffRequestRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * Creates request options for getClientShift without sending the request
@@ -113,6 +215,53 @@ export class ClientPortalApi extends runtime.BaseAPI {
      */
     async getClientShift(requestParameters: GetClientShiftRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClientShiftDetail> {
         const response = await this.getClientShiftRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for listClientLocations without sending the request
+     */
+    async listClientLocationsRequestOpts(): Promise<runtime.RequestOpts> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/client/locations`;
+
+        return {
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Sorted by name. A client has a handful of locations, so the list is not paged. Client users only.  Error codes: `forbidden` (403). 
+     * The locations of the client, to request staff for
+     */
+    async listClientLocationsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<Array<Location>>> {
+        const requestOptions = await this.listClientLocationsRequestOpts();
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => jsonValue.map(LocationFromJSON));
+    }
+
+    /**
+     * Sorted by name. A client has a handful of locations, so the list is not paged. Client users only.  Error codes: `forbidden` (403). 
+     * The locations of the client, to request staff for
+     */
+    async listClientLocations(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<Array<Location>> {
+        const response = await this.listClientLocationsRaw(initOverrides);
         return await response.value();
     }
 
@@ -172,6 +321,116 @@ export class ClientPortalApi extends runtime.BaseAPI {
      */
     async listClientShifts(requestParameters: ListClientShiftsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClientShiftPage> {
         const response = await this.listClientShiftsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for listClientStaffRequests without sending the request
+     */
+    async listClientStaffRequestsRequestOpts(requestParameters: ListClientStaffRequestsRequest): Promise<runtime.RequestOpts> {
+        const queryParameters: any = {};
+
+        if (requestParameters['page'] != null) {
+            queryParameters['page'] = requestParameters['page'];
+        }
+
+        if (requestParameters['size'] != null) {
+            queryParameters['size'] = requestParameters['size'];
+        }
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/client/staff-requests`;
+
+        return {
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Requests sent by anyone at the logged-in user\'s client, newest first, whatever their status. Client users only.  Error codes: `forbidden` (403). 
+     * The staff the client has requested
+     */
+    async listClientStaffRequestsRaw(requestParameters: ListClientStaffRequestsRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StaffRequestPage>> {
+        const requestOptions = await this.listClientStaffRequestsRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => StaffRequestPageFromJSON(jsonValue));
+    }
+
+    /**
+     * Requests sent by anyone at the logged-in user\'s client, newest first, whatever their status. Client users only.  Error codes: `forbidden` (403). 
+     * The staff the client has requested
+     */
+    async listClientStaffRequests(requestParameters: ListClientStaffRequestsRequest = {}, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StaffRequestPage> {
+        const response = await this.listClientStaffRequestsRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for withdrawClientStaffRequest without sending the request
+     */
+    async withdrawClientStaffRequestRequestOpts(requestParameters: WithdrawClientStaffRequestRequest): Promise<runtime.RequestOpts> {
+        if (requestParameters['requestId'] == null) {
+            throw new runtime.RequiredError(
+                'requestId',
+                'Required parameter "requestId" was null or undefined when calling withdrawClientStaffRequest().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/client/staff-requests/{requestId}/withdraw`;
+        urlPath = urlPath.replace('{requestId}', encodeURIComponent(String(requestParameters['requestId'])));
+
+        return {
+            path: urlPath,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * Anyone at the client may withdraw any of the client\'s open requests. Client users only.  Error codes: `forbidden` (403), `staff_request_not_found` (404, also for other clients\' requests), `staff_request_not_open` (409). 
+     * Withdraw an open request
+     */
+    async withdrawClientStaffRequestRaw(requestParameters: WithdrawClientStaffRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<StaffRequest>> {
+        const requestOptions = await this.withdrawClientStaffRequestRequestOpts(requestParameters);
+        const response = await this.request(requestOptions, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => StaffRequestFromJSON(jsonValue));
+    }
+
+    /**
+     * Anyone at the client may withdraw any of the client\'s open requests. Client users only.  Error codes: `forbidden` (403), `staff_request_not_found` (404, also for other clients\' requests), `staff_request_not_open` (409). 
+     * Withdraw an open request
+     */
+    async withdrawClientStaffRequest(requestParameters: WithdrawClientStaffRequestRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<StaffRequest> {
+        const response = await this.withdrawClientStaffRequestRaw(requestParameters, initOverrides);
         return await response.value();
     }
 
