@@ -67,16 +67,31 @@ void main() {
       expect(find.text('Keine Plätze frei · Warteliste offen'), findsOneWidget);
     });
 
-    testWidgets('the list card says the waitlist is open', (tester) async {
-      await pumpApp(tester, backend);
+    Finder onCard(String text) =>
+        find.descendant(of: find.byType(ShiftCard), matching: find.text(text));
 
-      expect(
-        find.descendant(
-          of: find.byType(ShiftCard),
-          matching: find.text('Keine Plätze frei · Warteliste offen'),
-        ),
-        findsOneWidget,
+    testWidgets('the list card says the waitlist is open', (tester) async {
+      await pumpApp(
+        tester,
+        backend,
+        overrides: [clockProvider.overrideWithValue(() => now)],
       );
+
+      expect(onCard('Keine Plätze frei · Warteliste offen'), findsOneWidget);
+    });
+
+    testWidgets('the list card says no spots once the shift has started', (
+      tester,
+    ) async {
+      now = DateTime(2026, 10, 17, 18, 30);
+      await pumpApp(
+        tester,
+        backend,
+        overrides: [clockProvider.overrideWithValue(() => now)],
+      );
+
+      expect(onCard('Keine Plätze frei'), findsOneWidget);
+      expect(onCard('Keine Plätze frei · Warteliste offen'), findsNothing);
     });
 
     testWidgets('joins after the worker confirms and shows the place', (
@@ -217,6 +232,7 @@ void main() {
 
       expect(button('Auf die Warteliste'), findsNothing);
       expect(button('Keine Plätze frei'), findsOneWidget);
+      expect(find.text('Keine Plätze frei · Warteliste offen'), findsNothing);
     });
 
     testWidgets('a claimed full shift offers no waitlist', (tester) async {
