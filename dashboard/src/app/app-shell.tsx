@@ -3,6 +3,7 @@ import {
   Building2,
   Calendar,
   Clock,
+  Inbox,
   type LucideIcon,
   MessageSquare,
   SlidersHorizontal,
@@ -22,6 +23,7 @@ import { useClientPortalOn } from '@/features/clients/queries'
 import { LiveInbox } from '@/features/messages/live-inbox'
 import { useUnreadMessageCount } from '@/features/messages/queries'
 import { usePendingSignupCount } from '@/features/signups/queries'
+import { useOpenStaffRequestCount } from '@/features/staff-requests/queries'
 import { initials } from '@/lib/initials'
 import { cn } from '@/lib/utils'
 
@@ -83,6 +85,35 @@ function UnreadMessagesBadge() {
   )
 }
 
+function OpenStaffRequestsBadge() {
+  const { t } = useTranslation()
+  const count = useOpenStaffRequestCount()
+
+  if (!count) {
+    return null
+  }
+  return (
+    <Badge variant="feature">
+      <span aria-hidden>{count}</span>
+      <span className="sr-only">{t('shell.nav.openStaffRequests', { count })}</span>
+    </Badge>
+  )
+}
+
+/** Clients' requests for staff; there only while the client portal is switched on. */
+function StaffRequestsNavItem() {
+  const { t } = useTranslation()
+
+  if (!useClientPortalOn()) {
+    return null
+  }
+  return (
+    <NavItem to="/staff-requests" icon={Inbox} label={t('shell.nav.staffRequests')}>
+      <OpenStaffRequestsBadge />
+    </NavItem>
+  )
+}
+
 /** The clients and their portal access; there only while the client portal is switched on. */
 function ClientsNavItem() {
   const { t } = useTranslation()
@@ -116,6 +147,7 @@ export function AppShell() {
             <NavItem to="/messages" icon={MessageSquare} label={t('shell.nav.messages')}>
               <UnreadMessagesBadge />
             </NavItem>
+            <StaffRequestsNavItem />
             <ClientsNavItem />
             <NavItem to="/settings" icon={SlidersHorizontal} label={t('shell.nav.settings')} />
           </nav>

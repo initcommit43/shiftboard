@@ -8,6 +8,7 @@ import {
   ShiftStatus,
   type ShiftTemplate,
   type ShiftTemplateRequest,
+  type StaffRequest,
 } from '@/api/generated'
 
 /** The shift form as the dispatcher types it: every input as text. */
@@ -55,6 +56,7 @@ export type DraftError =
   | 'rate_out_of_range'
   | 'slots_out_of_range'
   | 'below_taken'
+  | 'not_request_client'
   | 'unknown'
 
 export type DraftErrors = Partial<Record<DraftField, DraftError>>
@@ -202,6 +204,43 @@ export function editDraftFrom(
 ): { draft: ShiftDraft; missing: MissingField[] } {
   const filled = draftFrom(shiftSource(shift), clients, qualifications, language)
   return { ...filled, draft: { ...filled.draft, date: dateOf(shift.startsAt) } }
+}
+
+/**
+ * A draft filled in from a client's request for staff: client, location, date and times,
+ * the role as the title, the notes as the description and as many spots as people asked
+ * for. The rate is the agency's to fill in.
+ */
+export function requestDraft(
+  request: StaffRequest,
+  clients: Client[],
+): { draft: ShiftDraft; missing: MissingField[] } {
+  const missing: MissingField[] = []
+  const client = clients.find((it) => it.id === request.client.id)
+  if (!client) {
+    missing.push('clientId')
+  }
+  const location = client?.locations.find((it) => it.id === request.location.id)
+  if (client && !location) {
+    missing.push('locationId')
+  }
+
+  return {
+    draft: {
+      clientId: client?.id ?? '',
+      locationId: location?.id ?? '',
+      title: request.role,
+      description: request.notes,
+      date: dateOf(request.startsAt),
+      startTime: timeOfDay(request.startsAt),
+      endTime: timeOfDay(request.endsAt),
+      endIsEstimate: request.endIsEstimate,
+      hourlyRate: '',
+      slots: String(request.workerCount),
+      qualificationIds: [],
+    },
+    missing,
+  }
 }
 
 /** What a template gives a new shift: everything but the date. */
@@ -396,6 +435,7 @@ const SHARED_CODES = new Set<string>([
   'before_start',
   'not_found',
   'below_taken',
+  'not_request_client',
 ])
 
 /** The field errors of a `validation_failed` response, placed on the fields of the form. */

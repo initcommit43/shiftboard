@@ -16,7 +16,10 @@
       "pendingSignups_other": "{{count}} offene Anmeldungen",
       "unreadMessages_one": "{{count}} ungelesene Nachricht",
       "unreadMessages_other": "{{count}} ungelesene Nachrichten",
-      "clients": "Kunden"
+      "clients": "Kunden",
+      "staffRequests": "Anfragen",
+      "openStaffRequests_one": "{{count}} offene Anfrage",
+      "openStaffRequests_other": "{{count}} offene Anfragen"
     },
     "theme": {
       "toLight": "Zum hellen Design wechseln",
@@ -151,13 +154,20 @@
         "rate_out_of_range": "Der Stundenlohn muss über 0 € liegen.",
         "slots_out_of_range": "Zwischen 1 und 500 Plätze.",
         "unknown": "Diese Angabe wurde nicht angenommen.",
-        "below_taken": "Weniger Plätze als vergeben. Lehne zuerst jemanden ab oder nimm jemanden heraus."
+        "below_taken": "Weniger Plätze als vergeben. Lehne zuerst jemanden ab oder nimm jemanden heraus.",
+        "not_request_client": "Die Schicht muss für den Kunden der Anfrage sein."
       },
       "duplicate": {
         "title": "Schicht duplizieren",
         "description": "Alles ist übernommen außer dem Datum. Wähle es aus, dann veröffentlichen oder als Entwurf speichern."
       },
-      "missing": "Nicht mehr vorhanden und daher leer: {{fields}}. Bitte neu auswählen."
+      "missing": "Nicht mehr vorhanden und daher leer: {{fields}}. Bitte neu auswählen.",
+      "fromRequest": {
+        "title": "Schicht aus Anfrage anlegen",
+        "description": "Kunde, Ort, Zeit und Personenzahl sind aus der Anfrage übernommen. Ergänze den Stundenlohn, dann veröffentlichen oder als Entwurf speichern.",
+        "notice": "Anfrage von {{client}}, gesendet von {{name}} am {{date}}",
+        "noticeHint": "Beim Speichern wird die Anfrage mit der Schicht verknüpft und geschlossen. Der Kunde sieht die Schicht, sobald sie veröffentlicht ist."
+      }
     },
     "descriptionPast": "Schichten, die vorbei sind: wer gearbeitet hat und wer nicht erschienen ist.",
     "periods": {
@@ -260,7 +270,9 @@
     "client_user_not_invited": "Diese Person hat schon ein Passwort gesetzt oder keinen Zugang mehr. Die Liste wurde aktualisiert.",
     "email_already_registered": "Mit dieser E-Mail-Adresse gibt es schon ein Konto.",
     "account_deactivated": "Dein Zugang wurde beendet. Wenn du wieder Zugang brauchst, wende dich an die Agentur.",
-    "setup_code_invalid": "Dieser Link ist ungültig, abgelaufen oder wurde schon verwendet. Bitte die Agentur um einen neuen."
+    "setup_code_invalid": "Dieser Link ist ungültig, abgelaufen oder wurde schon verwendet. Bitte die Agentur um einen neuen.",
+    "staff_request_not_found": "Diese Anfrage gibt es nicht mehr. Die Liste wurde aktualisiert.",
+    "staff_request_not_open": "Diese Anfrage wurde schon bearbeitet oder zurückgezogen. Die Liste wurde aktualisiert."
   },
   "hours": {
     "amount": "{{hours}} Std.",
@@ -816,6 +828,194 @@
         "title": "Noch niemand bestätigt",
         "description": "Sobald die Agentur Mitarbeiter:innen für diese Schicht bestätigt, stehen ihre Namen hier."
       }
+    },
+    "navigation": "Portalnavigation",
+    "nav": {
+      "shifts": "Schichten",
+      "requests": "Personalanfragen"
+    },
+    "requests": {
+      "title": "Personalanfragen",
+      "description": "Fragt bei {{agency}} Personal an und seht, was aus euren Anfragen geworden ist.",
+      "new": "Personal anfragen",
+      "loading": "Anfragen werden geladen …",
+      "status": {
+        "OPEN": "Offen",
+        "ACCEPTED": "Eingeplant",
+        "DECLINED": "Abgelehnt",
+        "WITHDRAWN": "Zurückgezogen"
+      },
+      "columns": {
+        "role": "Tätigkeit",
+        "workerCount": "Personen",
+        "outcome": "Ergebnis und Aktionen"
+      },
+      "people_one": "{{count}} Person",
+      "people_other": "{{count}} Personen",
+      "requestedBy": "Angefragt von {{name}}",
+      "count_one": "{{count}} Anfrage",
+      "count_other": "{{count}} Anfragen",
+      "toShift": "Zur Schicht",
+      "preparing": "Die Agentur bereitet die Schicht vor.",
+      "declineReason": "Grund: {{reason}}",
+      "declinedNoReason": "Die Agentur hat abgelehnt.",
+      "empty": {
+        "title": "Noch keine Anfragen",
+        "description": "Braucht ihr Personal? Schickt der Agentur eine Anfrage mit Datum, Zeit, Ort und Personenzahl."
+      },
+      "error": {
+        "title": "Anfragen konnten nicht geladen werden",
+        "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu.",
+        "retry": "Erneut versuchen"
+      },
+      "sent": {
+        "title": "Anfrage für {{role}} gesendet",
+        "description": "Die Agentur meldet sich hier mit einer Schicht oder einer Absage."
+      },
+      "withdraw": {
+        "action": "Zurückziehen",
+        "actionNamed": "Anfrage {{role}} am {{date}} zurückziehen",
+        "title": "Anfrage zurückziehen?",
+        "description": "Die Anfrage {{role}} am {{date}} wird zurückgezogen. Die Agentur bearbeitet sie dann nicht mehr.",
+        "keep": "Behalten",
+        "confirm": "Zurückziehen",
+        "done": "Anfrage {{role}} zurückgezogen"
+      },
+      "form": {
+        "back": "Alle Anfragen",
+        "title": "Personal anfragen",
+        "description": "Sag der Agentur, wann, wo und wie viele Personen ihr braucht. Sie meldet sich mit einer Schicht oder einer Absage.",
+        "sections": {
+          "what": "Einsatz",
+          "time": "Zeit"
+        },
+        "fields": {
+          "locationId": "Einsatzort",
+          "role": "Tätigkeit",
+          "date": "Datum",
+          "startTime": "Beginn",
+          "endTime": "Ende",
+          "workerCount": "Anzahl Personen",
+          "notes": "Hinweise"
+        },
+        "rolePlaceholder": "z. B. Lagerhelfer:innen",
+        "roleHint": "Was die Personen tun werden.",
+        "notesHint": "Treffpunkt, Kleidung, Ansprechperson vor Ort und alles, was die Agentur sonst wissen sollte.",
+        "endIsEstimate": "Das Ende ist ungefähr (wird mit „ca.“ angezeigt)",
+        "send": "Anfrage senden",
+        "errors": {
+          "required": "Bitte ausfüllen.",
+          "invalid_format": "Bitte eine ganze Zahl eingeben.",
+          "invalid_length": "Der Text ist zu lang.",
+          "before_start": "Das Ende muss nach dem Beginn liegen.",
+          "in_past": "Dieser Zeitpunkt ist schon vorbei.",
+          "out_of_range": "Zwischen 1 und 500 Personen.",
+          "not_found": "Diesen Einsatzort gibt es nicht mehr. Lade die Seite neu.",
+          "unknown": "Diese Angabe wurde nicht angenommen."
+        },
+        "error": {
+          "title": "Das Formular konnte nicht geladen werden",
+          "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu."
+        },
+        "noLocations": {
+          "title": "Noch keine Einsatzorte",
+          "description": "Für eine Anfrage braucht es einen Einsatzort. {{agency}} hat für euch noch keinen hinterlegt. Bitte wende dich an die Agentur."
+        }
+      }
     }
+  },
+  "staffRequests": {
+    "title": "Anfragen",
+    "descriptions": {
+      "OPEN": "Personalanfragen eurer Kunden, die noch auf euch warten, frühester Beginn zuerst.",
+      "ACCEPTED": "Anfragen, aus denen eine Schicht geworden ist.",
+      "DECLINED": "Anfragen, die ihr abgelehnt habt, mit dem Grund, den der Kunde sieht.",
+      "WITHDRAWN": "Anfragen, die der Kunde zurückgezogen hat."
+    },
+    "tabs": {
+      "label": "Status",
+      "OPEN": "Offen",
+      "ACCEPTED": "Angenommen",
+      "DECLINED": "Abgelehnt",
+      "WITHDRAWN": "Zurückgezogen"
+    },
+    "status": {
+      "OPEN": "Offen",
+      "ACCEPTED": "Angenommen",
+      "DECLINED": "Abgelehnt",
+      "WITHDRAWN": "Zurückgezogen"
+    },
+    "columns": {
+      "client": "Kunde",
+      "role": "Tätigkeit",
+      "workerCount": "Personen",
+      "requestedBy": "Angefragt von",
+      "actions": "Aktionen"
+    },
+    "count": {
+      "OPEN_one": "{{count}} offene Anfrage",
+      "OPEN_other": "{{count}} offene Anfragen",
+      "ACCEPTED_one": "{{count}} angenommene Anfrage",
+      "ACCEPTED_other": "{{count}} angenommene Anfragen",
+      "DECLINED_one": "{{count}} abgelehnte Anfrage",
+      "DECLINED_other": "{{count}} abgelehnte Anfragen",
+      "WITHDRAWN_one": "{{count}} zurückgezogene Anfrage",
+      "WITHDRAWN_other": "{{count}} zurückgezogene Anfragen"
+    },
+    "loading": "Anfragen werden geladen …",
+    "empty": {
+      "OPEN": {
+        "title": "Keine offenen Anfragen",
+        "description": "Wenn ein Kunde im Kundenportal Personal anfragt, erscheint die Anfrage hier."
+      },
+      "ACCEPTED": {
+        "title": "Noch keine angenommenen Anfragen",
+        "description": "Anfragen, aus denen ihr eine Schicht anlegt, erscheinen hier."
+      },
+      "DECLINED": {
+        "title": "Keine abgelehnten Anfragen",
+        "description": "Anfragen, die ihr ablehnt, erscheinen hier."
+      },
+      "WITHDRAWN": {
+        "title": "Keine zurückgezogenen Anfragen",
+        "description": "Zieht ein Kunde eine offene Anfrage zurück, erscheint sie hier."
+      }
+    },
+    "error": {
+      "title": "Anfragen konnten nicht geladen werden",
+      "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu.",
+      "retry": "Erneut versuchen"
+    },
+    "toShift": {
+      "action": "Als Schicht anlegen",
+      "actionNamed": "Anfrage von {{client}} für {{date}} als Schicht anlegen",
+      "gone": "Diese Anfrage ist nicht mehr offen: Der Kunde hat sie zurückgezogen oder sie wurde schon bearbeitet."
+    },
+    "openShift": "Zur Schicht",
+    "declineReason": "Grund: {{reason}}",
+    "withdrawnAt": "Zurückgezogen am {{date}}",
+    "decline": {
+      "action": "Ablehnen",
+      "actionNamed": "Anfrage von {{client}} für {{date}} ablehnen",
+      "title": "Anfrage von {{client}} für {{date}} ablehnen?",
+      "description": "Der Kunde sieht die Anfrage danach als abgelehnt, mit deinem Grund.",
+      "reason": "Grund",
+      "reasonPlaceholder": "z. B. An diesem Tag sind alle Mitarbeiter:innen schon eingeplant.",
+      "reasonHint": "Der Kunde sieht diesen Text im Kundenportal.",
+      "reasonRequired": "Bitte gib einen Grund an.",
+      "keep": "Abbrechen",
+      "confirm": "Ablehnen",
+      "done": "Anfrage von {{client}} abgelehnt",
+      "doneDescription": "Der Kunde sieht den Grund im Kundenportal."
+    },
+    "notFound": {
+      "title": "Anfrage nicht gefunden",
+      "description": "Diese Anfrage gibt es nicht."
+    },
+    "notOpen": {
+      "title": "Anfrage schon bearbeitet",
+      "description": "Diese Anfrage ist nicht mehr offen: Sie wurde schon als Schicht angelegt, abgelehnt oder vom Kunden zurückgezogen."
+    },
+    "back": "Zu den Anfragen"
   }
 }

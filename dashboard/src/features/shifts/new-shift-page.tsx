@@ -1,40 +1,45 @@
-import { Building2, SearchX, TriangleAlert } from 'lucide-react'
+import { Building2, CircleCheck, Inbox, SearchX, TriangleAlert } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 
 import { ApiError } from '@/api/errors'
-import type { Client, Qualification } from '@/api/generated'
+import { type Client, type Qualification, StaffRequestStatus } from '@/api/generated'
 import { PageHeader } from '@/components/page-header'
 import { StateCard } from '@/components/state-card'
+import { Alert, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { NativeSelect } from '@/components/ui/native-select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useStaffRequest } from '@/features/staff-requests/queries'
 
+import { formatShiftDate } from './format'
 import { useShift, useShiftFormOptions, useShiftTemplates } from './queries'
-import { draftFrom, shiftSource, templateSource } from './shift-draft'
+import { draftFrom, requestDraft, shiftSource, templateSource } from './shift-draft'
 import { ShiftForm } from './shift-form'
 
-/** A new shift; with `?from=<shift id>` it starts as a copy of that shift without its date. */
+/**
+ * A new shift. With `?from=<shift id>` it starts as a copy of that shift without its date;
+ * with `?request=<request id>` it is filled in from a client's request for staff.
+ */
 export function NewShiftPage() {
   const { t } = useTranslation()
   const [params] = useSearchParams()
-  const from = params.get('from')
+  const request = params.get('request')
+  const from = request ? null : params.get('from')
+  const heading = request ? 'shifts.form.fromRequest' : from ? 'shifts.form.duplicate' : 'shifts.form'
 
   return (
     <div className="space-y-8">
-      <PageHeader
-        title={t(from ? 'shifts.form.duplicate.title' : 'shifts.form.title')}
-        description={t(from ? 'shifts.form.duplicate.description' : 'shifts.form.description')}
-      />
-      <NewShift from={from} />
+      <PageHeader title={t(`${heading}.title`)} description={t(`${heading}.description`)} />
+      <NewShift from={from} request={request} />
     </div>
   )
 }
 
-function NewShift({ from }: { from: string | null }) {
+function NewShift({ from, request }: { from: string | null; request: string | null }) {
   const { t } = useTranslation()
   const options = useShiftFormOptions()
 
@@ -61,6 +66,10 @@ function NewShift({ from }: { from: string | null }) {
         description={t('shifts.form.noClients.description')}
       />
     )
+  }
+
+  if (request) {
+    return <FromRequest key={request} requestId={request} {...options.data} />
   }
 
   if (from) {
@@ -186,6 +195,88 @@ function DuplicateShift({
       qualifications={qualifications}
       initial={draftFrom(shiftSource(shift.data), clients, qualifications, i18n.language)}
     />
+  )
+}
+
+/** A new shift filled in from a client's request; saving it closes the request. */
+function FromRequest({
+  requestId,
+  clients,
+  qualifications,
+}: {
+  requestId: string
+  clients: Client[]
+  qualifications: Qualification[]
+}) {
+  const { t, i18n } = useTranslation()
+  const request = useStaffRequest(requestId)
+
+  if (request.isPending) {
+    return <FormSkeleton />
+  }
+
+  if (request.isError) {
+    if (request.error instanceof ApiError && request.error.status === 404) {
+      return (
+        <StateCard
+          icon={<SearchX />}
+          title={t('staffRequests.notFound.title')}
+          description={t('staffRequests.notFound.description')}
+          action={<BackToRequests />}
+        />
+      )
+    }
+    return (
+      <LoadError
+        retrying={request.isFetching}
+        retry={() => {
+          void request.refetch()
+        }}
+      />
+    )
+  }
+
+  if (request.data.status !== StaffRequestStatus.OPEN) {
+    return (
+      <StateCard
+        icon={<CircleCheck />}
+        title={t('staffRequests.notOpen.title')}
+        description={t('staffRequests.notOpen.description')}
+        action={<BackToRequests />}
+      />
+    )
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <Alert className="max-w-[50rem]">
+        <Inbox aria-hidden />
+        <AlertTitle>
+          {t('shifts.form.fromRequest.notice', {
+            client: request.data.client.name,
+            name: request.data.requestedBy,
+            date: formatShiftDate(request.data.createdAt, i18n.language),
+          })}
+        </AlertTitle>
+        <p className="col-start-2">{t('shifts.form.fromRequest.noticeHint')}</p>
+      </Alert>
+      <ShiftForm
+        clients={clients}
+        qualifications={qualifications}
+        initial={requestDraft(request.data, clients)}
+        staffRequest={request.data}
+      />
+    </div>
+  )
+}
+
+function BackToRequests() {
+  const { t } = useTranslation()
+
+  return (
+    <Button asChild variant="outline">
+      <Link to="/staff-requests">{t('staffRequests.back')}</Link>
+    </Button>
   )
 }
 

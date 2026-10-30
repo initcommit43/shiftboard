@@ -38,6 +38,9 @@ import {
   type ShiftTemplate,
   ShiftTemplateToJSON,
   ShiftToJSON,
+  type StaffRequest,
+  StaffRequestStatus,
+  StaffRequestToJSON,
   type WaitlistEntry,
   WaitlistEntryToJSON,
   type Worker,
@@ -328,6 +331,69 @@ export const portalFair = clientShift(5, {
   confirmedWorkers: [{ firstName: 'Jakob', lastName: 'Steiner' }],
 })
 
+export function staffRequest(
+  number: number,
+  values: Partial<StaffRequest> & Pick<StaffRequest, 'role'>,
+): StaffRequest {
+  return {
+    id: `0199c3a0-0000-7000-8000-0000000011${String(number).padStart(2, '0')}`,
+    status: StaffRequestStatus.OPEN,
+    client: { id: nordlicht.id, name: nordlicht.name },
+    location: zentrallager,
+    startsAt: new Date(2026, 9, 22, 7, 0),
+    endsAt: new Date(2026, 9, 22, 15, 0),
+    endIsEstimate: false,
+    workerCount: 3,
+    notes: '',
+    requestedBy: 'Petra Lindner',
+    createdAt: new Date(2026, 9, 13, 9, number),
+    ...values,
+  }
+}
+
+/** Nordlicht's requests for staff, one per status and two accepted; Hafenhalle has an open one too. */
+export const openRequest = staffRequest(1, {
+  role: 'Lagerhelfer:innen',
+  notes: 'Treffpunkt Tor 3, Sicherheitsschuhe mitbringen.',
+  endIsEstimate: true,
+})
+export const plannedRequest = staffRequest(2, {
+  role: 'Inventurhilfe',
+  status: StaffRequestStatus.ACCEPTED,
+  startsAt: portalNewYear.startsAt,
+  endsAt: portalNewYear.endsAt,
+  decidedAt: new Date(2026, 9, 13, 14, 0),
+  shiftId: portalNewYear.id,
+})
+export const preparingRequest = staffRequest(3, {
+  role: 'Kommissionierung',
+  status: StaffRequestStatus.ACCEPTED,
+  location: umschlaglager,
+  decidedAt: new Date(2026, 9, 13, 15, 0),
+})
+export const declinedRequest = staffRequest(4, {
+  role: 'Staplerfahrer:innen',
+  status: StaffRequestStatus.DECLINED,
+  workerCount: 2,
+  decidedAt: new Date(2026, 9, 13, 16, 0),
+  declineReason: 'An diesem Tag ist niemand mit Staplerschein frei.',
+})
+export const withdrawnRequest = staffRequest(5, {
+  role: 'Verpackung',
+  status: StaffRequestStatus.WITHDRAWN,
+  workerCount: 1,
+  decidedAt: new Date(2026, 9, 13, 17, 0),
+})
+export const galaRequest = staffRequest(6, {
+  role: 'Servicekräfte',
+  client: { id: hafenhalle.id, name: hafenhalle.name },
+  location: hafenhalleLinz,
+  startsAt: new Date(2026, 9, 20, 18, 0),
+  endsAt: new Date(2026, 9, 21, 1, 0),
+  workerCount: 6,
+  requestedBy: 'Paul Gruber',
+})
+
 export const lastWeek = shift(4, {
   title: 'Messeaufbau',
   status: ShiftStatus.COMPLETED,
@@ -451,6 +517,15 @@ export function installFakeApi() {
     clientShifts: [portalWarehouse, portalInventory, portalUnloading, portalNewYear],
     /** The client's ended shifts, latest first. */
     pastClientShifts: [portalFair],
+    /** The requests for staff of all clients, in any order: the fake sorts them as the API does. */
+    staffRequests: [
+      openRequest,
+      plannedRequest,
+      preparingRequest,
+      declinedRequest,
+      withdrawnRequest,
+      galaRequest,
+    ],
 
     /** The query parameters of each request to a route, oldest first. */
     queries(route: string) {
@@ -1017,6 +1092,134 @@ data: ${JSON.stringify(ConversationEventToJSON(notice))}
     return new Response(body, { headers: { 'Content-Type': 'text/event-stream' } })
   }
 
+  /** The client's own requests and locations; only client users reach them (ADR 0032). */
+  function clientStaffRequestsRoute(route: string, url: URL, body: unknown) {
+    if (api.user.role !== 'CLIENT') {
+      return problem(403, 'forbidden')
+    }
+    const clientId = api.user.client?.id
+    const client = api.clients.find((it) => it.id === clientId)
+    if (route === 'GET /client/locations') {
+      return json([...(client?.locations ?? [])].sort((a, b) => a.name.localeCompare(b.name, 'de')))
+    }
+    const own = api.staffRequests.filter((it) => it.client.id === clientId)
+    if (route === 'GET /client/staff-requests') {
+      return page(
+        url,
+        [...own].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
+        StaffRequestToJSON,
+      )
+    }
+    if (route === 'POST /client/staff-requests') {
+      return createStaffRequest(client, body as Record<string, unknown>)
+    }
+    const withdrawal = /^POST \/client\/staff-requests\/([^/]+)\/withdraw$/.exec(route)
+    const found = own.find((it) => it.id === withdrawal?.[1])
+    if (!found) {
+      return problem(404, 'staff_request_not_found')
+    }
+    if (found.status !== StaffRequestStatus.OPEN) {
+      return problem(409, 'staff_request_not_open')
+    }
+    return decideRequest(found, { status: StaffRequestStatus.WITHDRAWN })
+  }
+
+  function createStaffRequest(client: Client | undefined, body: Record<string, unknown>) {
+    const errors: FieldError[] = []
+    const location = client?.locations.find((it) => it.id === body['locationId'])
+    if (!location) {
+      errors.push({ field: 'locationId', code: body['locationId'] ? 'not_found' : 'required' })
+    }
+    const role = typeof body['role'] === 'string' ? body['role'].trim() : ''
+    if (!role) {
+      errors.push({ field: 'role', code: 'required' })
+    }
+    const startsAt = new Date(body['startsAt'] as string)
+    const endsAt = new Date(body['endsAt'] as string)
+    if (startsAt.getTime() <= Date.now()) {
+      errors.push({ field: 'startsAt', code: 'in_past' })
+    }
+    if (endsAt.getTime() <= startsAt.getTime()) {
+      errors.push({ field: 'endsAt', code: 'before_start' })
+    }
+    const workerCount = body['workerCount'] as number
+    if (!(workerCount >= 1 && workerCount <= 500)) {
+      errors.push({ field: 'workerCount', code: 'out_of_range' })
+    }
+    if (errors.length > 0 || !client || !location) {
+      return problem(400, 'validation_failed', errors)
+    }
+    const account = Object.values(api.clientUsers)
+      .flat()
+      .find((it) => it.id === api.user.id)
+    const created = staffRequest(api.staffRequests.length + 20, {
+      role,
+      client: { id: client.id, name: client.name },
+      location,
+      startsAt,
+      endsAt,
+      endIsEstimate: body['endIsEstimate'] === true,
+      workerCount,
+      notes: typeof body['notes'] === 'string' ? body['notes'] : '',
+      requestedBy: account ? `${account.firstName} ${account.lastName}` : '',
+      createdAt: new Date(2026, 9, 14, 12, 0),
+    })
+    api.staffRequests = [...api.staffRequests, created]
+    return json(StaffRequestToJSON(created), 201)
+  }
+
+  function decideRequest(request: StaffRequest, changes: Partial<StaffRequest>) {
+    const decided: StaffRequest = { ...request, decidedAt: new Date(2026, 9, 14, 13, 0), ...changes }
+    api.staffRequests = api.staffRequests.map((it) => (it === request ? decided : it))
+    return json(StaffRequestToJSON(decided))
+  }
+
+  /** The agency's side of the requests: list, look up, turn into a shift, decline. */
+  function staffRequestsRoute(route: string, url: URL, body: unknown) {
+    if (route === 'GET /staff-requests') {
+      const status = url.searchParams.get('status') ?? StaffRequestStatus.OPEN
+      const open = status === StaffRequestStatus.OPEN
+      const matching = api.staffRequests
+        .filter((it) => it.status === status)
+        .sort((a, b) =>
+          open
+            ? a.startsAt.getTime() - b.startsAt.getTime()
+            : (b.decidedAt?.getTime() ?? 0) - (a.decidedAt?.getTime() ?? 0),
+        )
+      return page(url, matching, StaffRequestToJSON)
+    }
+    const [, method, requestId, action] =
+      /^(GET|POST) \/staff-requests\/([^/]+)(?:\/(shift|decline))?$/.exec(route) ?? []
+    const found = api.staffRequests.find((it) => it.id === requestId)
+    if (!found) {
+      return problem(404, 'staff_request_not_found')
+    }
+    if (method === 'GET' && action === undefined) {
+      return json(StaffRequestToJSON(found))
+    }
+    if (found.status !== StaffRequestStatus.OPEN) {
+      return problem(409, 'staff_request_not_open')
+    }
+    if (action === 'decline') {
+      const reason = ((body as Record<string, string>)['reason'] ?? '').trim()
+      if (!reason) {
+        return problem(400, 'validation_failed', [{ field: 'reason', code: 'required' }])
+      }
+      return decideRequest(found, { status: StaffRequestStatus.DECLINED, declineReason: reason })
+    }
+    const shiftBody = body as Record<string, unknown>
+    if (shiftBody['clientId'] !== found.client.id) {
+      return problem(400, 'validation_failed', [{ field: 'clientId', code: 'not_request_client' }])
+    }
+    const before = new Set(api.shifts.map((it) => it.id))
+    const response = createShift(shiftBody)
+    const created = api.shifts.find((it) => !before.has(it.id))
+    if (created) {
+      decideRequest(found, { status: StaffRequestStatus.ACCEPTED, shiftId: created.id })
+    }
+    return response
+  }
+
   function respond(
     route: string,
     url: URL,
@@ -1063,6 +1266,9 @@ data: ${JSON.stringify(ConversationEventToJSON(notice))}
     if (/^GET \/client\/shifts(\/[^/]+)?$/.test(route)) {
       return clientShiftsRoute(route, url)
     }
+    if (/^(GET|POST) \/client\/(locations|staff-requests)/.test(route)) {
+      return clientStaffRequestsRoute(route, url, body)
+    }
     // Client users reach nothing of the agency's API (ADR 0032).
     if (api.user.role === 'CLIENT') {
       return problem(403, 'forbidden')
@@ -1072,6 +1278,9 @@ data: ${JSON.stringify(ConversationEventToJSON(notice))}
     }
     if (route === 'GET /clients') {
       return page(url, api.clients, ClientToJSON)
+    }
+    if (/^(GET|POST) \/staff-requests(\/|$)/.test(route)) {
+      return staffRequestsRoute(route, url, body)
     }
     const clientUsersRoute = /^(GET|POST) \/clients\/([^/]+)\/users$/.exec(route)
     if (clientUsersRoute) {

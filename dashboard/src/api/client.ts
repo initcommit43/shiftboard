@@ -13,6 +13,7 @@ import {
   SettingsApi,
   ShiftsApi,
   ShiftTemplatesApi,
+  StaffRequestsApi,
   WaitlistApi,
   WorkersApi,
 } from './generated'
@@ -134,5 +135,6 @@ export const messagesApi = new MessagesApi(configuration)
 export const settingsApi = new SettingsApi(configuration)
 export const shiftsApi = new ShiftsApi(configuration)
 export const shiftTemplatesApi = new ShiftTemplatesApi(configuration)
+export const staffRequestsApi = new StaffRequestsApi(configuration)
 export const waitlistApi = new WaitlistApi(configuration)
 export const workersApi = new WorkersApi(configuration)
