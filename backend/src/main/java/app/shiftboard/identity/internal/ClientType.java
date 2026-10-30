@@ -12,7 +12,7 @@ enum ClientType {
     boolean admits(Role role) {
         return switch (this) {
             case WORKER_APP -> role == Role.WORKER;
-            case DASHBOARD -> role == Role.DISPATCHER || role == Role.ADMIN;
+            case DASHBOARD -> role == Role.DISPATCHER || role == Role.ADMIN || role == Role.CLIENT;
         };
     }
 }

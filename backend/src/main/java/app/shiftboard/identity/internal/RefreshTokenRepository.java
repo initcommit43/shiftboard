@@ -24,4 +24,12 @@ interface RefreshTokenRepository extends Repository<RefreshToken, UUID> {
             where t.tokenHash = :tokenHash and t.revokedAt is null and t.expiresAt > :now
             """)
     int revokeIfActive(String tokenHash, Instant now);
+
+    /** Ends every session of the account. */
+    @Modifying
+    @Query("""
+            update RefreshToken t set t.revokedAt = :now
+            where t.userAccountId = :userAccountId and t.revokedAt is null
+            """)
+    int revokeAll(UUID userAccountId, Instant now);
 }
