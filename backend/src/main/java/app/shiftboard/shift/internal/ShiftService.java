@@ -39,6 +39,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -222,6 +223,14 @@ class ShiftService implements Shifts {
     @Transactional(readOnly = true)
     public Optional<ShiftDetails> find(UUID shiftId) {
         return shifts.findById(shiftId)
+                .filter(ShiftService::visibleToWorkers)
+                .map(shift -> details(List.of(shift)).getFirst());
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Optional<ShiftDetails> findAndLock(UUID shiftId) {
+        return shifts.findAndLockById(shiftId)
                 .filter(ShiftService::visibleToWorkers)
                 .map(shift -> details(List.of(shift)).getFirst());
     }

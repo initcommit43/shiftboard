@@ -567,9 +567,11 @@ paths:
         `conversation` event carries a `ConversationEvent` as JSON in its
         `data`: which conversation changed and how. Clients then reload the
         inbox or the open conversation through the endpoints above; the
-        notice carries no message data. Comment lines (`: ping`) keep idle
-        connections open. Dispatchers and admins only; the access token goes
-        in the `Authorization` header, so clients read the stream with a
+        notice carries no message data. A comment line (`: ping`) every 25
+        seconds keeps idle connections open; clients that hear nothing for 60
+        seconds reconnect. The stream ends when the access token expires.
+        Dispatchers and admins only; the access token goes in the
+        `Authorization` header, so clients read the stream with a
         streaming HTTP request rather than `EventSource`. When the stream
         ends or fails, clients reconnect with backoff and fall back to
         polling meanwhile (ADR 0031).
@@ -1740,8 +1742,9 @@ paths:
         A server-sent event stream (`text/event-stream`) that stays open while
         the app is in the foreground. Each `conversation` event carries a
         `ConversationEvent` as JSON in its `data`; the app then reloads the
-        conversation or its unread count. Comment lines (`: ping`) keep idle
-        connections open. Active workers only; the access token goes in the
+        conversation or its unread count. A comment line (`: ping`) every 25
+        seconds keeps idle connections open; clients that hear nothing for 60
+        seconds reconnect. The stream ends when the access token expires. Active workers only; the access token goes in the
         `Authorization` header (ADR 0031).
 
         Error codes: `forbidden` (403), `worker_not_active` (403).

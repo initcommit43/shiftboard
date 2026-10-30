@@ -588,6 +588,32 @@ class WaitlistIntegrationTests extends IntegrationTest {
                 .filteredOn("WAITLISTED"::equals).hasSize(3 - (int) droppedOut);
     }
 
+    @Test
+    void aJoinAtTheMomentASpotFreesNeverWaitsForAFreeSpot() throws Exception {
+        for (var round = 0; round < 20; round++) {
+            var shiftId = publish("Staplerfahrer:in", IN_THREE_DAYS, 8, 1);
+            var holder = activeWorker();
+            claim(shiftId, holder).expectStatus().isCreated();
+            var joiner = activeWorker();
+
+            var results = atOnce(List.<Callable<Integer>>of(
+                    () -> cancel(shiftId, holder).returnResult().getStatus().value(),
+                    () -> join(shiftId, joiner).returnResult().getStatus().value()));
+
+            assertThat(results.getFirst()).as("round %d: the drop-out", round).isEqualTo(200);
+            if (results.getLast() == 201) {
+                // The join came first: the spot freed afterwards went to the joiner.
+                assertThat(status(shiftId, joiner)).as("round %d: the joiner", round).isEqualTo("PENDING");
+                assertThat(takenSlots(shiftId)).as("round %d: taken slots", round).isEqualTo(1);
+            } else {
+                // The spot was freed first: the join was refused, as the shift was no longer full.
+                assertThat(results.getLast()).as("round %d: the join", round).isEqualTo(409);
+                assertThat(status(shiftId, joiner)).as("round %d: the joiner", round).isNull();
+                assertThat(takenSlots(shiftId)).as("round %d: taken slots", round).isZero();
+            }
+        }
+    }
+
     // --- the agency's view (#112) ----------------------------------------------------------
 
     @Test
