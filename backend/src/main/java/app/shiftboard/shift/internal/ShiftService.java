@@ -22,6 +22,7 @@ import app.shiftboard.shift.ShiftPublished;
 import app.shiftboard.shift.ShiftSpotsAdded;
 import app.shiftboard.shift.ShiftWaitlists;
 import app.shiftboard.shift.Shifts;
+import app.shiftboard.shift.StaffRequestAcceptance;
 import app.shiftboard.shift.internal.ShiftController.ClientSummary;
 import app.shiftboard.shift.internal.ShiftController.ShiftChangeRequest;
 import app.shiftboard.shift.internal.ShiftController.ShiftPage;
@@ -39,6 +40,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -60,20 +62,23 @@ class ShiftService implements Shifts {
 
     private final ShiftWaitlists waitlists;
 
+    private final StaffRequestAcceptance staffRequests;
+
     private final ApplicationEventPublisher events;
 
     private final TransactionTemplate transactions;
 
     ShiftService(
             ShiftRepository shifts, Clients clients, Agencies agencies, ShiftReferences references,
-            UserAccounts userAccounts, ShiftWaitlists waitlists, ApplicationEventPublisher events,
-            TransactionTemplate transactions) {
+            UserAccounts userAccounts, ShiftWaitlists waitlists, StaffRequestAcceptance staffRequests,
+            ApplicationEventPublisher events, TransactionTemplate transactions) {
         this.shifts = shifts;
         this.clients = clients;
         this.agencies = agencies;
         this.references = references;
         this.userAccounts = userAccounts;
         this.waitlists = waitlists;
+        this.staffRequests = staffRequests;
         this.events = events;
         this.transactions = transactions;
     }
@@ -202,6 +207,17 @@ class ShiftService implements Shifts {
         return responses(List.of(created)).getFirst();
     }
 
+    /**
+     * Creates the shift and closes the client's staff request with it in one transaction: if the
+     * request no longer accepts it, the shift is not kept (ADR 0032).
+     */
+    @Transactional
+    ShiftResponse createFromStaffRequest(UUID requestId, ShiftRequest request, UUID contactUserId) {
+        var created = create(request, contactUserId);
+        staffRequests.accept(requestId, request.clientId(), created.id());
+        return created;
+    }
+
     @Transactional
     ShiftResponse publish(UUID shiftId) {
         var shift = shifts.findById(shiftId).orElseThrow(ShiftService::notFound);
@@ -234,6 +250,14 @@ class ShiftService implements Shifts {
     @Transactional(readOnly = true)
     public Optional<ShiftDetails> find(UUID shiftId) {
         return shifts.findById(shiftId)
+                .filter(ShiftService::visibleToWorkers)
+                .map(shift -> details(List.of(shift)).getFirst());
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Optional<ShiftDetails> findAndLock(UUID shiftId) {
+        return shifts.findAndLockById(shiftId)
                 .filter(ShiftService::visibleToWorkers)
                 .map(shift -> details(List.of(shift)).getFirst());
     }

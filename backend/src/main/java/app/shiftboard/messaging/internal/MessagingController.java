@@ -1,5 +1,6 @@
 package app.shiftboard.messaging.internal;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -11,6 +12,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 /**
  * The worker's conversation, the agency's shared inbox and broadcasts. Who may call what is
@@ -38,6 +41,12 @@ class MessagingController {
     @GetMapping("/worker/conversation")
     UnreadCount myConversation(@AuthenticationPrincipal Jwt accessToken) {
         return messaging.workerUnread(accountId(accessToken));
+    }
+
+    /** Ends when the access token expires; the app refreshes it and reconnects. */
+    @GetMapping(path = "/worker/conversation/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    SseEmitter myEvents(@AuthenticationPrincipal Jwt accessToken) {
+        return messaging.workerStream(accountId(accessToken), lifetime(accessToken));
     }
 
     @GetMapping("/worker/conversation/messages")
@@ -59,6 +68,12 @@ class MessagingController {
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
         return messaging.inbox(page, size);
+    }
+
+    /** Ends when the access token expires; the dashboard refreshes it and reconnects. */
+    @GetMapping(path = "/conversations/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    SseEmitter inboxEvents(@AuthenticationPrincipal Jwt accessToken) {
+        return messaging.inboxStream(lifetime(accessToken));
     }
 
     @GetMapping("/conversations/unread-count")
@@ -88,6 +103,10 @@ class MessagingController {
             @AuthenticationPrincipal Jwt accessToken, @PathVariable UUID shiftId,
             @Valid @RequestBody BroadcastRequest request) {
         return messaging.broadcast(shiftId, accountId(accessToken), request.body().strip());
+    }
+
+    private static Duration lifetime(Jwt accessToken) {
+        return Duration.between(Instant.now(), accessToken.getExpiresAt());
     }
 
     private static UUID accountId(Jwt accessToken) {

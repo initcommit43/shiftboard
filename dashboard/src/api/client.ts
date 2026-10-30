@@ -68,6 +68,25 @@ function isAuthEndpoint(url: string) {
   return new URL(url, window.location.origin).pathname.includes('/auth/')
 }
 
+/**
+ * After a 401 for a request sent with the given Authorization header: refreshes
+ * the tokens, unless another request has refreshed them since, and tells the
+ * session-expired listeners when the session cannot be continued. Resolves to
+ * true when there is an access token to repeat the request with.
+ */
+export async function renewAccessToken(sentAuthorization: string | null): Promise<boolean> {
+  const current = getAccessToken()
+  if (!current || sentAuthorization === `Bearer ${current}`) {
+    if (!(await refreshTokens())) {
+      sessionExpiredListeners.forEach((listener) => {
+        listener()
+      })
+      return false
+    }
+  }
+  return getAccessToken() !== null
+}
+
 /** On 401, refreshes the tokens once and repeats the request with the new access token. */
 const refreshOnUnauthorized: Middleware = {
   async post({ url, init, response }) {
@@ -75,22 +94,10 @@ const refreshOnUnauthorized: Middleware = {
       return undefined
     }
     const headers = new Headers(init.headers)
-    const current = getAccessToken()
-    // If the token has changed since the request was sent, another request has
-    // refreshed already and the new token is reused.
-    if (!current || headers.get('Authorization') === `Bearer ${current}`) {
-      if (!(await refreshTokens())) {
-        sessionExpiredListeners.forEach((listener) => {
-          listener()
-        })
-        return undefined
-      }
-    }
-    const accessToken = getAccessToken()
-    if (!accessToken) {
+    if (!(await renewAccessToken(headers.get('Authorization')))) {
       return undefined
     }
-    headers.set('Authorization', `Bearer ${accessToken}`)
+    headers.set('Authorization', `Bearer ${getAccessToken() ?? ''}`)
     return fetch(url, { ...init, headers })
   },
 }
@@ -109,8 +116,11 @@ const throwApiError: Middleware = {
   },
 }
 
+/** Where the API lives, for requests the generated client cannot make, such as event streams. */
+export const apiBasePath = import.meta.env.VITE_API_BASE_URL ?? '/api/v1'
+
 const configuration = new Configuration({
-  basePath: import.meta.env.VITE_API_BASE_URL ?? '/api/v1',
+  basePath: apiBasePath,
   accessToken: () => getAccessToken() ?? '',
   middleware: [refreshOnUnauthorized, throwApiError],
 })

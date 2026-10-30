@@ -64,7 +64,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           selectedIcon: CupertinoIcons.chat_bubble_fill,
           badge: ref.watch(unreadMessagesProvider).value ?? 0,
         ),
-        view: const ChatView(),
+        view: ChatView(shown: _tab == _messagesTab),
       ),
       (
         title: l10n.navProfile,
@@ -139,7 +139,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         tabs: [for (final tab in tabs) tab.tab],
         selectedIndex: _tab,
         onSelected: (index) {
-          // The chat loads what came in meanwhile, which also clears the badge.
+          // Shown, the chat loads what came in meanwhile, which also clears
+          // the badge. Tapping the open chat's tab loads it again.
           if (index == _messagesTab) ref.invalidate(myMessagesProvider);
           setState(() => _tab = index);
         },

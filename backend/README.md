@@ -136,6 +136,7 @@ Base package `app.shiftboard`. Each direct subpackage is a Spring Modulith appli
 | `messaging` | Conversations between an agency and its workers |
 | `notification` | Push notifications sent in reaction to events of other modules |
 | `portal` | What the staff of a client see of their shifts in the client portal |
+| `staffrequest` | Clients' requests for staff, which dispatchers turn into shifts or decline |
 | `seed` | Fictional demo data for development machines (`local` profile) |
 | `system` | Service status, `/api/v1` path prefix, problem details |
 

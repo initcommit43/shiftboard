@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.UUID;
 
 import app.shiftboard.assignment.Assignments;
+import app.shiftboard.client.Clients;
 import app.shiftboard.client.LocationDetails;
 import app.shiftboard.shift.ShiftDetails;
 import app.shiftboard.shift.Shifts;
@@ -24,7 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * The shifts of the logged-in user's client, as the client sees them: no hourly rate, no requests
+ * The shifts and locations of the logged-in user's client, as the client sees them: no hourly rate, no requests
  * or waitlist, and of the workers only the names of the confirmed ones (ADR 0032). Client users
  * only, enforced by the security configuration; the client comes from the access token.
  */
@@ -43,10 +44,19 @@ class ClientPortalController {
 
     private final Workers workers;
 
-    ClientPortalController(Shifts shifts, Assignments assignments, Workers workers) {
+    private final Clients clients;
+
+    ClientPortalController(Shifts shifts, Assignments assignments, Workers workers, Clients clients) {
         this.shifts = shifts;
         this.assignments = assignments;
         this.workers = workers;
+        this.clients = clients;
+    }
+
+    /** The locations the client can request staff for, sorted by name. */
+    @GetMapping("/client/locations")
+    List<LocationDetails> locations(@AuthenticationPrincipal Jwt accessToken) {
+        return clients.find(clientId(accessToken)).orElseThrow().locations();
     }
 
     @GetMapping("/client/shifts")

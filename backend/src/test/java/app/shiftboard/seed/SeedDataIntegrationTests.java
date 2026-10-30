@@ -59,7 +59,8 @@ class SeedDataIntegrationTests {
                 Map.entry("shift_template_qualification", 5),
                 Map.entry("assignment", 15),
                 Map.entry("conversation", 2),
-                Map.entry("message", 3)));
+                Map.entry("message", 3),
+                Map.entry("staff_request", 5)));
         assertThat(workersOfDonauPersonalWith("ACTIVE")).isEqualTo(6);
         assertThat(workersOfDonauPersonalWith("PENDING")).isEqualTo(4);
         assertThat(workersOfDonauPersonalWith("INACTIVE")).isEqualTo(1);
@@ -267,6 +268,27 @@ class SeedDataIntegrationTests {
                 .jsonPath("$.content[*].title").isEqualTo(List.of("Inventur"));
     }
 
+    @Test
+    void theSeededStaffRequestsShowEveryOutcome() {
+        var clientToken = login("kunde.nordlicht@example.com", "DASHBOARD");
+        client.get().uri("/api/v1/client/staff-requests")
+                .headers(headers -> headers.setBearerAuth(clientToken))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[*].status").isEqualTo(List.of("OPEN", "OPEN", "DECLINED", "ACCEPTED", "WITHDRAWN"))
+                .jsonPath("$.content[2].declineReason").isEqualTo("An diesem Wochenende sind wir leider ausgebucht.")
+                .jsonPath("$.content[3].shiftId").isNotEmpty()
+                .jsonPath("$.content[0].requestedBy").isEqualTo("Petra Wimmer");
+        client.get().uri("/api/v1/staff-requests")
+                .headers(headers -> headers.setBearerAuth(login("dispatcher1.donau@example.com", "DASHBOARD")))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.totalElements").isEqualTo(2)
+                .jsonPath("$.content[*].role").isEqualTo(List.of("Kommissionierung", "Staplerfahrer:in"));
+    }
+
     private String login(String email, String clientType) {
         return client.post().uri("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -281,7 +303,8 @@ class SeedDataIntegrationTests {
         var counts = new LinkedHashMap<String, Integer>();
         for (var table : List.of(
                 "agency", "qualification", "user_account", "worker", "worker_qualification", "client", "location",
-                "shift", "shift_qualification", "shift_template", "shift_template_qualification", "assignment", "conversation", "message")) {
+                "shift", "shift_qualification", "shift_template", "shift_template_qualification", "assignment", "conversation", "message",
+                "staff_request")) {
             counts.put(table, jdbc.sql("select count(*) from " + table).query(Integer.class).single());
         }
         return counts;

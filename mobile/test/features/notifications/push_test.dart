@@ -120,6 +120,25 @@ void main() {
     expect(backend.sent('GET /worker/shifts').length, before + 1);
   });
 
+  testWidgets('a message push on another tab is counted and stays unread', (
+    tester,
+  ) async {
+    await start(tester);
+
+    backend.unread = 1;
+    push.receivedController.add({'type': 'MESSAGE'});
+    await tester.pumpAndSettle();
+
+    expect(find.text('1'), findsOneWidget);
+    expect(backend.sent('GET /worker/conversation/messages'), isEmpty);
+
+    await tester.tap(find.text('Nachrichten'));
+    await tester.pumpAndSettle();
+
+    expect(backend.sent('GET /worker/conversation/messages'), hasLength(1));
+    expect(find.text('1'), findsNothing);
+  });
+
   testWidgets('a tapped push opens its shift or the chat', (tester) async {
     backend.on('GET /worker/shifts/$shiftId', (_) => json(workerShift()));
     await start(tester);

@@ -70,7 +70,7 @@ All demo accounts use the password `shiftboard-demo`.
 | --- | --- | --- |
 | Dashboard | `dispatcher1.donau@example.com` | Dispatcher of "Donau Personal" with pending signups |
 | Dashboard | `dispatcher.alpen@example.com` | Dispatcher of a second agency, to see tenant isolation |
-| Dashboard | `kunde.nordlicht@example.com` | Client portal of "Nordlicht Logistik": its shifts and who is coming. "Karl Huber" of the same client is invited and has no password yet |
+| Dashboard | `kunde.nordlicht@example.com` | Client portal of "Nordlicht Logistik": its shifts, who is coming, and its staff requests (two open, one turned into a shift, one declined, one withdrawn). "Karl Huber" of the same client is invited and has no password yet |
 | App | `lena.hofer@example.com` | Active worker |
 | App | `emma.koller@example.com` | Worker waiting for approval |
 | App | `simon.egger@example.com` | Inactive worker |

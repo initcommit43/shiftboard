@@ -176,11 +176,17 @@ class WorkerShiftService {
     /**
      * Puts the worker at the back of the waitlist of a full shift (ADR 0029). Not when they are on
      * the shift already, in any status, or booked for a shift at the same time.
+     *
+     * <p>The shift is read with a shared lock held until the entry is stored, so a change that
+     * frees a spot at the same moment cannot slip in between: either it waits for the join and
+     * then moves the new entry up, or it went first and the join sees the free spot and is
+     * refused. The lock comes before any assignment is touched, as with every change of a slot,
+     * and joins of different workers share it.
      */
     WorkerShiftResponse joinWaitlist(UUID accountId, UUID shiftId) {
         var workerId = activeWorker(accountId);
         transactions.executeWithoutResult(_ -> {
-            var shift = shifts.find(shiftId).orElseThrow(WorkerShiftService::shiftNotFound);
+            var shift = shifts.findAndLock(shiftId).orElseThrow(WorkerShiftService::shiftNotFound);
             var existing = assignments.findStatus(shiftId, workerId);
             if (existing.isPresent()) {
                 throw existing.get() == AssignmentStatus.WAITLISTED

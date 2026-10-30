@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge'
 import { useCurrentUser, useSessionExpiry } from '@/features/auth/use-session'
 import { UserMenu } from '@/features/auth/user-menu'
 import { useClientPortalOn } from '@/features/clients/queries'
+import { LiveInbox } from '@/features/messages/live-inbox'
 import { useUnreadMessageCount } from '@/features/messages/queries'
 import { usePendingSignupCount } from '@/features/signups/queries'
 import { useOpenStaffRequestCount } from '@/features/staff-requests/queries'
@@ -129,51 +130,53 @@ export function AppShell() {
   useSessionExpiry()
 
   return (
-    <div className="flex min-h-svh">
-      {/* The navigation is a dark band in both themes. */}
-      <aside className="dark hidden w-64 shrink-0 flex-col gap-8 border-r bg-canvas px-4 pb-6 text-ink md:flex">
-        <div className="flex h-16 items-center px-4">
-          <Brand />
-        </div>
-        <nav aria-label={t('shell.navigation')} className="flex flex-col gap-1">
-          <NavItem to="/shifts" icon={Calendar} label={t('shell.nav.shifts')} />
-          <NavItem to="/templates" icon={Bookmark} label={t('shell.nav.templates')} />
-          <NavItem to="/hours" icon={Clock} label={t('shell.nav.hours')} />
-          <NavItem to="/signups" icon={UserPlus} label={t('shell.nav.signups')}>
-            <PendingSignupsBadge />
-          </NavItem>
-          <NavItem to="/messages" icon={MessageSquare} label={t('shell.nav.messages')}>
-            <UnreadMessagesBadge />
-          </NavItem>
-          <StaffRequestsNavItem />
-          <ClientsNavItem />
-          <NavItem to="/settings" icon={SlidersHorizontal} label={t('shell.nav.settings')} />
-        </nav>
-      </aside>
+    <LiveInbox>
+      <div className="flex min-h-svh">
+        {/* The navigation is a dark band in both themes. */}
+        <aside className="dark hidden w-64 shrink-0 flex-col gap-8 border-r bg-canvas px-4 pb-6 text-ink md:flex">
+          <div className="flex h-16 items-center px-4">
+            <Brand />
+          </div>
+          <nav aria-label={t('shell.navigation')} className="flex flex-col gap-1">
+            <NavItem to="/shifts" icon={Calendar} label={t('shell.nav.shifts')} />
+            <NavItem to="/templates" icon={Bookmark} label={t('shell.nav.templates')} />
+            <NavItem to="/hours" icon={Clock} label={t('shell.nav.hours')} />
+            <NavItem to="/signups" icon={UserPlus} label={t('shell.nav.signups')}>
+              <PendingSignupsBadge />
+            </NavItem>
+            <NavItem to="/messages" icon={MessageSquare} label={t('shell.nav.messages')}>
+              <UnreadMessagesBadge />
+            </NavItem>
+            <StaffRequestsNavItem />
+            <ClientsNavItem />
+            <NavItem to="/settings" icon={SlidersHorizontal} label={t('shell.nav.settings')} />
+          </nav>
+        </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b px-8">
-          <div className="flex min-w-0 items-center gap-3">
-            <span
-              aria-hidden
-              className="type-caption grid size-9 shrink-0 place-items-center rounded-full bg-surface-soft font-semibold"
-            >
-              {initials(agency.name)}
-            </span>
-            <span className="type-body-md-bold truncate">{agency.name}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <LanguageSwitch />
-            <ThemeToggle />
-            <UserMenu />
-          </div>
-        </header>
-        <main className="flex-1 px-8 py-12">
-          <div className="mx-auto max-w-[75rem]">
-            <Outlet />
-          </div>
-        </main>
+        <div className="flex min-w-0 flex-1 flex-col">
+          <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b px-8">
+            <div className="flex min-w-0 items-center gap-3">
+              <span
+                aria-hidden
+                className="type-caption grid size-9 shrink-0 place-items-center rounded-full bg-surface-soft font-semibold"
+              >
+                {initials(agency.name)}
+              </span>
+              <span className="type-body-md-bold truncate">{agency.name}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <LanguageSwitch />
+              <ThemeToggle />
+              <UserMenu />
+            </div>
+          </header>
+          <main className="flex-1 px-8 py-12">
+            <div className="mx-auto max-w-[75rem]">
+              <Outlet />
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </LiveInbox>
   )
 }
