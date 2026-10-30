@@ -1,27 +1,29 @@
 import {
   Bookmark,
+  Building2,
   Calendar,
   Clock,
   type LucideIcon,
   MessageSquare,
   SlidersHorizontal,
   UserPlus,
-} from 'lucide-react'
-import type { ReactNode } from 'react'
-import { useTranslation } from 'react-i18next'
-import { NavLink, Outlet } from 'react-router'
+} from "lucide-react";
+import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+import { NavLink, Outlet } from "react-router";
 
-import { Brand } from '@/components/brand'
-import { LanguageSwitch } from '@/components/language-switch'
-import { ThemeToggle } from '@/components/theme-toggle'
-import { Badge } from '@/components/ui/badge'
-import { useCurrentUser, useSessionExpiry } from '@/features/auth/use-session'
-import { UserMenu } from '@/features/auth/user-menu'
-import { LiveInbox } from '@/features/messages/live-inbox'
-import { useUnreadMessageCount } from '@/features/messages/queries'
-import { usePendingSignupCount } from '@/features/signups/queries'
-import { initials } from '@/lib/initials'
-import { cn } from '@/lib/utils'
+import { Brand } from "@/components/brand";
+import { LanguageSwitch } from "@/components/language-switch";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Badge } from "@/components/ui/badge";
+import { useCurrentUser, useSessionExpiry } from "@/features/auth/use-session";
+import { UserMenu } from "@/features/auth/user-menu";
+import { useClientPortalOn } from "@/features/clients/queries";
+import { LiveInbox } from "@/features/messages/live-inbox";
+import { useUnreadMessageCount } from "@/features/messages/queries";
+import { usePendingSignupCount } from "@/features/signups/queries";
+import { initials } from "@/lib/initials";
+import { cn } from "@/lib/utils";
 
 function NavItem({
   to,
@@ -29,18 +31,18 @@ function NavItem({
   label,
   children,
 }: {
-  to: string
-  icon: LucideIcon
-  label: string
-  children?: ReactNode
+  to: string;
+  icon: LucideIcon;
+  label: string;
+  children?: ReactNode;
 }) {
   return (
     <NavLink
       to={to}
       className={({ isActive }) =>
         cn(
-          'type-button-sm flex h-11 items-center gap-3 rounded-full px-4 text-ink-secondary transition-colors hover:bg-surface-soft hover:text-ink',
-          isActive && 'bg-surface-soft text-ink',
+          "type-button-sm flex h-11 items-center gap-3 rounded-full px-4 text-ink-secondary transition-colors hover:bg-surface-soft hover:text-ink",
+          isActive && "bg-surface-soft text-ink",
         )
       }
     >
@@ -48,43 +50,59 @@ function NavItem({
       <span className="flex-1">{label}</span>
       {children}
     </NavLink>
-  )
+  );
 }
 
 function PendingSignupsBadge() {
-  const { t } = useTranslation()
-  const count = usePendingSignupCount()
+  const { t } = useTranslation();
+  const count = usePendingSignupCount();
 
   if (!count) {
-    return null
+    return null;
   }
   return (
     <Badge variant="feature">
       <span aria-hidden>{count}</span>
-      <span className="sr-only">{t('shell.nav.pendingSignups', { count })}</span>
+      <span className="sr-only">
+        {t("shell.nav.pendingSignups", { count })}
+      </span>
     </Badge>
-  )
+  );
 }
 
 function UnreadMessagesBadge() {
-  const { t } = useTranslation()
-  const count = useUnreadMessageCount()
+  const { t } = useTranslation();
+  const count = useUnreadMessageCount();
 
   if (!count) {
-    return null
+    return null;
   }
   return (
     <Badge variant="feature">
       <span aria-hidden>{count}</span>
-      <span className="sr-only">{t('shell.nav.unreadMessages', { count })}</span>
+      <span className="sr-only">
+        {t("shell.nav.unreadMessages", { count })}
+      </span>
     </Badge>
-  )
+  );
+}
+
+/** The clients and their portal access; there only while the client portal is switched on. */
+function ClientsNavItem() {
+  const { t } = useTranslation();
+
+  if (!useClientPortalOn()) {
+    return null;
+  }
+  return (
+    <NavItem to="/clients" icon={Building2} label={t("shell.nav.clients")} />
+  );
 }
 
 export function AppShell() {
-  const { t } = useTranslation()
-  const { agency } = useCurrentUser()
-  useSessionExpiry()
+  const { t } = useTranslation();
+  const { agency } = useCurrentUser();
+  useSessionExpiry();
 
   return (
     <LiveInbox>
@@ -94,17 +112,41 @@ export function AppShell() {
           <div className="flex h-16 items-center px-4">
             <Brand />
           </div>
-          <nav aria-label={t('shell.navigation')} className="flex flex-col gap-1">
-            <NavItem to="/shifts" icon={Calendar} label={t('shell.nav.shifts')} />
-            <NavItem to="/templates" icon={Bookmark} label={t('shell.nav.templates')} />
-            <NavItem to="/hours" icon={Clock} label={t('shell.nav.hours')} />
-            <NavItem to="/signups" icon={UserPlus} label={t('shell.nav.signups')}>
+          <nav
+            aria-label={t("shell.navigation")}
+            className="flex flex-col gap-1"
+          >
+            <NavItem
+              to="/shifts"
+              icon={Calendar}
+              label={t("shell.nav.shifts")}
+            />
+            <NavItem
+              to="/templates"
+              icon={Bookmark}
+              label={t("shell.nav.templates")}
+            />
+            <NavItem to="/hours" icon={Clock} label={t("shell.nav.hours")} />
+            <NavItem
+              to="/signups"
+              icon={UserPlus}
+              label={t("shell.nav.signups")}
+            >
               <PendingSignupsBadge />
             </NavItem>
-            <NavItem to="/messages" icon={MessageSquare} label={t('shell.nav.messages')}>
+            <NavItem
+              to="/messages"
+              icon={MessageSquare}
+              label={t("shell.nav.messages")}
+            >
               <UnreadMessagesBadge />
             </NavItem>
-            <NavItem to="/settings" icon={SlidersHorizontal} label={t('shell.nav.settings')} />
+            <ClientsNavItem />
+            <NavItem
+              to="/settings"
+              icon={SlidersHorizontal}
+              label={t("shell.nav.settings")}
+            />
           </nav>
         </aside>
 
@@ -133,5 +175,5 @@ export function AppShell() {
         </div>
       </div>
     </LiveInbox>
-  )
+  );
 }

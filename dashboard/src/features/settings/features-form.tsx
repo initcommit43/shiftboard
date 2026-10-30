@@ -28,6 +28,7 @@ function Features({ saved }: { saved: AgencyFeatures }) {
   const save = useSaveAgencyFeatures()
   const [contactButton, setContactButton] = useState(saved.contactButton)
   const [checkIn, setCheckIn] = useState(saved.checkIn ?? false)
+  const [clientPortal, setClientPortal] = useState(saved.clientPortal ?? false)
   const readOnly = role !== 'ADMIN'
 
   return (
@@ -35,7 +36,7 @@ function Features({ saved }: { saved: AgencyFeatures }) {
       className="flex max-w-[40rem] flex-col gap-6"
       onSubmit={(event) => {
         event.preventDefault()
-        save.mutate({ contactButton, checkIn })
+        save.mutate({ contactButton, checkIn, clientPortal })
       }}
     >
       <h2 className="type-heading-sm">{t('settings.features.title')}</h2>
@@ -61,6 +62,14 @@ function Features({ saved }: { saved: AgencyFeatures }) {
           checked={checkIn}
           disabled={readOnly}
           onChange={setCheckIn}
+        />
+        <SettingCheckbox
+          id="settings-client-portal"
+          label={t('settings.features.clientPortal')}
+          hint={t('settings.features.clientPortalHint')}
+          checked={clientPortal}
+          disabled={readOnly}
+          onChange={setClientPortal}
         />
       </Card>
       {!readOnly && (

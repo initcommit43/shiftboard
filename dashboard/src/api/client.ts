@@ -2,7 +2,9 @@ import { ApiError } from './errors'
 import {
   AssignmentsApi,
   AuthApi,
+  ClientPortalApi,
   ClientsApi,
+  ClientUsersApi,
   Configuration,
   HoursApi,
   MessagesApi,
@@ -124,7 +126,9 @@ const configuration = new Configuration({
 
 export const assignmentsApi = new AssignmentsApi(configuration)
 export const authApi = new AuthApi(configuration)
+export const clientPortalApi = new ClientPortalApi(configuration)
 export const clientsApi = new ClientsApi(configuration)
+export const clientUsersApi = new ClientUsersApi(configuration)
 export const hoursApi = new HoursApi(configuration)
 export const messagesApi = new MessagesApi(configuration)
 export const settingsApi = new SettingsApi(configuration)
