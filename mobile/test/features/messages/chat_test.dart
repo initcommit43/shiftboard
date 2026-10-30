@@ -88,6 +88,69 @@ void main() {
     expect(find.text('Lagerunterstützung · Sa., 17. Okt.'), findsNWidgets(2));
   });
 
+  testWidgets('words waitlist events and shows what changed on a shift', (
+    tester,
+  ) async {
+    backend.on(
+      messagesRoute,
+      (_) => json(
+        page([
+          message(
+            4,
+            'Die Agentur hat „Lagerunterstützung“ geändert. Treffpunkt: Tor 3.',
+            type: 'SYSTEM',
+            event: 'SHIFT_CHANGED',
+            aboutShift: true,
+          ),
+          message(
+            3,
+            'Du bist von der Warteliste für „Lagerunterstützung“ nachgerückt.',
+            type: 'SYSTEM',
+            event: 'WAITLIST_MOVED_UP_CONFIRMED',
+            aboutShift: true,
+          ),
+        ]),
+      ),
+    );
+    await openMessagesTab(tester);
+
+    expect(
+      find.text(
+        'Du bist von der Warteliste nachgerückt. Deine Schicht ist bestätigt.',
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.text(
+        'Die Agentur hat „Lagerunterstützung“ geändert. Treffpunkt: Tor 3.',
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('shows the body of an event newer than the app', (tester) async {
+    backend.on(
+      messagesRoute,
+      (_) => json(
+        page([
+          message(
+            3,
+            'Die Agentur hat deine Schicht getauscht.',
+            type: 'SYSTEM',
+            event: 'SHIFT_SWAPPED',
+            aboutShift: true,
+          ),
+        ]),
+      ),
+    );
+    await openMessagesTab(tester);
+
+    expect(
+      find.text('Die Agentur hat deine Schicht getauscht.'),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('shows an empty state before the first message', (tester) async {
     await openMessagesTab(tester);
 

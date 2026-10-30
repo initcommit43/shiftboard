@@ -16,7 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 
-import { formatShiftDate, formatShiftTime, STATUS_VARIANT } from './format'
+import { formatShiftDate, formatShiftTime, statusBadge } from './format'
 import { usePublishShift } from './queries'
 
 
@@ -58,6 +58,7 @@ function ShiftRow({ shift }: { shift: Shift }) {
   const { t, i18n } = useTranslation()
   const publish = usePublishShift()
   const full = shift.takenSlots >= shift.slots
+  const status = statusBadge(t, shift.status)
 
   return (
     <TableRow>
@@ -71,7 +72,7 @@ function ShiftRow({ shift }: { shift: Shift }) {
       <TableCell className="tabular-nums">{formatShiftDate(shift.startsAt, i18n.language)}</TableCell>
       <TableCell className="tabular-nums">{formatShiftTime(t, i18n.language, shift)}</TableCell>
       <TableCell>
-        <Badge variant={STATUS_VARIANT[shift.status]}>{t(`shifts.status.${shift.status}`)}</Badge>
+        <Badge variant={status.variant}>{status.label}</Badge>
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">

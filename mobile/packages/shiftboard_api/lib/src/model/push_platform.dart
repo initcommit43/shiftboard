@@ -14,6 +14,8 @@ class PushPlatform extends EnumClass {
   static const PushPlatform ANDROID = _$ANDROID;
   @BuiltValueEnumConst(wireName: r'IOS')
   static const PushPlatform IOS = _$IOS;
+  @BuiltValueEnumConst(wireName: r'unknown_default_open_api', fallback: true)
+  static const PushPlatform unknownDefaultOpenApi = _$unknownDefaultOpenApi;
 
   static Serializer<PushPlatform> get serializer => _$pushPlatformSerializer;
 

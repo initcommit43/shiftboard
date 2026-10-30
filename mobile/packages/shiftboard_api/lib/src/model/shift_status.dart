@@ -19,6 +19,8 @@ class ShiftStatus extends EnumClass {
   static const ShiftStatus COMPLETED = _$COMPLETED;
   @BuiltValueEnumConst(wireName: r'CANCELLED')
   static const ShiftStatus CANCELLED = _$CANCELLED;
+  @BuiltValueEnumConst(wireName: r'unknown_default_open_api', fallback: true)
+  static const ShiftStatus unknownDefaultOpenApi = _$unknownDefaultOpenApi;
 
   static Serializer<ShiftStatus> get serializer => _$shiftStatusSerializer;
 

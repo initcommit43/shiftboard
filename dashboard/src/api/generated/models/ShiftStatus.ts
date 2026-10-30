@@ -26,6 +26,7 @@ export const ShiftStatus = {
     PUBLISHED: 'PUBLISHED',
     COMPLETED: 'COMPLETED',
     CANCELLED: 'CANCELLED',
+    unknown_default_open_api: '11184809',
 } as const;
 export type ShiftStatus = typeof ShiftStatus[keyof typeof ShiftStatus];
 

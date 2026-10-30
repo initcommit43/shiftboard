@@ -8,6 +8,8 @@ part of 'cancelled_by.dart';
 
 const CancelledBy _$WORKER = const CancelledBy._('WORKER');
 const CancelledBy _$AGENCY = const CancelledBy._('AGENCY');
+const CancelledBy _$unknownDefaultOpenApi =
+    const CancelledBy._('unknownDefaultOpenApi');
 
 CancelledBy _$valueOf(String name) {
   switch (name) {
@@ -15,8 +17,10 @@ CancelledBy _$valueOf(String name) {
       return _$WORKER;
     case 'AGENCY':
       return _$AGENCY;
+    case 'unknownDefaultOpenApi':
+      return _$unknownDefaultOpenApi;
     default:
-      throw ArgumentError(name);
+      return _$unknownDefaultOpenApi;
   }
 }
 
@@ -24,12 +28,14 @@ final BuiltSet<CancelledBy> _$values =
     BuiltSet<CancelledBy>(const <CancelledBy>[
   _$WORKER,
   _$AGENCY,
+  _$unknownDefaultOpenApi,
 ]);
 
 class _$CancelledByMeta {
   const _$CancelledByMeta();
   CancelledBy get WORKER => _$WORKER;
   CancelledBy get AGENCY => _$AGENCY;
+  CancelledBy get unknownDefaultOpenApi => _$unknownDefaultOpenApi;
   CancelledBy valueOf(String name) => _$valueOf(name);
   BuiltSet<CancelledBy> get values => _$values;
 }
@@ -45,10 +51,12 @@ class _$CancelledBySerializer implements PrimitiveSerializer<CancelledBy> {
   static const Map<String, Object> _toWire = const <String, Object>{
     'WORKER': 'WORKER',
     'AGENCY': 'AGENCY',
+    'unknownDefaultOpenApi': 'unknown_default_open_api',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'WORKER': 'WORKER',
     'AGENCY': 'AGENCY',
+    'unknown_default_open_api': 'unknownDefaultOpenApi',
   };
 
   @override

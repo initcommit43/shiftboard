@@ -9,6 +9,8 @@ part of 'worker_status.dart';
 const WorkerStatus _$PENDING = const WorkerStatus._('PENDING');
 const WorkerStatus _$ACTIVE = const WorkerStatus._('ACTIVE');
 const WorkerStatus _$INACTIVE = const WorkerStatus._('INACTIVE');
+const WorkerStatus _$unknownDefaultOpenApi =
+    const WorkerStatus._('unknownDefaultOpenApi');
 
 WorkerStatus _$valueOf(String name) {
   switch (name) {
@@ -18,8 +20,10 @@ WorkerStatus _$valueOf(String name) {
       return _$ACTIVE;
     case 'INACTIVE':
       return _$INACTIVE;
+    case 'unknownDefaultOpenApi':
+      return _$unknownDefaultOpenApi;
     default:
-      throw ArgumentError(name);
+      return _$unknownDefaultOpenApi;
   }
 }
 
@@ -28,6 +32,7 @@ final BuiltSet<WorkerStatus> _$values =
   _$PENDING,
   _$ACTIVE,
   _$INACTIVE,
+  _$unknownDefaultOpenApi,
 ]);
 
 class _$WorkerStatusMeta {
@@ -35,6 +40,7 @@ class _$WorkerStatusMeta {
   WorkerStatus get PENDING => _$PENDING;
   WorkerStatus get ACTIVE => _$ACTIVE;
   WorkerStatus get INACTIVE => _$INACTIVE;
+  WorkerStatus get unknownDefaultOpenApi => _$unknownDefaultOpenApi;
   WorkerStatus valueOf(String name) => _$valueOf(name);
   BuiltSet<WorkerStatus> get values => _$values;
 }
@@ -51,11 +57,13 @@ class _$WorkerStatusSerializer implements PrimitiveSerializer<WorkerStatus> {
     'PENDING': 'PENDING',
     'ACTIVE': 'ACTIVE',
     'INACTIVE': 'INACTIVE',
+    'unknownDefaultOpenApi': 'unknown_default_open_api',
   };
   static const Map<Object, String> _fromWire = const <Object, String>{
     'PENDING': 'PENDING',
     'ACTIVE': 'ACTIVE',
     'INACTIVE': 'INACTIVE',
+    'unknown_default_open_api': 'unknownDefaultOpenApi',
   };
 
   @override

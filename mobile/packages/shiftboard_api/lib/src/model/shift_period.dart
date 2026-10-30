@@ -15,6 +15,8 @@ class ShiftPeriod extends EnumClass {
   static const ShiftPeriod UPCOMING = _$UPCOMING;
   @BuiltValueEnumConst(wireName: r'PAST')
   static const ShiftPeriod PAST = _$PAST;
+  @BuiltValueEnumConst(wireName: r'unknown_default_open_api', fallback: true)
+  static const ShiftPeriod unknownDefaultOpenApi = _$unknownDefaultOpenApi;
 
   static Serializer<ShiftPeriod> get serializer => _$shiftPeriodSerializer;
 

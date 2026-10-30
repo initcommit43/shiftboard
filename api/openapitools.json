@@ -13,7 +13,8 @@
           "pubDescription": "Generated API client for the shiftboard worker app. Do not edit.",
           "pubVersion": "0.1.0",
           "serializationLibrary": "built_value",
-          "dateLibrary": "core"
+          "dateLibrary": "core",
+          "enumUnknownDefaultCase": true
         },
         "globalProperty": {
           "apiTests": false,
@@ -30,7 +31,8 @@
           "supportsES6": true,
           "useSingleRequestParameter": true,
           "stringEnums": false,
-          "enumPropertyNaming": "original"
+          "enumPropertyNaming": "original",
+          "enumUnknownDefaultCase": true
         },
         "globalProperty": {
           "apiTests": false,

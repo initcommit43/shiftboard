@@ -29,6 +29,7 @@ export const AssignmentStatus = {
     CANCELLED: 'CANCELLED',
     COMPLETED: 'COMPLETED',
     NO_SHOW: 'NO_SHOW',
+    unknown_default_open_api: '11184809',
 } as const;
 export type AssignmentStatus = typeof AssignmentStatus[keyof typeof AssignmentStatus];
 

@@ -15,6 +15,8 @@ class CancelledBy extends EnumClass {
   static const CancelledBy WORKER = _$WORKER;
   @BuiltValueEnumConst(wireName: r'AGENCY')
   static const CancelledBy AGENCY = _$AGENCY;
+  @BuiltValueEnumConst(wireName: r'unknown_default_open_api', fallback: true)
+  static const CancelledBy unknownDefaultOpenApi = _$unknownDefaultOpenApi;
 
   static Serializer<CancelledBy> get serializer => _$cancelledBySerializer;
 

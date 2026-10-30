@@ -1,6 +1,7 @@
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
 
+import { known } from '@/api/enums'
 import { ShiftStatus } from '@/api/generated'
 
 /** Date and time of an event on a shift, such as a claim or joining the waitlist. */
@@ -16,6 +17,14 @@ export const STATUS_VARIANT = {
   [ShiftStatus.COMPLETED]: 'confirmed',
   [ShiftStatus.CANCELLED]: 'cancelled',
 } as const
+
+/** The badge and label of a shift status; a status newer than the dashboard shows as unknown. */
+export function statusBadge(t: TFunction, value: ShiftStatus) {
+  const status = known(ShiftStatus, value)
+  return status
+    ? { variant: STATUS_VARIANT[status], label: t(`shifts.status.${status}`) }
+    : { variant: 'tag' as const, label: t('unknownValue') }
+}
 
 function sameDay(a: Date, b: Date) {
   return (

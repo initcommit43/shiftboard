@@ -20,6 +20,7 @@
 export const PushPlatform = {
     ANDROID: 'ANDROID',
     IOS: 'IOS',
+    unknown_default_open_api: '11184809',
 } as const;
 export type PushPlatform = typeof PushPlatform[keyof typeof PushPlatform];
 

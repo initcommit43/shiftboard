@@ -3088,8 +3088,27 @@ components:
       type: string
       description: |
         What a `SYSTEM` message reports, so that clients can word it in their
-        language. `body` carries a German text as a fallback.
-      enum: [CLAIM_CONFIRMED, CLAIM_REJECTED, CLAIM_CANCELLED_BY_WORKER, REMOVED_BY_AGENCY, SHIFT_CANCELLED]
+        language. `body` carries a German text as a fallback. `SHIFT_CHANGED`
+        means the agency changed the shift, and its `body` says what changed.
+        The `WAITLIST_*` events report the waitlist: moved up into a claim
+        that waits for the agency (`WAITLIST_MOVED_UP`) or into a confirmed
+        spot (`WAITLIST_MOVED_UP_CONFIRMED`), taken off by the agency
+        (`WAITLIST_REMOVED_BY_AGENCY`), or taken off because the worker is
+        booked at the same time by now (`WAITLIST_SKIPPED`).
+
+        New values may be added. Clients show the `body` of an event they do
+        not know.
+      enum:
+        - CLAIM_CONFIRMED
+        - CLAIM_REJECTED
+        - CLAIM_CANCELLED_BY_WORKER
+        - REMOVED_BY_AGENCY
+        - SHIFT_CANCELLED
+        - SHIFT_CHANGED
+        - WAITLIST_MOVED_UP
+        - WAITLIST_MOVED_UP_CONFIRMED
+        - WAITLIST_REMOVED_BY_AGENCY
+        - WAITLIST_SKIPPED
 
     MessageShift:
       type: object
@@ -3115,9 +3134,7 @@ components:
         type:
           $ref: "#/components/schemas/MessageType"
         event:
-          description: |
-            Present for `SYSTEM` messages that clients word themselves. A
-            change of the shift has none: its `body` says what changed.
+          description: Present for `SYSTEM` messages; says what the message reports.
           $ref: "#/components/schemas/SystemEvent"
         body:
           type: string

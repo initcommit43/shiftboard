@@ -748,6 +748,22 @@
   "@chatEventShiftCancelled": {
     "description": "System message."
   },
+  "chatEventWaitlistMovedUp": "Du bist von der Warteliste nachgerückt. Deine Anfrage wartet auf die Bestätigung der Agentur.",
+  "@chatEventWaitlistMovedUp": {
+    "description": "System message: moved up from the waitlist into a claim the agency still has to confirm."
+  },
+  "chatEventWaitlistMovedUpConfirmed": "Du bist von der Warteliste nachgerückt. Deine Schicht ist bestätigt.",
+  "@chatEventWaitlistMovedUpConfirmed": {
+    "description": "System message: moved up from the waitlist into a confirmed spot."
+  },
+  "chatEventWaitlistRemoved": "Die Agentur hat dich von der Warteliste genommen.",
+  "@chatEventWaitlistRemoved": {
+    "description": "System message."
+  },
+  "chatEventWaitlistSkipped": "Ein Platz ist frei geworden, aber du hast zur selben Zeit schon eine Schicht. Du bist nicht mehr auf der Warteliste.",
+  "@chatEventWaitlistSkipped": {
+    "description": "System message: first in line, but booked for a shift at the same time, so off the waitlist."
+  },
   "profileNotifications": "Benachrichtigungen",
   "@profileNotifications": {
     "description": "Section title in the profile."

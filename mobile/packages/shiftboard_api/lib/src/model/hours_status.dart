@@ -15,6 +15,8 @@ class HoursStatus extends EnumClass {
   static const HoursStatus OPEN = _$OPEN;
   @BuiltValueEnumConst(wireName: r'APPROVED')
   static const HoursStatus APPROVED = _$APPROVED;
+  @BuiltValueEnumConst(wireName: r'unknown_default_open_api', fallback: true)
+  static const HoursStatus unknownDefaultOpenApi = _$unknownDefaultOpenApi;
 
   static Serializer<HoursStatus> get serializer => _$hoursStatusSerializer;
 

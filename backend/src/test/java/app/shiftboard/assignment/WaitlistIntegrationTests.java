@@ -335,7 +335,7 @@ class WaitlistIntegrationTests extends IntegrationTest {
                         .expectBody()
                         .jsonPath("$.content.length()").isEqualTo(1)
                         .jsonPath("$.content[0].type").isEqualTo("SYSTEM")
-                        .jsonPath("$.content[0].event").doesNotExist()
+                        .jsonPath("$.content[0].event").isEqualTo("WAITLIST_MOVED_UP")
                         .jsonPath("$.content[0].shift.id").isEqualTo(shiftId.toString()));
         var body = jdbc.sql("""
                 select m.body from message m join conversation c on c.id = m.conversation_id
@@ -698,7 +698,7 @@ class WaitlistIntegrationTests extends IntegrationTest {
                         .expectStatus().isOk()
                         .expectBody()
                         .jsonPath("$.content.length()").isEqualTo(1)
-                        .jsonPath("$.content[0].event").doesNotExist()
+                        .jsonPath("$.content[0].event").isEqualTo("WAITLIST_REMOVED_BY_AGENCY")
                         .jsonPath("$.content[0].body").value(body -> assertThat((String) body)
                                 .startsWith("Die Agentur hat dich von der Warteliste für „Staplerfahrer:in“ am ")
                                 .endsWith(" genommen.")));

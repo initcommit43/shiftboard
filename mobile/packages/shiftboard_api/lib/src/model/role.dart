@@ -16,6 +16,8 @@ class Role extends EnumClass {
   static const Role DISPATCHER = _$DISPATCHER;
   @BuiltValueEnumConst(wireName: r'WORKER')
   static const Role WORKER = _$WORKER;
+  @BuiltValueEnumConst(wireName: r'unknown_default_open_api', fallback: true)
+  static const Role unknownDefaultOpenApi = _$unknownDefaultOpenApi;
 
   static Serializer<Role> get serializer => _$roleSerializer;
 
