@@ -5,6 +5,7 @@ import 'core/l10n/l10n.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/tokens.dart';
+import 'features/messages/presentation/live_chat.dart';
 import 'features/notifications/presentation/push_handler.dart';
 
 class ShiftboardApp extends ConsumerWidget {
@@ -19,7 +20,7 @@ class ShiftboardApp extends ConsumerWidget {
       darkTheme: AppTheme.dark,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
-      builder: (context, child) => PushHandler(child: child!),
+      builder: (context, child) => PushHandler(child: LiveChat(child: child!)),
     );
   }
 }

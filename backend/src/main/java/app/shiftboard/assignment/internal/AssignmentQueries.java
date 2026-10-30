@@ -28,11 +28,21 @@ class AssignmentQueries implements Assignments, ShiftWaitlists {
 
     @Override
     @Transactional(readOnly = true)
+    public Map<UUID, Integer> confirmedCounts(Collection<UUID> shiftIds) {
+        return counts(shiftIds, AssignmentStatus.CONFIRMED);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Map<UUID, Integer> waitingCounts(Collection<UUID> shiftIds) {
+        return counts(shiftIds, AssignmentStatus.WAITLISTED);
+    }
+
+    private Map<UUID, Integer> counts(Collection<UUID> shiftIds, AssignmentStatus status) {
         if (shiftIds.isEmpty()) {
             return Map.of();
         }
-        return assignments.countWaiting(shiftIds, AssignmentStatus.WAITLISTED).stream()
+        return assignments.countWaiting(shiftIds, status).stream()
                 .collect(Collectors.toMap(
                         AssignmentRepository.WaitingPerShift::getShiftId,
                         waiting -> Math.toIntExact(waiting.getWaiting())));

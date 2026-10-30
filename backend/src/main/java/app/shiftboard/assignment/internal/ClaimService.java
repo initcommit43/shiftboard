@@ -53,6 +53,9 @@ class ClaimService {
         // The slot first: every change that frees or takes a slot changes the shift before it
         // locks assignments, so that two of them wait for each other instead of deadlocking.
         var shift = shifts.claim(shiftId);
+        // Then the worker: a concurrent claim of the same worker on another shift waits here and
+        // sees this one in the check below once it is committed.
+        assignments.lockBookings(workerId);
         if (assignments.isBooked(workerId, AssignmentStatus.HOLDING, shift.startsAt(), shift.endsAt())) {
             throw overlap();
         }
@@ -71,8 +74,8 @@ class ClaimService {
                         shiftId, workerId, shift.startsAt(), shift.endsAt(), now, autoConfirm));
             }
         } catch (DataIntegrityViolationException e) {
-            // A concurrent claim of the same worker was stored between the checks above and this
-            // insert; the constraints caught it.
+            // The constraints back up the checks above, e.g. against a change that books the
+            // worker without taking their lock.
             throw byConstraint(e);
         }
         var agencyId = TenantContext.require();

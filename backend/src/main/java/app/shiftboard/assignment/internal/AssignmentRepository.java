@@ -118,6 +118,26 @@ interface AssignmentRepository extends Repository<Assignment, UUID> {
     boolean isBookedElsewhere(
             UUID workerId, UUID except, Collection<AssignmentStatus> statuses, Instant startsAt, Instant endsAt);
 
+    // The bookings of a worker are locked before a change books them for a time: a new claim, a
+    // move up from the waitlist, or a shift moved to a new time. Two such changes of the same
+    // worker then run one after the other, and the second sees the first, instead of both waiting
+    // for each other in the exclusion constraint assignment_no_overlap, which Postgres ends as a
+    // deadlock. The lock is a transaction-level advisory lock, released with the transaction, and
+    // always taken after the shift is written, so that the order is shift first, then workers.
+
+    /** Locks the bookings of the worker until the transaction ends. */
+    @Query(nativeQuery = true, value = """
+            select count(*) from (
+                select pg_advisory_xact_lock(hashtextextended('assignment.worker:' || cast(:workerId as text), 0))
+            ) locked
+            """)
+    long lockBookings(UUID workerId);
+
+    /** Locks the bookings of each of the workers, always in the same order. */
+    default void lockBookings(Collection<UUID> workerIds) {
+        workerIds.stream().distinct().sorted().forEach(this::lockBookings);
+    }
+
     interface WaitingPerShift {
 
         UUID getShiftId();

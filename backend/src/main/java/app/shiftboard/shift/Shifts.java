@@ -15,8 +15,26 @@ public interface Shifts {
     /** The published shifts that have not started yet, earliest start first, full ones included. */
     Page<ShiftDetails> listOpen(int page, int size);
 
+    /**
+     * The published, completed and cancelled shifts of one client. Upcoming ones haven't ended,
+     * earliest start first; past ones have, latest start first.
+     */
+    Page<ShiftDetails> listForClient(UUID clientId, boolean past, int page, int size);
+
     /** A published, completed or cancelled shift. */
     Optional<ShiftDetails> find(UUID shiftId);
+
+    /**
+     * Like {@link #find}, but holds a shared lock on the shift until the transaction of the caller
+     * ends, which this joins. A change of the shift, such as one that frees or takes a slot, waits
+     * for that transaction, and if one was in progress, the shift is read as it left it. Readers
+     * that share the lock don't wait for each other. Callers take it before they lock any
+     * assignment, in the same order as every change that frees or takes a slot, so that the two
+     * wait for each other instead of deadlocking.
+     *
+     * @throws org.springframework.transaction.IllegalTransactionStateException without a transaction
+     */
+    Optional<ShiftDetails> findAndLock(UUID shiftId);
 
     /** The shifts with these ids by id; unknown ids are left out. */
     Map<UUID, ShiftDetails> findAll(Collection<UUID> shiftIds);

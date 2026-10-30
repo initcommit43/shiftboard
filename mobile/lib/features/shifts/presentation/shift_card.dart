@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shiftboard_api/shiftboard_api.dart';
 
 import '../../../core/l10n/l10n.dart';
+import '../../../core/platform/clock.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/tokens.dart';
 import 'shift_format.dart';
@@ -15,16 +17,17 @@ const _stackFromTextScale = 1.5;
 
 /// One shift in the list: what an agency's SMS says, plus spots left and the
 /// estimated pay. Tapping it opens the detail.
-class ShiftCard extends StatelessWidget {
+class ShiftCard extends ConsumerWidget {
   const ShiftCard({super.key, required this.shift, this.onTap});
 
   final WorkerShift shift;
   final VoidCallback? onTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final format = ShiftFormat.of(context);
+    final now = ref.watch(clockProvider)();
     final badge = shiftBadge(shift, context.l10n);
     final stacked =
         MediaQuery.textScalerOf(context).scale(1) >= _stackFromTextScale;
@@ -113,7 +116,7 @@ class ShiftCard extends StatelessWidget {
                     ],
                   ),
                   Text(
-                    format.spots(shift),
+                    format.spots(shift, now),
                     style: AppTypography.footnote.copyWith(
                       color: colors.inkSecondary,
                     ),

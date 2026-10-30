@@ -39,6 +39,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -220,8 +221,28 @@ class ShiftService implements Shifts {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<ShiftDetails> listForClient(UUID clientId, boolean past, int page, int size) {
+        var now = Instant.now();
+        var visible = List.of(ShiftStatus.PUBLISHED, ShiftStatus.COMPLETED, ShiftStatus.CANCELLED);
+        var pageable = PageRequest.of(page, size, past ? LATEST_START_FIRST : EARLIEST_START_FIRST);
+        var result = past
+                ? shifts.findByClientIdAndStatusInAndEndsAtLessThanEqual(clientId, visible, now, pageable)
+                : shifts.findByClientIdAndStatusInAndEndsAtAfter(clientId, visible, now, pageable);
+        return new PageImpl<>(details(result.getContent()), pageable, result.getTotalElements());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Optional<ShiftDetails> find(UUID shiftId) {
         return shifts.findById(shiftId)
+                .filter(ShiftService::visibleToWorkers)
+                .map(shift -> details(List.of(shift)).getFirst());
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.MANDATORY)
+    public Optional<ShiftDetails> findAndLock(UUID shiftId) {
+        return shifts.findAndLockById(shiftId)
                 .filter(ShiftService::visibleToWorkers)
                 .map(shift -> details(List.of(shift)).getFirst());
     }
