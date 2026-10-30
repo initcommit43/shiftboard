@@ -39,6 +39,10 @@ class Conversation {
         return id;
     }
 
+    UUID getAgencyId() {
+        return agencyId;
+    }
+
     UUID getWorkerId() {
         return workerId;
     }

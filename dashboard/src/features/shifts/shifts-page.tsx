@@ -6,9 +6,9 @@ import { Link, useSearchParams } from 'react-router'
 import { ShiftPeriod } from '@/api/generated'
 import { PageHeader } from '@/components/page-header'
 import { Pagination } from '@/components/pagination'
+import { PeriodTabs } from '@/components/period-tabs'
 import { StateCard } from '@/components/state-card'
 import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 
 import { useShifts } from './queries'
 import { ShiftTable, ShiftTableSkeleton } from './shift-table'
@@ -39,41 +39,25 @@ export function ShiftsPage() {
           </Button>
         }
       />
-      <PeriodTabs period={period} />
+      <ShiftPeriodTabs period={period} />
       {/* A new period starts on its first page. */}
       <ShiftList key={period} period={period} />
     </div>
   )
 }
 
-function PeriodTabs({ period }: { period: ShiftPeriod }) {
+function ShiftPeriodTabs({ period }: { period: ShiftPeriod }) {
   const { t } = useTranslation()
-  const tabs = [
-    { period: ShiftPeriod.UPCOMING, to: '/shifts', label: t('shifts.periods.upcoming') },
-    { period: ShiftPeriod.PAST, to: '/shifts?period=past', label: t('shifts.periods.past') },
-  ]
 
   return (
-    <nav aria-label={t('shifts.periods.label')} className="flex gap-2">
-      {tabs.map((tab) => {
-        const current = tab.period === period
-        return (
-          <Link
-            key={tab.period}
-            to={tab.to}
-            aria-current={current ? 'page' : undefined}
-            className={cn(
-              'type-button-sm inline-flex h-9 items-center rounded-full px-4 transition-colors',
-              current
-                ? 'bg-action text-on-action'
-                : 'bg-surface-soft text-ink hover:bg-surface-soft/70',
-            )}
-          >
-            {tab.label}
-          </Link>
-        )
-      })}
-    </nav>
+    <PeriodTabs
+      label={t('shifts.periods.label')}
+      current={period}
+      tabs={[
+        { period: ShiftPeriod.UPCOMING, to: '/shifts', label: t('shifts.periods.upcoming') },
+        { period: ShiftPeriod.PAST, to: '/shifts?period=past', label: t('shifts.periods.past') },
+      ]}
+    />
   )
 }
 

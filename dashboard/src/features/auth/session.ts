@@ -1,5 +1,5 @@
-import { authApi, onSessionExpired, refreshTokens } from '@/api/client'
-import { ClientType, type CurrentUser } from '@/api/generated'
+import { authApi, clientUsersApi, onSessionExpired, refreshTokens } from '@/api/client'
+import { ClientType, type CurrentUser, type TokenResponse } from '@/api/generated'
 import { clearTokens, getRefreshToken, setTokens } from '@/api/tokens'
 
 let user: CurrentUser | null = null
@@ -36,9 +36,21 @@ async function restoreSession() {
 }
 
 export async function login(email: string, password: string) {
-  const tokens = await authApi.login({
-    loginRequest: { email, password, client: ClientType.DASHBOARD },
-  })
+  await startSession(
+    await authApi.login({
+      loginRequest: { email, password, client: ClientType.DASHBOARD },
+    }),
+  )
+}
+
+/** Sets the password of an invited client user with their setup link; they are logged in afterwards. */
+export async function completeClientSetup(setupCode: string, password: string) {
+  await startSession(
+    await clientUsersApi.completeClientSetup({ setupCode, clientSetupRequest: { password } }),
+  )
+}
+
+async function startSession(tokens: TokenResponse) {
   setTokens(tokens)
   try {
     user = await authApi.getCurrentUser()
