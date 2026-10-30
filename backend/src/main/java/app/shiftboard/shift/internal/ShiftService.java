@@ -22,6 +22,7 @@ import app.shiftboard.shift.ShiftPublished;
 import app.shiftboard.shift.ShiftSpotsAdded;
 import app.shiftboard.shift.ShiftWaitlists;
 import app.shiftboard.shift.Shifts;
+import app.shiftboard.shift.StaffRequestAcceptance;
 import app.shiftboard.shift.internal.ShiftController.ClientSummary;
 import app.shiftboard.shift.internal.ShiftController.ShiftChangeRequest;
 import app.shiftboard.shift.internal.ShiftController.ShiftPage;
@@ -61,20 +62,23 @@ class ShiftService implements Shifts {
 
     private final ShiftWaitlists waitlists;
 
+    private final StaffRequestAcceptance staffRequests;
+
     private final ApplicationEventPublisher events;
 
     private final TransactionTemplate transactions;
 
     ShiftService(
             ShiftRepository shifts, Clients clients, Agencies agencies, ShiftReferences references,
-            UserAccounts userAccounts, ShiftWaitlists waitlists, ApplicationEventPublisher events,
-            TransactionTemplate transactions) {
+            UserAccounts userAccounts, ShiftWaitlists waitlists, StaffRequestAcceptance staffRequests,
+            ApplicationEventPublisher events, TransactionTemplate transactions) {
         this.shifts = shifts;
         this.clients = clients;
         this.agencies = agencies;
         this.references = references;
         this.userAccounts = userAccounts;
         this.waitlists = waitlists;
+        this.staffRequests = staffRequests;
         this.events = events;
         this.transactions = transactions;
     }
@@ -201,6 +205,17 @@ class ShiftService implements Shifts {
             events.publishEvent(new ShiftPublished(TenantContext.require(), created.getId()));
         }
         return responses(List.of(created)).getFirst();
+    }
+
+    /**
+     * Creates the shift and closes the client's staff request with it in one transaction: if the
+     * request no longer accepts it, the shift is not kept (ADR 0032).
+     */
+    @Transactional
+    ShiftResponse createFromStaffRequest(UUID requestId, ShiftRequest request, UUID contactUserId) {
+        var created = create(request, contactUserId);
+        staffRequests.accept(requestId, request.clientId(), created.id());
+        return created;
     }
 
     @Transactional
