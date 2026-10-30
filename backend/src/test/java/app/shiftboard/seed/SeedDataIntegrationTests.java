@@ -48,13 +48,13 @@ class SeedDataIntegrationTests {
         assertThat(rowCounts()).containsExactlyInAnyOrderEntriesOf(Map.ofEntries(
                 Map.entry("agency", 2),
                 Map.entry("qualification", 6),
-                Map.entry("user_account", 16),
+                Map.entry("user_account", 18),
                 Map.entry("worker", 12),
                 Map.entry("worker_qualification", 15),
                 Map.entry("client", 4),
                 Map.entry("location", 5),
-                Map.entry("shift", 10),
-                Map.entry("shift_qualification", 9),
+                Map.entry("shift", 11),
+                Map.entry("shift_qualification", 10),
                 Map.entry("shift_template", 5),
                 Map.entry("shift_template_qualification", 5),
                 Map.entry("assignment", 15),
@@ -121,12 +121,13 @@ class SeedDataIntegrationTests {
                 .expectBody()
                 .jsonPath("$.content[*].title").isEqualTo(List.of(
                         "Service Tagung", "Lagerunterstützung", "Service Hochzeit", "Barkeeper:in Hochzeit",
-                        "Staplerfahrer:in", "Auf- und Abbau Messe", "Service Firmenfeier"))
+                        "Staplerfahrer:in", "Wareneingang", "Auf- und Abbau Messe", "Service Firmenfeier"))
                 .jsonPath("$.content[1].client.name").isEqualTo("Nordlicht Logistik")
                 .jsonPath("$.content[1].location.name").isEqualTo("Zentrallager Linz")
                 .jsonPath("$.content[1].hourlyRateCents").isEqualTo(1650)
                 .jsonPath("$.content[4].qualifications[*].name").isEqualTo(List.of("Lager", "Staplerschein"))
-                .jsonPath("$.content[6].status").isEqualTo("DRAFT");
+                .jsonPath("$.content[5].status").isEqualTo("CANCELLED")
+                .jsonPath("$.content[7].status").isEqualTo("DRAFT");
 
         client.get().uri("/api/v1/clients")
                 .headers(headers -> headers.setBearerAuth(login("dispatcher.alpen@example.com", "DASHBOARD")))
@@ -244,6 +245,26 @@ class SeedDataIntegrationTests {
     void theSeededAdminAndWorkersCanLogIn() {
         assertThat(login("admin.donau@example.com", "DASHBOARD")).isNotBlank();
         assertThat(login("lena.hofer@example.com", "WORKER_APP")).isNotBlank();
+    }
+
+    @Test
+    void theSeededClientUserSeesTheShiftsOfNordlichtLogistik() {
+        var token = login("kunde.nordlicht@example.com", "DASHBOARD");
+        client.get().uri("/api/v1/client/shifts")
+                .headers(headers -> headers.setBearerAuth(token))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[*].title").isEqualTo(List.of("Lagerunterstützung", "Staplerfahrer:in", "Wareneingang"))
+                .jsonPath("$.content[0].confirmedCount").isEqualTo(1)
+                .jsonPath("$.content[1].confirmedCount").isEqualTo(2)
+                .jsonPath("$.content[2].status").isEqualTo("CANCELLED");
+        client.get().uri("/api/v1/client/shifts?period=PAST")
+                .headers(headers -> headers.setBearerAuth(token))
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.content[*].title").isEqualTo(List.of("Inventur"));
     }
 
     private String login(String email, String clientType) {
