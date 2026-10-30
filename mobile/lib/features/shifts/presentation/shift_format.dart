@@ -48,18 +48,15 @@ class ShiftFormat {
   String hourlyRate(WorkerShift shift) =>
       _l10n.shiftHourlyRate(money(shift.hourlyRateCents));
 
-  /// The spots left, and on a full shift whether its waitlist is open to the
-  /// worker.
-  String spots(WorkerShift shift) {
+  /// The spots left, and on a full shift whether the worker can still join
+  /// its waitlist at [now], by the same rule as the join button.
+  String spots(WorkerShift shift, DateTime now) {
     if (!shift.isFull) {
       return _l10n.shiftSpotsLeft(shift.spotsLeft, shift.slots);
     }
-    final waitlistOpen =
-        (shift.waitlistEnabled ?? false) &&
-        shift.status == ShiftStatus.PUBLISHED &&
-        shift.assignment == null &&
-        !shift.isWaiting;
-    return waitlistOpen ? _l10n.shiftSpotsWaitlist : _l10n.shiftNoSpotsLeft;
+    return shift.canJoinWaitlistAt(now)
+        ? _l10n.shiftSpotsWaitlist
+        : _l10n.shiftNoSpotsLeft;
   }
 
   /// For example "18:00".
