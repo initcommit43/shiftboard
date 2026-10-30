@@ -128,13 +128,14 @@ Base package `app.shiftboard`. Each direct subpackage is a Spring Modulith appli
 | Module | Responsibility |
 | --- | --- |
 | `agency` | Agencies as tenants, their qualifications and per-agency settings, the tenant context |
-| `identity` | User accounts, login, access and refresh tokens, security configuration |
+| `identity` | User accounts, login, access and refresh tokens, client users and their setup links, security configuration |
 | `worker` | Workers in an agency's pool: signup, approval and the qualifications they have |
 | `client` | Clients of an agency and the locations their shifts take place at |
 | `shift` | Shifts an agency publishes, with their slots and requirements |
 | `assignment` | Claims of workers on shifts, their confirmation and cancellation |
 | `messaging` | Conversations between an agency and its workers |
 | `notification` | Push notifications sent in reaction to events of other modules |
+| `portal` | What the staff of a client see of their shifts in the client portal |
 | `seed` | Fictional demo data for development machines (`local` profile) |
 | `system` | Service status, `/api/v1` path prefix, problem details |
 

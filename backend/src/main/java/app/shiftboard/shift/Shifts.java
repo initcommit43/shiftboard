@@ -15,6 +15,12 @@ public interface Shifts {
     /** The published shifts that have not started yet, earliest start first, full ones included. */
     Page<ShiftDetails> listOpen(int page, int size);
 
+    /**
+     * The published, completed and cancelled shifts of one client. Upcoming ones haven't ended,
+     * earliest start first; past ones have, latest start first.
+     */
+    Page<ShiftDetails> listForClient(UUID clientId, boolean past, int page, int size);
+
     /** A published, completed or cancelled shift. */
     Optional<ShiftDetails> find(UUID shiftId);
 
