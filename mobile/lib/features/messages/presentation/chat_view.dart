@@ -24,10 +24,19 @@ typedef ChatShift = ({String id, String title, DateTime startsAt});
 /// The worker's one conversation with the agency: the latest messages at the
 /// bottom, and a field to write. A message started from a shift carries that
 /// shift until it is sent or the tag is removed.
+///
+/// Loading the messages marks the agency's as read, so the chat loads them
+/// only while it is on screen: while [shown] and its route is the current
+/// one. Hidden, it keeps showing what it had and loads nothing, so that the
+/// unread badge stays until the worker opens the chat; it loads again when
+/// shown.
 class ChatView extends ConsumerStatefulWidget {
-  const ChatView({super.key, this.shift});
+  const ChatView({super.key, this.shift, this.shown = true});
 
   final ChatShift? shift;
+
+  /// False while the chat is in a tab that is not selected.
+  final bool shown;
 
   @override
   ConsumerState<ChatView> createState() => _ChatViewState();
@@ -38,6 +47,9 @@ class _ChatViewState extends ConsumerState<ChatView> {
   late ChatShift? _shift = widget.shift;
   bool _sending = false;
   String? _error;
+
+  /// The messages last loaded, shown while hidden or loading again.
+  List<Message>? _lastMessages;
 
   @override
   void dispose() {
@@ -83,11 +95,13 @@ class _ChatViewState extends ConsumerState<ChatView> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final messages = ref.watch(myMessagesProvider);
+    final shown = widget.shown && (ModalRoute.isCurrentOf(context) ?? true);
+    final messages = shown ? ref.watch(myMessagesProvider) : null;
+    if (messages?.value case final list?) _lastMessages = list;
     Future<void> reload() => ref.refresh(myMessagesProvider.future);
 
     final Widget body;
-    if (messages.value case final list?) {
+    if (messages?.value ?? _lastMessages case final list?) {
       body = RefreshIndicator(
         onRefresh: () async {
           try {
@@ -125,6 +139,9 @@ class _ChatViewState extends ConsumerState<ChatView> {
                     MessageBubble(message: list[index]),
               ),
       );
+    } else if (messages == null) {
+      // Hidden before it was ever shown: nothing to show, nothing loads.
+      body = const SizedBox.shrink();
     } else if (messages.isLoading) {
       body = Center(
         child: CircularProgressIndicator(semanticsLabel: l10n.loadingLabel),
