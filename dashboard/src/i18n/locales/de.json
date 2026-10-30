@@ -15,7 +15,8 @@
       "pendingSignups_one": "{{count}} offene Anmeldung",
       "pendingSignups_other": "{{count}} offene Anmeldungen",
       "unreadMessages_one": "{{count}} ungelesene Nachricht",
-      "unreadMessages_other": "{{count}} ungelesene Nachrichten"
+      "unreadMessages_other": "{{count}} ungelesene Nachrichten",
+      "clients": "Kunden"
     },
     "theme": {
       "toLight": "Zum hellen Design wechseln",
@@ -42,13 +43,14 @@
   "login": {
     "tagline": "Jede Schicht besetzt.",
     "title": "Anmelden",
-    "description": "Melde dich mit deinem Agentur-Konto im Dashboard an.",
+    "description": "Melde dich mit deinem Konto im Dashboard oder im Kundenportal an.",
     "email": "E-Mail",
     "emailPlaceholder": "name@example.com",
     "password": "Passwort",
     "passwordPlaceholder": "Dein Passwort",
     "submit": "Anmelden",
-    "workerHint": "Du bist Mitarbeiter:in? Deine Schichten findest du in der shiftboard App."
+    "workerHint": "Du bist Mitarbeiter:in? Deine Schichten findest du in der shiftboard App.",
+    "clientPortalOff": "Das Kundenportal ist derzeit ausgeschaltet. Bitte wende dich an die Agentur."
   },
   "shifts": {
     "title": "Schichten",
@@ -251,7 +253,14 @@
     "shift_not_started": "Die Schicht hat noch nicht begonnen. Stunden lassen sich erst danach erfassen.",
     "assignment_not_worked": "Diese Person hat keinen bestätigten Platz mehr. Die Liste wurde aktualisiert.",
     "worker_attended": "Diese Person war da: Sie hat eingecheckt oder hat freigegebene Stunden. Sie kann nicht als nicht erschienen markiert werden.",
-    "waitlist_entry_not_found": "Diese Person ist nicht mehr auf der Warteliste: Sie hat sich ausgetragen oder ist nachgerückt. Die Liste wurde aktualisiert."
+    "waitlist_entry_not_found": "Diese Person ist nicht mehr auf der Warteliste: Sie hat sich ausgetragen oder ist nachgerückt. Die Liste wurde aktualisiert.",
+    "client_portal_off": "Das Kundenportal ist ausgeschaltet.",
+    "client_not_found": "Diesen Kunden gibt es nicht mehr.",
+    "client_user_not_found": "Diesen Zugang gibt es nicht mehr. Die Liste wurde aktualisiert.",
+    "client_user_not_invited": "Diese Person hat schon ein Passwort gesetzt oder keinen Zugang mehr. Die Liste wurde aktualisiert.",
+    "email_already_registered": "Mit dieser E-Mail-Adresse gibt es schon ein Konto.",
+    "account_deactivated": "Dein Zugang wurde beendet. Wenn du wieder Zugang brauchst, wende dich an die Agentur.",
+    "setup_code_invalid": "Dieser Link ist ungültig, abgelaufen oder wurde schon verwendet. Bitte die Agentur um einen neuen."
   },
   "hours": {
     "amount": "{{hours}} Std.",
@@ -505,6 +514,8 @@
       "contactButtonHint": "Mitarbeiter:innen sehen bei jeder Schicht einen Button, der WhatsApp mit der Ansprechperson öffnet. Für Agenturen, die lieber so kommunizieren.",
       "checkIn": "Einchecken in der App",
       "checkInHint": "Mitarbeiter:innen checken in der App bei ihren Schichten ein und aus. Ohne diese Funktion werden die Stunden nach den geplanten Zeiten freigegeben.",
+      "clientPortal": "Kundenportal",
+      "clientPortalHint": "Eure Kunden melden sich im Dashboard an und sehen ihre Schichten und die Namen der bestätigten Mitarbeiter:innen, aber keine Stundenlöhne. Zugänge vergebt ihr unter „Kunden“. Ausgeschaltet kann sich kein Kunde anmelden.",
       "save": "Zusatzfunktionen speichern",
       "saved": "Die Zusatzfunktionen sind gespeichert"
     }
@@ -635,6 +646,176 @@
       "description": "Die Vorlage ist dann für alle in eurer Agentur weg. Schichten, die schon aus ihr angelegt wurden, bleiben, wie sie sind.",
       "keep": "Behalten",
       "confirm": "Vorlage löschen"
+    }
+  },
+  "clients": {
+    "title": "Kunden",
+    "description": "Gebt Ansprechpersonen eurer Kunden Zugang zum Kundenportal. Dort sehen sie ihre Schichten und wer kommt.",
+    "loading": "Kunden werden geladen …",
+    "columns": {
+      "name": "Kunde",
+      "locations": "Einsatzorte",
+      "actions": "Aktionen"
+    },
+    "access": "Zugänge",
+    "accessNamed": "Zugänge von {{name}}",
+    "count_one": "{{count}} Kunde",
+    "count_other": "{{count}} Kunden",
+    "back": "Alle Kunden",
+    "empty": {
+      "title": "Noch keine Kunden",
+      "description": "Für eure Agentur ist noch kein Kunde hinterlegt."
+    },
+    "error": {
+      "title": "Kunden konnten nicht geladen werden",
+      "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu.",
+      "retry": "Erneut versuchen"
+    },
+    "notFound": {
+      "title": "Kunde nicht gefunden",
+      "description": "Diesen Kunden gibt es nicht oder nicht mehr."
+    },
+    "portalOff": {
+      "title": "Das Kundenportal ist ausgeschaltet",
+      "description": "Ein Admin kann es in den Einstellungen unter Zusatzfunktionen einschalten.",
+      "descriptionAdmin": "Schalte es in den Einstellungen unter Zusatzfunktionen ein, um Kunden Zugang zu geben.",
+      "toSettings": "Zu den Einstellungen"
+    },
+    "users": {
+      "description": "Wer bei {{client}} Zugang zum Kundenportal hat. Dort sind die Schichten von {{client}} und die Namen der bestätigten Mitarbeiter:innen zu sehen, keine Stundenlöhne.",
+      "loading": "Zugänge werden geladen …",
+      "columns": {
+        "name": "Name",
+        "email": "E-Mail",
+        "status": "Status",
+        "actions": "Aktionen"
+      },
+      "status": {
+        "INVITED": "Eingeladen",
+        "ACTIVE": "Aktiv",
+        "DEACTIVATED": "Deaktiviert"
+      },
+      "empty": {
+        "title": "Noch keine Zugänge",
+        "description": "Lege einen Zugang an. Du bekommst einen Link, mit dem die Person bei {{client}} ihr Passwort setzt."
+      },
+      "error": {
+        "title": "Die Zugänge konnten nicht geladen werden",
+        "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu."
+      },
+      "invite": {
+        "action": "Zugang anlegen",
+        "title": "Zugang anlegen",
+        "description": "Für eine Person bei {{client}}. Danach bekommst du einen Link zum Weitergeben, mit dem sie ihr Passwort setzt.",
+        "firstName": "Vorname",
+        "lastName": "Nachname",
+        "email": "E-Mail",
+        "cancel": "Abbrechen",
+        "confirm": "Zugang anlegen",
+        "errors": {
+          "required": "Bitte ausfüllen.",
+          "invalid_length": "Der Text ist zu lang.",
+          "invalid_format": "Bitte gib eine gültige E-Mail-Adresse ein.",
+          "taken": "Mit dieser E-Mail-Adresse gibt es schon ein Konto.",
+          "unknown": "Diese Angabe wurde nicht angenommen."
+        }
+      },
+      "link": {
+        "title": "Link für {{name}}",
+        "description": "Gib den Link an {{name}} weiter, zum Beispiel per E-Mail. Damit setzt die Person ihr Passwort. Der Link funktioniert einmal und gilt bis {{expiresAt}}.",
+        "descriptionRenewed": "Der bisherige Link funktioniert nicht mehr. Gib diesen an {{name}} weiter. Er funktioniert einmal und gilt bis {{expiresAt}}.",
+        "label": "Link zum Passwort setzen",
+        "copy": "Kopieren",
+        "copied": "Link kopiert",
+        "copyFailed": "Kopieren hat nicht geklappt. Markiere den Link und kopiere ihn selbst.",
+        "hint": "Der Link wird nur jetzt angezeigt. Geht er verloren, erstelle einen neuen.",
+        "done": "Fertig"
+      },
+      "renew": {
+        "action": "Neuen Link erstellen",
+        "actionNamed": "Neuen Link für {{name}} erstellen"
+      },
+      "deactivate": {
+        "action": "Zugang beenden",
+        "actionNamed": "Zugang von {{name}} beenden",
+        "title": "Zugang von {{name}} beenden?",
+        "description": "{{name}} kann sich nicht mehr anmelden und wird auf allen Geräten abgemeldet. Ein offener Link funktioniert nicht mehr.",
+        "keep": "Abbrechen",
+        "confirm": "Zugang beenden",
+        "done": "Zugang von {{name}} beendet",
+        "doneDescription": "Die Person ist auf allen Geräten abgemeldet."
+      }
+    }
+  },
+  "clientSetup": {
+    "loading": "Einladung wird geladen …",
+    "title": "Passwort festlegen",
+    "greeting": "Hallo {{firstName}}, hier richtest du deinen Zugang zum Kundenportal von {{agency}} für {{client}} ein. Dort siehst du eure Schichten und wer kommt.",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "passwordHint": "Mindestens 8 Zeichen.",
+    "confirmation": "Passwort wiederholen",
+    "submit": "Passwort festlegen und anmelden",
+    "toLogin": "Zur Anmeldung",
+    "errors": {
+      "required": "Bitte gib ein Passwort ein.",
+      "too_short": "Das Passwort braucht mindestens 8 Zeichen.",
+      "mismatch": "Die Passwörter stimmen nicht überein."
+    },
+    "invalid": {
+      "title": "Dieser Link funktioniert nicht",
+      "description": "Er ist ungültig, abgelaufen oder wurde schon verwendet. Bitte deine Ansprechperson bei der Agentur um einen neuen Link. Hast du dein Passwort schon festgelegt, melde dich einfach an."
+    },
+    "portalOff": {
+      "title": "Das Kundenportal ist nicht verfügbar",
+      "description": "Die Agentur hat das Kundenportal ausgeschaltet. Bitte wende dich an deine Ansprechperson dort."
+    },
+    "error": {
+      "title": "Die Einladung konnte nicht geladen werden",
+      "retry": "Erneut versuchen"
+    }
+  },
+  "portal": {
+    "home": "Zu euren Schichten",
+    "byAgency": "Kundenportal von {{agency}}",
+    "status": {
+      "DRAFT": "Entwurf",
+      "PUBLISHED": "Geplant",
+      "COMPLETED": "Vorbei",
+      "CANCELLED": "Abgesagt"
+    },
+    "fill": {
+      "count": "{{confirmed}} von {{total}}",
+      "full": "Voll",
+      "cancelled": "Abgesagt, keine Plätze"
+    },
+    "shifts": {
+      "title": "Eure Schichten",
+      "description": "Die Schichten, die {{agency}} für euch besetzt, und wie viele Plätze schon bestätigt sind.",
+      "descriptionPast": "Schichten, die vorbei sind.",
+      "empty": {
+        "title": "Keine anstehenden Schichten",
+        "description": "Sobald die Agentur eine Schicht für euch plant, erscheint sie hier."
+      },
+      "emptyPast": {
+        "title": "Noch keine vergangenen Schichten",
+        "description": "Schichten erscheinen hier, sobald sie vorbei sind."
+      },
+      "error": {
+        "title": "Schichten konnten nicht geladen werden",
+        "description": "Bitte versuche es noch einmal. Wenn das Problem bleibt, lade die Seite neu.",
+        "retry": "Erneut versuchen"
+      }
+    },
+    "detail": {
+      "back": "Alle Schichten",
+      "cancelled": "Diese Schicht wurde abgesagt.",
+      "team": "Wer kommt",
+      "teamHint": "Alle, die die Agentur für diese Schicht bestätigt hat.",
+      "noTeam": {
+        "title": "Noch niemand bestätigt",
+        "description": "Sobald die Agentur Mitarbeiter:innen für diese Schicht bestätigt, stehen ihre Namen hier."
+      }
     }
   }
 }
