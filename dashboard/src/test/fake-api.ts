@@ -16,6 +16,8 @@ import {
   HoursEntryToJSON,
   HoursStatus,
   type Conversation,
+  type ConversationEvent,
+  ConversationEventToJSON,
   ConversationToJSON,
   type Location,
   type Message,
@@ -283,6 +285,8 @@ export function installFakeApi() {
   let refreshToken: string | null = null
   const overrides = new Map<string, Reply[]>()
   const queries: { route: string; query: URLSearchParams }[] = []
+  const encoder = new TextEncoder()
+  let eventStreams: ReadableStreamDefaultController<Uint8Array>[] = []
 
   const api = {
     calls: [] as Call[],
@@ -342,6 +346,31 @@ export function installFakeApi() {
     /** Stores a valid refresh token, as left behind by an earlier login. */
     signIn() {
       localStorage.setItem(STORAGE_KEY, issueTokens().refreshToken)
+    },
+    /** Number of open event streams. */
+    get openEventStreams() {
+      return eventStreams.length
+    },
+    /** Sends raw text, such as `: ping` or a whole event, down every open event stream. */
+    sendEventText(text: string) {
+      eventStreams.forEach((stream) => {
+        stream.enqueue(encoder.encode(text))
+      })
+    },
+    /** Sends a `conversation` notice down every open event stream. */
+    notify(notice: ConversationEvent) {
+      api.sendEventText(`event: conversation
+data: ${JSON.stringify(ConversationEventToJSON(notice))}
+
+`)
+    },
+    /** The connections of the open event streams drop. */
+    dropEventStreams() {
+      const dropped = eventStreams
+      eventStreams = []
+      dropped.forEach((stream) => {
+        stream.error(new TypeError('network error'))
+      })
     },
     /** The access token expires; the refresh token stays valid. */
     expireAccessToken() {
@@ -714,7 +743,33 @@ export function installFakeApi() {
     return page(url, entries, HoursEntryToJSON)
   }
 
-  function respond(route: string, url: URL, body: unknown, authorization: string | null) {
+  /** An event stream that stays open until it is dropped or the request is aborted. */
+  function eventStream(signal: AbortSignal | null | undefined) {
+    let controller: ReadableStreamDefaultController<Uint8Array> | undefined
+    const close = () => {
+      eventStreams = eventStreams.filter((it) => it !== controller)
+    }
+    const body = new ReadableStream<Uint8Array>({
+      start(it) {
+        controller = it
+        eventStreams.push(it)
+        signal?.addEventListener('abort', () => {
+          close()
+          it.error(new DOMException('aborted', 'AbortError'))
+        })
+      },
+      cancel: close,
+    })
+    return new Response(body, { headers: { 'Content-Type': 'text/event-stream' } })
+  }
+
+  function respond(
+    route: string,
+    url: URL,
+    body: unknown,
+    authorization: string | null,
+    signal: AbortSignal | null | undefined,
+  ) {
     if (route === 'POST /auth/login') {
       const { email, password, client } = body as Record<string, string>
       if (client !== 'DASHBOARD') {
@@ -782,6 +837,9 @@ export function installFakeApi() {
       }
       api.features = body as AgencyFeatures
       return json(AgencyFeaturesToJSON(api.features))
+    }
+    if (route === 'GET /conversations/events') {
+      return eventStream(signal)
     }
     if (route === 'GET /conversations') {
       return page(url, api.conversations, ConversationToJSON)
@@ -887,7 +945,7 @@ export function installFakeApi() {
         return Promise.reject(override)
       }
       return Promise.resolve(
-        override ?? respond(route, url, body, new Headers(init?.headers).get('Authorization')),
+        override ?? respond(route, url, body, new Headers(init?.headers).get('Authorization'), init?.signal),
       )
     }),
   )
