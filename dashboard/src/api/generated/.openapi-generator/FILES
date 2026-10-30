@@ -29,6 +29,8 @@ models/ClientPage.ts
 models/ClientSummary.ts
 models/ClientType.ts
 models/Conversation.ts
+models/ConversationChange.ts
+models/ConversationEvent.ts
 models/ConversationPage.ts
 models/ConversationWorker.ts
 models/CurrentUser.ts

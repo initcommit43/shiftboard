@@ -28,6 +28,8 @@ import 'package:shiftboard_api/src/model/client_page.dart';
 import 'package:shiftboard_api/src/model/client_summary.dart';
 import 'package:shiftboard_api/src/model/client_type.dart';
 import 'package:shiftboard_api/src/model/conversation.dart';
+import 'package:shiftboard_api/src/model/conversation_change.dart';
+import 'package:shiftboard_api/src/model/conversation_event.dart';
 import 'package:shiftboard_api/src/model/conversation_page.dart';
 import 'package:shiftboard_api/src/model/conversation_worker.dart';
 import 'package:shiftboard_api/src/model/current_user.dart';
@@ -99,6 +101,8 @@ part 'serializers.g.dart';
   ClientSummary,
   ClientType,
   Conversation,
+  ConversationChange,
+  ConversationEvent,
   ConversationPage,
   ConversationWorker,
   CurrentUser,

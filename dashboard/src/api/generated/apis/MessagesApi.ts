@@ -579,4 +579,106 @@ export class MessagesApi extends runtime.BaseAPI {
         return await response.value();
     }
 
+    /**
+     * Creates request options for streamInboxEvents without sending the request
+     */
+    async streamInboxEventsRequestOpts(): Promise<runtime.RequestOpts> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/conversations/events`;
+
+        return {
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * A server-sent event stream (`text/event-stream`) that stays open. Each `conversation` event carries a `ConversationEvent` as JSON in its `data`: which conversation changed and how. Clients then reload the inbox or the open conversation through the endpoints above; the notice carries no message data. A comment line (`: ping`) every 25 seconds keeps idle connections open; clients that hear nothing for 60 seconds reconnect. The stream ends when the access token expires. Dispatchers and admins only; the access token goes in the `Authorization` header, so clients read the stream with a streaming HTTP request rather than `EventSource`. When the stream ends or fails, clients reconnect with backoff and fall back to polling meanwhile (ADR 0031).  Error codes: `forbidden` (403). 
+     * Live notices when a conversation of the agency changes
+     */
+    async streamInboxEventsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+        const requestOptions = await this.streamInboxEventsRequestOpts();
+        const response = await this.request(requestOptions, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * A server-sent event stream (`text/event-stream`) that stays open. Each `conversation` event carries a `ConversationEvent` as JSON in its `data`: which conversation changed and how. Clients then reload the inbox or the open conversation through the endpoints above; the notice carries no message data. A comment line (`: ping`) every 25 seconds keeps idle connections open; clients that hear nothing for 60 seconds reconnect. The stream ends when the access token expires. Dispatchers and admins only; the access token goes in the `Authorization` header, so clients read the stream with a streaming HTTP request rather than `EventSource`. When the stream ends or fails, clients reconnect with backoff and fall back to polling meanwhile (ADR 0031).  Error codes: `forbidden` (403). 
+     * Live notices when a conversation of the agency changes
+     */
+    async streamInboxEvents(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+        const response = await this.streamInboxEventsRaw(initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * Creates request options for streamMyConversationEvents without sending the request
+     */
+    async streamMyConversationEventsRequestOpts(): Promise<runtime.RequestOpts> {
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        if (this.configuration && this.configuration.accessToken) {
+            const token = this.configuration.accessToken;
+            const tokenString = await token("bearerAuth", []);
+
+            if (tokenString) {
+                headerParameters["Authorization"] = `Bearer ${tokenString}`;
+            }
+        }
+
+        let urlPath = `/worker/conversation/events`;
+
+        return {
+            path: urlPath,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        };
+    }
+
+    /**
+     * A server-sent event stream (`text/event-stream`) that stays open while the app is in the foreground. Each `conversation` event carries a `ConversationEvent` as JSON in its `data`; the app then reloads the conversation or its unread count. A comment line (`: ping`) every 25 seconds keeps idle connections open; clients that hear nothing for 60 seconds reconnect. The stream ends when the access token expires. Active workers only; the access token goes in the `Authorization` header (ADR 0031).  Error codes: `forbidden` (403), `worker_not_active` (403). 
+     * Live notices when the worker\'s conversation changes
+     */
+    async streamMyConversationEventsRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<string>> {
+        const requestOptions = await this.streamMyConversationEventsRequestOpts();
+        const response = await this.request(requestOptions, initOverrides);
+
+        if (this.isJsonMime(response.headers.get('content-type'))) {
+            return new runtime.JSONApiResponse<string>(response);
+        } else {
+            return new runtime.TextApiResponse(response) as any;
+        }
+    }
+
+    /**
+     * A server-sent event stream (`text/event-stream`) that stays open while the app is in the foreground. Each `conversation` event carries a `ConversationEvent` as JSON in its `data`; the app then reloads the conversation or its unread count. A comment line (`: ping`) every 25 seconds keeps idle connections open; clients that hear nothing for 60 seconds reconnect. The stream ends when the access token expires. Active workers only; the access token goes in the `Authorization` header (ADR 0031).  Error codes: `forbidden` (403), `worker_not_active` (403). 
+     * Live notices when the worker\'s conversation changes
+     */
+    async streamMyConversationEvents(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<string> {
+        const response = await this.streamMyConversationEventsRaw(initOverrides);
+        return await response.value();
+    }
+
 }

@@ -34,3 +34,4 @@ One short record per real decision. Format: `NNNN-title.md` with the sections Co
 | [0028](0028-check-in-and-hours.md) | Check-in in the app, hours approved by the agency, CSV built in the dashboard |
 | [0029](0029-waitlist.md) | Workers move up from the waitlist automatically until the cancellation deadline |
 | [0030](0030-clients-tolerate-unknown-enum-values.md) | Generated clients tolerate unknown enum values |
+| [0031](0031-real-time-chat.md) | Chat updates reach open apps through server-sent events |

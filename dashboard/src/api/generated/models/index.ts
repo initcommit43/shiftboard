@@ -14,6 +14,8 @@ export * from './ClientPage';
 export * from './ClientSummary';
 export * from './ClientType';
 export * from './Conversation';
+export * from './ConversationChange';
+export * from './ConversationEvent';
 export * from './ConversationPage';
 export * from './ConversationWorker';
 export * from './CurrentUser';

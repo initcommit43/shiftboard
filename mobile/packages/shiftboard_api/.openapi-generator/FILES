@@ -37,6 +37,8 @@ lib/src/model/client_page.dart
 lib/src/model/client_summary.dart
 lib/src/model/client_type.dart
 lib/src/model/conversation.dart
+lib/src/model/conversation_change.dart
+lib/src/model/conversation_event.dart
 lib/src/model/conversation_page.dart
 lib/src/model/conversation_worker.dart
 lib/src/model/current_user.dart
