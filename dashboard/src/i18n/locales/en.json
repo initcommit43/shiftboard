@@ -15,7 +15,8 @@
       "pendingSignups_one": "{{count}} pending signup",
       "pendingSignups_other": "{{count}} pending signups",
       "unreadMessages_one": "{{count}} unread message",
-      "unreadMessages_other": "{{count}} unread messages"
+      "unreadMessages_other": "{{count}} unread messages",
+      "clients": "Clients"
     },
     "theme": {
       "toLight": "Switch to light theme",
@@ -42,13 +43,14 @@
   "login": {
     "tagline": "Every shift, covered.",
     "title": "Log in",
-    "description": "Log in to the dashboard with your agency account.",
+    "description": "Log in to the dashboard or the client portal with your account.",
     "email": "Email",
     "emailPlaceholder": "name@example.com",
     "password": "Password",
     "passwordPlaceholder": "Your password",
     "submit": "Log in",
-    "workerHint": "Are you a worker? You'll find your shifts in the shiftboard app."
+    "workerHint": "Are you a worker? You'll find your shifts in the shiftboard app.",
+    "clientPortalOff": "The client portal is currently switched off. Please contact the agency."
   },
   "shifts": {
     "title": "Shifts",
@@ -251,7 +253,14 @@
     "shift_not_started": "The shift has not started yet. Hours can be recorded once it has.",
     "assignment_not_worked": "This person no longer holds a confirmed spot. The list has been updated.",
     "worker_attended": "This person was there: they checked in or have approved hours. They can't be marked as a no-show.",
-    "waitlist_entry_not_found": "This person is no longer on the waitlist: they left or moved up. The list has been updated."
+    "waitlist_entry_not_found": "This person is no longer on the waitlist: they left or moved up. The list has been updated.",
+    "client_portal_off": "The client portal is switched off.",
+    "client_not_found": "This client no longer exists.",
+    "client_user_not_found": "This access no longer exists. The list has been updated.",
+    "client_user_not_invited": "This person has already set a password or no longer has access. The list has been updated.",
+    "email_already_registered": "There is already an account with this email address.",
+    "account_deactivated": "Your access has been ended. If you need access again, please contact the agency.",
+    "setup_code_invalid": "This link is invalid, has expired or was already used. Please ask the agency for a new one."
   },
   "hours": {
     "amount": "{{hours}} h",
@@ -505,6 +514,8 @@
       "contactButtonHint": "Workers see a button on every shift that opens WhatsApp with the contact person. For agencies that prefer that.",
       "checkIn": "Check in in the app",
       "checkInHint": "Workers check in and out of their shifts in the app. Without it, hours are approved from the planned times.",
+      "clientPortal": "Client portal",
+      "clientPortalHint": "Your clients log in to the dashboard and see their shifts and the names of confirmed workers, but no hourly rates. You give access under “Clients”. While it's off, no client can log in.",
       "save": "Save optional features",
       "saved": "The optional features are saved"
     }
@@ -635,6 +646,176 @@
       "description": "The template is then gone for everyone at your agency. Shifts already created from it stay as they are.",
       "keep": "Keep",
       "confirm": "Delete template"
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "description": "Give your clients' contacts access to the client portal. There they see their shifts and who is coming.",
+    "loading": "Loading clients …",
+    "columns": {
+      "name": "Client",
+      "locations": "Locations",
+      "actions": "Actions"
+    },
+    "access": "Access",
+    "accessNamed": "Access for {{name}}",
+    "count_one": "{{count}} client",
+    "count_other": "{{count}} clients",
+    "back": "All clients",
+    "empty": {
+      "title": "No clients yet",
+      "description": "Your agency has no clients set up yet."
+    },
+    "error": {
+      "title": "Clients couldn't be loaded",
+      "description": "Please try again. If the problem persists, reload the page.",
+      "retry": "Try again"
+    },
+    "notFound": {
+      "title": "Client not found",
+      "description": "This client doesn't exist or no longer exists."
+    },
+    "portalOff": {
+      "title": "The client portal is switched off",
+      "description": "An admin can switch it on in the settings under Optional features.",
+      "descriptionAdmin": "Switch it on in the settings under Optional features to give clients access.",
+      "toSettings": "Go to settings"
+    },
+    "users": {
+      "description": "Who at {{client}} has access to the client portal. It shows the shifts of {{client}} and the names of confirmed workers, no hourly rates.",
+      "loading": "Loading access …",
+      "columns": {
+        "name": "Name",
+        "email": "Email",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "status": {
+        "INVITED": "Invited",
+        "ACTIVE": "Active",
+        "DEACTIVATED": "Deactivated"
+      },
+      "empty": {
+        "title": "No access yet",
+        "description": "Give someone access. You'll get a link the person at {{client}} sets their password with."
+      },
+      "error": {
+        "title": "Access couldn't be loaded",
+        "description": "Please try again. If the problem persists, reload the page."
+      },
+      "invite": {
+        "action": "Give access",
+        "title": "Give access",
+        "description": "For someone at {{client}}. Afterwards you get a link to pass on, which they set their password with.",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "cancel": "Cancel",
+        "confirm": "Give access",
+        "errors": {
+          "required": "Please fill in.",
+          "invalid_length": "The text is too long.",
+          "invalid_format": "Please enter a valid email address.",
+          "taken": "There is already an account with this email address.",
+          "unknown": "This value was not accepted."
+        }
+      },
+      "link": {
+        "title": "Link for {{name}}",
+        "description": "Pass the link on to {{name}}, by email for example. It lets them set a password. The link works once and is valid until {{expiresAt}}.",
+        "descriptionRenewed": "The previous link no longer works. Pass this one on to {{name}}. It works once and is valid until {{expiresAt}}.",
+        "label": "Link to set a password",
+        "copy": "Copy",
+        "copied": "Link copied",
+        "copyFailed": "Copying didn't work. Select the link and copy it yourself.",
+        "hint": "The link is shown only now. If it gets lost, create a new one.",
+        "done": "Done"
+      },
+      "renew": {
+        "action": "Create new link",
+        "actionNamed": "Create a new link for {{name}}"
+      },
+      "deactivate": {
+        "action": "End access",
+        "actionNamed": "End access for {{name}}",
+        "title": "End access for {{name}}?",
+        "description": "{{name}} can no longer log in and is logged out on all devices. An open link stops working.",
+        "keep": "Cancel",
+        "confirm": "End access",
+        "done": "Access for {{name}} ended",
+        "doneDescription": "The person is logged out on all devices."
+      }
+    }
+  },
+  "clientSetup": {
+    "loading": "Loading invitation …",
+    "title": "Set your password",
+    "greeting": "Hi {{firstName}}, here you set up your access to the client portal of {{agency}} for {{client}}. There you see your shifts and who is coming.",
+    "email": "Email",
+    "password": "Password",
+    "passwordHint": "At least 8 characters.",
+    "confirmation": "Repeat password",
+    "submit": "Set password and log in",
+    "toLogin": "Go to login",
+    "errors": {
+      "required": "Please enter a password.",
+      "too_short": "The password needs at least 8 characters.",
+      "mismatch": "The passwords don't match."
+    },
+    "invalid": {
+      "title": "This link doesn't work",
+      "description": "It is invalid, has expired or was already used. Please ask your contact at the agency for a new link. If you already set your password, just log in."
+    },
+    "portalOff": {
+      "title": "The client portal isn't available",
+      "description": "The agency has switched the client portal off. Please contact your contact person there."
+    },
+    "error": {
+      "title": "The invitation couldn't be loaded",
+      "retry": "Try again"
+    }
+  },
+  "portal": {
+    "home": "To your shifts",
+    "byAgency": "Client portal of {{agency}}",
+    "status": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Planned",
+      "COMPLETED": "Over",
+      "CANCELLED": "Cancelled"
+    },
+    "fill": {
+      "count": "{{confirmed}} of {{total}}",
+      "full": "Full",
+      "cancelled": "Cancelled, no spots"
+    },
+    "shifts": {
+      "title": "Your shifts",
+      "description": "The shifts {{agency}} staffs for you, and how many spots are confirmed.",
+      "descriptionPast": "Shifts that are over.",
+      "empty": {
+        "title": "No upcoming shifts",
+        "description": "As soon as the agency plans a shift for you, it shows up here."
+      },
+      "emptyPast": {
+        "title": "No past shifts yet",
+        "description": "Shifts show up here once they are over."
+      },
+      "error": {
+        "title": "Shifts couldn't be loaded",
+        "description": "Please try again. If the problem persists, reload the page.",
+        "retry": "Try again"
+      }
+    },
+    "detail": {
+      "back": "All shifts",
+      "cancelled": "This shift has been cancelled.",
+      "team": "Who is coming",
+      "teamHint": "Everyone the agency has confirmed for this shift.",
+      "noTeam": {
+        "title": "Nobody confirmed yet",
+        "description": "As soon as the agency confirms workers for this shift, their names show up here."
+      }
     }
   }
 }

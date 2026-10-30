@@ -14,6 +14,7 @@ import {
   warehouse,
 } from '@/test/fake-api'
 import { renderApp } from '@/test/render'
+import { enter, typingUser } from '@/test/user'
 
 describe('duplicate a shift', () => {
   let api: ReturnType<typeof installFakeApi>
@@ -23,32 +24,36 @@ describe('duplicate a shift', () => {
     api.signIn()
   })
 
-  const field = (label: string) => screen.findByLabelText<HTMLInputElement>(label)
+  // Looked up once the form is shown: waiting for each field again costs a turn of the event
+  // loop every time, and on a busy machine those turns add up past the test timeout.
+  const field = (label: string) => screen.getByLabelText<HTMLInputElement>(label)
+  const formShown = () => screen.findByLabelText('Kunde')
   const created = () => api.calls.find((call) => call.route === 'POST /shifts')?.body
 
   it('copies everything but the date and publishes the copy on the chosen day', async () => {
     const { router } = renderApp(`/shifts/${gala.id}`)
-    const user = userEvent.setup()
+    const user = typingUser()
 
     await user.click(await screen.findByRole('link', { name: 'Duplizieren' }))
 
     expect(await screen.findByRole('heading', { name: 'Schicht duplizieren' })).toBeInTheDocument()
-    expect(await field('Kunde')).toHaveValue(hafenhalle.id)
-    expect(await field('Einsatzort')).toHaveValue(hafenhalleLinz.id)
-    expect(await field('Titel')).toHaveValue('Servicekraft Gala')
-    expect(await field('Datum')).toHaveValue('')
-    expect(await field('Beginn')).toHaveValue('18:00')
-    expect(await field('Ende')).toHaveValue('01:00')
-    expect(await field('Stundenlohn in Euro')).toHaveValue('18,00')
-    expect(await field('Plätze')).toHaveValue(4)
+    await formShown()
+    expect(field('Kunde')).toHaveValue(hafenhalle.id)
+    expect(field('Einsatzort')).toHaveValue(hafenhalleLinz.id)
+    expect(field('Titel')).toHaveValue('Servicekraft Gala')
+    expect(field('Datum')).toHaveValue('')
+    expect(field('Beginn')).toHaveValue('18:00')
+    expect(field('Ende')).toHaveValue('01:00')
+    expect(field('Stundenlohn in Euro')).toHaveValue('18,00')
+    expect(field('Plätze')).toHaveValue(4)
     expect(screen.getByRole('checkbox', { name: 'Service' })).toBeChecked()
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Veröffentlichen' }))
-    expect(await field('Datum')).toHaveAccessibleDescription('Bitte ausfüllen.')
+    expect(field('Datum')).toHaveAccessibleDescription('Bitte ausfüllen.')
     expect(created()).toBeUndefined()
 
-    await user.type(await field('Datum'), '2026-10-23')
+    await enter(user, field('Datum'), '2026-10-23')
     await user.click(screen.getByRole('button', { name: 'Veröffentlichen' }))
 
     await waitFor(() => {
@@ -71,10 +76,11 @@ describe('duplicate a shift', () => {
   it('copies a shift that has already taken place, without its claims', async () => {
     renderApp(`/shifts/new?from=${lastWeek.id}`)
 
-    expect(await field('Titel')).toHaveValue('Messeaufbau')
-    expect(await field('Beginn')).toHaveValue('07:00')
-    expect(await field('Ende')).toHaveValue('15:00')
-    expect(await field('Datum')).toHaveValue('')
+    await formShown()
+    expect(field('Titel')).toHaveValue('Messeaufbau')
+    expect(field('Beginn')).toHaveValue('07:00')
+    expect(field('Ende')).toHaveValue('15:00')
+    expect(field('Datum')).toHaveValue('')
   })
 
   it('leaves out what no longer exists and says so', async () => {
@@ -85,10 +91,10 @@ describe('duplicate a shift', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent(
       'Nicht mehr vorhanden und daher leer: Einsatzort und Erforderliche Qualifikationen. Bitte neu auswählen.',
     )
-    expect(await field('Kunde')).toHaveValue(nordlicht.id)
-    expect(await field('Einsatzort')).toHaveValue('')
+    expect(field('Kunde')).toHaveValue(nordlicht.id)
+    expect(field('Einsatzort')).toHaveValue('')
     expect(screen.getByRole('checkbox', { name: 'Service' })).not.toBeChecked()
-    expect(await field('Titel')).toHaveValue('Lagerunterstützung')
+    expect(field('Titel')).toHaveValue('Lagerunterstützung')
   })
 
   it('explains when the shift to copy does not exist', async () => {

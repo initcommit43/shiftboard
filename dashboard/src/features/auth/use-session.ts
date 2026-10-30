@@ -5,16 +5,22 @@ import { useNavigate, useRevalidator, useRouteLoaderData } from 'react-router'
 import { onSessionExpired } from '@/api/client'
 import type { CurrentUser } from '@/api/generated'
 
-import type { requireSession } from './guards'
+import type { requireClientSession, requireSession } from './guards'
 import { logout } from './session'
 
-/** Id of the protected layout route, whose loader provides the signed-in user. */
+/** Id of the agency's protected layout route, whose loader provides the signed-in user. */
 export const APP_ROUTE_ID = 'app'
 
+/** Id of the client portal's layout route, whose loader provides the signed-in client user. */
+export const PORTAL_ROUTE_ID = 'portal'
+
+/** The signed-in user, below either the agency's layout or the portal's. */
 export function useCurrentUser(): CurrentUser {
-  const user = useRouteLoaderData<typeof requireSession>(APP_ROUTE_ID)
+  const staff = useRouteLoaderData<typeof requireSession>(APP_ROUTE_ID)
+  const client = useRouteLoaderData<typeof requireClientSession>(PORTAL_ROUTE_ID)
+  const user = staff ?? client
   if (!user) {
-    throw new Error('useCurrentUser needs the protected app route as an ancestor')
+    throw new Error('useCurrentUser needs a protected layout route as an ancestor')
   }
   return user
 }
