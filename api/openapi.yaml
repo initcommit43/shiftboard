@@ -91,7 +91,7 @@ paths:
         Returns what the signup form needs: the agency's name. Needs no
         authentication.
 
-        Error codes: `signup_code_unknown` (404).
+        Error codes: `signup_code_unknown` (404), `too_many_requests` (429).
       security: []
       responses:
         "200":
@@ -102,6 +102,8 @@ paths:
                 $ref: "#/components/schemas/SignupInfo"
         "404":
           $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
         default:
           $ref: "#/components/responses/Problem"
     post:
@@ -118,7 +120,8 @@ paths:
         `out_of_range` (today or later, or more than 120 years ago).
 
         Error codes: `validation_failed` (400, with `errors`),
-        `signup_code_unknown` (404), `email_already_registered` (409).
+        `signup_code_unknown` (404), `email_already_registered` (409),
+        `too_many_requests` (429).
       security: []
       requestBody:
         required: true
@@ -139,6 +142,8 @@ paths:
           $ref: "#/components/responses/Problem"
         "409":
           $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
         default:
           $ref: "#/components/responses/Problem"
 
@@ -154,7 +159,7 @@ paths:
         and agency. Needs no authentication.
 
         Error codes: `setup_code_invalid` (404, unknown, already used or
-        expired), `client_portal_off` (403).
+        expired), `client_portal_off` (403), `too_many_requests` (429).
       security: []
       responses:
         "200":
@@ -167,6 +172,8 @@ paths:
           $ref: "#/components/responses/Problem"
         "404":
           $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
         default:
           $ref: "#/components/responses/Problem"
     post:
@@ -180,7 +187,8 @@ paths:
         Field error codes: `required`, `invalid_length` (`password`).
 
         Error codes: `validation_failed` (400, with `errors`),
-        `client_portal_off` (403), `setup_code_invalid` (404).
+        `client_portal_off` (403), `setup_code_invalid` (404),
+        `too_many_requests` (429).
       security: []
       requestBody:
         required: true
@@ -201,6 +209,8 @@ paths:
           $ref: "#/components/responses/Problem"
         "404":
           $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
         default:
           $ref: "#/components/responses/Problem"
 
@@ -241,7 +251,7 @@ paths:
         "403":
           $ref: "#/components/responses/Problem"
         "429":
-          $ref: "#/components/responses/Problem"
+          $ref: "#/components/responses/TooManyRequests"
         default:
           $ref: "#/components/responses/Problem"
 
@@ -256,7 +266,7 @@ paths:
 
         Error codes: `invalid_refresh_token` (401, unknown, expired, revoked or
         already used), `client_portal_off` (403, a client user while the
-        agency has the portal switched off).
+        agency has the portal switched off), `too_many_requests` (429).
       security: []
       requestBody:
         required: true
@@ -273,6 +283,8 @@ paths:
                 $ref: "#/components/schemas/TokenResponse"
         "401":
           $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
         default:
           $ref: "#/components/responses/Problem"
 
@@ -285,6 +297,8 @@ paths:
         Revokes the given refresh token. Succeeds even if the token is unknown
         or already revoked. Needs no access token, so logging out works after
         the access token has expired.
+
+        Error codes: `too_many_requests` (429).
       security: []
       requestBody:
         required: true
@@ -295,6 +309,8 @@ paths:
       responses:
         "204":
           description: The session has ended.
+        "429":
+          $ref: "#/components/responses/TooManyRequests"
         default:
           $ref: "#/components/responses/Problem"
 
@@ -2578,6 +2594,22 @@ components:
         maximum: 100
         default: 20
   responses:
+    TooManyRequests:
+      description: |
+        Over a rate limit (ADR 0033). The endpoints that need no login are
+        limited per client address, everything else per user; `/ping` is not
+        limited, so any other operation can answer with this. The problem's
+        code is `too_many_requests`, or `too_many_attempts` for login.
+      headers:
+        Retry-After:
+          description: Seconds until a request can succeed again.
+          schema:
+            type: integer
+            minimum: 1
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
     Problem:
       description: An error, described as RFC 9457 problem details.
       content:

@@ -108,7 +108,9 @@ class AuthIntegrationTests extends IntegrationTest {
             expectProblem(postLogin(email, "wrong-password", DASHBOARD), 401, "invalid_credentials");
         }
 
-        expectProblem(postLogin(email, "wrong-password", DASHBOARD), 429, "too_many_attempts");
+        var limited = postLogin(email, "wrong-password", DASHBOARD);
+        limited.expectHeader().exists(HttpHeaders.RETRY_AFTER);
+        expectProblem(limited, 429, "too_many_attempts");
         expectProblem(postLogin(email, TestData.PASSWORD, DASHBOARD), 429, "too_many_attempts");
     }
 

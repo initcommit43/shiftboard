@@ -14,3 +14,12 @@ shiftboard:
     enabled: false
   security:
     jwt-secret: test-only-jwt-secret-0123456789abcdef
+    # All tests share one application context and one client address, so the limits per
+    # address are out of reach here. RateLimitIntegrationTests checks them with low limits.
+    rate-limits:
+      login:
+        requests: 100000
+      links:
+        requests: 100000
+      session:
+        requests: 100000

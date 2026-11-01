@@ -150,7 +150,7 @@ export class ClientUsersApi extends runtime.BaseAPI {
     }
 
     /**
-     * Uses up the setup code, sets the password of the client user and logs them in. Needs no authentication.  Field error codes: `required`, `invalid_length` (`password`).  Error codes: `validation_failed` (400, with `errors`), `client_portal_off` (403), `setup_code_invalid` (404). 
+     * Uses up the setup code, sets the password of the client user and logs them in. Needs no authentication.  Field error codes: `required`, `invalid_length` (`password`).  Error codes: `validation_failed` (400, with `errors`), `client_portal_off` (403), `setup_code_invalid` (404), `too_many_requests` (429). 
      * Set a password and log in to the client portal
      */
     async completeClientSetupRaw(requestParameters: CompleteClientSetupRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponse>> {
@@ -161,7 +161,7 @@ export class ClientUsersApi extends runtime.BaseAPI {
     }
 
     /**
-     * Uses up the setup code, sets the password of the client user and logs them in. Needs no authentication.  Field error codes: `required`, `invalid_length` (`password`).  Error codes: `validation_failed` (400, with `errors`), `client_portal_off` (403), `setup_code_invalid` (404). 
+     * Uses up the setup code, sets the password of the client user and logs them in. Needs no authentication.  Field error codes: `required`, `invalid_length` (`password`).  Error codes: `validation_failed` (400, with `errors`), `client_portal_off` (403), `setup_code_invalid` (404), `too_many_requests` (429). 
      * Set a password and log in to the client portal
      */
     async completeClientSetup(requestParameters: CompleteClientSetupRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponse> {
@@ -260,7 +260,7 @@ export class ClientUsersApi extends runtime.BaseAPI {
     }
 
     /**
-     * What the set-password form shows: who is invited, for which client and agency. Needs no authentication.  Error codes: `setup_code_invalid` (404, unknown, already used or expired), `client_portal_off` (403). 
+     * What the set-password form shows: who is invited, for which client and agency. Needs no authentication.  Error codes: `setup_code_invalid` (404, unknown, already used or expired), `client_portal_off` (403), `too_many_requests` (429). 
      * Look up the invitation behind a setup link
      */
     async getClientSetupInfoRaw(requestParameters: GetClientSetupInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<ClientSetupInfo>> {
@@ -271,7 +271,7 @@ export class ClientUsersApi extends runtime.BaseAPI {
     }
 
     /**
-     * What the set-password form shows: who is invited, for which client and agency. Needs no authentication.  Error codes: `setup_code_invalid` (404, unknown, already used or expired), `client_portal_off` (403). 
+     * What the set-password form shows: who is invited, for which client and agency. Needs no authentication.  Error codes: `setup_code_invalid` (404, unknown, already used or expired), `client_portal_off` (403), `too_many_requests` (429). 
      * Look up the invitation behind a setup link
      */
     async getClientSetupInfo(requestParameters: GetClientSetupInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<ClientSetupInfo> {

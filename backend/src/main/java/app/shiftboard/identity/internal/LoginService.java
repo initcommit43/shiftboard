@@ -1,7 +1,10 @@
 package app.shiftboard.identity.internal;
 
+import java.time.InstantSource;
+
 import app.shiftboard.identity.TokenPair;
 import app.shiftboard.system.ApiException;
+import app.shiftboard.system.TooManyRequestsException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,18 +14,20 @@ class LoginService {
 
     private final UserAccountRepository accounts;
     private final PasswordEncoder passwordEncoder;
-    private final LoginRateLimiter rateLimiter;
+    /** Failed logins per client address and email; a successful login clears them. */
+    private final RateLimiter rateLimiter;
     private final SessionService sessions;
     private final String unknownAccountHash;
 
     LoginService(
             UserAccountRepository accounts,
             PasswordEncoder passwordEncoder,
-            LoginRateLimiter rateLimiter,
+            SecurityProperties properties,
             SessionService sessions) {
         this.accounts = accounts;
         this.passwordEncoder = passwordEncoder;
-        this.rateLimiter = rateLimiter;
+        var limit = properties.loginRateLimit();
+        this.rateLimiter = new RateLimiter(limit.maxAttempts(), limit.window(), InstantSource.system());
         this.sessions = sessions;
         this.unknownAccountHash = passwordEncoder.encode("no account has this password");
     }
@@ -30,9 +35,10 @@ class LoginService {
     TokenPair login(String email, String password, ClientType client, String clientAddress) {
         var normalizedEmail = UserAccount.normalizeEmail(email);
         var limiterKey = clientAddress + '|' + normalizedEmail;
-        if (!rateLimiter.tryAcquire(limiterKey)) {
-            throw new ApiException(
-                    HttpStatus.TOO_MANY_REQUESTS, "too_many_attempts", "Too many login attempts. Try again later.");
+        var decision = rateLimiter.tryAcquire(limiterKey);
+        if (!decision.allowed()) {
+            throw new TooManyRequestsException(
+                    "too_many_attempts", "Too many login attempts. Try again later.", decision.retryAfter());
         }
 
         var account = accounts.findByEmail(normalizedEmail);

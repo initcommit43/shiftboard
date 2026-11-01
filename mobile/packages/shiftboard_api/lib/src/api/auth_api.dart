@@ -197,7 +197,7 @@ class AuthApi {
   }
 
   /// End the session on this device
-  /// Revokes the given refresh token. Succeeds even if the token is unknown or already revoked. Needs no access token, so logging out works after the access token has expired.
+  /// Revokes the given refresh token. Succeeds even if the token is unknown or already revoked. Needs no access token, so logging out works after the access token has expired.  Error codes: &#x60;too_many_requests&#x60; (429).
   ///
   /// Parameters:
   /// * [refreshTokenRequest]
@@ -264,7 +264,7 @@ class AuthApi {
   }
 
   /// Exchange a refresh token for a new token pair
-  /// The refresh token is single use; the response contains its replacement. Deactivating a client user revokes their refresh tokens.  Error codes: &#x60;invalid_refresh_token&#x60; (401, unknown, expired, revoked or already used), &#x60;client_portal_off&#x60; (403, a client user while the agency has the portal switched off).
+  /// The refresh token is single use; the response contains its replacement. Deactivating a client user revokes their refresh tokens.  Error codes: &#x60;invalid_refresh_token&#x60; (401, unknown, expired, revoked or already used), &#x60;client_portal_off&#x60; (403, a client user while the agency has the portal switched off), &#x60;too_many_requests&#x60; (429).
   ///
   /// Parameters:
   /// * [refreshTokenRequest]

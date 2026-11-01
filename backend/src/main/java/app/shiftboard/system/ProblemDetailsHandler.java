@@ -41,6 +41,14 @@ class ProblemDetailsHandler extends ResponseEntityExceptionHandler {
         return respond(ex, problem(ex.getStatus(), ex.getCode(), ex.getMessage()), request);
     }
 
+    @ExceptionHandler(TooManyRequestsException.class)
+    ResponseEntity<Object> handleTooManyRequests(TooManyRequestsException ex, WebRequest request) {
+        var headers = new HttpHeaders();
+        headers.set(HttpHeaders.RETRY_AFTER, Long.toString(ex.retryAfterSeconds()));
+        var problem = problem(ex.getStatus(), ex.getCode(), ex.getMessage());
+        return handleExceptionInternal(ex, problem, headers, ex.getStatus(), request);
+    }
+
     @ExceptionHandler(InvalidFieldException.class)
     ResponseEntity<Object> handleInvalidField(InvalidFieldException ex, WebRequest request) {
         return validationFailed(ex, List.of(new FieldError(ex.getField(), ex.getCode())), request);
