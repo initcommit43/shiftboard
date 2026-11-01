@@ -36,3 +36,4 @@ One short record per real decision. Format: `NNNN-title.md` with the sections Co
 | [0030](0030-clients-tolerate-unknown-enum-values.md) | Generated clients tolerate unknown enum values |
 | [0031](0031-real-time-chat.md) | Chat updates reach open apps through server-sent events |
 | [0032](0032-client-portal.md) | Clients get their own role in the dashboard and see who is coming, not what workers earn |
+| [0033](0033-rate-limiting.md) | Every API request is rate limited, in memory per instance |

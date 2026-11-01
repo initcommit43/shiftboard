@@ -50,3 +50,21 @@ shiftboard:
       # Login attempts per email and client address within the window.
       max-attempts: 5
       window: 15m
+    # Token buckets per instance, in memory (ADR 0033): up to `requests` at once, refilled evenly over `per`.
+    rate-limits:
+      # Logins per client address, across all emails.
+      login:
+        requests: 20
+        per: 15m
+      # Signup and client setup links per client address.
+      links:
+        requests: 30
+        per: 15m
+      # Token refreshes and logouts per client address.
+      session:
+        requests: 60
+        per: 15m
+      # Requests per user to the rest of the API.
+      api:
+        requests: 300
+        per: 1m

@@ -42,6 +42,10 @@ Everything comes from environment variables; `.env.example` in the repository ro
 | `SHIFTBOARD_SECURITY_REFRESH_TOKEN_TTL` | `30d` | Lifetime of a refresh token |
 | `SHIFTBOARD_SECURITY_LOGIN_RATE_LIMIT_MAX_ATTEMPTS` | `5` | Login attempts per email and client address within the window |
 | `SHIFTBOARD_SECURITY_LOGIN_RATE_LIMIT_WINDOW` | `15m` | Length of that window |
+| `SHIFTBOARD_SECURITY_RATE_LIMITS_LOGIN_REQUESTS` / `_PER` | `20` / `15m` | Logins per client address, across all emails |
+| `SHIFTBOARD_SECURITY_RATE_LIMITS_LINKS_REQUESTS` / `_PER` | `30` / `15m` | Signup and client setup requests per client address |
+| `SHIFTBOARD_SECURITY_RATE_LIMITS_SESSION_REQUESTS` / `_PER` | `60` / `15m` | Token refreshes and logouts per client address |
+| `SHIFTBOARD_SECURITY_RATE_LIMITS_API_REQUESTS` / `_PER` | `300` / `1m` | Requests per user to the rest of the API |
 | `SEED_PASSWORD` | `shiftboard-demo`, `local` profile only | Password of the seeded demo accounts |
 | `SPRING_PROFILES_ACTIVE` | none (`local` for `bootRun` and docker compose) | `local` is for development machines only: development JWT secret and demo data |
 
@@ -55,7 +59,7 @@ The `local` profile in turn only starts against a database on the same machine: 
 - The access token is a JWT (HS256) carrying the account id (`sub`), `agency_id` and `role`. The API is stateless: a request is authenticated by the token alone, without a database lookup.
 - The refresh token is a random opaque value. Only its SHA-256 hash is stored. `POST /auth/refresh` revokes it and returns a new pair, so a token works once; `POST /auth/logout` revokes it and ends the session on that device.
 - Passwords are hashed with Argon2id. A wrong password and an unknown email give the same answer and take comparable time.
-- Login attempts are limited per email and client address. The counters are kept in memory: the limit holds per application instance and is forgotten on restart, so running several instances needs a shared store. The client address is the remote address of the connection; behind a reverse proxy set `server.forward-headers-strategy`.
+- Every API request is rate limited ([ADR 0033](../docs/adr/0033-rate-limiting.md)): failed logins per email and client address, the public endpoints per client address, and everything else per user. `/ping` and `/actuator/health` are not limited. A limited request gets `429` with a `Retry-After` header. The counters are token buckets in memory: a limit holds per application instance and is forgotten on restart, so running several instances needs a shared store. The client address is the remote address of the connection; behind a reverse proxy set `server.forward-headers-strategy`.
 - `/ping`, `/signup/**`, `/auth/**` and `/actuator/health` are public. Everything else needs an access token; `/workers/**`, `/clients/**`, `/qualifications/**`, `/shifts/**` and `/hours/**` need the role `DISPATCHER` or `ADMIN`, `/worker/**` needs the role `WORKER`.
 
 Pending and inactive workers can log in; the app reads their status from `GET /me` and shows the matching screen. The endpoints under `/worker/**` answer them with `worker_not_active`.

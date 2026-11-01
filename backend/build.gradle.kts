@@ -33,6 +33,9 @@ dependencies {
     implementation("org.springframework.modulith:spring-modulith-starter-jpa")
     implementation("net.javacrumbs.shedlock:shedlock-spring:7.10.1")
     implementation("net.javacrumbs.shedlock:shedlock-provider-jdbc-template:7.10.1")
+    // Rate limiting: token buckets, kept in a size-bounded in-memory cache (ADR 0033)
+    implementation("com.bucket4j:bucket4j_jdk17-core:8.21.0")
+    implementation("com.github.ben-manes.caffeine:caffeine")
     // Service account tokens for the Firebase Cloud Messaging HTTP v1 API
     implementation("com.google.auth:google-auth-library-oauth2-http:1.54.0")
 

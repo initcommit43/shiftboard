@@ -17,7 +17,15 @@ class SecurityPropertiesTests {
                     "shiftboard.security.access-token-ttl=15m",
                     "shiftboard.security.refresh-token-ttl=30d",
                     "shiftboard.security.login-rate-limit.max-attempts=5",
-                    "shiftboard.security.login-rate-limit.window=15m");
+                    "shiftboard.security.login-rate-limit.window=15m",
+                    "shiftboard.security.rate-limits.login.requests=20",
+                    "shiftboard.security.rate-limits.login.per=15m",
+                    "shiftboard.security.rate-limits.links.requests=30",
+                    "shiftboard.security.rate-limits.links.per=15m",
+                    "shiftboard.security.rate-limits.session.requests=60",
+                    "shiftboard.security.rate-limits.session.per=15m",
+                    "shiftboard.security.rate-limits.api.requests=300",
+                    "shiftboard.security.rate-limits.api.per=1m");
 
     @Test
     void theApplicationDoesNotStartWithoutAJwtSecret() {
@@ -32,6 +40,14 @@ class SecurityPropertiesTests {
     }
 
     @Test
+    void theApplicationDoesNotStartWithARateLimitOfZero() {
+        runner.withPropertyValues(
+                        "shiftboard.security.jwt-secret=" + "x".repeat(32),
+                        "shiftboard.security.rate-limits.api.requests=0")
+                .run(context -> assertThat(context).hasFailed());
+    }
+
+    @Test
     void bindsTheConfiguredLifetimes() {
         runner.withPropertyValues("shiftboard.security.jwt-secret=" + "x".repeat(32))
                 .run(context -> {
@@ -39,6 +55,8 @@ class SecurityPropertiesTests {
                     assertThat(properties.accessTokenTtl()).isEqualTo(Duration.ofMinutes(15));
                     assertThat(properties.refreshTokenTtl()).isEqualTo(Duration.ofDays(30));
                     assertThat(properties.loginRateLimit().maxAttempts()).isEqualTo(5);
+                    assertThat(properties.rateLimits().api().requests()).isEqualTo(300);
+                    assertThat(properties.rateLimits().api().per()).isEqualTo(Duration.ofMinutes(1));
                 });
     }
 

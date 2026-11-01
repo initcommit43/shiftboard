@@ -1,6 +1,7 @@
 package app.shiftboard.identity.internal;
 
 import java.nio.charset.StandardCharsets;
+import java.time.InstantSource;
 import java.util.Map;
 
 import javax.crypto.SecretKey;
@@ -43,7 +44,9 @@ class SecurityConfiguration {
 
     @Bean
     SecurityFilterChain securityFilterChain(
-            HttpSecurity http, @Qualifier("handlerExceptionResolver") HandlerExceptionResolver exceptionResolver) {
+            HttpSecurity http,
+            SecurityProperties properties,
+            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver exceptionResolver) {
         // Authentication and authorization failures are rendered by the same handler as all other errors.
         AuthenticationEntryPoint entryPoint = (request, response, exception) -> {
             response.setHeader(HttpHeaders.WWW_AUTHENTICATE, "Bearer");
@@ -88,6 +91,9 @@ class SecurityConfiguration {
                         .authenticationEntryPoint(entryPoint)
                         .accessDeniedHandler(accessDeniedHandler))
                 .addFilterAfter(new TenantFilter(), BearerTokenAuthenticationFilter.class)
+                .addFilterAfter(
+                        new RateLimitFilter(properties.rateLimits(), InstantSource.system(), exceptionResolver),
+                        TenantFilter.class)
                 .build();
     }
 
