@@ -85,7 +85,7 @@ export class SignupApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns what the signup form needs: the agency\'s name. Needs no authentication.  Error codes: `signup_code_unknown` (404). 
+     * Returns what the signup form needs: the agency\'s name. Needs no authentication.  Error codes: `signup_code_unknown` (404), `too_many_requests` (429). 
      * Look up the agency behind a signup link
      */
     async getSignupInfoRaw(requestParameters: GetSignupInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<SignupInfo>> {
@@ -96,7 +96,7 @@ export class SignupApi extends runtime.BaseAPI {
     }
 
     /**
-     * Returns what the signup form needs: the agency\'s name. Needs no authentication.  Error codes: `signup_code_unknown` (404). 
+     * Returns what the signup form needs: the agency\'s name. Needs no authentication.  Error codes: `signup_code_unknown` (404), `too_many_requests` (429). 
      * Look up the agency behind a signup link
      */
     async getSignupInfo(requestParameters: GetSignupInfoRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<SignupInfo> {
@@ -142,7 +142,7 @@ export class SignupApi extends runtime.BaseAPI {
     }
 
     /**
-     * Creates a user account and a worker profile with status `PENDING` and logs the worker in. The agency approves or rejects the signup later. Needs no authentication.  `dateOfBirth` must be a real calendar date in the past. Its field error codes are `required`, `invalid_format` (not a date) and `out_of_range` (today or later, or more than 120 years ago).  Error codes: `validation_failed` (400, with `errors`), `signup_code_unknown` (404), `email_already_registered` (409). 
+     * Creates a user account and a worker profile with status `PENDING` and logs the worker in. The agency approves or rejects the signup later. Needs no authentication.  `dateOfBirth` must be a real calendar date in the past. Its field error codes are `required`, `invalid_format` (not a date) and `out_of_range` (today or later, or more than 120 years ago).  Error codes: `validation_failed` (400, with `errors`), `signup_code_unknown` (404), `email_already_registered` (409), `too_many_requests` (429). 
      * Sign up as a worker of the agency
      */
     async signUpRaw(requestParameters: SignUpRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponse>> {
@@ -153,7 +153,7 @@ export class SignupApi extends runtime.BaseAPI {
     }
 
     /**
-     * Creates a user account and a worker profile with status `PENDING` and logs the worker in. The agency approves or rejects the signup later. Needs no authentication.  `dateOfBirth` must be a real calendar date in the past. Its field error codes are `required`, `invalid_format` (not a date) and `out_of_range` (today or later, or more than 120 years ago).  Error codes: `validation_failed` (400, with `errors`), `signup_code_unknown` (404), `email_already_registered` (409). 
+     * Creates a user account and a worker profile with status `PENDING` and logs the worker in. The agency approves or rejects the signup later. Needs no authentication.  `dateOfBirth` must be a real calendar date in the past. Its field error codes are `required`, `invalid_format` (not a date) and `out_of_range` (today or later, or more than 120 years ago).  Error codes: `validation_failed` (400, with `errors`), `signup_code_unknown` (404), `email_already_registered` (409), `too_many_requests` (429). 
      * Sign up as a worker of the agency
      */
     async signUp(requestParameters: SignUpRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponse> {

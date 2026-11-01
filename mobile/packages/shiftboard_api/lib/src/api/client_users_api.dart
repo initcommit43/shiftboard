@@ -26,7 +26,7 @@ class ClientUsersApi {
   const ClientUsersApi(this._dio, this._serializers);
 
   /// Set a password and log in to the client portal
-  /// Uses up the setup code, sets the password of the client user and logs them in. Needs no authentication.  Field error codes: &#x60;required&#x60;, &#x60;invalid_length&#x60; (&#x60;password&#x60;).  Error codes: &#x60;validation_failed&#x60; (400, with &#x60;errors&#x60;), &#x60;client_portal_off&#x60; (403), &#x60;setup_code_invalid&#x60; (404).
+  /// Uses up the setup code, sets the password of the client user and logs them in. Needs no authentication.  Field error codes: &#x60;required&#x60;, &#x60;invalid_length&#x60; (&#x60;password&#x60;).  Error codes: &#x60;validation_failed&#x60; (400, with &#x60;errors&#x60;), &#x60;client_portal_off&#x60; (403), &#x60;setup_code_invalid&#x60; (404), &#x60;too_many_requests&#x60; (429).
   ///
   /// Parameters:
   /// * [setupCode] - The code from a client user's setup link.
@@ -219,7 +219,7 @@ class ClientUsersApi {
   }
 
   /// Look up the invitation behind a setup link
-  /// What the set-password form shows: who is invited, for which client and agency. Needs no authentication.  Error codes: &#x60;setup_code_invalid&#x60; (404, unknown, already used or expired), &#x60;client_portal_off&#x60; (403).
+  /// What the set-password form shows: who is invited, for which client and agency. Needs no authentication.  Error codes: &#x60;setup_code_invalid&#x60; (404, unknown, already used or expired), &#x60;client_portal_off&#x60; (403), &#x60;too_many_requests&#x60; (429).
   ///
   /// Parameters:
   /// * [setupCode] - The code from a client user's setup link.

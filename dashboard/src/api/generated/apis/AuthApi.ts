@@ -191,7 +191,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * Revokes the given refresh token. Succeeds even if the token is unknown or already revoked. Needs no access token, so logging out works after the access token has expired. 
+     * Revokes the given refresh token. Succeeds even if the token is unknown or already revoked. Needs no access token, so logging out works after the access token has expired.  Error codes: `too_many_requests` (429). 
      * End the session on this device
      */
     async logoutRaw(requestParameters: LogoutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
@@ -202,7 +202,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * Revokes the given refresh token. Succeeds even if the token is unknown or already revoked. Needs no access token, so logging out works after the access token has expired. 
+     * Revokes the given refresh token. Succeeds even if the token is unknown or already revoked. Needs no access token, so logging out works after the access token has expired.  Error codes: `too_many_requests` (429). 
      * End the session on this device
      */
     async logout(requestParameters: LogoutRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
@@ -239,7 +239,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * The refresh token is single use; the response contains its replacement. Deactivating a client user revokes their refresh tokens.  Error codes: `invalid_refresh_token` (401, unknown, expired, revoked or already used), `client_portal_off` (403, a client user while the agency has the portal switched off). 
+     * The refresh token is single use; the response contains its replacement. Deactivating a client user revokes their refresh tokens.  Error codes: `invalid_refresh_token` (401, unknown, expired, revoked or already used), `client_portal_off` (403, a client user while the agency has the portal switched off), `too_many_requests` (429). 
      * Exchange a refresh token for a new token pair
      */
     async refreshTokenRaw(requestParameters: RefreshTokenOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<TokenResponse>> {
@@ -250,7 +250,7 @@ export class AuthApi extends runtime.BaseAPI {
     }
 
     /**
-     * The refresh token is single use; the response contains its replacement. Deactivating a client user revokes their refresh tokens.  Error codes: `invalid_refresh_token` (401, unknown, expired, revoked or already used), `client_portal_off` (403, a client user while the agency has the portal switched off). 
+     * The refresh token is single use; the response contains its replacement. Deactivating a client user revokes their refresh tokens.  Error codes: `invalid_refresh_token` (401, unknown, expired, revoked or already used), `client_portal_off` (403, a client user while the agency has the portal switched off), `too_many_requests` (429). 
      * Exchange a refresh token for a new token pair
      */
     async refreshToken(requestParameters: RefreshTokenOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<TokenResponse> {
